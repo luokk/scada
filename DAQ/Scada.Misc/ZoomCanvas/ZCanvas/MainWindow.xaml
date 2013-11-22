@@ -1,0 +1,33 @@
+﻿<Window x:Class="ZCanvas.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="clr-namespace:System.Windows.Controls"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <Slider ValueChanged="Slider_ValueChanged_1"></Slider>
+        <m:ZoomableCanvas Scale="2.0" x:Name="aa">
+            <Rectangle Width="20" Height="20" Stroke="Black"></Rectangle>
+            <Path  Stroke="Gold" StrokeThickness="3" >
+
+                <Path.Data>
+
+                    <PathGeometry>
+
+                        <PathFigure StartPoint="20,20">
+
+                            <PathFigure.Segments  >
+
+                                <LineSegment   Point="40,10"/>
+
+                            </PathFigure.Segments>
+
+                        </PathFigure>
+
+                    </PathGeometry>
+
+                </Path.Data>
+
+            </Path>
+        </m:ZoomableCanvas>
+    </Grid>
+</Window>

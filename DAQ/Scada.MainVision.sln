@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.MainVision", "Scada.MainVision\Scada.MainVision.csproj", "{222D3901-CCFF-4846-90A2-E7513F7DD8C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.Chart", "Scada.Chart\Scada.Chart.csproj", "{B6AF3022-1BA4-4F1F-A7A3-35ECE6D5D5F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.MainVision.Black", "Scada.MainVision.Black\Scada.MainVision.Black.csproj", "{79737107-371B-4223-AC9A-A3BCFDEC7724}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{222D3901-CCFF-4846-90A2-E7513F7DD8C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{222D3901-CCFF-4846-90A2-E7513F7DD8C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{222D3901-CCFF-4846-90A2-E7513F7DD8C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{222D3901-CCFF-4846-90A2-E7513F7DD8C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6AF3022-1BA4-4F1F-A7A3-35ECE6D5D5F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6AF3022-1BA4-4F1F-A7A3-35ECE6D5D5F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6AF3022-1BA4-4F1F-A7A3-35ECE6D5D5F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6AF3022-1BA4-4F1F-A7A3-35ECE6D5D5F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79737107-371B-4223-AC9A-A3BCFDEC7724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79737107-371B-4223-AC9A-A3BCFDEC7724}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79737107-371B-4223-AC9A-A3BCFDEC7724}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79737107-371B-4223-AC9A-A3BCFDEC7724}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

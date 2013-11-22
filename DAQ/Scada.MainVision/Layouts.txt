@@ -1,0 +1,8 @@
+Left sidebar
+        <Border Width="Auto" Background="PaleGreen" BorderBrush="Black" BorderThickness="1" DockPanel.Dock="Left">
+            <Expander ExpandDirection="Left">
+                <!--<Expander.Header></Expander.Header>-->
+                <ScrollViewer Background="AliceBlue" Margin="0, 0, 0, 0"/>
+            </Expander>
+
+        </Border>

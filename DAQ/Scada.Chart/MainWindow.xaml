@@ -1,0 +1,13 @@
+﻿<Window x:Class="Scada.Chart.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="clr-namespace:Scada.Chart"
+        Title="MainWindow" Height="350" Width="525" Loaded="Window_Loaded_1">
+    <Grid>
+
+
+        <m:ChartView x:Name="ChartView" Width="1000" TimeScale="4">
+            
+        </m:ChartView>
+    </Grid>
+</Window>
