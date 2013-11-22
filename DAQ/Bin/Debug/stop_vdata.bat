@@ -1,0 +1,1 @@
+taskkill /F /IM Scada.Data.Tools.exe
