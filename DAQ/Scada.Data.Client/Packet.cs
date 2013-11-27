@@ -8,12 +8,14 @@ namespace Scada.Data.Client
 {
     public class Packet
     {
+        // Const keys.
         public const string EntryKey = "entry";
 
         public const string StationKey = "station";
 
         public const string TokenKey = "token";
 
+        // Content
         private JObject jobject = new JObject();
 
         private int result = 0;
@@ -151,6 +153,7 @@ namespace Scada.Data.Client
             return json;
         }
 
+        /* Move to ...
         private static DateTime StartTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1, 0, 0, 0, 0));
 
         private long GetUnixTime(string time)
@@ -160,6 +163,7 @@ namespace Scada.Data.Client
             long unixTime = (long)Math.Round((dateTime - StartTime).TotalMilliseconds, MidpointRounding.AwayFromZero);
             return unixTime;
         }
+        */
 
         private string path;
 

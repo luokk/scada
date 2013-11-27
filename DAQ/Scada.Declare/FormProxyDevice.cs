@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -189,11 +190,13 @@ namespace Scada.Declare
         {
             string hWndCfgFile = path + "\\HWND.r";
 
+            string exePath = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string formProxyPath = System.IO.Path.Combine(exePath, "Scada.FormProxy.exe");
             using (Process process = new Process())
             {
                 process.StartInfo.CreateNoWindow = false;    //设定不显示窗口
                 process.StartInfo.UseShellExecute = false;
-                process.StartInfo.FileName = "Scada.FormProxy.exe"; //设定程序名  
+                process.StartInfo.FileName = formProxyPath; //设定程序名  
                 process.StartInfo.RedirectStandardInput = true;   //重定向标准输入
                 process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
                 process.StartInfo.RedirectStandardError = true;//重定向错误输出
