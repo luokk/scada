@@ -173,7 +173,7 @@ namespace Scada.Declare
         }
 
         // Device Config Path
-        public string Path
+        public string DeviceConfigPath
         {
             get { return this.path; }
             set { this.path = value; }

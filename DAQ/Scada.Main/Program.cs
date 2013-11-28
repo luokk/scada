@@ -93,8 +93,6 @@ namespace Scada.Main
         {
             Program.DeviceManager.Args = args;
 
-            string path = ConfigPath.GetConfigFilePath("device/scada.w/cfg");
-
             if (!IsWatchRunning())
 			{
 				StartWatchProcess();

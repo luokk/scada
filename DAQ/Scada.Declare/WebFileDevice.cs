@@ -49,7 +49,7 @@ namespace Scada.Declare
 		private void Initialize(DeviceEntry entry)
 		{
 			this.Name = entry[DeviceEntry.Name].ToString();
-			this.Path = entry[DeviceEntry.Path].ToString();
+			this.DeviceConfigPath = entry[DeviceEntry.Path].ToString();
 			this.Version = entry[DeviceEntry.Version].ToString();
             this.Id = entry[DeviceEntry.Identity].ToString();
 
@@ -132,17 +132,17 @@ namespace Scada.Declare
 		private void TimerCallback(object o)
 		{
             // The temp file name is fixed.
-            string tempFile = this.Path + "\\temp_download_file.xml";
+            string tempFile = this.DeviceConfigPath + "\\temp_download_file.xml";
             string filePath = string.Empty;
             if (this.IsVirtual)
             {
-                filePath = this.Path + "/sara0240_2013-01-19T06_05_00Z-5min.n42";
+                filePath = this.DeviceConfigPath + "/sara0240_2013-01-19T06_05_00Z-5min.n42";
             }
             else
             {
                 // Start download ...
                 string fileName = GetFileName(DateTime.Now);
-                string datePath = this.Path + "\\" + this.GetDatePath(DateTime.Now);
+                string datePath = LogPath.GetDeviceLogFilePath("scada.naidevice", DateTime.Now);
                 this.DoFolderPolicy(datePath);
 
                 filePath = datePath + "\\" + fileName;
@@ -400,7 +400,7 @@ namespace Scada.Declare
             }
 
             DateTime threeMonthAgo = DateTime.Now.AddMonths(-3);
-            string threeMonthAgoPath = this.Path + "\\" + this.GetDatePath(threeMonthAgo);
+            string threeMonthAgoPath = this.DeviceConfigPath + "\\" + this.GetDatePath(threeMonthAgo);
 
             if (Directory.Exists(threeMonthAgoPath))
             {

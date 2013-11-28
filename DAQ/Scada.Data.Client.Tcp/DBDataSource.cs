@@ -171,7 +171,7 @@ namespace Scada.Data.Client.Tcp
         {
             string fileName = this.GetFileName(time);
             string datePath = this.GetDatePath(time);
-            string filePath = string.Format("{0}\\{1}\\{2}", Settings.Instance.NaIFilePath, datePath, fileName);
+            string filePath = LogPath.GetDeviceLogFilePath("scada.naidevice", time) + "\\" + fileName;
             string content = string.Empty;
             if (File.Exists(filePath))
             {

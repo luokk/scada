@@ -19,7 +19,7 @@ namespace Scada.Update
         // ~
         private string destPath;
 
-        private bool force;
+        private bool force = false;
 
         public Updater(bool force)
         {

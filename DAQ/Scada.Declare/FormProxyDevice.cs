@@ -105,7 +105,7 @@ namespace Scada.Declare
 		{
             this.Name = entry[DeviceEntry.Name].ToString();
             this.Id = entry[DeviceEntry.Identity].ToString();
-            this.Path = entry[DeviceEntry.Path].ToString();
+            this.DeviceConfigPath = entry[DeviceEntry.Path].ToString();
             this.Version = entry[DeviceEntry.Version].ToString();
 
             this.processName = (StringValue)entry[ProcessName];
@@ -271,7 +271,7 @@ namespace Scada.Declare
             this.thread = new Thread(new ThreadStart(() => {
 
                 // Fetch Window Handle from HWND.r file.
-                this.hWnd = FetchWindowHandle(this.processName, this.Path);
+                this.hWnd = FetchWindowHandle(this.processName, this.DeviceConfigPath);
 
 
                 //string s = GetText(hWnd, this.elemIdList[0]);

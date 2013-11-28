@@ -187,7 +187,12 @@ namespace Scada.Installer
                 string s = this.GetBinFile(fileName);
                 IWshRuntimeLibrary.WshShell shell = new IWshRuntimeLibrary.WshShell();
 
-                IWshRuntimeLibrary.WshShortcut shortcut = (IWshRuntimeLibrary.WshShortcut)shell.CreateShortcut(p + "\\" + linkName + ".lnk");
+                string linkFilePath = p + "\\" + linkName + ".lnk";
+                if (File.Exists(linkFilePath))
+                {
+                    File.Delete(linkFilePath);
+                }
+                IWshRuntimeLibrary.WshShortcut shortcut = (IWshRuntimeLibrary.WshShortcut)shell.CreateShortcut(linkFilePath);
                 shortcut.TargetPath = s;
                 shortcut.Arguments = "";
                 shortcut.Description = fileName;

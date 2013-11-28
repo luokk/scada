@@ -179,9 +179,11 @@ namespace Scada.Data.Client.Tcp
             // TODO:
 
             this.NaIFilePath = string.Format("{0}\\..\\devices\\Scada.NaIDevice\\0.9", Application.ExecutablePath);
-            string path = string.Format("{0}\\device.cfg", this.NaIFilePath);
 
-            DeviceEntry entry = LoadFromConfig("Scada.NaIDevice", path);
+            
+
+            const string NaIDeviceKey = "scada.naidevice";
+            DeviceEntry entry = LoadFromConfig(NaIDeviceKey, ConfigPath.GetDeviceConfigFilePath(NaIDeviceKey, "0.9"));
 
             this.NaIDeviceSn = (StringValue)entry["DeviceSn"];
             this.MinuteAdjust = (StringValue)entry["MinuteAdjust"];
@@ -300,8 +302,7 @@ namespace Scada.Data.Client.Tcp
 
         private string GetPasswordFile()
         {
-            string pwFileName = string.Format("{0}\\..\\{1}", Application.ExecutablePath, "password");
-            return pwFileName;
+            return ConfigPath.GetConfigFilePath("password");
         }
 
         private void LoadPassword()

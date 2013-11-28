@@ -108,7 +108,7 @@ namespace Scada.Declare
 		{
 			this.Name = entry[DeviceEntry.Name].ToString();
             this.Id = entry[DeviceEntry.Identity].ToString();
-            this.Path = entry[DeviceEntry.Path].ToString();
+            this.DeviceConfigPath = entry[DeviceEntry.Path].ToString();
 			this.Version = entry[DeviceEntry.Version].ToString();
 
             this.baudRate = this.GetValue(entry, DeviceEntry.BaudRate, 9600);
