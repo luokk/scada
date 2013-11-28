@@ -26,12 +26,7 @@ namespace Scada.Declare
 
 		private static AnalysisRecord analysis = null;
 
-		// private static FileRecord frameworkRecord = null;
-
-        private static bool analysisToolOpen = false;
-
-        private const string LocalPipeServer = ".";
-
+        private static LoggerClient logger = null;
 
 		private static int flushCtrlCount = 0;
 
@@ -66,11 +61,14 @@ namespace Scada.Declare
 
 			RecordManager.analysis = new AnalysisRecord();
 
+            LoggerClient.Initialize();
+            RecordManager.logger = new LoggerClient();
 			// RecordManager.frameworkRecord = new FileRecord("");
 		}
 
-		public static bool OpenRecordAnalysis()
+		public static void OpenLoggerServer()
 		{
+            // TODO: fix the Path issues.
 			using (Process process = new Process())
 			{
 				process.StartInfo.CreateNoWindow = false;    //设定不显示窗口
@@ -79,8 +77,6 @@ namespace Scada.Declare
 				process.StartInfo.RedirectStandardInput = true;   //重定向标准输入
 				process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
 				process.StartInfo.RedirectStandardError = true;//重定向错误输出
-				RecordManager.analysisToolOpen = process.Start();
-				return RecordManager.analysisToolOpen;
 			}
 		}
 
@@ -88,9 +84,10 @@ namespace Scada.Declare
 		{
 			RecordManager.WriteDataToLog(device, systemEvent, recordType);
 
-			if (analysisToolOpen)
+            string deviceKey = device.Id.ToLower();
+            if (LoggerClient.Contains(deviceKey))
 			{
-				SendToAnalysisWindow(systemEvent);
+                logger.Send(deviceKey, systemEvent);
 			}
 		}
 
@@ -104,9 +101,11 @@ namespace Scada.Declare
             }
 			string line = RecordManager.PackDeviceData(deviceData);
 			RecordManager.WriteDataToLog(deviceData.Device, line, RecordType.Data);
-            if (analysisToolOpen)
+
+            string deviceKey = deviceData.Device.Id.ToLower();
+            if (LoggerClient.Contains(deviceKey))
             {
-                SendToAnalysisWindow(line);
+                logger.Send(deviceKey, line);
             }
 
 			if (!RecordManager.mysql.DoRecord(deviceData))
@@ -218,19 +217,7 @@ namespace Scada.Declare
 
         private static void SendToAnalysisWindow(string line)
         {
-            IInterProcessConnection clientConnection = null;
-            try
-            {
-                clientConnection = new ClientPipeConnection(Defines.LocalPipeName, LocalPipeServer);
-                clientConnection.Connect();
-                clientConnection.Write(line);
-                clientConnection.Close();
-            }
-            catch (Exception)
-            {
-                clientConnection.Dispose();
-                RecordManager.analysisToolOpen = false;
-            }
+           
         }
 	}
 }

@@ -33,7 +33,6 @@ namespace Scada.Main
         {
             InitSysNotifyIcon();
             this.SetStatusText("系统就绪");
-            new LoggerClient().Send("Scada.Main started");
 
             bool recover = false;
             bool runAll = false;
@@ -250,7 +249,7 @@ namespace Scada.Main
 
 		private void logToolMenuItem_Click(object sender, EventArgs e)
 		{
-			RecordManager.OpenRecordAnalysis();
+			RecordManager.OpenLoggerServer();
 		}
 
 		private void logBankMenuItem_Click(object sender, EventArgs e)
