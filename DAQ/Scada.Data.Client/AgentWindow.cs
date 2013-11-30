@@ -105,7 +105,8 @@ namespace Scada.Data.Client
         private void OnSysNotifyIconContextMenu(object sender, EventArgs e)
         {
             this.Show();
-            this.WindowState = FormWindowState.Normal;   
+            this.WindowState = FormWindowState.Normal;
+            this.BringToFront();
         }
 
         private void Start()
@@ -157,7 +158,6 @@ namespace Scada.Data.Client
 
         private void HttpRecvDataTick(object sender, EventArgs e)
         {
-            
             foreach (var agent in this.agents)
             {
                 agent.FetchCommands();
@@ -167,34 +167,47 @@ namespace Scada.Data.Client
         private void HttpSendDataTick(object sender, EventArgs e)
         {
             DateTime now = DateTime.Now;
-            List<Packet> packets = new List<Packet>();
-            foreach (var deviceKey in Settings.Instance.DeviceKeys)
+            // For NaI Device.
+            if (!IsNaISendFileTimeOK(now))
             {
-                if (IsDeviceSendTimeOK(now, deviceKey))
+                SendDevicePackets(Settings.Instance.FileDeviceKeys, now);
+            }
+
+            // For other Devices.
+            if (IsSendTimeOK(now))
+            {
+                SendDevicePackets(Settings.Instance.DataDeviceKeys, now);
+            }
+        }
+
+        private void SendDevicePackets(string[] deviceKeys, DateTime now)
+        {
+            List<Packet> packets = new List<Packet>();
+            foreach (var deviceKey in deviceKeys)
+            {
+                DateTime sendTime = GetDeviceSendTime(now, deviceKey);
+
+                if (!this.lastDeviceSendData.ContainsKey(deviceKey))
                 {
-                    DateTime sendTime = GetDeviceSendTime(now, deviceKey);
+                    this.lastDeviceSendData[deviceKey] = default(DateTime);
+                }
 
-                    if (!this.lastDeviceSendData.ContainsKey(deviceKey))
-                    {
-                        this.lastDeviceSendData[deviceKey] = default(DateTime);
-                    }
+                if (sendTime == this.lastDeviceSendData[deviceKey])
+                {
+                    continue;
+                }
 
-                    if (sendTime == this.lastDeviceSendData[deviceKey])
-                    {
-                        continue;
-                    }
+                this.lastDeviceSendData[deviceKey] = sendTime;
 
-                    this.lastDeviceSendData[deviceKey] = sendTime;
-
-                    int errorCode = 0;
-                    Packet packet = GetPacket(sendTime, deviceKey, out errorCode);
-                    if (packet != null)
-                    {
-                        packets.Add(packet);
-                    }
+                int errorCode = 0;
+                Packet packet = GetPacket(sendTime, deviceKey, out errorCode);
+                if (packet != null)
+                {
+                    packets.Add(packet);
                 }
             }
 
+            // Send ...
             packets = this.CombinePackets(packets);
             this.SendPackets(packets);
         }
@@ -309,6 +322,24 @@ namespace Scada.Data.Client
             }
         }
 
+        private bool IsNaISendFileTimeOK(DateTime dt)
+        {
+            return (dt.Minute - 1) % 5 == 0;
+        }
+
+        private static bool IsSendTimeOK(DateTime dt)
+        {
+            // 5 < current.second < 15 OR
+            // 35 < current.second < 45
+            int sec = dt.Second - 5;
+            if ((sec >= 0 && sec <= 10) || ((sec >= 30) && sec <= 40))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /*
         private static bool IsDeviceSendTimeOK(DateTime dt, string deviceKey)
         {
             if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
@@ -331,7 +362,7 @@ namespace Scada.Data.Client
                 }
             }
             return false;
-        }
+        }*/
 
 
         private void OnReceiveMessage(Agent agent, string msg)

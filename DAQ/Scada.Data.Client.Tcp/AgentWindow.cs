@@ -75,7 +75,7 @@ namespace Scada.Data.Client.Tcp
         {
             this.Show();
             this.WindowState = FormWindowState.Normal;
-            
+            this.BringToFront();
         }
 
         private void Start()

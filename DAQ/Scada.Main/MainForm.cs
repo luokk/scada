@@ -192,6 +192,7 @@ namespace Scada.Main
 		{
             this.ShowAtTaskBar(true);
             this.WindowState = FormWindowState.Normal;
+            this.BringToFront();
 		}
 
 

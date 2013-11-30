@@ -43,7 +43,7 @@ namespace Scada.Data.Client.Tcp
         {
             string logPath = Program.GetLogPath(deviceKey);
             DateTime t = DateTime.Now;
-            string logFileName = string.Format("{0}-{1:D2}-{2:D2}.log", t.Year, t.Month, t.Day);
+            string logFileName = string.Format("{0}-{1:D2}-{2:D2}.t.log", t.Year, t.Month, t.Day);
             string logFilePath = string.Format("{0}\\{1}", logPath, logFileName);
 
 

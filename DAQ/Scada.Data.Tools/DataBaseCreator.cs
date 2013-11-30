@@ -46,6 +46,7 @@ namespace Scada.Data.Tools
             CreateDAQDB();
             using(StringReader sr = new StringReader(content))
             {
+                this.connectionString = new DBConnectionString().ToString();
                 this.conn = new MySqlConnection(this.connectionString);
                 this.conn.Open();
 
@@ -91,8 +92,8 @@ namespace Scada.Data.Tools
         {
             var s = new DBConnectionString();
             s.Database = "mysql";
-            this.connectionString = new DBConnectionString().ToString();
-            using (var connToMySql = new MySqlConnection(this.connectionString))
+            var connectionString = s.ToString();
+            using (var connToMySql = new MySqlConnection(connectionString))
             {
                 connToMySql.Open();
 

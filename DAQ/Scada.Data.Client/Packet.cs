@@ -29,9 +29,9 @@ namespace Scada.Data.Client
 
         }
 
-        public Packet(string station, string token)
+        public Packet(string token)
         {
-            this.Station = station;
+            this.Station = Settings.Instance.Station;
             this.Token = token;
         }
 

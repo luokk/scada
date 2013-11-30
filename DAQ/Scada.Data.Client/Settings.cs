@@ -47,6 +47,20 @@ namespace Scada.Data.Client
                                 DeviceKey_NaI
                                      };
 
+        public string[] DataDeviceKeys = {
+                                DeviceKey_Hpic, 
+                                DeviceKey_Weather, 
+                                DeviceKey_HvSampler, 
+                                DeviceKey_ISampler, 
+                                DeviceKey_Shelter,
+                                DeviceKey_Dwd,  
+                                     };
+
+        public string[] FileDeviceKeys = {
+                                DeviceKey_NaI  
+                                     };
+
+
         public static Settings Instance = new Settings();
 
         /// <summary>
@@ -148,6 +162,7 @@ namespace Scada.Data.Client
             this.SysSt = this.GetAttribute(siteNode, "sysst");
             this.Mn = this.GetAttribute(siteNode, "mn");
             this.Sno = this.GetAttribute(siteNode, "sno");
+            this.Station = this.GetAttribute(siteNode, "station");
 
             this.LoadPassword();
             
@@ -412,16 +427,16 @@ namespace Scada.Data.Client
             }
 
             // Data Center
-            var dsNotes = doc.SelectNodes("//datacenter");
+            var dsNotes = doc.SelectNodes("//datacenter2");
             var ds = dsNotes[0].ParentNode;
 
-            XmlNode newDataCenterNode = doc.CreateElement("datacenter");
+            XmlNode newDataCenterNode = doc.CreateElement("datacenter2");
             ds.AppendChild(newDataCenterNode);
             this.AddAttribute(doc, newDataCenterNode, "ip", wireIp);
             this.AddAttribute(doc, newDataCenterNode, "port", wirePort);
             this.AddAttribute(doc, newDataCenterNode, "wirelessip", wirelessIp);
             this.AddAttribute(doc, newDataCenterNode, "wirelessport", wirelessPort);
-            this.AddAttribute(doc, newDataCenterNode, "type", country ? "2" : "1");
+            this.AddAttribute(doc, newDataCenterNode, "type", "3");
             doc.Save(settingFileName);
         }
 
@@ -430,6 +445,12 @@ namespace Scada.Data.Client
             XmlAttribute attrGender = doc.CreateAttribute(key);
             attrGender.Value = value;
             node.Attributes.Append(attrGender);
+        }
+
+        public string Station 
+        { 
+            get;
+            set; 
         }
     }
 }
