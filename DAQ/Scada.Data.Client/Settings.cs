@@ -95,6 +95,12 @@ namespace Scada.Data.Client
                 set;
             }
 
+            public string DataType
+            {
+                get;
+                set;
+            }
+
         }
 
         /// <summary>
@@ -110,10 +116,18 @@ namespace Scada.Data.Client
 
             private List<DeviceCode> codes = new List<DeviceCode>();
 
-
-            public void AddCode(string code, string field)
+            public void AddCode(string code, string field, string dataType)
             {
-                this.codes.Add(new DeviceCode() { Code = code, Field = field });
+                if (string.IsNullOrEmpty(dataType))
+                {
+                    dataType = @"real";
+                }
+
+                this.codes.Add(new DeviceCode() { 
+                    Code = code, 
+                    Field = field, 
+                    DataType = dataType 
+                });
             }
 
 
@@ -179,7 +193,11 @@ namespace Scada.Data.Client
                     XmlNode fieldNode = codeNode.Attributes.GetNamedItem("field");
                     if (fieldNode != null)
                     {
-                        device.AddCode(code, fieldNode.Value);
+                        XmlNode typeNode = codeNode.Attributes.GetNamedItem("type");
+                        string dataType = "real";
+                        if (typeNode != null)
+                            dataType = typeNode.Value;
+                        device.AddCode(code, fieldNode.Value, dataType);
                     }
                 }
             }
@@ -263,10 +281,27 @@ namespace Scada.Data.Client
             return new List<DeviceCode>();
         }
 
+        internal DeviceCode GetCode(string deviceKey, string code)
+        {
+            Device device = devices.Find((d) => { return deviceKey.Equals(d.Key, StringComparison.OrdinalIgnoreCase); });
+            if (device != null)
+            {
+                return device.GetCodes().Find((c) => { return c.Code == code; });
+            }
+            return null;
+        }
+
         private string GetAttribute(XmlNode node, string attr)
         {
-            var xmlAttr = node.Attributes.GetNamedItem(attr);
-            return xmlAttr.Value; 
+            try
+            {
+                var xmlAttr = node.Attributes.GetNamedItem(attr);
+                return xmlAttr.Value;
+            }
+            catch (Exception e)
+            {
+                return string.Empty;
+            }
         }
 
         private string GetAttribute(XmlNode node, string attr, string defaultValue = "")

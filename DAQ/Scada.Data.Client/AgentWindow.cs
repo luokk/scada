@@ -58,15 +58,15 @@ namespace Scada.Data.Client
             {
                 Start();
 
-                //TestSendPacket();
-                TestSendFilePacket();
+                TestSendPacket();
+                // TestSendFilePacket();
             }
         }
 
         private void TestSendPacket()
         {
-            string deviceKey = "scada.hpic";
-            DateTime sendTime = DateTime.Parse("2013-11-17 12:17:30");
+            string deviceKey = "scada.shelter";
+            DateTime sendTime = DateTime.Parse("2013-11-30 20:33:00");
             int errorCode = 0;
             Packet packet = this.GetPacket(sendTime, deviceKey, out errorCode);
             if (packet != null)

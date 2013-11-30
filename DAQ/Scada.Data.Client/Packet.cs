@@ -123,10 +123,30 @@ namespace Scada.Data.Client
             this.GetEntries().Add(entry);
         }
 
+        private static string GetDataCenterDeviceId(string deviceKey)
+        {
+            if (deviceKey == Settings.DeviceKey_Hpic)
+                return "hpic";
+            else if (deviceKey == Settings.DeviceKey_NaI)
+                return "NaIdevice";
+            else if (deviceKey == Settings.DeviceKey_Dwd)
+                return "rdsampler";
+            else if (deviceKey == Settings.DeviceKey_HvSampler)
+                return "hvsampler";
+            else if (deviceKey == Settings.DeviceKey_ISampler)
+                return "isampler";
+            else if (deviceKey == Settings.DeviceKey_Shelter)
+                return "environment";
+            else if (deviceKey == Settings.DeviceKey_Weather)
+                return "weather";
+            return "";
+
+        }
+
         private JObject GetObject(string deviceKey, Dictionary<string, object> data)
         {
             JObject json = new JObject();
-            json["device"] = deviceKey.Replace("scada.", "");
+            json["device"] = GetDataCenterDeviceId(deviceKey);
             foreach (var kv in data)
             {
                 if (kv.Key.ToLower() == "id")
@@ -142,12 +162,19 @@ namespace Scada.Data.Client
                 }
                 if (kv.Value is string)
                 {
-                    double v;
-                    if (double.TryParse(value, out v))
+                    Settings.DeviceCode code = Settings.Instance.GetCode(deviceKey, kv.Key);
+                    if (code.DataType == "real")
                     {
-                        json[kv.Key] = v;
+                        double v;
+                        if (double.TryParse(value, out v))
+                        {
+                            json[kv.Key] = v;
+                        }
                     }
-                    
+                    else if (code.DataType == "bit")
+                    {
+                        json[kv.Key] = 1;
+                    }
                 }
             }
             return json;

@@ -73,13 +73,13 @@
 
 		<!-- ??? -->
 		<device id="Scada.Shelter" table="environment_rec" eno="999000">
-			<code field="IfMainPowerOff">0102069909</code>
+			<code field="IfMainPowerOff" type="bit">0102069909</code>
 			<code field="BatteryHours">0102069910</code>
-			<code field="IfDoorOpen">0102069906</code>		
+			<code field="IfDoorOpen" type="bit">0102069906</code>		
 			<code field="Temperature">0102069907</code>
 			<code field="Humidity">0102069911</code>	
-			<code field="IfSmoke">0102069912</code>
-			<code field="IfWater">0102069913</code>		
+			<code field="IfSmoke" type="bit">0102069912</code>
+			<code field="IfWater" type="bit">0102069913</code>		
 		</device>
 
 	</devices>
