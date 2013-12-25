@@ -264,9 +264,17 @@ namespace Scada.Data.Client
                 // return null;
             }
 
-            if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
+            var d = DBDataSource.Instance.GetData(deviceKey, time);
+            if (d != null && d.Count > 0)
             {
-                if (!this.checkBoxUpdateNaI.Checked)
+                Packet p = builder.GetPacket(deviceKey, d, true);
+                return p;
+            }
+            errorCode = 100;
+            return null;
+
+            /*
+             *  if (!this.checkBoxUpdateNaI.Checked)
                 {
                     return null;
                 }
@@ -276,32 +284,9 @@ namespace Scada.Data.Client
                 {
                     return builder.GetFilePacket(fileName);
                 }
-                return null;
-            }
-            else
-            {
-                var d = DBDataSource.Instance.GetData(deviceKey, time);
-                if (d != null && d.Count > 0)
-                {
-                    Packet p = null;
-                    // By different device.
-
-                    if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
-                        deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
-                    {
-                        p = builder.GetFlowPacket(deviceKey, d, true);
-                    }
-                    else
-                    {
-                        p = builder.GetPacket(deviceKey, d, true);
-                    }
-                    return p;
-                }
-                errorCode = 100;
-                return null;
-            }
+             */
         }
-
+  
 
 
         private DateTime lastSendTime;

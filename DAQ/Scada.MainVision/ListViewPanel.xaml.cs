@@ -496,7 +496,8 @@ namespace Scada.Controls
 
         private void DatePickerCalendarClosed(object sender, RoutedEventArgs e)
         {
-            DatePicker picker = (DatePicker)sender;
+            // From .Net3.5 => .Net4.0, 
+            Microsoft.Windows.Controls.DatePicker picker = (Microsoft.Windows.Controls.DatePicker)sender;
             if (picker.Name == "FromDate")
             {
                 DateTime? dt = picker.SelectedDate;

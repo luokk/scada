@@ -215,9 +215,5 @@ namespace Scada.Declare
             return path;
         }
 
-        private static void SendToAnalysisWindow(string line)
-        {
-           
-        }
-	}
+    }
 }
