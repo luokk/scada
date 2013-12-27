@@ -47,6 +47,11 @@ namespace Scada.Config
         private static void WatchLoggerFlagFiles()
         {
             string statusPath = ConfigPath.GetConfigFilePath("status");
+            if (!Directory.Exists(statusPath))
+            {
+                Directory.CreateDirectory(statusPath);
+            }
+
             string[] filePaths = Directory.GetFiles(statusPath, @"@*");
             var fileNames = filePaths.Select((string path) =>
             {
