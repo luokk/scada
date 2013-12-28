@@ -47,6 +47,9 @@ namespace Scada.Logger.Server
 
         private void FormOnLoad(object sender, EventArgs e)
         {
+            this.tabPageMain.Controls.Add(this.CreateListBox("Scada.Main"));
+            this.tabPageMainVision.Controls.Add(this.CreateListBox("Scada.MainVision"));
+
             this.tabPage1.Controls.Add(this.CreateListBox("Scada.HPIC"));
             this.tabPage2.Controls.Add(this.CreateListBox("Scada.NaIDevice"));
             this.tabPage3.Controls.Add(this.CreateListBox("Scada.Weather"));
@@ -82,5 +85,26 @@ namespace Scada.Logger.Server
                 listBox.Items.Add(msg);
             }
         }
+
+        private void HandleCheckedChanged(string device)
+        {
+
+        }
+
+        private void OnStripMenuItemClick(object sender, EventArgs e)
+        {
+            ToolStripMenuItem mi = (ToolStripMenuItem)sender;
+            bool c = mi.Checked;
+
+            mi.Checked = !c;
+
+            this.HandleCheckedChanged((string)mi.Tag);
+        }
+
+        private void ClearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }
