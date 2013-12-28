@@ -265,6 +265,8 @@ namespace Scada.MainSettings
     {
         private string serialPort = "COM1";
 
+        private bool sensitive = false;
+
         [Category("Common")]
         [TypeConverter(typeof(SerialPortConverter))]
         [DisplayName("串口")]
@@ -277,6 +279,19 @@ namespace Scada.MainSettings
             set
             {
                 this.serialPort = value;
+            }
+        }
+
+        [DisplayName("门禁敏感")]
+        public virtual bool Sensitive
+        {
+            get
+            {
+                return this.sensitive;
+            }
+            set
+            {
+                this.sensitive = value;
             }
         }
     }

@@ -108,7 +108,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	if (strPathName.GetLength() == 0)
 	{
-		strPathName = L"C:\\HWND.r";
+		strPathName = L"C:\\Scada\\HWND.r";
 	}
 
 	DWORD dwProcId = GetProcessID(strProcName);
@@ -116,7 +116,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 	// ----
 	HWND hWnd = GetProcessMainWnd(dwProcId);
-	WriteWindowInfo(strPathName, hWnd);
+	if (strPathName && strPathName.GetLength() > 0)
+	{
+		WriteWindowInfo(strPathName, hWnd);
+	}
 	return 0;
 }
 

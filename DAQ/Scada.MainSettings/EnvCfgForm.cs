@@ -28,7 +28,8 @@ namespace Scada.MainSettings
             this.settings = (ShelterSettings)this.Apply(new Dictionary<string, string>
             {
                 {DeviceEntry.SerialPort, this.settings.SerialPort},
-                {DeviceEntry.RecordInterval, this.settings.Frequence.ToString()}
+                {DeviceEntry.RecordInterval, this.settings.Frequence.ToString()},
+                {DeviceEntry.Sensitive, this.settings.Sensitive.ToString().ToLower()}
             });
 
         }
@@ -55,6 +56,8 @@ namespace Scada.MainSettings
             ShelterSettings settings = new ShelterSettings();
             settings.SerialPort = (StringValue)entry[DeviceEntry.SerialPort];
             settings.Frequence = (StringValue)entry[DeviceEntry.RecordInterval];
+            string sensitive = (StringValue)entry[DeviceEntry.Sensitive];
+            settings.Sensitive = (sensitive == "true");
             return settings;
         }
     }
