@@ -16,16 +16,26 @@ namespace Scada.Data.Client.Tcp
         [STAThread]
         static void Main(string[] args)
         {
-            // Settings settings = new Settings();
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            AgentWindow agentWindow = new AgentWindow();
-            if (args.Length > 0 && args[0] == "--start")
+            bool createNew = false;
+            using (Mutex mutex = new Mutex(true, Application.ProductName, out createNew))
             {
-                Thread.Sleep(2000);
-                agentWindow.StartState = true;
+                if (createNew)
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    AgentWindow agentWindow = new AgentWindow();
+                    if (args.Length > 0 && args[0] == "--start")
+                    {
+                        Thread.Sleep(2000);
+                        agentWindow.StartState = true;
+                    }
+                    Application.Run(agentWindow);
+                }
+                else
+                {
+                    MessageBox.Show("数据上传程序（TCP）已经在运行中...");
+                }
             }
-            Application.Run(agentWindow);
         }
 
         public static string GetInstallPath()

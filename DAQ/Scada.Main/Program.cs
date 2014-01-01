@@ -91,21 +91,34 @@ namespace Scada.Main
         [STAThread]
         static void Main(string[] args)
         {
-            Program.DeviceManager.Args = args;
+            bool createNew = false;
+            using (Mutex mutex = new Mutex(true, Application.ProductName, out createNew))
+            {
+                if (createNew)
+                {
+                    Program.DeviceManager.Args = args;
 
-            if (!IsWatchRunning())
-			{
-				StartWatchProcess();
-			}
+                    if (!IsWatchRunning())
+                    {
+                        StartWatchProcess();
+                    }
 
-            MainApplication.TimerCreator = new WinFormTimerCreator();
+                    MainApplication.TimerCreator = new WinFormTimerCreator();
 
 
-            deviceManager.Initialize();
+                    deviceManager.Initialize();
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new MainForm());
+                }
+                // 程序已经运行的情况，则弹出消息提示并终止此次运行
+                else
+                {
+                    MessageBox.Show("应用程序[Scada.Main.exe]已经在运行中...");
+                }
+            }
+            
         }
     }
 }

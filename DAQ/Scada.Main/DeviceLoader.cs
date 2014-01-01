@@ -8,7 +8,7 @@ using System.Threading;
 namespace Scada.Main
 {
     /// <summary>
-    /// 
+    /// TODO:
     /// </summary>
     public class DeviceLoader
     {

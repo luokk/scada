@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Scada.Data.Client
@@ -16,14 +17,25 @@ namespace Scada.Data.Client
         [STAThread]
         static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            AgentWindow form = new AgentWindow();
-            if (args.Length > 0 && args[0] == "--start")
+            bool createNew = false;
+            using (Mutex mutex = new Mutex(true, Application.ProductName, out createNew))
             {
-                form.StartState = true;
+                if (createNew)
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    AgentWindow form = new AgentWindow();
+                    if (args.Length > 0 && args[0] == "--start")
+                    {
+                        form.StartState = true;
+                    }
+                    Application.Run(form);
+                }
+                else
+                {
+                    MessageBox.Show("数据上传程序（HTTP）已经在运行中...");
+                }
             }
-            Application.Run(form);
         }
 
         public static string GetInstallPath()

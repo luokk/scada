@@ -28,7 +28,8 @@ namespace Scada.Config
             using (var client = new WebClient())
             {
                 // client.UploadDataCompleted += UploadDataCompleted;
-                client.UploadDataAsync(loggerApi, "POST", BuildMessage(fileName, content), client);
+                byte[] msgBytes = BuildMessage(fileName, content);
+                client.UploadDataAsync(loggerApi, "POST", msgBytes, client);
             }
         }
 

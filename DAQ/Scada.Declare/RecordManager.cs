@@ -83,12 +83,6 @@ namespace Scada.Declare
         public static void DoSystemEventRecord(Device device, string systemEvent, RecordType recordType = RecordType.Event)
 		{
 			RecordManager.WriteDataToLog(device, systemEvent, recordType);
-
-            string deviceKey = device.Id.ToLower();
-            if (LoggerClient.Contains(deviceKey))
-			{
-                logger.Send(deviceKey, systemEvent);
-			}
 		}
 
 		public static void DoDataRecord(DeviceData deviceData)
@@ -102,12 +96,7 @@ namespace Scada.Declare
 			string line = RecordManager.PackDeviceData(deviceData);
 			RecordManager.WriteDataToLog(deviceData.Device, line, RecordType.Data);
 
-            string deviceKey = deviceData.Device.Id.ToLower();
-            if (LoggerClient.Contains(deviceKey))
-            {
-                logger.Send(deviceKey, line);
-            }
-
+            // Record into MySQL:)
 			if (!RecordManager.mysql.DoRecord(deviceData))
 			{
 				// TODO: Do log this failure.
@@ -133,6 +122,7 @@ namespace Scada.Declare
 
 		private static void WriteDataToLog(Device device, string content, RecordType recordType)
 		{
+            // To Log File
 			DateTime now = DateTime.Now;
 			FileStream stream = RecordManager.GetLogFileStream(device, now);
 			string time = string.Format("[{0:HH:mm:ss}] ", now);
@@ -151,6 +141,14 @@ namespace Scada.Declare
 				stream.Flush();
 			}
 			flushCtrlCount = (flushCtrlCount + 1) % 5;
+
+            // To Log Console
+            string deviceKey = device.Id.ToLower();
+            if (LoggerClient.Contains(deviceKey))
+            {
+                logger.Send(deviceKey, line);
+            }
+
 		}
 
 

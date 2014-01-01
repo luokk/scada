@@ -74,7 +74,20 @@ namespace Scada.Logger.Server
 
         private void HandleMessage(string content)
         {
-            // TODO:
+            if (content.StartsWith("["))
+            {
+                int e = content.IndexOf("]:");
+                if (e > 0)
+                {
+                    string deviceKey = content.Substring(1, e - 1);
+                    ListBox box = this.GetListBox(deviceKey);
+                    if (box != null)
+                    {
+                        string logMsg = content.Substring(e + 2);
+                        box.Items.Add(logMsg);
+                    }
+                }
+            }
         }
 
         internal void OnSendDetails(string deviceKey, string msg)
