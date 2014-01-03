@@ -141,18 +141,20 @@ namespace Scada.Declare
             else
             {
                 // Start download ...
-                string fileName = GetFileName(DateTime.Now);
-                string datePath = LogPath.GetDeviceLogFilePath("scada.naidevice", DateTime.Now);
+                DateTime now = DateTime.Now;
+                string fileName1 = GetFileNameOnDevice(now);
+                string fileName2 = GetFileName(now);
+                string datePath = LogPath.GetDeviceLogFilePath("scada.naidevice", now);
                 this.DoFolderPolicy(datePath);
 
-                filePath = datePath + "\\" + fileName;
+                filePath = datePath + "\\" + fileName2;
 				if (File.Exists(filePath))
                 {
                     return;
                 }
 
                 // Download the file.
-                string address = this.addr + fileName;
+                string address = this.addr + fileName1;
                 
                 using (WebClient client = new WebClient())
                 {
@@ -169,7 +171,7 @@ namespace Scada.Declare
                     }
                     catch (Exception e)
                     {
-                        RecordManager.DoSystemEventRecord(this, address);
+                        RecordManager.DoSystemEventRecord(this, string.Format("{0} Try to download {1}: Failed.", now, address));
                         RecordManager.DoSystemEventRecord(this, e.Message);
                     }
                 }
@@ -278,7 +280,7 @@ namespace Scada.Declare
         /// </summary>
         /// <param name="min"></param>
         /// <returns></returns>
-        private string GetFileName(DateTime now)
+        private string GetFileNameOnDevice(DateTime now)
         {
             string fileName;
             DateTime t = now;
@@ -287,6 +289,16 @@ namespace Scada.Declare
 				this.deviceSn, t.Year, t.Month, t.Day, t.Hour, t.Minute / 5 * 5);
             return fileName;
         }
+
+        private string GetFileName(DateTime now)
+        {
+            string fileName;
+            DateTime t = now;
+            fileName = string.Format("{0}_{1}-{2:D2}-{3:D2}T{4:D2}_{5:D2}_00-5min.n42",
+                this.deviceSn, t.Year, t.Month, t.Day, t.Hour, t.Minute / 5 * 5);
+            return fileName;
+        }
+
 
         private string GetDatePath(DateTime date)
         {

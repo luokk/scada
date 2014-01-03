@@ -379,7 +379,6 @@ namespace Scada.Main
             }
 
             this.selectedDevices.Clear();
-            OpenMainProgram();
 		}
 
         private string GetCOMPort(DeviceEntry entry)
@@ -451,7 +450,7 @@ namespace Scada.Main
             }
         }
 
-        private void OpenMainProgram()
+        public void OpenMainProgram()
         {
             const string ScadaMainExe = "Scada.Main.exe";
             using (Process process = new Process())

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Scada.Config;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,12 +26,12 @@ namespace Scada.Logger.Server
         private ListBox CreateListBox(string deviceKey)
         {
             deviceKey = deviceKey.ToLower();
-            ListBox lb = new ListBox();
-            lb.Tag = deviceKey;
-            lb.Dock = DockStyle.Fill;
+            ListBox listBox = new ListBox();
+            listBox.Tag = deviceKey;
+            listBox.Dock = DockStyle.Fill;
 
-            listBoxes.Add(lb);
-            return lb;
+            listBoxes.Add(listBox);
+            return listBox;
         }
 
         private ListBox GetListBox(string deviceKey)
@@ -80,11 +81,12 @@ namespace Scada.Logger.Server
                 if (e > 0)
                 {
                     string deviceKey = content.Substring(1, e - 1);
-                    ListBox box = this.GetListBox(deviceKey);
-                    if (box != null)
+                    ListBox listBox = this.GetListBox(deviceKey);
+                    if (listBox != null)
                     {
                         string logMsg = content.Substring(e + 2);
-                        box.Items.Add(logMsg);
+                        listBox.Items.Add(logMsg);
+                        listBox.SelectedIndex = -1;
                     }
                 }
             }
@@ -99,9 +101,25 @@ namespace Scada.Logger.Server
             }
         }
 
-        private void HandleCheckedChanged(string device)
+        private void HandleCheckedChanged(string deviceKey, bool check)
         {
-
+            string relFileName = string.Format("status\\@{0}", deviceKey);
+            string fileName = ConfigPath.GetConfigFilePath(relFileName);
+            if (check)
+            {
+                if (!File.Exists(fileName))
+                {
+                    using (File.Create(fileName))
+                    { }
+                }
+            }
+            else
+            {
+                if (File.Exists(fileName))
+                {
+                    File.Delete(fileName);
+                }
+            }
         }
 
         private void OnStripMenuItemClick(object sender, EventArgs e)
@@ -111,7 +129,8 @@ namespace Scada.Logger.Server
 
             mi.Checked = !c;
 
-            this.HandleCheckedChanged((string)mi.Tag);
+            string deviceName = (string)mi.Tag;
+            this.HandleCheckedChanged(deviceName.ToLower(), mi.Checked);
         }
 
         private void ClearToolStripMenuItem_Click(object sender, EventArgs e)

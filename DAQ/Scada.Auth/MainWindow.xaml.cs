@@ -66,15 +66,21 @@ namespace Scada.Auth
         {
             using (Process process = new Process())
             {
-                process.StartInfo.CreateNoWindow = true;    //设定不显示窗口
-                process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.FileName = "Scada.MainVision.exe"; //设定程序名  
-                process.StartInfo.RedirectStandardInput = true;   //重定向标准输入
-                process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
-                process.StartInfo.RedirectStandardError = true;//重定向错误输出
-                process.Start();
-
+                try
+                {
+                    process.StartInfo.CreateNoWindow = true;    //设定不显示窗口
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.FileName = "Scada.MainVision.exe"; //设定程序名
+                    process.StartInfo.RedirectStandardInput = true;   //重定向标准输入
+                    process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
+                    process.StartInfo.RedirectStandardError = true;//重定向错误输出
+                    process.Start();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
             }
             Thread.Sleep(2000);
             this.Close();

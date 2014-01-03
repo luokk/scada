@@ -54,7 +54,6 @@ namespace Scada.Main
 
 			////////////////////////////////////////////////////////////////
 			// Device List in Group.
-
             deviceListView.Columns.Add("设备", 280);
 			deviceListView.Columns.Add("版本", 80);
 			deviceListView.Columns.Add("状态", 100);
@@ -153,6 +152,9 @@ namespace Scada.Main
             lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, version));
             lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, status));
 
+            string deviceKey = deviceName.ToLower();
+            if (deviceKey != "scada.hvsampler" && deviceKey != "scada.isampler")
+                lvi.Checked = true;
             return lvi;
         }
 
@@ -228,7 +230,9 @@ namespace Scada.Main
             this.startToolBarButton.Enabled = true;
             // deviceListView.Enabled = true;
             this.UpdateDevicesWaitStatus();
-			Program.DeviceManager.CloseAllDevices();
+            Program.DeviceManager.CloseAllDevices();
+            Program.Exit(); // For quit Mutex;
+            Program.DeviceManager.OpenMainProgram();
             Application.Exit();
 		}
 

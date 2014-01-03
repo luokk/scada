@@ -28,8 +28,7 @@ namespace Scada.Logger.Server
         public void Start(Action<string> action)
         {
             this.action = action;
-            this.thread = new Thread(new ParameterizedThreadStart(StartServerThread));
-            this.thread.Start();
+            this.StartServerThread(null);
         }
 
         private void StartServerThread(object obj)
@@ -59,26 +58,35 @@ namespace Scada.Logger.Server
         {
             if (asyncRequestResult.IsCompleted)
             {
-                HttpListener session = (HttpListener)asyncRequestResult.AsyncState;
-                HttpListenerContext context = session.EndGetContext(asyncRequestResult);
-                this.ResumeListening();
-
-                Stream stream = context.Request.InputStream;
-
-                byte[] bytes = new byte[1024];
-                stream.BeginRead(bytes, 0, 1024, new AsyncCallback((IAsyncResult asyncReadResult) => 
+                try
                 {
-                    Stream stream2 = (Stream)asyncReadResult.AsyncState;
-                    int r = stream2.EndRead(asyncReadResult);
-                    
-                    string content = Encoding.ASCII.GetString(bytes, 0, r);
-                    if (!string.IsNullOrEmpty(content))
+                    HttpListener session = (HttpListener)asyncRequestResult.AsyncState;
+                    HttpListenerContext context = session.EndGetContext(asyncRequestResult);
+                    this.ResumeListening();
+
+                    Stream stream = context.Request.InputStream;
+
+                    byte[] bytes = new byte[1024];
+                    stream.BeginRead(bytes, 0, 1024, new AsyncCallback((IAsyncResult asyncReadResult) =>
                     {
-                        this.action(content);
-                    }
-                    context.Response.StatusCode = 200;
-                    context.Response.Close();
-                }), stream);
+                        Stream stream2 = (Stream)asyncReadResult.AsyncState;
+                        int r = stream2.EndRead(asyncReadResult);
+
+                        string content = Encoding.ASCII.GetString(bytes, 0, r);
+                        if (!string.IsNullOrEmpty(content))
+                        {
+                            this.action(content);
+                        }
+                        context.Response.StatusCode = 200;
+                        context.Response.Close();
+                    }), stream);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString());
+                }
+
+ 
             }
 
         }

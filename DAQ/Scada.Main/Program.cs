@@ -85,6 +85,7 @@ namespace Scada.Main
 			// TODO: Start Watch Process
 		}
 
+        private static Mutex mutex = null;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -92,33 +93,41 @@ namespace Scada.Main
         static void Main(string[] args)
         {
             bool createNew = false;
-            using (Mutex mutex = new Mutex(true, Application.ProductName, out createNew))
-            {
-                if (createNew)
-                {
-                    Program.DeviceManager.Args = args;
-
-                    if (!IsWatchRunning())
-                    {
-                        StartWatchProcess();
-                    }
-
-                    MainApplication.TimerCreator = new WinFormTimerCreator();
-
-
-                    deviceManager.Initialize();
-
-                    Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(false);
-                    Application.Run(new MainForm());
-                }
-                // 程序已经运行的情况，则弹出消息提示并终止此次运行
-                else
-                {
-                    MessageBox.Show("应用程序[Scada.Main.exe]已经在运行中...");
-                }
-            }
+            mutex = new Mutex(true, Application.ProductName, out createNew);
             
+            if (createNew)
+            {
+                Program.DeviceManager.Args = args;
+
+                if (!IsWatchRunning())
+                {
+                    StartWatchProcess();
+                }
+
+                MainApplication.TimerCreator = new WinFormTimerCreator();
+
+
+                deviceManager.Initialize();
+
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MainForm());
+                Exit();
+            }
+            // 程序已经运行的情况，则弹出消息提示并终止此次运行
+            else
+            {
+                MessageBox.Show("应用程序[Scada.Main.exe]已经在运行中...");
+            }                        
+        }
+
+        internal static void Exit()
+        {
+            if (mutex != null)
+            {
+                mutex.Close();
+            }
+            mutex = null;
         }
     }
 }
