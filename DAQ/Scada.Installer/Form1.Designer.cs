@@ -39,6 +39,7 @@
             this.progressBox = new System.Windows.Forms.ListBox();
             this.button3 = new System.Windows.Forms.Button();
             this.resetCheckBox = new System.Windows.Forms.CheckBox();
+            this.updateConfigCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.fileSystemWatcher1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -121,18 +122,29 @@
             // resetCheckBox
             // 
             this.resetCheckBox.AutoSize = true;
-            this.resetCheckBox.Location = new System.Drawing.Point(372, 398);
+            this.resetCheckBox.Location = new System.Drawing.Point(261, 398);
             this.resetCheckBox.Name = "resetCheckBox";
             this.resetCheckBox.Size = new System.Drawing.Size(86, 17);
             this.resetCheckBox.TabIndex = 5;
             this.resetCheckBox.Text = "更新数据库";
             this.resetCheckBox.UseVisualStyleBackColor = true;
             // 
+            // updateConfigCheckBox
+            // 
+            this.updateConfigCheckBox.AutoSize = true;
+            this.updateConfigCheckBox.Location = new System.Drawing.Point(358, 398);
+            this.updateConfigCheckBox.Name = "updateConfigCheckBox";
+            this.updateConfigCheckBox.Size = new System.Drawing.Size(98, 17);
+            this.updateConfigCheckBox.TabIndex = 5;
+            this.updateConfigCheckBox.Text = "更新配置文件";
+            this.updateConfigCheckBox.UseVisualStyleBackColor = true;
+            // 
             // InstallerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(575, 429);
+            this.Controls.Add(this.updateConfigCheckBox);
             this.Controls.Add(this.resetCheckBox);
             this.Controls.Add(this.progressBox);
             this.Controls.Add(this.label3);
@@ -163,6 +175,7 @@
         private System.Windows.Forms.ListBox progressBox;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.CheckBox resetCheckBox;
+        private System.Windows.Forms.CheckBox updateConfigCheckBox;
     }
 }
 

@@ -69,7 +69,8 @@ namespace Scada.Installer
                 return false;
             }
 
-            Updater u = new Updater(true);
+            Updater u = new Updater();
+            u.NeedUpdateConfigFiles = updateConfigCheckBox.Checked;
             // If Put the bin.zip @ Install Path, the Installer would unzip it into InstallPath.
             // If Put the bin.zip @ Update Path, The Update Program would update using this zip file.
             string binZipFilePath = this.GetInstallerPath() + "\\bin.zip";

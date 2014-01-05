@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Scada.Installer
@@ -13,9 +14,20 @@ namespace Scada.Installer
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new InstallerForm());
+            bool createNew = false;
+            using (Mutex mutex = new Mutex(true, Application.ProductName, out createNew))
+            {
+                if (createNew)
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new InstallerForm());
+                }
+                else
+                {
+                    MessageBox.Show("安装程序已经在运行中...");
+                }
+            }
         }
     }
 }

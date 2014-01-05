@@ -31,7 +31,7 @@ namespace Scada.Declare
 
 		private int minuteAdjust = 0;
 
-        private int timeZone = 8;
+        private const int TimeZone = 8;
 
         // private int index = 0;
 
@@ -132,6 +132,7 @@ namespace Scada.Declare
 		private void TimerCallback(object o)
 		{
             // The temp file name is fixed.
+            DateTime now = DateTime.Now;
             string tempFile = this.DeviceConfigPath + "\\temp_download_file.xml";
             string filePath = string.Empty;
             if (this.IsVirtual)
@@ -141,7 +142,6 @@ namespace Scada.Declare
             else
             {
                 // Start download ...
-                DateTime now = DateTime.Now;
                 string fileName1 = GetFileNameOnDevice(now);
                 string fileName2 = GetFileName(now);
                 string datePath = LogPath.GetDeviceLogFilePath("scada.naidevice", now);
@@ -191,7 +191,7 @@ namespace Scada.Declare
                     nsmgr.AddNamespace("e", "http://www.technidata.com/ENVINET");
 
                     NuclideDataSet set = this.ParseData(doc, nsmgr);
-                    this.Record(set);
+                    this.Record(set, now);
 
                     File.Move(tempFile, filePath);
                 }
@@ -230,10 +230,11 @@ namespace Scada.Declare
 		{
 		}
 
-        private void Record(NuclideDataSet set)
+        private void Record(NuclideDataSet set, DateTime now)
         {
             DateTime time = DateTime.Parse(set.EndTime);
-            time = time.AddMinutes(-this.minuteAdjust);
+            double minutesAdjust = this.minuteAdjust / 5 * 5 - 5;
+            time = time.AddMinutes(-minutesAdjust);
 
             var dd = this.ParseNaI(set, time);
             this.SynchronizationContext.Post(this.DataReceived, dd);
@@ -284,7 +285,7 @@ namespace Scada.Declare
         {
             string fileName;
             DateTime t = now;
-            t = t.AddHours(-this.timeZone).AddMinutes(this.minuteAdjust);
+            t = t.AddHours(-TimeZone).AddMinutes(this.minuteAdjust);
             fileName = string.Format("{0}_{1}-{2:D2}-{3:D2}T{4:D2}_{5:D2}_00Z-5min.n42",
 				this.deviceSn, t.Year, t.Month, t.Day, t.Hour, t.Minute / 5 * 5);
             return fileName;

@@ -17,12 +17,10 @@ namespace Scada.Update
 
         static void Main(string[] args)
         {
-            bool force = false;
-            if (args.Length > 0 && args[0] == "-f")
-            {
-                force = true;
-            }
-            Updater u = new Updater(force);
+            Updater u = new Updater();
+            u.ForceReplaceConfigFiles = false;
+            u.NeedUpdateConfigFiles = false;
+
             string binZipPath = GetCurrentPath() + "\\update\\bin.zip";
             KillProcesses();
             bool r = u.UnzipProgramFiles(binZipPath, GetCurrentPath());

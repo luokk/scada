@@ -21,9 +21,26 @@ namespace Scada.Update
 
         private bool force = false;
 
-        public Updater(bool force)
+        public Updater()
+        {            
+        }
+
+        public bool ForceReplaceConfigFiles
         {
-            this.force = force;
+            private get
+            {
+                return this.force;
+            }
+            set
+            {
+                this.force = value;
+            }
+        }
+
+        public bool NeedUpdateConfigFiles
+        {
+            get;
+            set;
         }
 
         public bool UnzipProgramFiles(string programZipFile, string destPath)
@@ -49,11 +66,15 @@ namespace Scada.Update
                 fileName.EndsWith(".bat") ||
                 fileName.EndsWith(".settings"))
             {
-                if (fileStream != null)
+                if (this.NeedUpdateConfigFiles)
                 {
-                    WriteFile(fileStream, this.destPath + "\\" + fileName);
+                    if (fileStream != null)
+                    {
+                        WriteFile(fileStream, this.destPath + "\\" + fileName);
+                    }
+                    return UnzipCode.Compare;
                 }
-                return UnzipCode.Compare;
+                return UnzipCode.Ignore;
             }
 
             if (fileName.EndsWith("scada.update.exe") || fileName.EndsWith("icsharpcode.sharpziplib.dll"))
