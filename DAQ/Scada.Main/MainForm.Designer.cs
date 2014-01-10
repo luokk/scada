@@ -63,9 +63,9 @@
             this.stopToolBarButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.statusBar = new System.Windows.Forms.StatusStrip();
-            this.deviceListView = new System.Windows.Forms.ListView();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.deviceListView = new System.Windows.Forms.ListView();
             this.menuBar.SuspendLayout();
             this.toolBar.SuspendLayout();
             this.statusBar.SuspendLayout();
@@ -335,6 +335,24 @@
             this.statusBar.TabIndex = 4;
             this.statusBar.Text = "statusStrip1";
             // 
+            // statusLabel
+            // 
+            this.statusLabel.BorderStyle = System.Windows.Forms.Border3DStyle.Sunken;
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(59, 17);
+            this.statusLabel.Text = "系统就绪";
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.toolStripStatusLabel1.IsLink = true;
+            this.toolStripStatusLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Overflow = System.Windows.Forms.ToolStripItemOverflow.Always;
+            this.toolStripStatusLabel1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(33, 17);
+            this.toolStripStatusLabel1.Text = "帮助";
+            // 
             // deviceListView
             // 
             this.deviceListView.Activation = System.Windows.Forms.ItemActivation.OneClick;
@@ -354,24 +372,6 @@
             this.deviceListView.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.deviceListView_ItemChecked);
             this.deviceListView.SelectedIndexChanged += new System.EventHandler(this.deviceListView_SelectedIndexChanged);
             // 
-            // statusLabel
-            // 
-            this.statusLabel.BorderStyle = System.Windows.Forms.Border3DStyle.Sunken;
-            this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(59, 17);
-            this.statusLabel.Text = "系统就绪";
-            // 
-            // toolStripStatusLabel1
-            // 
-            this.toolStripStatusLabel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.toolStripStatusLabel1.IsLink = true;
-            this.toolStripStatusLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Overflow = System.Windows.Forms.ToolStripItemOverflow.Always;
-            this.toolStripStatusLabel1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(33, 17);
-            this.toolStripStatusLabel1.Text = "帮助";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -386,6 +386,7 @@
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "系统设备管理器";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.menuBar.ResumeLayout(false);

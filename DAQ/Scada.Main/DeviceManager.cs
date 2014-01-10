@@ -290,8 +290,8 @@ namespace Scada.Main
                 context.Callback = callback;
 
                 this.RunDevice(context);
-
             }
+            RecordManager.DoSystemEventRecord(Device.Main, "Devices are running now.", RecordType.Event);
             return true;
         }
 

@@ -7,6 +7,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using MySql.Data.Types;
 using Scada.Config;
+using System.Timers;
 
 namespace Scada.Declare
 {
@@ -29,6 +30,8 @@ namespace Scada.Declare
 
         private string database = null;
 
+        private Timer retryTimer = null;
+
         public string Database
         {
             get { return this.database; }
@@ -37,22 +40,38 @@ namespace Scada.Declare
 
         public void Connect()
         {
-			try
-			{
+            try
+            {
                 string connectionString = new DBConnectionString().ToString();
                 this.conn = new MySqlConnection(connectionString);
-				this.conn.Open();
-				this.cmd = this.conn.CreateCommand();
-
-				// AddHPICRecordData("243.5", "2.3", "5.88", "24.0000", 2);
-				// AddHPICRecordData("243.5", "2.3", "5.88", "24.0000", 2);
-			}
-			catch (Exception e)
-			{
-				Debug.WriteLine(e.Message);
-			}
+                this.conn.Open();
+                this.cmd = this.conn.CreateCommand();
+            }
+            catch (Exception e)
+            {
+                this.retryTimer = new Timer(30 * 1000);
+                this.retryTimer.Elapsed += this.RetryTimerTick;
+                this.retryTimer.Start();
+                
+            }
         }
 
+        void RetryTimerTick(object sender, ElapsedEventArgs e)
+        {
+            if (this.retryTimer != null)
+            {
+                this.retryTimer.Stop();
+                this.retryTimer = null;
+
+                this.Reconnect();
+            }
+        }
+
+        private void Reconnect()
+        {
+            RecordManager.DoSystemEventRecord(Device.Main, "Reconnect to MySQL DB", RecordType.Notice);
+            this.Connect();
+        }
 
 		public bool AddRecordData(string commandText, DateTime time, params object[] items)
 		{

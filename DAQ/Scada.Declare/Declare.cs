@@ -398,26 +398,76 @@ namespace Scada.Declare
             return defaultValue;
         }
 
-        /*
-        public static bool NowAt30Sec(out DateTime rightTime)
+        public static Device Main
         {
-            DateTime now = DateTime.Now;
-            int second = (now.Second < 30) ? 0 : 30;
-            rightTime = default(DateTime);
-            if (now.Second >= 0 && now.Second <= MaxDelay)
+            get
             {
-                rightTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, second);
-                return true;
+                return MainVirtualDevice.Instance();
             }
-            else if (now.Second >= 30 && now.Second <= (30 + MaxDelay))
+        }
+
+        public static Device MainVision
+        {
+            get
             {
-                rightTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, second);
-                return true;
+                return MainVisionVirtualDevice.Instance();
             }
-            return false;
-        }*/
+        }
+
 	}
     // Enc of class Device
 
-    
+
+
+    public class MainVirtualDevice : Device
+    {
+        private static MainVirtualDevice device = new MainVirtualDevice();
+
+        public static MainVirtualDevice Instance()
+        {
+            return MainVirtualDevice.device;
+        }
+
+        public MainVirtualDevice()
+        {
+            this.Name = "Scada.Main";
+            this.Id = this.Name.ToLower();
+            this.Version = "0.1";
+        }
+
+        public override void Start(string address)
+        {
+        }
+
+        public override void Stop()
+        {
+        }
+
+        public override void Send(byte[] action, DateTime time)
+        {
+        }
+    }
+
+    public class MainVisionVirtualDevice : Device
+    {
+        private static MainVisionVirtualDevice device = new MainVisionVirtualDevice();
+
+        public static MainVisionVirtualDevice Instance()
+        {
+            return MainVisionVirtualDevice.device;
+        }
+
+        public override void Start(string address)
+        {
+        }
+
+        public override void Stop()
+        {
+        }
+
+        public override void Send(byte[] action, DateTime time)
+        {
+        }
+    }
+
 }

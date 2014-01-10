@@ -231,6 +231,7 @@ namespace Scada.Main
             // deviceListView.Enabled = true;
             this.UpdateDevicesWaitStatus();
             Program.DeviceManager.CloseAllDevices();
+            RecordManager.DoSystemEventRecord(Device.Main, "User Stopped the devices");
             Program.Exit(); // For quit Mutex;
             Program.DeviceManager.OpenMainProgram();
             Application.Exit();
@@ -248,7 +249,6 @@ namespace Scada.Main
                 process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
                 process.StartInfo.RedirectStandardError = true;//重定向错误输出
                 process.Start();
-
             }
 		}
 
@@ -381,6 +381,15 @@ namespace Scada.Main
                 process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
                 process.StartInfo.RedirectStandardError = true;//重定向错误输出
                 process.Start();
+            }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("您确定要退出[数据采集程序]吗？", "Scada.Main", MessageBoxButtons.OKCancel);
+            if (dr == DialogResult.OK)
+            {
+                RecordManager.DoSystemEventRecord(Device.Main, "User Quit from Scada.Main");
             }
         }
 
