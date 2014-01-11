@@ -20,9 +20,7 @@ namespace Scada.Main
     {
 		private System.Windows.Forms.Timer timer = null;
 
-        private bool started = false;
-
-        //private Process mainVisionProcess;
+        private bool deviceRunning = false;
 
         public MainForm()
         {
@@ -126,7 +124,7 @@ namespace Scada.Main
                 MessageBox.Show("请选择要启动的设备！");
                 return;
             }
-            this.started = true;
+            this.deviceRunning = true;
             this.startToolBarButton.Enabled = false;
             
             RecordManager.Initialize();
@@ -216,7 +214,7 @@ namespace Scada.Main
 
 		private void aboutMenuItem_Click(object sender, EventArgs e)
 		{
-
+            this.OpenProcessByName("Scada.About.exe");
 		}
 
 		private void docMenuItem_Click(object sender, EventArgs e)
@@ -226,7 +224,7 @@ namespace Scada.Main
 
 		private void stopMenuItem_Click(object sender, EventArgs e)
 		{
-            this.started = false;
+            this.deviceRunning = false;
             this.startToolBarButton.Enabled = true;
             // deviceListView.Enabled = true;
             this.UpdateDevicesWaitStatus();
@@ -240,38 +238,23 @@ namespace Scada.Main
 		private void startMainVisionMenuItem_Click(object sender, EventArgs e)
 		{
             // Show MainVision
-            using (Process process = new Process())
-            {
-                process.StartInfo.CreateNoWindow = false;    //设定不显示窗口
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.FileName = "Scada.MainVision.exe"; //设定程序名  
-                process.StartInfo.RedirectStandardInput = true;   //重定向标准输入
-                process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
-                process.StartInfo.RedirectStandardError = true;//重定向错误输出
-                process.Start();
-            }
+            this.OpenProcessByName("Scada.MainVision.exe");
 		}
 
 		private void logToolMenuItem_Click(object sender, EventArgs e)
 		{
-			RecordManager.OpenLoggerServer();
+            this.OpenProcessByName("Scada.Logger.Server.exe");
 		}
 
 		private void logBankMenuItem_Click(object sender, EventArgs e)
 		{
-
+            // TODO: Bank Log files;
 		}
 
 		private void logDelMenuItem_Click(object sender, EventArgs e)
 		{
-
+            // TODO: Delete Log files;
 		}
-
-
-		//////////////////////////////////////////////////////////////////////////
-		private void func()
-		{
-        }
 
         private void MainForm_Resize(object sender, EventArgs e)
         {
@@ -327,7 +310,7 @@ namespace Scada.Main
 
         private void deviceListView_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            if (this.started)
+            if (this.deviceRunning)
             {
                 if (!this.BeforeShowAtTaskBar)
                 {
@@ -338,7 +321,7 @@ namespace Scada.Main
 
         private void deviceListView_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
-            if (!this.started)
+            if (!this.deviceRunning)
             {
                 bool itemChecked = e.Item.Checked;
                 if (itemChecked)
@@ -351,53 +334,89 @@ namespace Scada.Main
 
         private void settingClick(object sender, EventArgs e)
         {
-
+            this.OpenProcessByName("Scada.MainSettings.exe");
         }
 
         private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // TODO: Select the device in the list;
-            this.SelectDevices();
-            this.RunDevices();
+            this.StartDevices(false);
         }
 
+        private void startMenuItem_Click(object sender, EventArgs e)
+        {
+            this.StartDevices(false);
+        }
+
+        // Toolbar Menu
         private void startAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // TODO: Select the device in the list;
-            this.CheckAllDevices();
+            this.StartDevices(true);
+        }
+
+        // Menu
+        private void StartAllToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            this.StartDevices(true);
+        }
+
+        private void StartDevices(bool all)
+        {
+            if (all)
+            {
+                this.CheckAllDevices();
+            }
             this.SelectDevices();
             this.RunDevices();
         }
 
         private void settingToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Show MainVision
-            using (Process process = new Process())
-            {
-                process.StartInfo.CreateNoWindow = false;    //设定不显示窗口
-                process.StartInfo.UseShellExecute = false;
-                process.StartInfo.FileName = "Scada.MainSettings.exe"; //设定程序名  
-                process.StartInfo.RedirectStandardInput = true;   //重定向标准输入
-                process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
-                process.StartInfo.RedirectStandardError = true;//重定向错误输出
-                process.Start();
-            }
+            this.OpenProcessByName("Scada.MainSettings.exe");
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            DialogResult dr = MessageBox.Show("您确定要退出[数据采集程序]吗？", "Scada.Main", MessageBoxButtons.OKCancel);
-            if (dr == DialogResult.OK)
+            if (this.deviceRunning)
             {
-                RecordManager.DoSystemEventRecord(Device.Main, "User Quit from Scada.Main");
-            }
-            else
-            {
-                e.Cancel = true;
+                // Prompt only when running
+                DialogResult dr = MessageBox.Show("您确定要退出[数据采集程序]吗？", "Scada.Main", MessageBoxButtons.OKCancel);
+                if (dr == DialogResult.OK)
+                {
+                    RecordManager.DoSystemEventRecord(Device.Main, "User Quit from Scada.Main");
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
             }
         }
 
+        private void loggerServer_Click(object sender, EventArgs e)
+        {
+            this.OpenProcessByName("Scada.Logger.Server.exe");
+        }
 
+        private void OpenProcessByName(string name)
+        {
+            string fileName = name;
+            try
+            {
+                using (Process process = new Process())
+                {
+                    process.StartInfo.CreateNoWindow = false;    //设定不显示窗口
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.FileName = fileName; //设定程序名  
+                    process.StartInfo.RedirectStandardInput = true;   //重定向标准输入
+                    process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
+                    process.StartInfo.RedirectStandardError = true;//重定向错误输出
+                    process.Start();
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(string.Format("Dose {0} Exist?", name));
+            }
+        }
 
 
 

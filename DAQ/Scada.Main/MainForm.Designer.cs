@@ -66,6 +66,8 @@
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.deviceListView = new System.Windows.Forms.ListView();
+            this.loggerServer = new System.Windows.Forms.ToolStripButton();
+            this.StartAllToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuBar.SuspendLayout();
             this.toolBar.SuspendLayout();
             this.statusBar.SuspendLayout();
@@ -132,6 +134,7 @@
             // 
             this.operateMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.startMenuItem,
+            this.StartAllToolStripMenuItem2,
             this.stopMenuItem});
             this.operateMenuItem.Name = "operateMenuItem";
             this.operateMenuItem.Size = new System.Drawing.Size(45, 20);
@@ -140,12 +143,14 @@
             // startMenuItem
             // 
             this.startMenuItem.Name = "startMenuItem";
-            this.startMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.startMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.startMenuItem.Text = "启动";
+            this.startMenuItem.Click += new System.EventHandler(this.startMenuItem_Click);
             // 
             // stopMenuItem
             // 
             this.stopMenuItem.Name = "stopMenuItem";
-            this.stopMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.stopMenuItem.Size = new System.Drawing.Size(152, 22);
             this.stopMenuItem.Text = "停止";
             this.stopMenuItem.Click += new System.EventHandler(this.stopMenuItem_Click);
             // 
@@ -272,7 +277,8 @@
             this.toolBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.startToolBarButton,
             this.stopToolBarButton,
-            this.toolStripButton2});
+            this.toolStripButton2,
+            this.loggerServer});
             this.toolBar.Location = new System.Drawing.Point(0, 24);
             this.toolBar.Name = "toolBar";
             this.toolBar.Size = new System.Drawing.Size(704, 28);
@@ -372,6 +378,22 @@
             this.deviceListView.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.deviceListView_ItemChecked);
             this.deviceListView.SelectedIndexChanged += new System.EventHandler(this.deviceListView_SelectedIndexChanged);
             // 
+            // loggerServer
+            // 
+            this.loggerServer.Image = ((System.Drawing.Image)(resources.GetObject("loggerServer.Image")));
+            this.loggerServer.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.loggerServer.Name = "loggerServer";
+            this.loggerServer.Size = new System.Drawing.Size(53, 25);
+            this.loggerServer.Text = "日志";
+            this.loggerServer.Click += new System.EventHandler(this.loggerServer_Click);
+            // 
+            // StartAllToolStripMenuItem2
+            // 
+            this.StartAllToolStripMenuItem2.Name = "StartAllToolStripMenuItem2";
+            this.StartAllToolStripMenuItem2.Size = new System.Drawing.Size(152, 22);
+            this.StartAllToolStripMenuItem2.Text = "启动全部";
+            this.StartAllToolStripMenuItem2.Click += new System.EventHandler(this.StartAllToolStripMenuItem2_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -438,6 +460,8 @@
         private System.Windows.Forms.ToolStripMenuItem settingToolStripMenuItem;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripButton loggerServer;
+        private System.Windows.Forms.ToolStripMenuItem StartAllToolStripMenuItem2;
     }
 }
 

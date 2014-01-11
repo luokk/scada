@@ -40,7 +40,8 @@
             this.tabPage7 = new System.Windows.Forms.TabPage();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.设置ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ClearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainVisionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.HpicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +52,6 @@
             this.envToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dwdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.帮助ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ClearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -168,7 +168,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.文件ToolStripMenuItem,
-            this.设置ToolStripMenuItem,
+            this.SettingsToolStripMenuItem,
             this.帮助ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -184,11 +184,18 @@
             this.文件ToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
             this.文件ToolStripMenuItem.Text = "文件";
             // 
-            // 设置ToolStripMenuItem
+            // ClearToolStripMenuItem
             // 
-            this.设置ToolStripMenuItem.Checked = true;
-            this.设置ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.设置ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ClearToolStripMenuItem.Name = "ClearToolStripMenuItem";
+            this.ClearToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.ClearToolStripMenuItem.Text = "清除";
+            this.ClearToolStripMenuItem.Click += new System.EventHandler(this.ClearToolStripMenuItem_Click);
+            // 
+            // SettingsToolStripMenuItem
+            // 
+            this.SettingsToolStripMenuItem.Checked = true;
+            this.SettingsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.SettingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MainToolStripMenuItem,
             this.mainVisionToolStripMenuItem,
             this.HpicToolStripMenuItem,
@@ -198,9 +205,9 @@
             this.IspToolStripMenuItem,
             this.envToolStripMenuItem,
             this.dwdToolStripMenuItem});
-            this.设置ToolStripMenuItem.Name = "设置ToolStripMenuItem";
-            this.设置ToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
-            this.设置ToolStripMenuItem.Text = "设置";
+            this.SettingsToolStripMenuItem.Name = "SettingsToolStripMenuItem";
+            this.SettingsToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.SettingsToolStripMenuItem.Text = "设置";
             // 
             // MainToolStripMenuItem
             // 
@@ -288,13 +295,6 @@
             this.帮助ToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
             this.帮助ToolStripMenuItem.Text = "帮助";
             // 
-            // ClearToolStripMenuItem
-            // 
-            this.ClearToolStripMenuItem.Name = "ClearToolStripMenuItem";
-            this.ClearToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.ClearToolStripMenuItem.Text = "清除";
-            this.ClearToolStripMenuItem.Click += new System.EventHandler(this.ClearToolStripMenuItem_Click);
-            // 
             // LoggerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -327,7 +327,7 @@
         private System.Windows.Forms.TabPage tabPageMainVision;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem 文件ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 设置ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SettingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 帮助ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem MainToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mainVisionToolStripMenuItem;

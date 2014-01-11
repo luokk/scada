@@ -59,6 +59,6 @@ namespace Scada.Data.Client.Tcp
             return p;
         }
 
-        public const string System = "system";
+        public const string DataClient = "Scada.Data.Client";
     }
 }

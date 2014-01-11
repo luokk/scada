@@ -46,8 +46,41 @@ namespace Scada.Logger.Server
             return null;
         }
 
+        private void InitMenuStatus()
+        {
+            string statusPath = ConfigPath.GetConfigFilePath("status");
+            if (Directory.Exists(statusPath))
+            {
+                string[] filePaths = Directory.GetFiles(statusPath, @"@*");
+                var deviceKeys = filePaths.Select((string path) =>
+                {
+                    string fileName = Path.GetFileName(path);
+                    return fileName.ToLower().Substring(1);
+                });
+
+                var menus = SettingsToolStripMenuItem.DropDownItems;
+                foreach (ToolStripMenuItem m in menus)
+                {
+                    string tag = m.Tag as string;
+                    if (string.IsNullOrEmpty(tag))
+                        continue;
+                    m.Checked = false;
+                    tag = tag.ToLower();
+                    foreach (var deviceKey in deviceKeys)
+                    {
+                        if (deviceKey == tag)
+                        {
+                            m.Checked = true;
+                        }
+                    }
+                }
+            }
+        }
+
         private void FormOnLoad(object sender, EventArgs e)
         {
+            this.InitMenuStatus();
+
             this.tabPageMain.Controls.Add(this.CreateListBox("Scada.Main"));
             this.tabPageMainVision.Controls.Add(this.CreateListBox("Scada.MainVision"));
 

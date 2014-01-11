@@ -59,7 +59,7 @@ namespace Scada.Data.Client
             return p;
         }
 
-        public const string System = "system";
+        public const string DataClient = "Scada.Data.Client";
 
     }
 }

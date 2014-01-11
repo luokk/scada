@@ -66,20 +66,6 @@ namespace Scada.Declare
 			// RecordManager.frameworkRecord = new FileRecord("");
 		}
 
-		public static void OpenLoggerServer()
-		{
-            // TODO: fix the Path issues.
-			using (Process process = new Process())
-			{
-				process.StartInfo.CreateNoWindow = false;    //设定不显示窗口
-				process.StartInfo.UseShellExecute = false;
-				process.StartInfo.FileName = "Scada.RecordAnalysis.exe"; //设定程序名  
-				process.StartInfo.RedirectStandardInput = true;   //重定向标准输入
-				process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
-				process.StartInfo.RedirectStandardError = true;//重定向错误输出
-			}
-		}
-
         public static void DoSystemEventRecord(Device device, string systemEvent, RecordType recordType = RecordType.Event)
 		{
 			RecordManager.WriteDataToLog(device, systemEvent, recordType);

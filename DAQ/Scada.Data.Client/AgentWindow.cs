@@ -118,7 +118,7 @@ namespace Scada.Data.Client
             this.InitializeAgents();
             this.InitializeTimer();
             this.started = true;
-            Log.GetLogFile(Program.System).Log("Data (upload) Agent starts at " + DateTime.Now);
+            Log.GetLogFile(Program.DataClient).Log("Data (upload) Agent starts at " + DateTime.Now);
         }
 
         private void InitializeAgents()
@@ -367,24 +367,24 @@ namespace Scada.Data.Client
                 {
                     string logger = agent.ToString() + " 已连接";
                     this.statusStrip1.Items[1].Text = logger;
-                    Log.GetLogFile(Program.System).Log(logger);
+                    Log.GetLogFile(Program.DataClient).Log(logger);
                 }
                 else if (NotifyEvent.ConnectError == ne)
                 {
                     this.statusStrip1.Items[1].Text = msg;
-                    Log.GetLogFile(Program.System).Log(msg);
+                    Log.GetLogFile(Program.DataClient).Log(msg);
                 }
                 else if (NotifyEvent.ConnectToCountryCenter == ne)
                 {
                     // this.StartConnectCountryCenter();
                     this.listBox1.Items.Add(msg);
-                    Log.GetLogFile(Program.System).Log(msg);
+                    Log.GetLogFile(Program.DataClient).Log(msg);
                 }
                 else if (NotifyEvent.DisconnectToCountryCenter == ne)
                 {
                     // this.StopConnectCountryCenter();
                     this.listBox1.Items.Add(msg);
-                    Log.GetLogFile(Program.System).Log(msg);
+                    Log.GetLogFile(Program.DataClient).Log(msg);
                 }
             });
         }
