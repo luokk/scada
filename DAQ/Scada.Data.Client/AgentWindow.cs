@@ -352,7 +352,8 @@ namespace Scada.Data.Client
 
         private void OnReceiveMessage(Agent agent, string msg)
         {
-            this.SafeInvoke(() => {
+            this.SafeInvoke(() => 
+            {
                 string line = string.Format("{0}: {1}", "Agent.ToString()", msg);
                 this.listBox1.Items.Add(line);
             });
@@ -418,7 +419,10 @@ namespace Scada.Data.Client
             {
                 e.Cancel = true;
             }
-                
+            else
+            {
+
+            }
         }
 
         private void SendDetails(string deviceKey, string msg)

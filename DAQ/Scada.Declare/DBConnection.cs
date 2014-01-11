@@ -49,11 +49,28 @@ namespace Scada.Declare
             }
             catch (Exception e)
             {
-                this.retryTimer = new Timer(30 * 1000);
-                this.retryTimer.Elapsed += this.RetryTimerTick;
-                this.retryTimer.Start();
-                
+                this.RetryConnection(e);
             }
+        }
+
+        private void RetryConnection(Exception e)
+        {
+            try
+            {
+                if (this.conn != null)
+                {
+                    this.conn.Close();
+                    this.conn = null;
+                }
+            }
+            catch (Exception)
+            {
+                this.conn = null;
+            }
+
+            this.retryTimer = new Timer(30 * 1000);
+            this.retryTimer.Elapsed += this.RetryTimerTick;
+            this.retryTimer.Start();
         }
 
         void RetryTimerTick(object sender, ElapsedEventArgs e)
@@ -98,7 +115,7 @@ namespace Scada.Declare
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
+                this.RetryConnection(e);
                 return false;
             }
             finally

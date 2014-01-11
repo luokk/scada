@@ -391,6 +391,10 @@ namespace Scada.Main
             {
                 RecordManager.DoSystemEventRecord(Device.Main, "User Quit from Scada.Main");
             }
+            else
+            {
+                e.Cancel = true;
+            }
         }
 
 

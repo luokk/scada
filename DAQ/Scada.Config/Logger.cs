@@ -35,6 +35,10 @@ namespace Scada.Config
 
         public static bool Contains(string ff)
         {
+            if (fileNameSets == null)
+            {
+                return false;
+            }
             return fileNameSets.Contains(string.Format("@{0}", ff));
         }
 

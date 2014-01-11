@@ -324,12 +324,14 @@ namespace Scada.Data.Client.Tcp
 
         private void OnReceiveMessage(Agent agent, string msg)
         {
-            if (!this.keepAliveCheckBox.Checked && ("6031" == Value.Parse(msg, "CN")))
+            if ("6031" == Value.Parse(msg, "CN"))
             {
+                // No KeepAlive message from now on;
                 return;
             }
 
-            this.SafeInvoke(() => {
+            this.SafeInvoke(() => 
+            {
                 string line = string.Format("{0}: {1}", agent.ToString(false), msg);
                 this.listBox1.Items.Add(line);
             });

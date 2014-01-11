@@ -34,7 +34,7 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.keepAliveCheckBox = new System.Windows.Forms.CheckBox();
+            this.checkBoxUpdateNaI = new System.Windows.Forms.CheckBox();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
@@ -43,7 +43,6 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.detailsButton = new System.Windows.Forms.ToolStripButton();
             this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.checkBoxUpdateNaI = new System.Windows.Forms.CheckBox();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -100,7 +99,6 @@
             // panel1
             // 
             this.panel1.Controls.Add(this.checkBoxUpdateNaI);
-            this.panel1.Controls.Add(this.keepAliveCheckBox);
             this.panel1.Controls.Add(this.listBox1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
@@ -108,15 +106,17 @@
             this.panel1.Size = new System.Drawing.Size(561, 410);
             this.panel1.TabIndex = 1;
             // 
-            // keepAliveCheckBox
+            // checkBoxUpdateNaI
             // 
-            this.keepAliveCheckBox.AutoSize = true;
-            this.keepAliveCheckBox.Location = new System.Drawing.Point(12, 380);
-            this.keepAliveCheckBox.Name = "keepAliveCheckBox";
-            this.keepAliveCheckBox.Size = new System.Drawing.Size(86, 17);
-            this.keepAliveCheckBox.TabIndex = 2;
-            this.keepAliveCheckBox.Text = "显示心跳包";
-            this.keepAliveCheckBox.UseVisualStyleBackColor = true;
+            this.checkBoxUpdateNaI.AutoSize = true;
+            this.checkBoxUpdateNaI.Checked = true;
+            this.checkBoxUpdateNaI.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxUpdateNaI.Location = new System.Drawing.Point(12, 379);
+            this.checkBoxUpdateNaI.Name = "checkBoxUpdateNaI";
+            this.checkBoxUpdateNaI.Size = new System.Drawing.Size(91, 17);
+            this.checkBoxUpdateNaI.TabIndex = 3;
+            this.checkBoxUpdateNaI.Text = "上传NaI数据";
+            this.checkBoxUpdateNaI.UseVisualStyleBackColor = true;
             // 
             // listBox1
             // 
@@ -186,16 +186,6 @@
             this.sysNotifyIcon.Text = "数据上传";
             this.sysNotifyIcon.Visible = true;
             // 
-            // checkBoxUpdateNaI
-            // 
-            this.checkBoxUpdateNaI.AutoSize = true;
-            this.checkBoxUpdateNaI.Location = new System.Drawing.Point(122, 380);
-            this.checkBoxUpdateNaI.Name = "checkBoxUpdateNaI";
-            this.checkBoxUpdateNaI.Size = new System.Drawing.Size(91, 17);
-            this.checkBoxUpdateNaI.TabIndex = 3;
-            this.checkBoxUpdateNaI.Text = "上传NaI数据";
-            this.checkBoxUpdateNaI.UseVisualStyleBackColor = true;
-            // 
             // AgentWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -237,7 +227,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.Splitter splitter1;
-        private System.Windows.Forms.CheckBox keepAliveCheckBox;
         private System.Windows.Forms.ToolStripButton detailsButton;
         private System.Windows.Forms.NotifyIcon sysNotifyIcon;
         private System.Windows.Forms.CheckBox checkBoxUpdateNaI;

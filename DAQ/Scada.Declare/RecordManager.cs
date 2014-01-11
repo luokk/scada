@@ -148,9 +148,7 @@ namespace Scada.Declare
             {
                 logger.Send(deviceKey, line);
             }
-
 		}
-
 
         private static FileStream GetLogFileStream(Device device, DateTime now)
         {

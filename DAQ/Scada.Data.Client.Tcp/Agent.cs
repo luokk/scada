@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Scada.Data.Client.Tcp
 {
@@ -165,6 +166,11 @@ namespace Scada.Data.Client.Tcp
                 : string.Format("{0}", this.WirelessServerAddress);
         }
 
+        private void OnConnectionException(Exception e)
+        {
+            this.ConnectToWireless();
+        }
+
         public void Connect()
         {
             if ((this.client == null) || (!this.client.Connected))
@@ -183,6 +189,7 @@ namespace Scada.Data.Client.Tcp
                 {
                     this.ScreenLogAppend("Connect(): " + e.Message);
                     this.OnNotifyEvent(this, NotifyEvent.ConnectError, "有线连接失败: " + e.Message);
+                    this.OnConnectionException(e);
                 }
             }
         }
@@ -257,7 +264,7 @@ namespace Scada.Data.Client.Tcp
                     this.ScreenLogAppend(e.Message);
                     this.OnNotifyEvent(this, NotifyEvent.ConnectError, e.Message);
                     this.client = null;
-                    this.ConnectToWireless();
+                    this.OnConnectionException(e);
                 }
 
             }
@@ -377,8 +384,35 @@ namespace Scada.Data.Client.Tcp
                 if (this.client != null)
                 {
                     this.client = null;
+
+                    this.RetryConnection();
                     this.ConnectToWireless();
                 }
+            }
+        }
+
+        private void RetryConnection()
+        {
+            Timer timer = new Timer();
+            timer.Interval = 30 * 1000;
+            timer.Tick += this.RetryConnectionTimerTick;
+            
+            timer.Start();
+        }
+
+        void RetryConnectionTimerTick(object sender, EventArgs e)
+        {
+            Timer timer = sender as Timer;
+            if (timer != null)
+            {
+
+                timer.Stop();
+
+                this.Connect();
+            }
+            else
+            {
+                MessageBox.Show("Timer CastException");
             }
         }
 
@@ -411,7 +445,6 @@ namespace Scada.Data.Client.Tcp
             string s = p.ToString();
             this.Send(Encoding.ASCII.GetBytes(s));
         }
-
 
         internal void StartConnectCountryCenter()
         {
