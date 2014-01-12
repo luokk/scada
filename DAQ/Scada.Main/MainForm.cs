@@ -262,7 +262,7 @@ namespace Scada.Main
 
 		private void logToolMenuItem_Click(object sender, EventArgs e)
 		{
-            this.OpenProcessByName("Scada.Logger.Server.exe");
+            this.OpenProcessByName("Scada.Logger.Server.exe", true);
 		}
 
 		private void logBankMenuItem_Click(object sender, EventArgs e)
@@ -418,9 +418,10 @@ namespace Scada.Main
 
         private void loggerServer_Click(object sender, EventArgs e)
         {
-            this.OpenProcessByName("Scada.Logger.Server.exe");
+            this.OpenProcessByName("Scada.Logger.Server.exe", true);
         }
 
+        /* Start process No UAC Supported
         private void OpenProcessByName(string name)
         {
             string fileName = name;
@@ -436,6 +437,26 @@ namespace Scada.Main
                     process.StartInfo.RedirectStandardError = true;//重定向错误输出
                     process.Start();
                 }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
+            }
+        }
+        */
+
+        private void OpenProcessByName(string name, bool uac = false)
+        {
+            string fileName = name;
+            try
+            {
+                ProcessStartInfo processInfo = new ProcessStartInfo();
+                if (uac)
+                {
+                    processInfo.Verb = "runas";
+                }
+                processInfo.FileName = fileName;
+                Process.Start(processInfo);
             }
             catch (Exception e)
             {
