@@ -1,4 +1,5 @@
-﻿using Scada.DataCenterAgent.Properties;
+﻿using Microsoft.Win32;
+using Scada.DataCenterAgent.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -43,6 +44,9 @@ namespace Scada.Data.Client.Tcp
 
         private void AgentWindow_Load(object sender, EventArgs e)
         {
+            this.Restart = false;
+            SystemEvents.SessionEnding += new SessionEndingEventHandler(SystemEventsSessionEnding);
+
             InitSysNotifyIcon();
             this.ShowInTaskbar = false;
             this.statusStrip1.Items.Add("状态: 等待");
@@ -417,15 +421,31 @@ namespace Scada.Data.Client.Tcp
             this.detailForm.Show();
         }
 
+        private void SystemEventsSessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            switch (e.Reason)
+            {
+                case SessionEndReasons.Logoff:
+                case SessionEndReasons.SystemShutdown:
+                    this.Restart = true;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         private void AgentWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (this.Restart)
+            {
+                return;
+            }
+
             DialogResult dr = MessageBox.Show("退出数据上传程序?", "数据上传", MessageBoxButtons.YesNo);
             if (DialogResult.No == dr)
             {
                 e.Cancel = true;
             }
-                
         }
 
         private void SendDetails(string deviceKey, string msg)
@@ -448,5 +468,7 @@ namespace Scada.Data.Client.Tcp
                 this.Hide();
             }
         }
+
+        public bool Restart { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -77,8 +78,19 @@ namespace Scada.Logger.Server
             }
         }
 
+        internal bool IsRunAsAdmin()
+        {
+            WindowsIdentity id = WindowsIdentity.GetCurrent();
+            WindowsPrincipal principal = new WindowsPrincipal(id);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
+
         private void FormOnLoad(object sender, EventArgs e)
         {
+            if (IsRunAsAdmin())
+            {
+            }
+
             this.InitMenuStatus();
 
             this.tabPageMain.Controls.Add(this.CreateListBox("Scada.Main"));

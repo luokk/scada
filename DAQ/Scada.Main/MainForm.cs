@@ -13,6 +13,8 @@ using System.Diagnostics;
 using Scada.Common;
 using Scada.Declare;
 using Scada.Config;
+using Microsoft.Win32;
+using System.Security.Principal;
 
 namespace Scada.Main
 {
@@ -22,6 +24,8 @@ namespace Scada.Main
 
         private bool deviceRunning = false;
 
+        public bool Restart { get; set; }
+
         public MainForm()
         {
             InitializeComponent();
@@ -29,6 +33,8 @@ namespace Scada.Main
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            this.Restart = false;
+            SystemEvents.SessionEnding += new SessionEndingEventHandler(SystemEventsSessionEnding);
             InitSysNotifyIcon();
             this.SetStatusText("系统就绪");
 
@@ -97,6 +103,19 @@ namespace Scada.Main
                 this.RunDevices();
             }
             
+        }
+
+        private void SystemEventsSessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            switch (e.Reason)
+            {
+                case SessionEndReasons.Logoff:
+                case SessionEndReasons.SystemShutdown:
+                    this.Restart = true;
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void SetStatusText(string status)
@@ -376,13 +395,19 @@ namespace Scada.Main
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (this.Restart)
+            {
+                RecordManager.DoSystemEventRecord(Device.Main, "Scada.Main Exits according to shutdown!");
+                return;
+            }
+
             if (this.deviceRunning)
             {
                 // Prompt only when running
                 DialogResult dr = MessageBox.Show("您确定要退出[数据采集程序]吗？", "Scada.Main", MessageBoxButtons.OKCancel);
                 if (dr == DialogResult.OK)
                 {
-                    RecordManager.DoSystemEventRecord(Device.Main, "User Quit from Scada.Main");
+                    RecordManager.DoSystemEventRecord(Device.Main, "Scada.Main Closed by Admin!");
                 }
                 else
                 {
@@ -412,13 +437,17 @@ namespace Scada.Main
                     process.Start();
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                MessageBox.Show(string.Format("Dose {0} Exist?", name));
+                MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
             }
         }
 
-
-
+        //internal bool IsRunAsAdmin()
+        //{
+        //    WindowsIdentity id = WindowsIdentity.GetCurrent();
+        //    WindowsPrincipal principal = new WindowsPrincipal(id);
+        //    return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        //}
     }
 }

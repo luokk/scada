@@ -57,12 +57,9 @@ namespace Scada.Data.Client
             if (this.StartState)
             {
                 Start();
-
-                TestSendPacket();
-                // TestSendFilePacket();
             }
         }
-
+        #if DEBUG
         private void TestSendPacket()
         {
             string deviceKey = "scada.shelter";
@@ -89,7 +86,7 @@ namespace Scada.Data.Client
                 this.agents[0].SendFilePacket(packet);
             }
         }
-
+        #endif
 
         private void InitSysNotifyIcon()
         {

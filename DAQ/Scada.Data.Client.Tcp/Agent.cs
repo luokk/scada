@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using System.Windows.Forms;
+using System.Timers;
 
 namespace Scada.Data.Client.Tcp
 {
@@ -68,6 +69,9 @@ namespace Scada.Data.Client.Tcp
         private MessageDataHandler handler;
 
         private const int Timeout = 5000;
+
+
+        private int retryCount = 0;
         
         internal bool SendDataStarted
         {
@@ -168,8 +172,9 @@ namespace Scada.Data.Client.Tcp
 
         private void OnConnectionException(Exception e)
         {
-            this.ConnectToWireless();
+            this.RetryConnection();
         }
+
 
         public void Connect()
         {
@@ -187,8 +192,8 @@ namespace Scada.Data.Client.Tcp
                 }
                 catch (Exception e)
                 {
-                    this.ScreenLogAppend("Connect(): " + e.Message);
-                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, "有线连接失败: " + e.Message);
+                    this.ScreenLogAppend("Agent::Connect(): " + e.Message);
+                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, "本地网络配置异常（有线连接）: " + e.Message);
                     this.OnConnectionException(e);
                 }
             }
@@ -211,8 +216,9 @@ namespace Scada.Data.Client.Tcp
                 }
                 catch (Exception e)
                 {
-                    this.ScreenLogAppend("ConnectToWireless(): " + e.Message);
-                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, "无线连接失败: " + e.Message);
+                    this.ScreenLogAppend("Agent::ConnectToWireless(): " + e.Message);
+                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, "本地网络配置异常（无线连接）: " + e.Message);
+                    this.OnConnectionException(e);
                 }
             }
         }
@@ -244,7 +250,7 @@ namespace Scada.Data.Client.Tcp
                 try
                 {
                     TcpClient client = (TcpClient)result.AsyncState;
-                    
+
                     client.EndConnect(result);
                     //client.
                     if (client.Connected)
@@ -259,14 +265,13 @@ namespace Scada.Data.Client.Tcp
                         this.OnNotifyEvent(this, NotifyEvent.Connected, "已连接");
                     }
                 }
-                catch (SocketException e)
+                catch (Exception se)
                 {
-                    this.ScreenLogAppend(e.Message);
-                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, e.Message);
+                    this.ScreenLogAppend(se.Message);
+                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, se.Message);
                     this.client = null;
-                    this.OnConnectionException(e);
+                    this.OnConnectionException(se);
                 }
-
             }
         }
 
@@ -292,10 +297,14 @@ namespace Scada.Data.Client.Tcp
                         this.OnNotifyEvent(this, NotifyEvent.Connected, "已连接");
                     }
                 }
-                catch (SocketException e)
+                catch (Exception se)
                 {
                     this.wirelessClient = null;
-                    var s = e.Message;
+
+                    this.ScreenLogAppend(se.Message);
+                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, se.Message);
+                    this.client = null;
+                    this.OnConnectionException(se);
                 }
 
             }
@@ -391,29 +400,40 @@ namespace Scada.Data.Client.Tcp
             }
         }
 
+        // A. 每30秒试图重连一次
+        // B. 6次连接失败, 则选择无线方式
+        // C. 无线连接也失败, 则重新测试连接无线4次
+        // D. 无线也连接不上, 则回到A步骤
         private void RetryConnection()
         {
             Timer timer = new Timer();
             timer.Interval = 30 * 1000;
-            timer.Tick += this.RetryConnectionTimerTick;
+            timer.Elapsed += (s, e) => 
+            {
+                if (timer != null)
+                {
+                    // Timer once;
+                    timer.Stop();
+                    timer.Dispose();
+                    // Connect to wireline Network.
+                    if (this.retryCount < 6)
+                    {
+                        this.retryCount++;
+                        this.Connect();
+                    }
+                    else if (this.retryCount < 10)
+                    {
+                        this.retryCount++;
+                        this.ConnectToWireless();
+                    }
+                    else
+                    {
+                        this.retryCount = 0;
+                    }
+                }
+            };
             
             timer.Start();
-        }
-
-        void RetryConnectionTimerTick(object sender, EventArgs e)
-        {
-            Timer timer = sender as Timer;
-            if (timer != null)
-            {
-
-                timer.Stop();
-
-                this.Connect();
-            }
-            else
-            {
-                MessageBox.Show("Timer CastException");
-            }
         }
 
         internal void SendPacket(DataPacket p, DateTime time)
