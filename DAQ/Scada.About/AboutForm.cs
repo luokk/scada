@@ -27,9 +27,22 @@ namespace Scada.About
         private void AboutForm_Load(object sender, EventArgs e)
         {
             var features = GetFeatures(DateTime.Now);
+
+            this.featureTextBox.Text = GetFeatureText(features);
         }
 
-        private List<string> GetFeatures(DateTime date)
+        private string GetFeatureText(List<Feature> features)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var feature in features)
+            {
+                sb.Append(feature.ReleasedDate).Append(" ").Append(feature.Description).AppendLine();
+            }
+
+            return sb.ToString();
+        }
+
+        private List<Feature> GetFeatures(DateTime date)
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
             String projectName = Assembly.GetExecutingAssembly().GetName().Name.ToString();
@@ -48,23 +61,40 @@ namespace Scada.About
             {
                 try
                 {
+                    List<Feature> ret = new List<Feature>();
                     XmlDocument doc = new XmlDocument();
                     doc.Load(stream);
 
-                    var entries = doc.SelectNodes("//feature");
+                    XmlNodeList entries = doc.SelectNodes("//feature");
 
-                    foreach (var e in entries)
+                    foreach (XmlElement e in entries)
                     {
+                        var f = new Feature()
+                        {
+                            Description = e.InnerText.Trim(),
+                        };
 
+                        var planDate = e.Attributes.GetNamedItem("plan-date");
+                        f.PlanDate = planDate.InnerText;
+
+                        var releasedDate = e.Attributes.GetNamedItem("released-date");
+                        f.ReleasedDate = releasedDate.InnerText;
+
+                        var progressNode = e.Attributes.GetNamedItem("progress");
+                        f.Progress = progressNode.InnerText;
+
+                        var featureNode = e.Attributes.GetNamedItem("type");
+                        f.IsFeature = featureNode.InnerText == "feature";
+
+                        ret.Add(f);
                     }
-                       
+                    return ret;
                 }
                 catch (Exception e)
                 {
                 }
             }
             return null;
-            
         }
 
         private string GetFeatureId(DateTime date, int index)

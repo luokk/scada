@@ -15,6 +15,7 @@ using Scada.Declare;
 using Scada.Config;
 using Microsoft.Win32;
 using System.Security.Principal;
+using System.IO;
 
 namespace Scada.Main
 {
@@ -79,30 +80,80 @@ namespace Scada.Main
                 }
             }
 
+            // Auto start
             // runAll = true;
             if (runAll)
             {
-                this.CheckAllDevices();
-                Thread.Sleep(1000);
-                this.PressVBFormConnectToCPUButtons();
-                
-                this.SelectDevices();
-                this.RunDevices();
+                this.StartDevices(true);
             }
             else if (recover)
             {
-                // TODO: Load devices selected from a file, insert them into ListView.
-                for (; ; )
+                if (this.RecoverCheck())
                 {
-                    // Select the devices.
-                    Program.DeviceManager.SelectDevice("", "", true);
-
-                    // TODO: List Them into ListView
+                    this.StartDevices(false);
                 }
-                //
-                this.RunDevices();
+                else
+                {
+                    this.StartDevices(true);
+                }
             }
-            
+        }
+
+        private bool RecoverCheck()
+        {
+            string statusPath = ConfigPath.GetConfigFilePath("status");
+            if (!Directory.Exists(statusPath))
+            {
+                return false;
+            }
+
+            string runningDevicesFile = Path.Combine(statusPath, "running.devices");
+            if (!File.Exists(runningDevicesFile))
+            {
+                return false;
+            }
+
+            try
+            {
+                using (FileStream fs = File.Open(runningDevicesFile, FileMode.Open))
+                {
+                    // Recover
+                    this.CheckAllDevices(false);
+
+                    long len = fs.Length;
+                    byte[] bytes = new byte[len];
+                    fs.Read(bytes, 0, (int)len);
+
+                    StringReader sr = new StringReader(Encoding.ASCII.GetString(bytes));
+
+                    string deviceKeyLine = sr.ReadLine();
+                    while (deviceKeyLine != null)
+                    {
+                        string deviceKey = deviceKeyLine.ToLower().Trim();
+
+                        if (!string.IsNullOrEmpty(deviceKey))
+                        {
+                            foreach (ListViewItem item in this.deviceListView.Items)
+                            {
+                                string itemTextLower = item.Text.ToLower();
+                                if (itemTextLower == deviceKey)
+                                {
+                                    item.Checked = true;
+                                }
+                            }
+
+                        }
+
+                        deviceKeyLine = sr.ReadLine();
+                    }
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                
+            }
+            return false;
         }
 
         private void SystemEventsSessionEnding(object sender, SessionEndingEventArgs e)
@@ -286,6 +337,7 @@ namespace Scada.Main
 
         private void SelectDevices()
         {
+            StringBuilder sb = new StringBuilder();
             foreach (ListViewItem item in this.deviceListView.Items)
             {
                 if (item.Checked)
@@ -293,15 +345,36 @@ namespace Scada.Main
                     string deviceName = item.SubItems[0].Text;
                     string version = item.SubItems[1].Text;
                     Program.DeviceManager.SelectDevice(deviceName, version, true);
+
+                    sb.AppendLine(deviceName);
                 }
+            }
+
+            // Dump the running devices.
+            string statusPath = ConfigPath.GetConfigFilePath("status");
+            if (!Directory.Exists(statusPath))
+            {
+                Directory.CreateDirectory(statusPath);
+            }
+
+            string runningDevicesFile = Path.Combine(statusPath, "running.devices");
+            if (File.Exists(runningDevicesFile))
+            {
+                File.Delete(runningDevicesFile);
+            }
+
+            using (FileStream fs = File.Open(runningDevicesFile, FileMode.CreateNew))
+            {
+                byte[] bytes = Encoding.ASCII.GetBytes(sb.ToString());
+                fs.Write(bytes, 0, bytes.Length);
             }
         }
 
-        private void CheckAllDevices()
+        private void CheckAllDevices(bool check = true)
         {
             foreach (ListViewItem item in this.deviceListView.Items)
             {
-                item.Checked = true;
+                item.Checked = check;
             }
         }
 
@@ -383,6 +456,11 @@ namespace Scada.Main
             if (all)
             {
                 this.CheckAllDevices();
+
+                // TODO:!
+                Thread.Sleep(1000);
+                this.PressVBFormConnectToCPUButtons();
+
             }
             this.SelectDevices();
             this.RunDevices();
