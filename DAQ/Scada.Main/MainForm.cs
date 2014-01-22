@@ -429,7 +429,7 @@ namespace Scada.Main
             this.OpenProcessByName("Scada.MainSettings.exe");
         }
 
-        private void startToolStripMenuItem_Click(object sender, EventArgs e)
+        private void startToolBarButton_Click(object sender, EventArgs e)
         {
             this.StartDevices(false);
         }
@@ -499,37 +499,13 @@ namespace Scada.Main
             this.OpenProcessByName("Scada.Logger.Server.exe", true);
         }
 
-        /* Start process No UAC Supported
-        private void OpenProcessByName(string name)
-        {
-            string fileName = name;
-            try
-            {
-                using (Process process = new Process())
-                {
-                    process.StartInfo.CreateNoWindow = false;    //设定不显示窗口
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.FileName = fileName; //设定程序名  
-                    process.StartInfo.RedirectStandardInput = true;   //重定向标准输入
-                    process.StartInfo.RedirectStandardOutput = true;  //重定向标准输出
-                    process.StartInfo.RedirectStandardError = true;//重定向错误输出
-                    process.Start();
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
-            }
-        }
-        */
-
         private void OpenProcessByName(string name, bool uac = false)
         {
             string fileName = name;
             try
             {
                 ProcessStartInfo processInfo = new ProcessStartInfo();
-                if (uac)
+                if (uac && Environment.OSVersion.Version.Major >= 6)
                 {
                     processInfo.Verb = "runas";
                 }
@@ -541,12 +517,5 @@ namespace Scada.Main
                 MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
             }
         }
-
-        //internal bool IsRunAsAdmin()
-        //{
-        //    WindowsIdentity id = WindowsIdentity.GetCurrent();
-        //    WindowsPrincipal principal = new WindowsPrincipal(id);
-        //    return principal.IsInRole(WindowsBuiltInRole.Administrator);
-        //}
     }
 }

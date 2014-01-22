@@ -148,9 +148,9 @@ namespace Scada.Data.Client.Tcp
             this.timer.Tick += this.SendDataTick;
             this.timer.Start();
 
-            // KeepAlive timer
+            // KeepAlive timer per 30 sec
             this.keepAliveTimer = new Timer();
-            this.keepAliveTimer.Interval = 1000 * 5;
+            this.keepAliveTimer.Interval = 1000 * 30;
             this.keepAliveTimer.Tick += this.KeepAliveTick;
             this.keepAliveTimer.Start();
         }
