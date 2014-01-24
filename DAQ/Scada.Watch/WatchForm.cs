@@ -16,7 +16,13 @@ namespace Scada.Watch
 {
 	public partial class WatchForm : Form
 	{
-        private Timer checkMainTimer = null;
+        private Timer checkTimer = null;
+
+        private int mainTimeCounter = 0;
+
+        private int dataClientTimeCounter = 0;
+
+        private FileSystemWatcher fsw = null;
 
 		public WatchForm()
 		{
@@ -26,40 +32,100 @@ namespace Scada.Watch
 
 		private void WatchForm_Load(object sender, EventArgs e)
 		{
-            this.checkMainTimer = new Timer();
-            this.checkMainTimer.Interval = 60 * 1000;    // Defines.KeepAliveInterval;
-            this.checkMainTimer.Tick += timerTick;
-            this.checkMainTimer.Start();
+            // Watch Main 
+            this.checkTimer = new Timer();
+            this.checkTimer.Interval = 30 * 1000;    // Defines.KeepAliveInterval;
+            this.checkTimer.Tick += Per30secTimerTick;
+            this.checkTimer.Start();
+
 		}
 
-		void timerTick(object sender, EventArgs e)
+        private void SetAutoUpdateSearchDir(string dir)
+        {
+            if (this.fsw != null)
+            {
+                this.fsw.Dispose();
+            }
+
+            if (Directory.Exists(dir))
+            {
+                this.fsw = new FileSystemWatcher(dir, "*.zip");
+                this.fsw.Created += (object sender, FileSystemEventArgs e) =>
+                {
+                    this.UpdateBin(e.FullPath);
+                };
+                this.fsw.EnableRaisingEvents = true;
+            }
+        }
+
+        private void UpdateBin(string filePath)
+        {
+            this.OpenProcessByName("Scada.Update", string.Format("\"{0}\"", filePath));
+        }
+
+
+        private void Per30secTimerTick(object sender, EventArgs e)
 		{
-            const string ScadaMain = @"Scada.Main.exe";
+            if (mainTimeCounter % 3 == 0)
+            {
+                this.WatchMainExe();
+            }
+
+            if (dataClientTimeCounter % 3 == 0)
+            {
+                this.WatchDataClientExe();
+            }
+
+
+            this.mainTimeCounter++;
+		}
+
+        private void WatchMainExe()
+        {
+            const string ScadaMain = @"Scada.Main";
             Process[] ps = Process.GetProcessesByName(ScadaMain);
             if (ps == null || ps.Length == 0)
             {
-                this.OpenProcessByName(ScadaMain, false);
+                // this.OpenProcessByName(ScadaMain, "/R");
             }
-		}
+        }
 
-        private void OpenProcessByName(string name, bool uac = false)
+        private void WatchDataClientExe()
         {
-            string fileName = name;
+            const string ScadaDataClient = @"??";
+            Process[] ps = Process.GetProcessesByName(ScadaDataClient);
+            if (ps == null || ps.Length == 0)
+            {
+                this.OpenProcessByName(ScadaDataClient, "/R");
+            }
+
+        }
+
+
+        private void OpenProcessByName(string name, string arg)
+        {
+            string fileName = name + ".exe";
             try
             {
                 ProcessStartInfo processInfo = new ProcessStartInfo();
-                if (uac)
-                {
-                    processInfo.Verb = "runas";
-                }
                 processInfo.FileName = fileName;
-                processInfo.Arguments = "/R";
+                processInfo.Arguments = arg;
                 Process.Start(processInfo);
             }
             catch (Exception e)
             {
-                MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
             }
+        }
+
+        private void buttonWatch_Click(object sender, EventArgs e)
+        {
+
+            this.SetAutoUpdateSearchDir(this.textPath.Text);
+        }
+
+        private void textPath_TextChanged(object sender, EventArgs e)
+        {
+
         }
 
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,7 +10,7 @@ namespace Scada.Update
 {
     class Program
     {
-        static string GetCurrentPath()
+        public static string GetCurrentPath()
         {
             string p = Assembly.GetExecutingAssembly().Location;
             return Path.GetDirectoryName(p);
@@ -17,17 +18,23 @@ namespace Scada.Update
 
         static void Main(string[] args)
         {
+            // Debug.Assert(false);
+            if (args.Length == 0)
+                return;
+
             Updater u = new Updater();
             u.ForceReplaceConfigFiles = false;
             u.NeedUpdateConfigFiles = false;
-
-            string binZipPath = GetCurrentPath() + "\\update\\bin.zip";
+            
+            // TODO:
             KillProcesses();
-            bool r = u.UnzipProgramFiles(binZipPath, GetCurrentPath());
+            string binZipPath = args[0];
+            bool r = u.UnzipProgramFiles(binZipPath, Path.GetDirectoryName(GetCurrentPath()));
             if (!r)
             {
                 Console.WriteLine("Failed to update!");
             }
+            // TODO:
             RestoreProcesses();
         }
 

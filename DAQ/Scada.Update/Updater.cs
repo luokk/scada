@@ -54,6 +54,10 @@ namespace Scada.Update
             Zip zip = new Zip();
             string errorMessage;
             bool ret = zip.UnZipFile(programZipFile, destPath, UnzipFileHandler, out errorMessage);
+
+            string logFileName = string.Format("logs\\{0}.ulog", DateTime.Now.ToString("yyyy_MM_dd_HH_mm"));
+            string logFile = Path.Combine(Program.GetCurrentPath(), logFileName);
+            UpdateLog.Instance().Dump(logFile);
             return ret;
         }
 
@@ -64,7 +68,8 @@ namespace Scada.Update
                 fileName.EndsWith("local.ip") ||
                 fileName.EndsWith("password") ||
                 fileName.EndsWith(".bat") ||
-                fileName.EndsWith(".settings"))
+                fileName.EndsWith(".settings") ||
+                fileName.EndsWith(".sql"))
             {
                 if (this.NeedUpdateConfigFiles)
                 {
@@ -77,9 +82,12 @@ namespace Scada.Update
                 return UnzipCode.Ignore;
             }
 
-            if (fileName.EndsWith("scada.update.exe") || fileName.EndsWith("icsharpcode.sharpziplib.dll"))
+            if (fileName.EndsWith("scada.update.exe") || 
+                fileName.EndsWith("scada.watch.exe") ||
+                fileName.EndsWith("icsharpcode.sharpziplib.dll"))
             {
                 Console.WriteLine("File <" + fileName + "> In use:!");
+                UpdateLog.Instance().AddName(fileName + " <iu>");
                 return UnzipCode.Ignore;
             }
 

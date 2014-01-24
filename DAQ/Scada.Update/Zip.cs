@@ -51,7 +51,11 @@ namespace Scada.Update
                         UnzipCode code = unzipHandler(relFileName, null);
                         if (directoryName.Length > 0)
                         {
-                            Directory.CreateDirectory(unZipDir + directoryName);
+                            string pathName = unZipDir + directoryName;
+                            if (!Directory.Exists(pathName))
+                            {
+                                Directory.CreateDirectory(pathName);
+                            }
                         }
 
                         if (!directoryName.EndsWith("\\"))
@@ -82,7 +86,8 @@ namespace Scada.Update
                                 continue;
                             }
 
-                            using (FileStream streamWriter = File.Create(unZipDir + theEntry.Name))
+                            string destFileName = unZipDir + theEntry.Name;
+                            using (FileStream streamWriter = File.Create(destFileName))
                             {
                                 ms.Seek(0, SeekOrigin.Begin);
                                 while (true)
@@ -97,6 +102,8 @@ namespace Scada.Update
                                         break;
                                     }
                                 }
+
+                                UpdateLog.Instance().AddName(theEntry.Name);
                             }
                         }
                     }
