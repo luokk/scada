@@ -43,6 +43,12 @@ namespace Scada.Update
             set;
         }
 
+        public bool UpdateByWatch
+        {
+            get;
+            set;
+        }
+
         public bool UnzipProgramFiles(string programZipFile, string destPath)
         {
             if (!File.Exists(programZipFile))
@@ -54,6 +60,12 @@ namespace Scada.Update
             Zip zip = new Zip();
             string errorMessage;
             bool ret = zip.UnZipFile(programZipFile, destPath, UnzipFileHandler, out errorMessage);
+
+            string logPath = Program.GetCurrentPath() + "\\logs";
+            if (!Directory.Exists(logPath))
+            {
+                Directory.CreateDirectory(logPath);
+            }
 
             string logFileName = string.Format("logs\\{0}.ulog", DateTime.Now.ToString("yyyy_MM_dd_HH_mm"));
             string logFile = Path.Combine(Program.GetCurrentPath(), logFileName);
@@ -83,7 +95,7 @@ namespace Scada.Update
             }
 
             if (fileName.EndsWith("scada.update.exe") || 
-                fileName.EndsWith("scada.watch.exe") ||
+                (fileName.EndsWith("scada.watch.exe") && this.UpdateByWatch) ||
                 fileName.EndsWith("icsharpcode.sharpziplib.dll"))
             {
                 Console.WriteLine("File <" + fileName + "> In use:!");

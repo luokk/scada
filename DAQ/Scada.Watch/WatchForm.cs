@@ -1,4 +1,5 @@
 ﻿using Scada.Common;
+using Scada.Watch.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,17 +28,39 @@ namespace Scada.Watch
 		public WatchForm()
 		{
 			InitializeComponent();
-            
         }
+
+        private void InitSysNotifyIcon()
+        {
+            // Notify Icon
+            watchNotifyIcon.Text = "系统设备管理器";
+            watchNotifyIcon.Icon = new Icon(Resources.Monitor, new Size(16, 16));
+            watchNotifyIcon.Visible = true;
+
+            watchNotifyIcon.Click += new EventHandler(OnSysNotifyIconContextMenu);
+        }
+
+        private void OnSysNotifyIconContextMenu(object sender, EventArgs e)
+        {
+            this.ShowInTaskbar = true;
+            this.Visible = true;
+        }
+
 
 		private void WatchForm_Load(object sender, EventArgs e)
 		{
+            this.InitSysNotifyIcon();
+
+            this.ShowInTaskbar = false;
+            this.Visible = false;
             // Watch Main 
             this.checkTimer = new Timer();
             this.checkTimer.Interval = 30 * 1000;    // Defines.KeepAliveInterval;
             this.checkTimer.Tick += Per30secTimerTick;
             this.checkTimer.Start();
 
+            // Initial Path
+            this.textPath.Text = @"C:\Install";
 		}
 
         private void SetAutoUpdateSearchDir(string dir)
@@ -73,7 +96,7 @@ namespace Scada.Watch
 
             if (dataClientTimeCounter % 3 == 0)
             {
-                this.WatchDataClientExe();
+                // this.WatchDataClientExe();
             }
 
 
@@ -92,6 +115,7 @@ namespace Scada.Watch
 
         private void WatchDataClientExe()
         {
+            // TODO:
             const string ScadaDataClient = @"??";
             Process[] ps = Process.GetProcessesByName(ScadaDataClient);
             if (ps == null || ps.Length == 0)
@@ -119,13 +143,49 @@ namespace Scada.Watch
 
         private void buttonWatch_Click(object sender, EventArgs e)
         {
-
-            this.SetAutoUpdateSearchDir(this.textPath.Text);
+            string dir = this.textPath.Text;
+            this.textPath.Enabled = false;
+            this.SetAutoUpdateSearchDir(dir);
         }
 
-        private void textPath_TextChanged(object sender, EventArgs e)
+        private void buttonPathClick(object sender, EventArgs e)
+        {
+            FolderBrowserDialog fbd = new FolderBrowserDialog();
+            fbd.SelectedPath = @"C:\";
+            DialogResult dr = fbd.ShowDialog();
+            if (dr == DialogResult.OK)
+            {
+                this.textPath.Enabled = true;
+                this.textPath.Text = fbd.SelectedPath;
+            }
+        }
+
+        private void watchNotifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
 
+        }
+
+        private void WatchForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("您确定要退出[进程监控程序]吗？", "Scada.Watch", MessageBoxButtons.OKCancel);
+            if (dr == DialogResult.OK)
+            {
+                // TODO:
+            }
+            else
+            {
+                e.Cancel = true;
+            }
+
+
+        }
+
+        private void WatchForm_SizeChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Visible = false;
+            }
         }
 
 

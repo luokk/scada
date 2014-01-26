@@ -22,13 +22,33 @@ namespace Scada.Update
             if (args.Length == 0)
                 return;
 
+            string binZipPath = args[0];
+
+
+
             Updater u = new Updater();
             u.ForceReplaceConfigFiles = false;
             u.NeedUpdateConfigFiles = false;
+
+            if (args.Length > 1)
+            {
+                string opt = args[1];
+                if (opt.StartsWith("--"))
+                {
+                    if (opt.IndexOf('w') > 0)
+                    {
+                        u.UpdateByWatch = true;
+                    }
+                }
+                
+            }
+            
             
             // TODO:
             KillProcesses();
-            string binZipPath = args[0];
+            
+
+
             bool r = u.UnzipProgramFiles(binZipPath, Path.GetDirectoryName(GetCurrentPath()));
             if (!r)
             {
