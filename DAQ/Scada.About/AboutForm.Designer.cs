@@ -31,15 +31,16 @@
             this.featureTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // featureTextBox
             // 
-            this.featureTextBox.Location = new System.Drawing.Point(22, 103);
+            this.featureTextBox.Location = new System.Drawing.Point(25, 103);
             this.featureTextBox.Multiline = true;
             this.featureTextBox.Name = "featureTextBox";
             this.featureTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.featureTextBox.Size = new System.Drawing.Size(414, 165);
+            this.featureTextBox.Size = new System.Drawing.Size(419, 165);
             this.featureTextBox.TabIndex = 0;
             // 
             // label1
@@ -54,17 +55,27 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(22, 48);
+            this.label2.Location = new System.Drawing.Point(22, 39);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(70, 13);
+            this.label2.Size = new System.Drawing.Size(52, 13);
             this.label2.TabIndex = 2;
-            this.label2.Text = "版本: 1.0.0.2";
+            this.label2.Text = "版本: 0.2";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(22, 62);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(67, 13);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Build: 0127A";
             // 
             // AboutForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(558, 332);
+            this.ClientSize = new System.Drawing.Size(466, 297);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.featureTextBox);
@@ -86,6 +97,7 @@
         private System.Windows.Forms.TextBox featureTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
     }
 }
 

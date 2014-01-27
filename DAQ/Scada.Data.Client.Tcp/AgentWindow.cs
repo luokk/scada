@@ -16,7 +16,10 @@ namespace Scada.Data.Client.Tcp
         private Timer timer;
 
         private Timer keepAliveTimer;
-        //private DataHandler handler;
+
+        public bool InQuitProcess { get; set; }
+
+        private List<string> connectionHistory = new List<string>();
 
         private List<Agent> agents = new List<Agent>();
 
@@ -26,8 +29,6 @@ namespace Scada.Data.Client.Tcp
 
         private Dictionary<string, DateTime> lastDeviceSendData = new Dictionary<string, DateTime>();
 
-        private RealTimeForm detailForm;
-
         public bool StartState
         {
             get;
@@ -35,6 +36,7 @@ namespace Scada.Data.Client.Tcp
         }
 
         private bool started = false;
+
 
         public AgentWindow()
         {
@@ -44,20 +46,17 @@ namespace Scada.Data.Client.Tcp
 
         private void AgentWindow_Load(object sender, EventArgs e)
         {
-            this.Restart = false;
+            this.InQuitProcess = false;
             SystemEvents.SessionEnding += new SessionEndingEventHandler(SystemEventsSessionEnding);
 
             InitSysNotifyIcon();
             this.ShowInTaskbar = false;
             this.statusStrip1.Items.Add("状态: 等待");
             this.statusStrip1.Items.Add(new ToolStripSeparator());
-            this.statusStrip1.Items.Add("IP ADDR:PORT");
-            ToolStripLabel label = new ToolStripLabel();
-            label.Alignment = ToolStripItemAlignment.Right;
-            label.Text = "";
-            this.statusStrip1.Items.Add(label);
+            this.statusStrip1.Items.Add("MS: " + Settings.Instance.Mn);
+            this.statusStrip1.Items.Add(new ToolStripSeparator());
+            this.statusStrip1.Items.Add("数据中心IP:");
 
-            // Start if have the --start args.
             if (this.StartState)
             {
                 Start();
@@ -70,7 +69,7 @@ namespace Scada.Data.Client.Tcp
             sysNotifyIcon.Text = "系统设备管理器";
             sysNotifyIcon.Icon = new Icon(Resources.AppIcon, new Size(16, 16));
             sysNotifyIcon.Visible = true;
-            this.WindowState = FormWindowState.Minimized;
+            // this.WindowState = FormWindowState.Minimized;
             this.Hide();
             sysNotifyIcon.Click += new EventHandler(OnSysNotifyIconContextMenu);
         }
@@ -79,7 +78,14 @@ namespace Scada.Data.Client.Tcp
         {
             this.Show();
             this.WindowState = FormWindowState.Normal;
-            this.BringToFront();
+            this.MakeWindowShownFront();
+        }
+
+        private void MakeWindowShownFront()
+        {
+            this.TopMost = true;
+            this.Activate();
+            this.TopMost = false;
         }
 
         private void Start()
@@ -112,10 +118,17 @@ namespace Scada.Data.Client.Tcp
                     Agent agent = CreateAgent(dc.Ip, dc.Port, false);
                     agent.AddWirelessInfo(dc.WirelessIp, dc.WirelessPort);
                     this.agents.Add(agent);
+
+                    this.SetConnectionStatus(true);
+                    this.statusStrip1.Items[4].Text = string.Format("数据中心IP:{0}", agent.ToString(true));
                 }
             }
+        }
 
-            this.statusStrip1.Items[0].Text = string.Format("状态: 开始 ({0})", DateTime.Now);
+        private void SetConnectionStatus(bool connected)
+        {
+            string status = connected ? "已连接" : "已断开";
+            this.statusStrip1.Items[0].Text = string.Format("状态: {0} [{1}]", status, DateTime.Now);
         }
 
         // 先连接有线的线路
@@ -124,13 +137,13 @@ namespace Scada.Data.Client.Tcp
             Agent agent = new Agent(serverAddress, serverPort);
             agent.Type = Type.Province;
             agent.Wireless = wireless;
-            agent.Connect();
+            agent.Connect(); // make connection
             agent.OnReceiveMessage += this.OnReceiveMessage;
             agent.OnNotifyEvent += this.OnNotifyEvent;
             return agent;
         }
 
-        // 国家中心
+        // 国家中心 (Notice: 开始并不Connect, 区别于省)
         private Agent CreateCountryCenterAgent(string serverAddress, int serverPort)
         {
             Agent agent = new Agent(serverAddress, serverPort);
@@ -261,15 +274,24 @@ namespace Scada.Data.Client.Tcp
                         p = builder.GetDataPacket(deviceKey, d, true);
                     }
 
-                    // Sent by each agent.s
+                    // Sent by each agent
+                    bool sent = false;
                     foreach (var agent in this.agents)
                     {
-                        agent.SendDataPacket(p, time);
+                        bool result = agent.SendDataPacket(p, time);
+                        if (result)
+                        {
+                            string msg = string.Format("[{0}]: @{1} {2}", DateTime.Now, agent.ToString(true), p.ToString());
+                            Log.GetLogFile(deviceKey).Log(msg);
+                        }
+                        sent |= result;
                     }
 
-                    string msg = string.Format("{0}: {1}", DateTime.Now, p.ToString());
-                    Log.GetLogFile(deviceKey).Log(msg);
-                    this.SendDetails(deviceKey, msg);
+                    if (sent)
+                    {
+                        string msg = string.Format("{0} Agent(s): {1}", this.agents.Count, p.ToString());
+                        this.SendDetails(deviceKey, msg);
+                    }
                 }
                 else
                 {
@@ -280,10 +302,6 @@ namespace Scada.Data.Client.Tcp
             }
             
         }
-
-
-
-        private DateTime lastSendTime;
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
         {
@@ -372,18 +390,6 @@ namespace Scada.Data.Client.Tcp
         }
 
 
-        // 开始
-        private void toolStripButton1_Click(object sender, EventArgs e)
-        {
-            this.Start();
-        }
-
-        // 暂停
-        private void toolStripButton2_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void StartConnectCountryCenter()
         {
             if (this.countryCenterAgent != null)
@@ -412,22 +418,13 @@ namespace Scada.Data.Client.Tcp
             }
         }
 
-        private void detailsButton_Click(object sender, EventArgs e)
-        {
-            this.detailForm = new RealTimeForm(() => 
-            {
-                this.detailForm = null;
-            });
-            this.detailForm.Show();
-        }
-
         private void SystemEventsSessionEnding(object sender, SessionEndingEventArgs e)
         {
             switch (e.Reason)
             {
                 case SessionEndReasons.Logoff:
                 case SessionEndReasons.SystemShutdown:
-                    this.Restart = true;
+                    this.InQuitProcess = true;
                     break;
                 default:
                     break;
@@ -436,39 +433,102 @@ namespace Scada.Data.Client.Tcp
 
         private void AgentWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (this.Restart)
+            if (this.InQuitProcess)
             {
                 return;
             }
 
-            DialogResult dr = MessageBox.Show("退出数据上传程序?", "数据上传", MessageBoxButtons.YesNo);
-            if (DialogResult.No == dr)
-            {
-                e.Cancel = true;
-            }
+            e.Cancel = true;
+            this.WindowState = FormWindowState.Minimized;
+            this.Hide();
         }
 
         private void SendDetails(string deviceKey, string msg)
         {
-            if (this.detailForm != null)
+            ListBox listBox = this.GetListBox(deviceKey);
+            if (listBox != null)
             {
-                this.detailForm.OnSendDetails(deviceKey, msg);
+                listBox.Items.Add(msg);
             }
         }
 
-        private void AgentWindow_MinimumSizeChanged(object sender, EventArgs e)
+        
+
+        private void tabDeviceDataSelectionChanged(object sender, EventArgs e)
         {
-            // Not invoked.
+
         }
 
-        private void AgentWindow_SizeChanged(object sender, EventArgs e)
+
+        private void mainTabCtrl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (this.WindowState == FormWindowState.Minimized)
+            int index = this.mainTabCtrl.SelectedIndex;
+            if (index == 2)
             {
-                this.Hide();
+                if (!this.dataDeviceInitialized)
+                {
+                    this.dataDeviceInitialized = true;
+                    this.InitDataDeviceTabCtrl();
+                }
             }
         }
 
-        public bool Restart { get; set; }
+        private void InitDataDeviceTabCtrl()
+        {
+            this.tabPage1.Controls.Add(this.CreateListBox("Scada.HPIC"));
+            this.tabPage2.Controls.Add(this.CreateListBox("Scada.NaIDevice"));
+            this.tabPage3.Controls.Add(this.CreateListBox("Scada.Weather"));
+            this.tabPage4.Controls.Add(this.CreateListBox("Scada.HVSampler"));
+            this.tabPage5.Controls.Add(this.CreateListBox("Scada.ISampler"));
+            this.tabPage6.Controls.Add(this.CreateListBox("Scada.Shelter"));
+            this.tabPage7.Controls.Add(this.CreateListBox("Scada.DWD"));
+        }
+
+        List<ListBox> listBoxes = new List<ListBox>();
+
+        private ListBox CreateListBox(string deviceKey)
+        {
+            deviceKey = deviceKey.ToLower();
+            ListBox lb = new ListBox();
+            lb.Tag = deviceKey;
+            lb.MultiColumn = false;
+            lb.Dock = DockStyle.Fill;
+
+            listBoxes.Add(lb);
+            return lb;
+        }
+
+        private ListBox GetListBox(string deviceKey)
+        {
+            foreach (ListBox lb in listBoxes)
+            {
+                if (string.Equals((string)lb.Tag, deviceKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    return lb;
+                }
+            }
+            return null;
+        }
+
+        public bool dataDeviceInitialized { get; set; }
+
+        private void toolStripClear_Click(object sender, EventArgs e)
+        {
+            foreach (var listBox in listBoxes)
+            {
+                listBox.Items.Clear();
+            }
+        }
+
+        private void StartToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Start();
+        }
+
+        private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.InQuitProcess = true;
+            Application.Exit();
+        }
     }
 }

@@ -378,13 +378,14 @@ namespace Scada.Data.Client.Tcp
         /// Final entry of send bytes.
         /// </summary>
         /// <param name="message"></param>
-        private void Send(byte[] message)
+        private bool Send(byte[] message)
         {
             try
             {
                 if (this.stream != null)
                 {
                     this.stream.Write(message, 0, message.Length);
+                    return true;
                 }
             }
             catch(IOException e)
@@ -398,6 +399,7 @@ namespace Scada.Data.Client.Tcp
                     this.ConnectToWireless();
                 }
             }
+            return false;
         }
 
         // A. 每30秒试图重连一次
@@ -436,27 +438,28 @@ namespace Scada.Data.Client.Tcp
             timer.Start();
         }
 
-        internal void SendPacket(DataPacket p, DateTime time)
+        internal bool SendPacket(DataPacket p, DateTime time)
         {
             string s = p.ToString();
-            this.Send(Encoding.ASCII.GetBytes(s));
+            return this.Send(Encoding.ASCII.GetBytes(s));
         }
 
-        internal void SendPacket(DataPacket p)
+        internal bool SendPacket(DataPacket p)
         {
-            this.SendPacket(p, default(DateTime));
+            return this.SendPacket(p, default(DateTime));
         }
 
-        internal void SendDataPacket(DataPacket p, DateTime time)
+        internal bool SendDataPacket(DataPacket p, DateTime time)
         {
             if (p == null)
-                return;
+                return false;
             // Only start or history.
             if (this.SendDataStarted || this.OnHistoryData)
             {
                 string s = p.ToString();
-                this.Send(Encoding.ASCII.GetBytes(s));
+                return this.Send(Encoding.ASCII.GetBytes(s));
             }
+            return false;
         }
 
 
