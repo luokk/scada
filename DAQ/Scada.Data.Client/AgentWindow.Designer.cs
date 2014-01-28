@@ -62,7 +62,7 @@
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.splitter1);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.panel1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(561, 410);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(687, 410);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
@@ -70,7 +70,7 @@
             // toolStripContainer1.RightToolStripPanel
             // 
             this.toolStripContainer1.RightToolStripPanel.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.toolStripContainer1.Size = new System.Drawing.Size(561, 457);
+            this.toolStripContainer1.Size = new System.Drawing.Size(687, 457);
             this.toolStripContainer1.TabIndex = 0;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -83,7 +83,7 @@
             this.statusStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.statusStrip1.Location = new System.Drawing.Point(0, 0);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(561, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(687, 22);
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.TabIndex = 0;
             this.statusStrip1.Text = "statusStrip1";
@@ -103,7 +103,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(561, 410);
+            this.panel1.Size = new System.Drawing.Size(687, 410);
             this.panel1.TabIndex = 1;
             // 
             // checkBoxUpdateNaI
@@ -126,7 +126,7 @@
             this.listBox1.Margin = new System.Windows.Forms.Padding(3, 3, 3, 30);
             this.listBox1.MultiColumn = true;
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(561, 368);
+            this.listBox1.Size = new System.Drawing.Size(687, 368);
             this.listBox1.TabIndex = 1;
             // 
             // toolStrip1
@@ -191,7 +191,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(561, 457);
+            this.ClientSize = new System.Drawing.Size(687, 457);
             this.Controls.Add(this.toolStripContainer1);
             this.MaximizeBox = false;
             this.Name = "AgentWindow";

@@ -497,6 +497,7 @@ namespace Scada.Main
         private void loggerServer_Click(object sender, EventArgs e)
         {
             this.OpenProcessByName("Scada.Logger.Server.exe", true);
+            RecordManager.ResetDetectTime();
         }
 
         private void OpenProcessByName(string name, bool uac = false)

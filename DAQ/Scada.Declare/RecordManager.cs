@@ -129,12 +129,43 @@ namespace Scada.Declare
 			flushCtrlCount = (flushCtrlCount + 1) % 5;
 
             // To Log Console
-            string deviceKey = device.Id.ToLower();
-            if (LoggerClient.Contains(deviceKey))
+            if (ExistLoggerConsoleProc())
             {
-                logger.Send(deviceKey, line);
+                string deviceKey = device.Id.ToLower();
+                if (LoggerClient.Contains(deviceKey))
+                {
+                    logger.Send(deviceKey, line);
+                }
             }
 		}
+
+        //////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Optimze: Only has logger.server process, the module would try HTTP connection.
+        /// Detect process every 15 sec, not every time, 
+        /// </summary>
+        private static long lastDetectTimeTicks = 0;
+
+        private static bool lastDetectResult = false;
+
+        public static void ResetDetectTime()
+        {
+            lastDetectTimeTicks = 0;
+        }
+
+        private static bool ExistLoggerConsoleProc()
+        {
+            long nowTicks = DateTime.Now.Ticks;
+            if (nowTicks - lastDetectTimeTicks > (15 * 10000000))
+            {
+                lastDetectTimeTicks = nowTicks;
+                Process[] ps = Process.GetProcessesByName(@"Scada.Logger.Server");
+                lastDetectResult = (ps != null && ps.Length > 0);
+                return lastDetectResult;
+            }
+            return lastDetectResult;
+        }
+        //////////////////////////////////////////////////////////////////////////////
 
         private static FileStream GetLogFileStream(Device device, DateTime now)
         {

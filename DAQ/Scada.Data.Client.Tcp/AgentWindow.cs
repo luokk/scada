@@ -530,5 +530,10 @@ namespace Scada.Data.Client.Tcp
             this.InQuitProcess = true;
             Application.Exit();
         }
+
+        private void tabPage3_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
