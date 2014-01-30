@@ -46,7 +46,6 @@
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.tabPage6 = new System.Windows.Forms.TabPage();
             this.tabPage7 = new System.Windows.Forms.TabPage();
-            this.checkBoxUpdateNaI = new System.Windows.Forms.CheckBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.OpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -116,7 +115,6 @@
             // panel1
             // 
             this.panel1.Controls.Add(this.mainTabCtrl);
-            this.panel1.Controls.Add(this.checkBoxUpdateNaI);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
@@ -223,7 +221,6 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "气象站";
             this.tabPage3.UseVisualStyleBackColor = true;
-            this.tabPage3.Click += new System.EventHandler(this.tabPage3_Click);
             // 
             // tabPage4
             // 
@@ -264,18 +261,6 @@
             this.tabPage7.TabIndex = 6;
             this.tabPage7.Text = "干湿沉降采集器";
             this.tabPage7.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxUpdateNaI
-            // 
-            this.checkBoxUpdateNaI.AutoSize = true;
-            this.checkBoxUpdateNaI.Checked = true;
-            this.checkBoxUpdateNaI.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxUpdateNaI.Location = new System.Drawing.Point(12, 379);
-            this.checkBoxUpdateNaI.Name = "checkBoxUpdateNaI";
-            this.checkBoxUpdateNaI.Size = new System.Drawing.Size(91, 17);
-            this.checkBoxUpdateNaI.TabIndex = 3;
-            this.checkBoxUpdateNaI.Text = "上传NaI数据";
-            this.checkBoxUpdateNaI.UseVisualStyleBackColor = true;
             // 
             // menuStrip1
             // 
@@ -336,7 +321,7 @@
             // ClsToolStripMenuItem1
             // 
             this.ClsToolStripMenuItem1.Name = "ClsToolStripMenuItem1";
-            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
+            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
             this.ClsToolStripMenuItem1.Text = "清屏";
             // 
             // sysNotifyIcon
@@ -366,7 +351,6 @@
             this.toolStripContainer1.ResumeLayout(false);
             this.toolStripContainer1.PerformLayout();
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.mainTabCtrl.ResumeLayout(false);
             this.connPage.ResumeLayout(false);
             this.dataPage.ResumeLayout(false);
@@ -384,7 +368,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.NotifyIcon sysNotifyIcon;
-        private System.Windows.Forms.CheckBox checkBoxUpdateNaI;
         private System.Windows.Forms.TabControl mainTabCtrl;
         private System.Windows.Forms.TabPage connPage;
         private System.Windows.Forms.TabPage historyPage;

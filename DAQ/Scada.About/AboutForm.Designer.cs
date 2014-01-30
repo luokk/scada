@@ -32,6 +32,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.sureButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // featureTextBox
@@ -39,8 +40,9 @@
             this.featureTextBox.Location = new System.Drawing.Point(25, 103);
             this.featureTextBox.Multiline = true;
             this.featureTextBox.Name = "featureTextBox";
+            this.featureTextBox.ReadOnly = true;
             this.featureTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.featureTextBox.Size = new System.Drawing.Size(419, 165);
+            this.featureTextBox.Size = new System.Drawing.Size(419, 237);
             this.featureTextBox.TabIndex = 0;
             // 
             // label1
@@ -70,11 +72,22 @@
             this.label3.TabIndex = 2;
             this.label3.Text = "Build: 0127A";
             // 
+            // sureButton
+            // 
+            this.sureButton.Location = new System.Drawing.Point(368, 357);
+            this.sureButton.Name = "sureButton";
+            this.sureButton.Size = new System.Drawing.Size(75, 30);
+            this.sureButton.TabIndex = 0;
+            this.sureButton.Text = "确定";
+            this.sureButton.UseVisualStyleBackColor = true;
+            this.sureButton.Click += new System.EventHandler(this.sureButton_Click);
+            // 
             // AboutForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(466, 297);
+            this.ClientSize = new System.Drawing.Size(466, 401);
+            this.Controls.Add(this.sureButton);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -98,6 +111,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button sureButton;
     }
 }
 

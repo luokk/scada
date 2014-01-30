@@ -29,6 +29,7 @@ namespace Scada.About
             var features = GetFeatures(DateTime.Now);
 
             this.featureTextBox.Text = GetFeatureText(features);
+            this.sureButton.Focus();
         }
 
         private string GetFeatureText(List<Feature> features)
@@ -90,7 +91,7 @@ namespace Scada.About
                     }
                     return ret;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
             }
@@ -101,6 +102,11 @@ namespace Scada.About
         {
             var y = date.Year - 2000;
             return string.Format("F{0}_{1:D2}_{2:d2}_{3:D2}", y, date.Month, date.Day, index);
+        }
+
+        private void sureButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
     }

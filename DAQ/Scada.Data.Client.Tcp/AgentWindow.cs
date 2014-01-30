@@ -66,10 +66,9 @@ namespace Scada.Data.Client.Tcp
         private void InitSysNotifyIcon()
         {
             // Notify Icon
-            sysNotifyIcon.Text = "系统设备管理器";
+            sysNotifyIcon.Text = "数据上传";
             sysNotifyIcon.Icon = new Icon(Resources.AppIcon, new Size(16, 16));
             sysNotifyIcon.Visible = true;
-            // this.WindowState = FormWindowState.Minimized;
             this.Hide();
             sysNotifyIcon.Click += new EventHandler(OnSysNotifyIconContextMenu);
         }
@@ -219,11 +218,8 @@ namespace Scada.Data.Client.Tcp
 
             if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
             {
-                if (!this.checkBoxUpdateNaI.Checked)
-                {
-                    return;
-                }
-                // 分包
+
+                // NaI device packet;
                 string content = DBDataSource.Instance.GetNaIDeviceData(time);
                 if (!string.IsNullOrEmpty(content))
                 {
@@ -248,7 +244,10 @@ namespace Scada.Data.Client.Tcp
                         }
                         logger.Log("---- ---- ---- ---- ---- ---- ---- ----");
 
-                        this.SendDetails(deviceKey, pks[0].ToString());
+                        if (this.IsCurrentPageForDeviceData())
+                        {
+                            this.SendDetails(deviceKey, pks[0].ToString());
+                        }
                     }
                 }
                 else
@@ -287,7 +286,7 @@ namespace Scada.Data.Client.Tcp
                         sent |= result;
                     }
 
-                    if (sent)
+                    if (sent && this.IsCurrentPageForDeviceData())
                     {
                         string msg = string.Format("{0} Agent(s): {1}", this.agents.Count, p.ToString());
                         this.SendDetails(deviceKey, msg);
@@ -459,6 +458,10 @@ namespace Scada.Data.Client.Tcp
 
         }
 
+        private bool IsCurrentPageForDeviceData()
+        {
+            return (this.mainTabCtrl.SelectedIndex == 2);
+        }
 
         private void mainTabCtrl_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -475,6 +478,7 @@ namespace Scada.Data.Client.Tcp
 
         private void InitDataDeviceTabCtrl()
         {
+            // NOTICE: Order!
             this.tabPage1.Controls.Add(this.CreateListBox("Scada.HPIC"));
             this.tabPage2.Controls.Add(this.CreateListBox("Scada.NaIDevice"));
             this.tabPage3.Controls.Add(this.CreateListBox("Scada.Weather"));
@@ -529,11 +533,6 @@ namespace Scada.Data.Client.Tcp
         {
             this.InQuitProcess = true;
             Application.Exit();
-        }
-
-        private void tabPage3_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }
