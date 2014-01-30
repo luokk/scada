@@ -4,6 +4,7 @@ import os
 import codecs
 import ast
 import shutil
+from datetime import *
 
 path = os.path.dirname(os.path.abspath(__file__)) + "\\Resources\\Features.XML"
 
@@ -15,6 +16,7 @@ print "Pre-build Action"
 node = dom.getElementsByTagName("features")[0]
 
 build = node.getAttribute("build")
+node.setAttribute('build-date', str(date.today()))
 node.setAttribute('build', str(ast.literal_eval(build) + 1))
 
 f = file(path, 'w')

@@ -31,7 +31,7 @@
             this.featureTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
+            this.buildLabel = new System.Windows.Forms.Label();
             this.sureButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -63,14 +63,14 @@
             this.label2.TabIndex = 2;
             this.label2.Text = "版本: 0.2";
             // 
-            // label3
+            // buildLabel
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(22, 62);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(67, 13);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "Build: 0127A";
+            this.buildLabel.AutoSize = true;
+            this.buildLabel.Location = new System.Drawing.Point(22, 62);
+            this.buildLabel.Name = "buildLabel";
+            this.buildLabel.Size = new System.Drawing.Size(67, 13);
+            this.buildLabel.TabIndex = 2;
+            this.buildLabel.Text = "Build: 0127A";
             // 
             // sureButton
             // 
@@ -88,7 +88,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(466, 401);
             this.Controls.Add(this.sureButton);
-            this.Controls.Add(this.label3);
+            this.Controls.Add(this.buildLabel);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.featureTextBox);
@@ -110,7 +110,7 @@
         private System.Windows.Forms.TextBox featureTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label buildLabel;
         private System.Windows.Forms.Button sureButton;
     }
 }

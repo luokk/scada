@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<features build="1">
+<?xml version="1.0" encoding="utf-8"?><features build="6" build-date="2014-01-30">
   <feature plan-date="2014-1-4" progress="0" released-date="2014-1-5" type="fixing">
     数据上传程序断线重连机制
   </feature>
@@ -14,5 +13,9 @@
 
   <feature plan-date="2014-1-20" progress="0" released-date="2014-1-28" type="fixing">
     数据上传功能和界面改进
+  </feature>
+
+  <feature plan-date="2014-1-30" progress="0" released-date="2014-1-30" type="feature">
+    &quot;关于(About)&quot;对话框 显示Build信息
   </feature>
 </features>

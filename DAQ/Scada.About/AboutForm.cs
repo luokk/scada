@@ -29,6 +29,9 @@ namespace Scada.About
             var features = GetFeatures(DateTime.Now);
 
             this.featureTextBox.Text = GetFeatureText(features);
+
+            this.buildLabel.Text = this.BuildText;
+
             this.sureButton.Focus();
         }
 
@@ -65,6 +68,15 @@ namespace Scada.About
                     List<Feature> ret = new List<Feature>();
                     XmlDocument doc = new XmlDocument();
                     doc.Load(stream);
+
+                    XmlNodeList features = doc.SelectNodes("//features");
+                    XmlNode featuresNode = features[0];
+                    var attributes = featuresNode.Attributes;
+                    var buildDate = attributes.GetNamedItem("build-date");
+                    var buildNum = attributes.GetNamedItem("build");
+
+                    DateTime dt = DateTime.Parse(buildDate.InnerText);
+                    this.BuildText = dt.ToString("yyMMdd")  + buildNum.InnerText;
 
                     XmlNodeList entries = doc.SelectNodes("//feature");
 
@@ -109,5 +121,7 @@ namespace Scada.About
             this.Close();
         }
 
+
+        public string BuildText { get; set; }
     }
 }
