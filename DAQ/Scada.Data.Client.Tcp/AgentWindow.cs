@@ -137,8 +137,7 @@ namespace Scada.Data.Client.Tcp
             agent.Type = Type.Province;
             agent.Wireless = wireless;
             agent.Connect(); // make connection
-            agent.OnReceiveMessage += this.OnReceiveMessage;
-            agent.OnNotifyEvent += this.OnNotifyEvent;
+            agent.NotifyEvent += this.OnNotifyEvent;
             return agent;
         }
 
@@ -148,8 +147,7 @@ namespace Scada.Data.Client.Tcp
             Agent agent = new Agent(serverAddress, serverPort);
             agent.Type = Type.Country;
             agent.Wireless = false;
-            agent.OnReceiveMessage += this.OnReceiveMessage;
-            agent.OnNotifyEvent += this.OnNotifyEvent;
+            agent.NotifyEvent += this.OnNotifyEvent;
             return agent;
         }
 
@@ -342,44 +340,40 @@ namespace Scada.Data.Client.Tcp
             return false;
         }
 
-
-        private void OnReceiveMessage(Agent agent, string msg)
+        // Main Thread Yet;
+        private void ShowAgentMessage(Agent agent, string msg)
         {
-            if ("6031" == Value.Parse(msg, "CN"))
-            {
-                // No KeepAlive message from now on;
-                return;
-            }
-
-            this.SafeInvoke(() => 
-            {
-                string line = string.Format("{0}: {1}", agent.ToString(false), msg);
-                this.listBox1.Items.Add(line);
-            });
+            string line = string.Format("{0}: {1}", agent.ToString(false), msg);
+            this.listBox1.Items.Add(line);
         }
 
-        private void OnNotifyEvent(Agent agent, NotifyEvent ne, string msg)
+        private void OnNotifyEvent(Agent agent, NotifyEvents ne, string msg)
         {
             this.SafeInvoke(() =>
             {
-                if (NotifyEvent.Connected == ne)
+                if (NotifyEvents.Connected == ne)
                 {
-                    string logger = agent.ToString() + " 已连接";
-                    this.statusStrip1.Items[1].Text = logger;
-                    Log.GetLogFile(Program.DataClient).Log(logger);
+                    string logInfo = agent.ToString() + " 已连接";
+                    this.statusStrip1.Items[1].Text = logInfo;
+                    Log.GetLogFile(Program.DataClient).Log(logInfo);
                 }
-                else if (NotifyEvent.ConnectError == ne)
+                else if (NotifyEvents.ConnectError == ne)
                 {
                     this.statusStrip1.Items[1].Text = msg;
                     Log.GetLogFile(Program.DataClient).Log(msg);
                 }
-                else if (NotifyEvent.ConnectToCountryCenter == ne)
+                else if (NotifyEvents.Messages == ne)
+                {
+                    this.listBox1.Items.Add(msg);
+                    Log.GetLogFile(Program.DataClient).Log(msg);
+                }
+                else if (NotifyEvents.ConnectToCountryCenter == ne)
                 {
                     this.StartConnectCountryCenter();
                     this.listBox1.Items.Add(msg);
                     Log.GetLogFile(Program.DataClient).Log(msg);
                 }
-                else if (NotifyEvent.DisconnectToCountryCenter == ne)
+                else if (NotifyEvents.DisconnectToCountryCenter == ne)
                 {
                     this.StopConnectCountryCenter();
                     this.listBox1.Items.Add(msg);

@@ -33,8 +33,9 @@ namespace Scada.Data.Client.Tcp
     /// <summary>
     /// 
     /// </summary>
-    public enum NotifyEvent
+    public enum NotifyEvents
     {
+        Messages,
         Connected,
         ConnectError,
         ConnectToCountryCenter,
@@ -47,9 +48,9 @@ namespace Scada.Data.Client.Tcp
         Country = 2,
     }
 
-    public delegate void OnReceiveMessage(Agent agent, string msg);
+    // public delegate void OnReceiveMessage(Agent agent, string msg);
 
-    public delegate void OnNotifyEvent(Agent agent, NotifyEvent ne, string msg);
+    public delegate void NotifyEventHandler(Agent agent, NotifyEvents ne, string msg);
 
     /// <summary>
     /// 
@@ -140,13 +141,7 @@ namespace Scada.Data.Client.Tcp
             set;
         }
 
-        public OnReceiveMessage OnReceiveMessage
-        {
-            get;
-            set;
-        }
-
-        public OnNotifyEvent OnNotifyEvent
+        public NotifyEventHandler NotifyEvent
         {
             get;
             set;
@@ -192,8 +187,7 @@ namespace Scada.Data.Client.Tcp
                 }
                 catch (Exception e)
                 {
-                    this.ScreenLogAppend("Agent::Connect(): " + e.Message);
-                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, "本地网络配置异常（有线连接）: " + e.Message);
+                    this.NotifyEvent(this, NotifyEvents.ConnectError, "Connect(): " + e.Message);
                     this.OnConnectionException(e);
                 }
             }
@@ -212,12 +206,11 @@ namespace Scada.Data.Client.Tcp
                         this.WirelessServerAddress, this.WirelessServerPort, 
                         new AsyncCallback(ConnectToWirelessCallback), 
                         this.wirelessClient);
-                    this.ScreenLogAppend("using wireless connection");
+                    this.ShowNetMessage("using wireless connection");
                 }
                 catch (Exception e)
                 {
-                    this.ScreenLogAppend("Agent::ConnectToWireless(): " + e.Message);
-                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, "本地网络配置异常（无线连接）: " + e.Message);
+                    this.NotifyEvent(this, NotifyEvents.ConnectError, "ConnectToWireless(): " + e.Message);
                     this.OnConnectionException(e);
                 }
             }
@@ -239,7 +232,7 @@ namespace Scada.Data.Client.Tcp
             }
             catch (Exception e)
             {
-                this.OnNotifyEvent(this, NotifyEvent.ConnectError, "断开连接时发生错误:" + e.Message);
+                this.NotifyEvent(this, NotifyEvents.ConnectError, "Disconnect(): " + e.Message);
             }
         }
 
@@ -262,14 +255,15 @@ namespace Scada.Data.Client.Tcp
                         // [Auth]
                         this.handler.SendAuthPacket();
 
-                        this.OnNotifyEvent(this, NotifyEvent.Connected, "已连接");
+                        this.NotifyEvent(this, NotifyEvents.Connected, "已连接");
                     }
                 }
                 catch (Exception se)
                 {
-                    this.ScreenLogAppend(se.Message);
-                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, se.Message);
+                    this.wirelessClient = null;
                     this.client = null;
+
+                    this.NotifyEvent(this, NotifyEvents.ConnectError, "ConnectCallback(): " + se.Message);
                     this.OnConnectionException(se);
                 }
             }
@@ -294,16 +288,15 @@ namespace Scada.Data.Client.Tcp
                         // [Auth]
                         this.handler.SendAuthPacket();
 
-                        this.OnNotifyEvent(this, NotifyEvent.Connected, "已连接");
+                        this.NotifyEvent(this, NotifyEvents.Connected, "已连接");
                     }
                 }
                 catch (Exception se)
                 {
                     this.wirelessClient = null;
-
-                    this.ScreenLogAppend(se.Message);
-                    this.OnNotifyEvent(this, NotifyEvent.ConnectError, se.Message);
                     this.client = null;
+
+                    this.NotifyEvent(this, NotifyEvents.ConnectError, "ConnectToWirelessCallback(): " + se.Message);
                     this.OnConnectionException(se);
                 }
 
@@ -362,16 +355,20 @@ namespace Scada.Data.Client.Tcp
                 {
                     if (this.handler != null)
                     {
-                        this.OnReceiveMessage(this, msg);
+                        this.ShowNetMessage(msg);
                         this.handler.OnMessageDispatcher(msg);
                     }
                 }
             }
         }
 
-        private void ScreenLogAppend(string msg)
+        private void ShowNetMessage(string msg)
         {
-            this.OnReceiveMessage(this, msg);
+            if ("6031" == Value.Parse(msg, "CN"))
+            {
+                return;
+            }
+            this.NotifyEvent(this, NotifyEvents.Messages, msg);
         }
 
         /// <summary>
@@ -472,13 +469,13 @@ namespace Scada.Data.Client.Tcp
         internal void StartConnectCountryCenter()
         {
             string msg = string.Format("启动到国家数据中心的连接!");
-            this.OnNotifyEvent(this, NotifyEvent.ConnectToCountryCenter, msg);
+            this.NotifyEvent(this, NotifyEvents.ConnectToCountryCenter, msg);
         }
 
         internal void StopConnectCountryCenter()
         {
             string msg = string.Format("国家数据中心连接已断开");
-            this.OnNotifyEvent(this, NotifyEvent.DisconnectToCountryCenter, msg);
+            this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg);
         }
 
     }
