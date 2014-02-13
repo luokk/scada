@@ -25,8 +25,6 @@ namespace Scada.Main
 
         private bool deviceRunning = false;
 
-        public bool Restart { get; set; }
-
         public MainForm()
         {
             InitializeComponent();
@@ -34,8 +32,6 @@ namespace Scada.Main
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            this.Restart = false;
-            SystemEvents.SessionEnding += new SessionEndingEventHandler(SystemEventsSessionEnding);
             InitSysNotifyIcon();
             this.SetStatusText("系统就绪");
 
@@ -156,19 +152,6 @@ namespace Scada.Main
             return false;
         }
 
-        private void SystemEventsSessionEnding(object sender, SessionEndingEventArgs e)
-        {
-            switch (e.Reason)
-            {
-                case SessionEndReasons.Logoff:
-                case SessionEndReasons.SystemShutdown:
-                    this.Restart = true;
-                    break;
-                default:
-                    break;
-            }
-        }
-
         private void SetStatusText(string status)
         {
             this.statusLabel.Text = status;
@@ -254,33 +237,71 @@ namespace Scada.Main
             sysNotifyIcon.Text = "系统设备管理器";
 			sysNotifyIcon.Icon = new Icon(Resources.AppIcon, new Size(16, 16));
 			sysNotifyIcon.Visible = true;
+            ContextMenu notifyContextMenu = new ContextMenu();
 
-			sysNotifyIcon.Click += new EventHandler(OnSysNotifyIconContextMenu);
+            MenuItem exitMenuItem = new MenuItem("退出");
+            exitMenuItem.Click += (s, e) => 
+            {
+                this.PerformQuitByUser();
+            };
+            MenuItem dataUploadMenuItem = new MenuItem("数据上传程序");
+            dataUploadMenuItem.Click += (s, e) => 
+            {
+                this.BringDataUploadUI();
+            };
+            MenuItem mainProcMenuItem = new MenuItem("主程序");
+            mainProcMenuItem.Click += (s, e) =>
+            {
+                this.ShowMainUI();
+            };
+            notifyContextMenu.MenuItems.Add(dataUploadMenuItem);
+            notifyContextMenu.MenuItems.Add(mainProcMenuItem);
+            notifyContextMenu.MenuItems.Add(exitMenuItem);
+
+            sysNotifyIcon.ContextMenu = notifyContextMenu;
+			sysNotifyIcon.DoubleClick += new EventHandler(OnSysNotifyIconContextMenu);
 		}
 
-		private void OnSysNotifyIconContextMenu(object sender, EventArgs e)
-		{
+        private void BringDataUploadUI()
+        {
+            MessageBox.Show("等待功能实现");
+        }
+
+        private void ShowMainUI()
+        {
             this.ShowAtTaskBar(true);
             this.WindowState = FormWindowState.Normal;
             this.BringToFront();
+        }
+
+		private void OnSysNotifyIconContextMenu(object sender, EventArgs e)
+		{
+            this.ShowMainUI();
 		}
 
-
+        private void MakeWindowShownFront()
+        {
+            this.TopMost = true;
+            this.Activate();
+            this.TopMost = false;
+        }
 		// Menu Entries
 		private void fileMenuItem_Click(object sender, EventArgs e)
 		{
 
 		}
 
-		private void addDeviceFileMenuItem_Click(object sender, EventArgs e)
-		{
-
-		}
-
 		private void exitMenuItem_Click(object sender, EventArgs e)
 		{
-
+            this.PerformQuitByUser();
 		}
+
+        private void PerformQuitByUser()
+        {
+            RecordManager.DoSystemEventRecord(Device.Main, "Scada.Main Closed by Admin!");
+            Program.Exit();
+            Application.Exit();
+        }
 
 		private void aboutMenuItem_Click(object sender, EventArgs e)
 		{
@@ -473,25 +494,9 @@ namespace Scada.Main
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (this.Restart)
-            {
-                RecordManager.DoSystemEventRecord(Device.Main, "Scada.Main Exits according to shutdown!");
-                return;
-            }
-
-            if (this.deviceRunning)
-            {
-                // Prompt only when running
-                DialogResult dr = MessageBox.Show("您确定要退出[数据采集程序]吗？", "Scada.Main", MessageBoxButtons.OKCancel);
-                if (dr == DialogResult.OK)
-                {
-                    RecordManager.DoSystemEventRecord(Device.Main, "Scada.Main Closed by Admin!");
-                }
-                else
-                {
-                    e.Cancel = true;
-                }
-            }
+            this.WindowState = FormWindowState.Minimized;
+            this.ShowAtTaskBar(false);
+            e.Cancel = true;
         }
 
         private void loggerServer_Click(object sender, EventArgs e)
@@ -517,6 +522,21 @@ namespace Scada.Main
             {
                 MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
             }
+        }
+
+        private void dataUploadMenuItem_Click(object sender, EventArgs e)
+        {
+            this.BringDataUploadUI();
+        }
+
+        private void dataUploadItem_Click(object sender, EventArgs e)
+        {
+            this.BringDataUploadUI();
+        }
+
+        private void dataUploadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.BringDataUploadUI();
         }
     }
 }

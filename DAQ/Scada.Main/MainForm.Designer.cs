@@ -33,7 +33,6 @@
             this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.menuBar = new System.Windows.Forms.MenuStrip();
             this.fileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addDeviceFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,6 +57,7 @@
             this.LeftToolStripPanel = new System.Windows.Forms.ToolStripPanel();
             this.ContentPanel = new System.Windows.Forms.ToolStripContentPanel();
             this.toolBar = new System.Windows.Forms.ToolStrip();
+            this.startToolBarButton = new System.Windows.Forms.ToolStripButton();
             this.stopToolBarButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.loggerServer = new System.Windows.Forms.ToolStripButton();
@@ -65,7 +65,8 @@
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.deviceListView = new System.Windows.Forms.ListView();
-            this.startToolBarButton = new System.Windows.Forms.ToolStripButton();
+            this.dataUploadItem = new System.Windows.Forms.ToolStripButton();
+            this.dataUploadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuBar.SuspendLayout();
             this.toolBar.SuspendLayout();
             this.statusBar.SuspendLayout();
@@ -93,7 +94,6 @@
             // fileMenuItem
             // 
             this.fileMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addDeviceFileMenuItem,
             this.settingToolStripMenuItem,
             this.toolStripSeparator1,
             this.exitMenuItem});
@@ -101,13 +101,6 @@
             this.fileMenuItem.Size = new System.Drawing.Size(45, 20);
             this.fileMenuItem.Text = "文件";
             this.fileMenuItem.Click += new System.EventHandler(this.fileMenuItem_Click);
-            // 
-            // addDeviceFileMenuItem
-            // 
-            this.addDeviceFileMenuItem.Name = "addDeviceFileMenuItem";
-            this.addDeviceFileMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.addDeviceFileMenuItem.Text = "添加设备文件";
-            this.addDeviceFileMenuItem.Click += new System.EventHandler(this.addDeviceFileMenuItem_Click);
             // 
             // settingToolStripMenuItem
             // 
@@ -141,21 +134,21 @@
             // startMenuItem
             // 
             this.startMenuItem.Name = "startMenuItem";
-            this.startMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.startMenuItem.Size = new System.Drawing.Size(126, 22);
             this.startMenuItem.Text = "启动";
             this.startMenuItem.Click += new System.EventHandler(this.startMenuItem_Click);
             // 
             // StartAllToolStripMenuItem2
             // 
             this.StartAllToolStripMenuItem2.Name = "StartAllToolStripMenuItem2";
-            this.StartAllToolStripMenuItem2.Size = new System.Drawing.Size(152, 22);
+            this.StartAllToolStripMenuItem2.Size = new System.Drawing.Size(126, 22);
             this.StartAllToolStripMenuItem2.Text = "启动全部";
             this.StartAllToolStripMenuItem2.Click += new System.EventHandler(this.StartAllToolStripMenuItem2_Click);
             // 
             // stopMenuItem
             // 
             this.stopMenuItem.Name = "stopMenuItem";
-            this.stopMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stopMenuItem.Size = new System.Drawing.Size(126, 22);
             this.stopMenuItem.Text = "停止";
             this.stopMenuItem.Click += new System.EventHandler(this.stopMenuItem_Click);
             // 
@@ -163,6 +156,7 @@
             // 
             this.dataMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.startMainVisionMenuItem,
+            this.dataUploadToolStripMenuItem,
             this.dataCenterSetMenuItem});
             this.dataMenuItem.Name = "dataMenuItem";
             this.dataMenuItem.Size = new System.Drawing.Size(45, 20);
@@ -282,6 +276,7 @@
             this.toolBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.startToolBarButton,
             this.stopToolBarButton,
+            this.dataUploadItem,
             this.toolStripButton2,
             this.loggerServer});
             this.toolBar.Location = new System.Drawing.Point(0, 24);
@@ -289,6 +284,15 @@
             this.toolBar.Size = new System.Drawing.Size(704, 28);
             this.toolBar.TabIndex = 3;
             this.toolBar.Text = "toolStrip1";
+            // 
+            // startToolBarButton
+            // 
+            this.startToolBarButton.Image = ((System.Drawing.Image)(resources.GetObject("startToolBarButton.Image")));
+            this.startToolBarButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.startToolBarButton.Name = "startToolBarButton";
+            this.startToolBarButton.Size = new System.Drawing.Size(53, 25);
+            this.startToolBarButton.Text = "启动";
+            this.startToolBarButton.Click += new System.EventHandler(this.startToolBarButton_Click);
             // 
             // stopToolBarButton
             // 
@@ -366,14 +370,21 @@
             this.deviceListView.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.deviceListView_ItemChecked);
             this.deviceListView.SelectedIndexChanged += new System.EventHandler(this.deviceListView_SelectedIndexChanged);
             // 
-            // startToolBarButton
+            // dataUploadItem
             // 
-            this.startToolBarButton.Image = ((System.Drawing.Image)(resources.GetObject("startToolBarButton.Image")));
-            this.startToolBarButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.startToolBarButton.Name = "startToolBarButton";
-            this.startToolBarButton.Size = new System.Drawing.Size(53, 25);
-            this.startToolBarButton.Text = "启动";
-            this.startToolBarButton.Click += new System.EventHandler(this.startToolBarButton_Click);
+            this.dataUploadItem.Image = ((System.Drawing.Image)(resources.GetObject("dataUploadItem.Image")));
+            this.dataUploadItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.dataUploadItem.Name = "dataUploadItem";
+            this.dataUploadItem.Size = new System.Drawing.Size(79, 25);
+            this.dataUploadItem.Text = "数据上传";
+            this.dataUploadItem.Click += new System.EventHandler(this.dataUploadItem_Click);
+            // 
+            // dataUploadToolStripMenuItem
+            // 
+            this.dataUploadToolStripMenuItem.Name = "dataUploadToolStripMenuItem";
+            this.dataUploadToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.dataUploadToolStripMenuItem.Text = "数据上传";
+            this.dataUploadToolStripMenuItem.Click += new System.EventHandler(this.dataUploadToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -407,8 +418,7 @@
 
         private System.Windows.Forms.NotifyIcon sysNotifyIcon;
 		private System.Windows.Forms.MenuStrip menuBar;
-		private System.Windows.Forms.ToolStripMenuItem fileMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem addDeviceFileMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fileMenuItem;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
 		private System.Windows.Forms.ToolStripMenuItem exitMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem operateMenuItem;
@@ -441,6 +451,8 @@
         private System.Windows.Forms.ToolStripButton loggerServer;
         private System.Windows.Forms.ToolStripMenuItem StartAllToolStripMenuItem2;
         private System.Windows.Forms.ToolStripButton startToolBarButton;
+        private System.Windows.Forms.ToolStripButton dataUploadItem;
+        private System.Windows.Forms.ToolStripMenuItem dataUploadToolStripMenuItem;
     }
 }
 

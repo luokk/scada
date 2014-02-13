@@ -112,12 +112,13 @@ namespace Scada.Main
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new MainForm());
-                Exit();
+                Program.Exit();
             }
             // 程序已经运行的情况，则弹出消息提示并终止此次运行
             else
             {
                 MessageBox.Show("应用程序[Scada.Main.exe]已经在运行中...");
+                Program.Exit();
             }                        
         }
 

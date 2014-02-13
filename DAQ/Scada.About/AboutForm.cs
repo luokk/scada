@@ -97,9 +97,10 @@ namespace Scada.About
                         f.Progress = progressNode.InnerText;
 
                         var featureNode = e.Attributes.GetNamedItem("type");
-                        f.IsFeature = featureNode.InnerText == "feature";
-
-                        ret.Add(f);
+                        if ("feature".Equals(featureNode.InnerText, StringComparison.OrdinalIgnoreCase))
+                        {
+                            ret.Add(f);
+                        }
                     }
                     return ret;
                 }

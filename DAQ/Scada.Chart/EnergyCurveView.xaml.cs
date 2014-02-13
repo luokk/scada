@@ -419,6 +419,8 @@ namespace Scada.Chart
                 d = (int)(d / Math.Pow(10, 0 - n)) * Math.Pow(10, 0 - n);
                 n = 0;
             }
+            if (n > 15) // For some Channel Data, n would be over 15 and throw Exception.
+                n = 15;
             return Math.Round(d, n);
         }
 
