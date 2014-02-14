@@ -95,6 +95,7 @@ namespace Scada.Logger.Server
 
             this.tabPageMain.Controls.Add(this.CreateListBox("Scada.Main"));
             this.tabPageMainVision.Controls.Add(this.CreateListBox("Scada.MainVision"));
+            this.dataUploadPage.Controls.Add(this.CreateListBox("Scada.Data.Client"));
 
             this.tabPage1.Controls.Add(this.CreateListBox("Scada.HPIC"));
             this.tabPage2.Controls.Add(this.CreateListBox("Scada.NaIDevice"));
@@ -180,7 +181,12 @@ namespace Scada.Logger.Server
 
         private void ClearToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            TabPage tab = this.tabControl.SelectedTab;
+            object c = tab.Controls[0];
+            if (c is ListBox)
+            {
+                ((ListBox)c).Items.Clear();
+            }
         }
 
     }

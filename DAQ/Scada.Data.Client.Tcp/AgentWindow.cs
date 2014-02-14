@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -16,8 +17,6 @@ namespace Scada.Data.Client.Tcp
         private Timer timer;
 
         private Timer keepAliveTimer;
-
-        public bool InQuitProcess { get; set; }
 
         private List<string> connectionHistory = new List<string>();
 
@@ -46,9 +45,6 @@ namespace Scada.Data.Client.Tcp
 
         private void AgentWindow_Load(object sender, EventArgs e)
         {
-            this.InQuitProcess = false;
-            SystemEvents.SessionEnding += new SessionEndingEventHandler(SystemEventsSessionEnding);
-
             InitSysNotifyIcon();
             this.ShowInTaskbar = false;
             this.statusStrip1.Items.Add("状态: 等待");
@@ -69,15 +65,24 @@ namespace Scada.Data.Client.Tcp
             sysNotifyIcon.Text = "数据上传";
             sysNotifyIcon.Icon = new Icon(Resources.AppIcon, new Size(16, 16));
             sysNotifyIcon.Visible = true;
-            this.Hide();
-            sysNotifyIcon.Click += new EventHandler(OnSysNotifyIconContextMenu);
+
+            ContextMenu notifyContextMenu = new ContextMenu();
+            MenuItem exitMenuItem = new MenuItem("退出");
+            exitMenuItem.Click += (s, e) =>
+            {
+                this.PerformQuitByUser();
+            };
+            notifyContextMenu.MenuItems.Add(exitMenuItem);
+            sysNotifyIcon.ContextMenu = notifyContextMenu;
+
+            sysNotifyIcon.DoubleClick += new EventHandler(OnSysNotifyIconContextMenu);
         }
 
         private void OnSysNotifyIconContextMenu(object sender, EventArgs e)
         {
-            this.Show();
             this.WindowState = FormWindowState.Normal;
             this.MakeWindowShownFront();
+            this.ShowAtTaskBar(true);
         }
 
         private void MakeWindowShownFront()
@@ -119,7 +124,7 @@ namespace Scada.Data.Client.Tcp
                     this.agents.Add(agent);
 
                     this.SetConnectionStatus(true);
-                    this.statusStrip1.Items[4].Text = string.Format("数据中心IP:{0}", agent.ToString(true));
+                    this.statusStrip1.Items[4].Text = string.Format("数据中心IP:{0}", agent.ToString());
                 }
             }
         }
@@ -227,7 +232,7 @@ namespace Scada.Data.Client.Tcp
                         // Sent by each agent.s
                         foreach (var agent in this.agents)
                         {
-                            agent.SendDataPacket(p, time);
+                            agent.SendDataPacket(p);
                         }
                     }
 
@@ -242,7 +247,7 @@ namespace Scada.Data.Client.Tcp
                         }
                         logger.Log("---- ---- ---- ---- ---- ---- ---- ----");
 
-                        if (this.IsCurrentPageForDeviceData())
+                        if (true)
                         {
                             this.SendDetails(deviceKey, pks[0].ToString());
                         }
@@ -275,16 +280,16 @@ namespace Scada.Data.Client.Tcp
                     bool sent = false;
                     foreach (var agent in this.agents)
                     {
-                        bool result = agent.SendDataPacket(p, time);
+                        bool result = agent.SendDataPacket(p);
                         if (result)
                         {
-                            string msg = string.Format("[{0}]: @{1} {2}", DateTime.Now, agent.ToString(true), p.ToString());
+                            string msg = string.Format("[{0}]: @{1} {2}", DateTime.Now, agent.ToString(), p.ToString());
                             Log.GetLogFile(deviceKey).Log(msg);
                         }
                         sent |= result;
                     }
 
-                    if (sent && this.IsCurrentPageForDeviceData())
+                    if (sent)
                     {
                         string msg = string.Format("{0} Agent(s): {1}", this.agents.Count, p.ToString());
                         this.SendDetails(deviceKey, msg);
@@ -343,8 +348,8 @@ namespace Scada.Data.Client.Tcp
         // Main Thread Yet;
         private void ShowAgentMessage(Agent agent, string msg)
         {
-            string line = string.Format("{0}: {1}", agent.ToString(false), msg);
-            this.listBox1.Items.Add(line);
+            string line = string.Format("{0}: {1}", agent.ToString(), msg);
+            this.mainListBox.Items.Add(line);
         }
 
         private void OnNotifyEvent(Agent agent, NotifyEvents ne, string msg)
@@ -364,19 +369,19 @@ namespace Scada.Data.Client.Tcp
                 }
                 else if (NotifyEvents.Messages == ne)
                 {
-                    this.listBox1.Items.Add(msg);
+                    this.mainListBox.Items.Add(msg);
                     Log.GetLogFile(Program.DataClient).Log(msg);
                 }
                 else if (NotifyEvents.ConnectToCountryCenter == ne)
                 {
                     this.StartConnectCountryCenter();
-                    this.listBox1.Items.Add(msg);
+                    this.mainListBox.Items.Add(msg);
                     Log.GetLogFile(Program.DataClient).Log(msg);
                 }
                 else if (NotifyEvents.DisconnectToCountryCenter == ne)
                 {
                     this.StopConnectCountryCenter();
-                    this.listBox1.Items.Add(msg);
+                    this.mainListBox.Items.Add(msg);
                     Log.GetLogFile(Program.DataClient).Log(msg);
                 }
             });
@@ -395,7 +400,7 @@ namespace Scada.Data.Client.Tcp
                 this.SafeInvoke(() =>
                 {
                     string line = string.Format("请检查国家数据中心的配置");
-                    this.listBox1.Items.Add(line);
+                    this.mainListBox.Items.Add(line);
 
                     Log.GetLogFile(Program.DataClient).Log("Error: StartConnectCountryCenter(); Check the config.");
                 });
@@ -411,112 +416,24 @@ namespace Scada.Data.Client.Tcp
             }
         }
 
-        private void SystemEventsSessionEnding(object sender, SessionEndingEventArgs e)
+        private void ShowAtTaskBar(bool shown)
         {
-            switch (e.Reason)
-            {
-                case SessionEndReasons.Logoff:
-                case SessionEndReasons.SystemShutdown:
-                    this.InQuitProcess = true;
-                    break;
-                default:
-                    break;
-            }
+            this.ShowInTaskbar = shown;
         }
 
         private void AgentWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (this.InQuitProcess)
-            {
-                return;
-            }
-
             e.Cancel = true;
             this.WindowState = FormWindowState.Minimized;
-            this.Hide();
+            this.ShowAtTaskBar(false);
         }
 
         private void SendDetails(string deviceKey, string msg)
         {
-            ListBox listBox = this.GetListBox(deviceKey);
-            if (listBox != null)
-            {
-                listBox.Items.Add(msg);
-            }
-        }
-
-        
-
-        private void tabDeviceDataSelectionChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private bool IsCurrentPageForDeviceData()
-        {
-            return (this.mainTabCtrl.SelectedIndex == 2);
-        }
-
-        private void mainTabCtrl_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            int index = this.mainTabCtrl.SelectedIndex;
-            if (index == 2)
-            {
-                if (!this.dataDeviceInitialized)
-                {
-                    this.dataDeviceInitialized = true;
-                    this.InitDataDeviceTabCtrl();
-                }
-            }
-        }
-
-        private void InitDataDeviceTabCtrl()
-        {
-            // NOTICE: Order!
-            this.tabPage1.Controls.Add(this.CreateListBox("Scada.HPIC"));
-            this.tabPage2.Controls.Add(this.CreateListBox("Scada.NaIDevice"));
-            this.tabPage3.Controls.Add(this.CreateListBox("Scada.Weather"));
-            this.tabPage4.Controls.Add(this.CreateListBox("Scada.HVSampler"));
-            this.tabPage5.Controls.Add(this.CreateListBox("Scada.ISampler"));
-            this.tabPage6.Controls.Add(this.CreateListBox("Scada.Shelter"));
-            this.tabPage7.Controls.Add(this.CreateListBox("Scada.DWD"));
-        }
-
-        List<ListBox> listBoxes = new List<ListBox>();
-
-        private ListBox CreateListBox(string deviceKey)
-        {
-            deviceKey = deviceKey.ToLower();
-            ListBox lb = new ListBox();
-            lb.Tag = deviceKey;
-            lb.MultiColumn = false;
-            lb.Dock = DockStyle.Fill;
-
-            listBoxes.Add(lb);
-            return lb;
-        }
-
-        private ListBox GetListBox(string deviceKey)
-        {
-            foreach (ListBox lb in listBoxes)
-            {
-                if (string.Equals((string)lb.Tag, deviceKey, StringComparison.OrdinalIgnoreCase))
-                {
-                    return lb;
-                }
-            }
-            return null;
+            // TODO: Update Data in ListView   
         }
 
         public bool dataDeviceInitialized { get; set; }
-
-        private void toolStripClear_Click(object sender, EventArgs e)
-        {
-            foreach (var listBox in listBoxes)
-            {
-                listBox.Items.Clear();
-            }
-        }
 
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -525,8 +442,42 @@ namespace Scada.Data.Client.Tcp
 
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.InQuitProcess = true;
+            this.PerformQuitByUser();
+        }
+
+        private void PerformQuitByUser()
+        {
             Application.Exit();
         }
+
+        private void LoggerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.OpenProcessByName("Scada.Logger.Server.exe", true);
+        }
+
+        private void loggerStripButton1_Click(object sender, EventArgs e)
+        {
+            this.OpenProcessByName("Scada.Logger.Server.exe", true);
+        }
+
+        private void OpenProcessByName(string name, bool uac = false)
+        {
+            string fileName = name;
+            try
+            {
+                ProcessStartInfo processInfo = new ProcessStartInfo();
+                if (uac && Environment.OSVersion.Version.Major >= 6)
+                {
+                    processInfo.Verb = "runas";
+                }
+                processInfo.FileName = fileName;
+                Process.Start(processInfo);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
+            }
+        }
+
     }
 }

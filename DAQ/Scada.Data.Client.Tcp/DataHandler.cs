@@ -258,7 +258,6 @@ namespace Scada.Data.Client.Tcp
             string qn = Value.Parse(msg, "QN");
             this.SendReplyPacket(qn);
             this.SendResultPacket(qn);
-
         }
 
         private void OnKeepAlive(string msg)
@@ -373,8 +372,8 @@ namespace Scada.Data.Client.Tcp
                         List<DataPacket> pks = builder.GetDataPackets(deviceKey, dt, content, true);
                         foreach (var p in pks)
                         {
-                            Thread.Sleep(10);
-                            this.agent.SendDataPacket(p, dt);
+                            Thread.Sleep(100);
+                            this.agent.SendHistoryDataPacket(p);
                         }
                     }
                     dt = dt.AddSeconds(60 * 5);
@@ -397,9 +396,12 @@ namespace Scada.Data.Client.Tcp
                         p = builder.GetDataPacket(deviceKey, d);
                     }
 
-                    this.agent.SendDataPacket(p, dt);
+                    this.agent.SendHistoryDataPacket(p);
                     dt = dt.AddSeconds(30);
                 }
+
+                // Sleeping
+                Thread.Sleep(500);
             }
 
         }

@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?><features build="8" build-date="2014-02-10">
-  <feature plan-date="2014-1-4" progress="0" released-date="2014-1-5" type="fixing">
+<?xml version="1.0" encoding="utf-8"?><features build="9" build-date="2014-02-12">
+  <feature plan-date="2014-1-4" progress="50" released-date="2014-2-5" type="fixing">
     数据上传程序断线重连机制
   </feature>
 
-  <feature plan-date="2014-1-12" progress="0" released-date="2014-1-15" type="feature">
-    &quot;关于(About)&quot;对话框
-  </feature>
-
-  <feature plan-date="2014-1-12" progress="0" released-date="2014-1-15" type="fixing">
+  <feature plan-date="2014-1-12" progress="50" released-date="2014-1-15" type="feature">
     进程监控功能
   </feature>
 
-  <feature plan-date="2014-1-20" progress="0" released-date="2014-1-28" type="fixing">
+  <feature plan-date="2014-1-20" progress="30" released-date="2014-1-28" type="fixing">
     数据上传功能和界面改进
   </feature>
 
-  <feature plan-date="2014-1-30" progress="0" released-date="2014-1-30" type="feature">
-    &quot;关于(About)&quot;对话框 显示Build信息
+  <feature plan-date="2014-1-30" progress="80" released-date="2014-1-30" type="feature">
+    &quot;关于(About)&quot;对话框显示版本信息和Build信息
+  </feature>
+
+  <feature plan-date="2014-2-13" progress="0" released-date="2014-2-16" type="feature">
+    &quot;Scada.Main&quot;程序操作方式改进
   </feature>
 </features>

@@ -31,6 +31,7 @@
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPageMain = new System.Windows.Forms.TabPage();
             this.tabPageMainVision = new System.Windows.Forms.TabPage();
+            this.dataUploadPage = new System.Windows.Forms.TabPage();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
@@ -44,6 +45,7 @@
             this.SettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainVisionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dataUploadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.HpicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.naIDeviceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.weatherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,6 +62,7 @@
             // 
             this.tabControl.Controls.Add(this.tabPageMain);
             this.tabControl.Controls.Add(this.tabPageMainVision);
+            this.tabControl.Controls.Add(this.dataUploadPage);
             this.tabControl.Controls.Add(this.tabPage1);
             this.tabControl.Controls.Add(this.tabPage2);
             this.tabControl.Controls.Add(this.tabPage3);
@@ -73,93 +76,103 @@
             this.tabControl.Multiline = true;
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(476, 524);
+            this.tabControl.Size = new System.Drawing.Size(925, 524);
             this.tabControl.TabIndex = 1;
             // 
             // tabPageMain
             // 
-            this.tabPageMain.Location = new System.Drawing.Point(4, 40);
+            this.tabPageMain.Location = new System.Drawing.Point(4, 22);
             this.tabPageMain.Name = "tabPageMain";
-            this.tabPageMain.Size = new System.Drawing.Size(468, 480);
+            this.tabPageMain.Size = new System.Drawing.Size(917, 498);
             this.tabPageMain.TabIndex = 7;
             this.tabPageMain.Text = "主程序";
             this.tabPageMain.UseVisualStyleBackColor = true;
             // 
             // tabPageMainVision
             // 
-            this.tabPageMainVision.Location = new System.Drawing.Point(4, 40);
+            this.tabPageMainVision.Location = new System.Drawing.Point(4, 22);
             this.tabPageMainVision.Name = "tabPageMainVision";
-            this.tabPageMainVision.Size = new System.Drawing.Size(468, 480);
+            this.tabPageMainVision.Size = new System.Drawing.Size(917, 498);
             this.tabPageMainVision.TabIndex = 8;
             this.tabPageMainVision.Text = "MainVision";
             this.tabPageMainVision.UseVisualStyleBackColor = true;
             // 
+            // dataUploadPage
+            // 
+            this.dataUploadPage.Location = new System.Drawing.Point(4, 22);
+            this.dataUploadPage.Name = "dataUploadPage";
+            this.dataUploadPage.Padding = new System.Windows.Forms.Padding(3);
+            this.dataUploadPage.Size = new System.Drawing.Size(917, 498);
+            this.dataUploadPage.TabIndex = 9;
+            this.dataUploadPage.Text = "数据上传";
+            this.dataUploadPage.UseVisualStyleBackColor = true;
+            // 
             // tabPage1
             // 
-            this.tabPage1.Location = new System.Drawing.Point(4, 40);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(468, 480);
+            this.tabPage1.Size = new System.Drawing.Size(917, 498);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "高压电离室";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // tabPage2
             // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 40);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(468, 480);
+            this.tabPage2.Size = new System.Drawing.Size(917, 498);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "NaI谱仪";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // tabPage3
             // 
-            this.tabPage3.Location = new System.Drawing.Point(4, 40);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(468, 480);
+            this.tabPage3.Size = new System.Drawing.Size(917, 498);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "气象站";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // tabPage4
             // 
-            this.tabPage4.Location = new System.Drawing.Point(4, 40);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(468, 480);
+            this.tabPage4.Size = new System.Drawing.Size(917, 498);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "超大流量气溶胶采样器";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
             // tabPage5
             // 
-            this.tabPage5.Location = new System.Drawing.Point(4, 40);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage5.Size = new System.Drawing.Size(468, 480);
+            this.tabPage5.Size = new System.Drawing.Size(917, 498);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "碘采样器";
             this.tabPage5.UseVisualStyleBackColor = true;
             // 
             // tabPage6
             // 
-            this.tabPage6.Location = new System.Drawing.Point(4, 40);
+            this.tabPage6.Location = new System.Drawing.Point(4, 22);
             this.tabPage6.Name = "tabPage6";
             this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage6.Size = new System.Drawing.Size(468, 480);
+            this.tabPage6.Size = new System.Drawing.Size(917, 498);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "环境与安防监控";
             this.tabPage6.UseVisualStyleBackColor = true;
             // 
             // tabPage7
             // 
-            this.tabPage7.Location = new System.Drawing.Point(4, 40);
+            this.tabPage7.Location = new System.Drawing.Point(4, 22);
             this.tabPage7.Name = "tabPage7";
             this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage7.Size = new System.Drawing.Size(468, 480);
+            this.tabPage7.Size = new System.Drawing.Size(917, 498);
             this.tabPage7.TabIndex = 6;
             this.tabPage7.Text = "干湿沉降采集器";
             this.tabPage7.UseVisualStyleBackColor = true;
@@ -172,7 +185,7 @@
             this.帮助ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(476, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(925, 24);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -198,6 +211,7 @@
             this.SettingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MainToolStripMenuItem,
             this.mainVisionToolStripMenuItem,
+            this.dataUploadToolStripMenuItem,
             this.HpicToolStripMenuItem,
             this.naIDeviceToolStripMenuItem,
             this.weatherToolStripMenuItem,
@@ -228,6 +242,16 @@
             this.mainVisionToolStripMenuItem.Tag = "Scada.MainVision";
             this.mainVisionToolStripMenuItem.Text = "MainVision";
             this.mainVisionToolStripMenuItem.Click += new System.EventHandler(this.OnStripMenuItemClick);
+            // 
+            // dataUploadToolStripMenuItem
+            // 
+            this.dataUploadToolStripMenuItem.Checked = true;
+            this.dataUploadToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.dataUploadToolStripMenuItem.Name = "dataUploadToolStripMenuItem";
+            this.dataUploadToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
+            this.dataUploadToolStripMenuItem.Tag = "scada.data.client";
+            this.dataUploadToolStripMenuItem.Text = "数据上传";
+            this.dataUploadToolStripMenuItem.Click += new System.EventHandler(this.OnStripMenuItemClick);
             // 
             // HpicToolStripMenuItem
             // 
@@ -299,7 +323,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(476, 548);
+            this.ClientSize = new System.Drawing.Size(925, 548);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.menuStrip1);
             this.Name = "LoggerForm";
@@ -339,5 +363,7 @@
         private System.Windows.Forms.ToolStripMenuItem envToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dwdToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ClearToolStripMenuItem;
+        private System.Windows.Forms.TabPage dataUploadPage;
+        private System.Windows.Forms.ToolStripMenuItem dataUploadToolStripMenuItem;
     }
 }

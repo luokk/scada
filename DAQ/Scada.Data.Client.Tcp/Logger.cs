@@ -14,7 +14,10 @@ namespace Scada.Data.Client.Tcp
 
         public Logger(string fileName)
         {
-            this.writer = new StreamWriter(fileName);
+            if (File.Exists(fileName))
+            {
+                this.writer = new StreamWriter(fileName);
+            }
         }
 
         public void Log(string msg)
@@ -30,8 +33,13 @@ namespace Scada.Data.Client.Tcp
 
         public void Close()
         {
-            this.writer.Flush();
-            this.writer.Close();
+            try
+            {
+                this.writer.Flush();
+                this.writer.Close();
+            }
+            catch (Exception)
+            { }
         }
     }
 
@@ -39,13 +47,23 @@ namespace Scada.Data.Client.Tcp
     {
         public static Dictionary<string, Logger> dict = new Dictionary<string, Logger>();
 
-        public static Logger GetLogFile(string deviceKey)
+        private static string GetLogFileName(DateTime date)
+        {
+            string logFileName = string.Format("{0}-{1:D2}-{2:D2}.t.log", date.Year, date.Month, date.Day);
+            return logFileName;
+        }
+
+        private static string GetLogFileName(string deviceKey, DateTime date)
         {
             string logPath = Program.GetLogPath(deviceKey);
-            DateTime t = DateTime.Now;
-            string logFileName = string.Format("{0}-{1:D2}-{2:D2}.t.log", t.Year, t.Month, t.Day);
+            string logFileName = GetLogFileName(date);
             string logFilePath = string.Format("{0}\\{1}", logPath, logFileName);
+            return logFilePath;
+        }
 
+        public static Logger GetLogFile(string deviceKey)
+        {
+            string logFilePath = GetLogFileName(deviceKey, DateTime.Now);
 
             string key = logFilePath.ToLower();
             if (dict.ContainsKey(key))
@@ -66,10 +84,7 @@ namespace Scada.Data.Client.Tcp
 
         private static void CloseLastLogFile(string deviceKey, DateTime time)
         {
-            string logPath = Program.GetLogPath(deviceKey);
-            DateTime t = time;
-            string logFileName = string.Format("{0}-{1:D2}-{2:D2}", t.Year, t.Month, t.Day);
-            string logFilePath = string.Format("{0}\\{1}", logPath, logFileName);
+            string logFilePath = GetLogFileName(deviceKey, time);
 
             string key = logFilePath.ToLower();
             if (dict.ContainsKey(key))
@@ -79,7 +94,6 @@ namespace Scada.Data.Client.Tcp
 
                 dict.Remove(key);
             }
-
         }
     }
 }
