@@ -8,17 +8,91 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Scada.Data.Client.Tcp
 {
     public partial class AgentWindow : Form
     {
-        private Timer timer;
+        public class DeviceDataDetails
+        {
 
-        private Timer keepAliveTimer;
+            public DeviceDataDetails()
+            {
+                this.SendDataCount = 0;
+                this.LatestSendDataTime = default(DateTime);
+                this.LatestSendHistoryDataTime = default(DateTime);
+            }
 
-        private List<string> connectionHistory = new List<string>();
+            public string DeviceName
+            {
+                get;
+                set;
+            }
+
+            public long SendDataCount
+            {
+                get;
+                set;
+            }
+
+            public DateTime LatestSendDataTime
+            {
+                get;
+                set;
+            }
+
+
+            public DateTime LatestSendHistoryDataTime
+            {
+                get;
+                set;
+            }
+        }
+
+        public class ConnetionRecord
+        {
+            public ConnetionRecord()
+            {
+                this.ConnectingTime = DateTime.Now;
+                this.ConnectedTime = default(DateTime);
+                this.DisconnectedTime = default(DateTime);
+            }
+
+            public override string ToString()
+            {
+                if (this.ConnectedTime != default(DateTime))
+                {
+                    // Connected
+                    if (this.DisconnectedTime == default(DateTime))
+                    {
+                        return string.Format("<{0}> 连接", this.ConnectedTime);
+                    }
+                    else
+                    {
+                        return string.Format("<{0}> 连接; <{1}> 断开连接", this.ConnectedTime, this.DisconnectedTime);
+                    }
+                }
+                else
+                {
+                    // Not connected
+                    return string.Format("<{0}> 正在连接...", this.ConnectingTime);
+                }
+            }
+
+            public DateTime ConnectingTime { get; set; }
+
+            public DateTime ConnectedTime { get; set; }
+
+            public DateTime DisconnectedTime { get; set; }
+        }
+
+        private System.Windows.Forms.Timer timer;
+
+        private System.Windows.Forms.Timer keepAliveTimer;
+
+        private List<ConnetionRecord> connectionHistory = new List<ConnetionRecord>();
 
         private List<Agent> agents = new List<Agent>();
 
@@ -27,6 +101,7 @@ namespace Scada.Data.Client.Tcp
         private DataPacketBuilder builder = new DataPacketBuilder();
 
         private Dictionary<string, DateTime> lastDeviceSendData = new Dictionary<string, DateTime>();
+
 
         public bool StartState
         {
@@ -43,20 +118,34 @@ namespace Scada.Data.Client.Tcp
             InitializeComponent();
         }
 
-        private void AgentWindow_Load(object sender, EventArgs e)
+        private void AgentWindowLoad(object sender, EventArgs e)
         {
+            // Program starts
+            Log.GetLogFile(Program.DataClient).Log("Data (upload) Program starts at " + DateTime.Now);
+
             InitSysNotifyIcon();
             this.ShowInTaskbar = false;
-            this.statusStrip1.Items.Add("状态: 等待");
-            this.statusStrip1.Items.Add(new ToolStripSeparator());
-            this.statusStrip1.Items.Add("MS: " + Settings.Instance.Mn);
-            this.statusStrip1.Items.Add(new ToolStripSeparator());
-            this.statusStrip1.Items.Add("数据中心IP:");
+            this.statusStrip.Items.Add(this.GetConnetionString());
+            this.statusStrip.Items.Add(new ToolStripSeparator());
+            this.statusStrip.Items.Add("MS: " + Settings.Instance.Mn);
+            this.statusStrip.Items.Add(new ToolStripSeparator());
+            // this.statusStrip.Items.Add("数据中心IP:");
 
+            this.InitDetailsListView();
             if (this.StartState)
             {
-                Start();
+                this.Start();
             }
+        }
+
+        private string GetConnetionString()
+        {
+            string address = "<NoConnection>";
+            if (this.agents.Count > 0)
+            {
+                address = this.agents[0].ToString();
+            }
+            return string.Format("连接到{0}", address);
         }
 
         private void InitSysNotifyIcon()
@@ -101,7 +190,6 @@ namespace Scada.Data.Client.Tcp
             this.InitializeAgents();
             this.InitializeTimer();
             this.started = true;
-            Log.GetLogFile(Program.DataClient).Log("Data (upload) Agent starts at " + DateTime.Now);
         }
 
         private void InitializeAgents()
@@ -121,18 +209,13 @@ namespace Scada.Data.Client.Tcp
                     // 省中心
                     Agent agent = CreateAgent(dc.Ip, dc.Port, false);
                     agent.AddWirelessInfo(dc.WirelessIp, dc.WirelessPort);
+                    SynchronizationContext synchronizationContext = SynchronizationContext.Current;
+                    agent.SetSynchronizationContext(synchronizationContext);
                     this.agents.Add(agent);
 
-                    this.SetConnectionStatus(true);
-                    this.statusStrip1.Items[4].Text = string.Format("数据中心IP:{0}", agent.ToString());
+                    agent.Connect();
                 }
             }
-        }
-
-        private void SetConnectionStatus(bool connected)
-        {
-            string status = connected ? "已连接" : "已断开";
-            this.statusStrip1.Items[0].Text = string.Format("状态: {0} [{1}]", status, DateTime.Now);
         }
 
         // 先连接有线的线路
@@ -141,7 +224,6 @@ namespace Scada.Data.Client.Tcp
             Agent agent = new Agent(serverAddress, serverPort);
             agent.Type = Type.Province;
             agent.Wireless = wireless;
-            agent.Connect(); // make connection
             agent.NotifyEvent += this.OnNotifyEvent;
             return agent;
         }
@@ -158,13 +240,13 @@ namespace Scada.Data.Client.Tcp
 
         private void InitializeTimer()
         {
-            this.timer = new Timer();
+            this.timer = new System.Windows.Forms.Timer();
             this.timer.Interval = 4000;
             this.timer.Tick += this.SendDataTick;
             this.timer.Start();
 
             // KeepAlive timer per 30 sec
-            this.keepAliveTimer = new Timer();
+            this.keepAliveTimer = new System.Windows.Forms.Timer();
             this.keepAliveTimer.Interval = 1000 * 30;
             this.keepAliveTimer.Tick += this.KeepAliveTick;
             this.keepAliveTimer.Start();
@@ -175,7 +257,10 @@ namespace Scada.Data.Client.Tcp
             DataPacket p = builder.GetKeepAlivePacket();
             foreach (var agent in this.agents)
             {
-                agent.SendPacket(p);
+                if (agent.Stream != null)
+                {
+                    agent.SendPacket(p);
+                }
             }
         }
 
@@ -249,7 +334,7 @@ namespace Scada.Data.Client.Tcp
 
                         if (true)
                         {
-                            this.SendDetails(deviceKey, pks[0].ToString());
+                            this.RecordSendData(deviceKey, false);
                         }
                     }
                 }
@@ -292,7 +377,7 @@ namespace Scada.Data.Client.Tcp
                     if (sent)
                     {
                         string msg = string.Format("{0} Agent(s): {1}", this.agents.Count, p.ToString());
-                        this.SendDetails(deviceKey, msg);
+                        this.RecordSendData(deviceKey, false);
                     }
                 }
                 else
@@ -302,7 +387,6 @@ namespace Scada.Data.Client.Tcp
 
                 }
             }
-            
         }
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
@@ -345,44 +429,57 @@ namespace Scada.Data.Client.Tcp
             return false;
         }
 
-        // Main Thread Yet;
+        // Main Thread Yet
+        /*
         private void ShowAgentMessage(Agent agent, string msg)
         {
             string line = string.Format("{0}: {1}", agent.ToString(), msg);
             this.mainListBox.Items.Add(line);
         }
+        */
 
-        private void OnNotifyEvent(Agent agent, NotifyEvents ne, string msg)
+        private void OnNotifyEvent(Agent agent, NotifyEvents notify, string msg)
         {
             this.SafeInvoke(() =>
             {
-                if (NotifyEvents.Connected == ne)
+                this.statusStrip.Items[0].Text = this.GetConnetionString();
+
+                if (NotifyEvents.Connecting == notify)
                 {
-                    string logInfo = agent.ToString() + " 已连接";
-                    this.statusStrip1.Items[1].Text = logInfo;
-                    Log.GetLogFile(Program.DataClient).Log(logInfo);
+                    ConnetionRecord cr = new ConnetionRecord();
+                    this.connectionHistory.Add(cr);
                 }
-                else if (NotifyEvents.ConnectError == ne)
+                else if (NotifyEvents.Connected == notify)
                 {
-                    this.statusStrip1.Items[1].Text = msg;
-                    Log.GetLogFile(Program.DataClient).Log(msg);
+                    int count = this.connectionHistory.Count;
+                    ConnetionRecord cr = this.connectionHistory[count - 1];
+                    cr.ConnectedTime = DateTime.Now;
                 }
-                else if (NotifyEvents.Messages == ne)
+                else if (NotifyEvents.Disconnect == notify)
                 {
-                    this.mainListBox.Items.Add(msg);
-                    Log.GetLogFile(Program.DataClient).Log(msg);
+                    int count = this.connectionHistory.Count;
+                    ConnetionRecord cr = this.connectionHistory[count - 1];
+                    cr.DisconnectedTime = DateTime.Now;
                 }
-                else if (NotifyEvents.ConnectToCountryCenter == ne)
+                else if (NotifyEvents.Received == notify)
+                {
+
+                }
+                else if (NotifyEvents.SentHistoryData == notify)
+                {
+                    string deviceKey = msg.ToLower();
+                    this.RecordSendData(deviceKey, true);
+                }
+                /// 国家数据中心相关
+                else if (NotifyEvents.ConnectToCountryCenter == notify)
                 {
                     this.StartConnectCountryCenter();
                     this.mainListBox.Items.Add(msg);
-                    Log.GetLogFile(Program.DataClient).Log(msg);
                 }
-                else if (NotifyEvents.DisconnectToCountryCenter == ne)
+                else if (NotifyEvents.DisconnectToCountryCenter == notify)
                 {
                     this.StopConnectCountryCenter();
                     this.mainListBox.Items.Add(msg);
-                    Log.GetLogFile(Program.DataClient).Log(msg);
                 }
             });
         }
@@ -428,14 +525,27 @@ namespace Scada.Data.Client.Tcp
             this.ShowAtTaskBar(false);
         }
 
-        private void SendDetails(string deviceKey, string msg)
+        // Realtime data sending...details
+        private void RecordSendData(string deviceKey, bool history)
         {
-            // TODO: Update Data in ListView   
+            var details = this.detailsDict[deviceKey];
+            if (history)
+            {
+                details.LatestSendHistoryDataTime = DateTime.Now;
+            }
+            else
+            {
+                details.LatestSendDataTime = DateTime.Now;
+            }
+            details.SendDataCount += 1;
         }
 
-        public bool dataDeviceInitialized { get; set; }
-
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Start();
+        }
+
+        private void startStripButton_Click(object sender, EventArgs e)
         {
             this.Start();
         }
@@ -473,10 +583,72 @@ namespace Scada.Data.Client.Tcp
                 processInfo.FileName = fileName;
                 Process.Start(processInfo);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
             }
+        }
+
+        private void mainTabCtrl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.mainTabCtrl.SelectedIndex == 1)
+            {
+                this.connHistoryList.Items.Clear();
+
+                foreach (var cr in this.connectionHistory)
+                {
+                    this.connHistoryList.Items.Insert(0, cr.ToString());
+                }
+            }
+            else
+            {
+                this.connHistoryList.Items.Clear();
+            }
+        }
+
+        private Dictionary<string, DeviceDataDetails> detailsDict = new Dictionary<string, DeviceDataDetails>();
+
+        private void InitDetailsListView()
+        {
+            this.InitDeviceColumn("scada.hpic", "高压电离室");
+            this.InitDeviceColumn("scada.naidevice", "NaI谱仪");
+            this.InitDeviceColumn("scada.weather", "气象站");
+            this.InitDeviceColumn("scada.hvsampler", "超大流量气溶胶采样器");
+            this.InitDeviceColumn("scada.isampler", "碘采样器");
+            this.InitDeviceColumn("scada.shelter", "环境与安防监控");
+            this.InitDeviceColumn("scada.dwd", "干湿沉降采样器");
+
+        }
+
+        private const string TimeFormat = "yyyy-MM-dd HH:mm:ss";
+
+        private void InitDeviceColumn(string deviceKey, string deviceName)
+        {
+            ListViewItem lvi = new ListViewItem(deviceName);
+            lvi.Tag = deviceKey;
+            var t = DateTime.MinValue.ToString(TimeFormat);
+            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, "0"));
+            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, t));
+            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, t));
+
+            this.detailsListView.Items.Add(lvi);
+
+            this.detailsDict.Add(deviceKey, new DeviceDataDetails());
+        }
+
+        private void UpdateDetailsListView()
+        {
+            foreach (ListViewItem item in this.detailsListView.Items)
+            {
+                string deviceKey = (string)item.Tag;
+
+                DeviceDataDetails details = this.detailsDict[deviceKey];
+
+                item.SubItems[0].Text = details.SendDataCount.ToString();
+                item.SubItems[1].Text = details.LatestSendDataTime.ToString(TimeFormat);
+                item.SubItems[2].Text = details.LatestSendHistoryDataTime.ToString(TimeFormat);
+            }
+            
         }
 
     }

@@ -14,10 +14,7 @@ namespace Scada.Data.Client.Tcp
 
         public Logger(string fileName)
         {
-            if (File.Exists(fileName))
-            {
-                this.writer = new StreamWriter(fileName);
-            }
+            this.writer = new StreamWriter(fileName);
         }
 
         public void Log(string msg)

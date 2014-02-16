@@ -51,9 +51,12 @@ namespace Scada.Data.Client.Tcp
     /// </summary>
     public enum NotifyEvents
     {
-        Messages,
+        Connecting,
         Connected,
-        ConnectError,
+        Disconnect,
+        Received,
+        Sent,
+        SentHistoryData,
         ConnectToCountryCenter,
         DisconnectToCountryCenter,
     }
@@ -80,10 +83,26 @@ namespace Scada.Data.Client.Tcp
         private TcpClient client = null;
 
         // Wireless connection Tcp client
-        private TcpClient wirelessClient = null;
+        private bool? IsWired
+        {
+            get;
+            set;
+        }
+
+        private bool isConnectingWired = false;
+
+        public bool IsRetryConnection
+        {
+            get;
+            set;
+        }
 
         // Maybe it uses wired connection, or wireless.
-        private NetworkStream stream;
+        public NetworkStream Stream
+        {
+            get;
+            set;
+        }
 
         // the current data handler.
         private MessageDataHandler handler;
@@ -119,6 +138,8 @@ namespace Scada.Data.Client.Tcp
             this.ServerPort = serverPort;
             this.handler = new MessageDataHandler(this);
             LoggerClient.Initialize();
+
+            this.IsRetryConnection = true;
         }
 
         internal void AddWirelessInfo(string wirelessServerAddress, int wirelessServerPort)
@@ -170,94 +191,103 @@ namespace Scada.Data.Client.Tcp
             set;
         }
 
-        private void Log(string fileName, string msg)
+        private void DoLog(string fileName, string msg)
         {
-            if (LoggerClient.Contains(fileName))
+            if (this.MainThreadSyncContext == null)
+                return;
+            this.MainThreadSyncContext.Post(new SendOrPostCallback((o) => 
             {
-                this.logger.Send(fileName, string.Format("[{0}] {1}", DateTime.Now.ToString("HH:mm:ss"), msg));
-            }
+                string line = string.Format("[{0}] {1}", DateTime.Now.ToString("HH:mm:ss"), msg);
+                if (LoggerClient.Contains(fileName))
+                {
+                    this.logger.Send(fileName, line);
+                }
+                Logger logger = Log.GetLogFile(fileName);
+                if (logger != null)
+                {
+                    logger.Log(line);
+                }
+            }), null);
+
         }
 
         public override string ToString()
         {
-            return (this.client != null) 
-                ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) 
-                : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
+            if (this.IsWired.HasValue)
+            {
+                return this.IsWired.Value ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
+            }
+            return "<No-connection>";
         }
 
         private void OnConnectionException(Exception e)
         {
-            this.RetryConnection();
+            this.Disconnect();
+            if (this.IsRetryConnection)
+            {
+                this.RetryConnection();
+            }
         }
 
 
         public void Connect()
         {
-            if ((this.client == null) || (!this.client.Connected))
-            {
-                try
-                {
-                    this.client = new TcpClient();
-                    this.client.ReceiveTimeout = Timeout;
-
-                    this.client.BeginConnect(
-                        this.ServerAddress, this.ServerPort, 
-                        new AsyncCallback(ConnectCallback), 
-                        this.client);
-
-                    this.Log(ScadaDataClient, string.Format("Connecting to {0} retry times = {1}.", this.ToString(), this.retryCount));
-                }
-                catch (Exception e)
-                {
-                    this.NotifyEvent(this, NotifyEvents.ConnectError, "Connect(): " + e.Message);
-                    this.OnConnectionException(e);
-                }
-            }
+            this.isConnectingWired = true;
+            this.Connect(this.ServerAddress, this.ServerPort);
         }
 
-        private void ConnectToWireless()
+        public void ConnectToWireless()
         {
-            if ((this.wirelessClient == null) || (!this.wirelessClient.Connected))
+            this.isConnectingWired = false;
+            this.Connect(this.WirelessServerAddress, this.WirelessServerPort);
+        }
+
+        private void Connect(string serverIpAddress, int serverPort)
+        {
+            try
             {
-                try
-                {
-                    this.wirelessClient = new TcpClient();
-                    this.wirelessClient.ReceiveTimeout = Timeout;
+                this.client = new TcpClient();
+                this.client.ReceiveTimeout = Timeout;
 
-                    this.wirelessClient.BeginConnect(
-                        this.WirelessServerAddress, this.WirelessServerPort, 
-                        new AsyncCallback(ConnectToWirelessCallback), 
-                        this.wirelessClient);
+                this.client.BeginConnect(serverIpAddress, serverPort,
+                    new AsyncCallback(ConnectCallback),
+                    this.client);
 
-                    this.Log(ScadaDataClient, string.Format("Connecting to {0} <wireless> retry times = {1}.", this.ToString(), this.retryCount));                    
-                }
-                catch (Exception e)
-                {
-                    this.NotifyEvent(this, NotifyEvents.ConnectError, "ConnectToWireless(): " + e.Message);
-                    this.OnConnectionException(e);
-                }
+                string msg = string.Format("Connecting to {0}:{1} retry times = {2}.", serverIpAddress, serverPort, this.retryCount);
+                this.DoLog(ScadaDataClient, msg);
+                this.NotifyEvent(this, NotifyEvents.Connecting, msg);
+            }
+            catch (Exception e)
+            {
+                string msg = string.Format("Connecting to {0}:{1} failed => {2}", serverIpAddress, serverPort, e.Message);
+                this.DoLog(ScadaDataClient, msg);
+                this.NotifyEvent(this, NotifyEvents.Connecting, msg);
+                this.OnConnectionException(e);
             }
         }
 
         internal void Disconnect()
         {
+            this.IsWired = null;
             try
             {
-                this.client.Close();
+                this.Stream = null;
+                if (this.client != null)
+                {
+                    this.client.Close();
+                }
+                string msg = string.Format("Disconnect from {0}", this.ToString());
+                this.DoLog(ScadaDataClient, msg);
+                this.NotifyEvent(this, NotifyEvents.Disconnect, msg);
             }
             catch (Exception e)
             {
-                this.NotifyEvent(this, NotifyEvents.ConnectError, "Disconnect(): " + e.Message);
+                string msg = string.Format("Disconnect from {0} Failed => {1}", this.ToString(), e.Message);
+                this.DoLog(ScadaDataClient, msg);
+                this.NotifyEvent(this, NotifyEvents.Disconnect, msg);
             }
 
-            try
-            {
-                this.wirelessClient.Close();
-            }
-            catch (Exception e)
-            {
-                this.NotifyEvent(this, NotifyEvents.ConnectError, "Disconnect(): <wireless> " + e.Message);
-            }
+            this.client = null;
         }
 
         private void ConnectCallback(IAsyncResult result)
@@ -271,65 +301,36 @@ namespace Scada.Data.Client.Tcp
 
                     if (client.Connected)
                     {
-                        this.BeginRead(client);
+                        // Send need this.stream
+                        this.Stream = client.GetStream();
 
-                        // [Auth]
-                        this.handler.SendAuthPacket();
-
-                        this.NotifyEvent(this, NotifyEvents.Connected, "已连接");
-                    }
-                }
-                catch (Exception se)
-                {
-                    this.wirelessClient = null;
-                    this.client = null;
-
-                    this.NotifyEvent(this, NotifyEvents.ConnectError, "ConnectCallback(): " + se.Message);
-                    this.OnConnectionException(se);
-                }
-            }
-        }
-
-        // Callback for Wireless
-        private void ConnectToWirelessCallback(IAsyncResult result)
-        {
-            if (result.IsCompleted)
-            {
-                try
-                {
-                    TcpClient client = (TcpClient)result.AsyncState;
-                    client.EndConnect(result);
-                    //client.
-                    if (client.Connected)
-                    {
-                        string connectedMessage = string.Format("Connected to {0}", this.ToString());
-                        this.Log(ScadaDataClient, connectedMessage);
-
-                        this.BeginRead(this.client);
-
+                        this.IsWired = this.isConnectingWired;
                         
+                        this.BeginRead(client, this.Stream);
+
                         // [Auth]
                         this.handler.SendAuthPacket();
 
-                        this.NotifyEvent(this, NotifyEvents.Connected, "已连接");
+                        string msg = string.Format("Connected to {0}", this.ToString());
+                        this.DoLog(ScadaDataClient, msg);
+                        this.NotifyEvent(this, NotifyEvents.Connected, msg);
                     }
                 }
-                catch (Exception se)
+                catch (Exception e)
                 {
-                    this.wirelessClient = null;
-                    this.client = null;
-
-                    this.NotifyEvent(this, NotifyEvents.ConnectError, "ConnectToWirelessCallback(): " + se.Message);
-                    this.OnConnectionException(se);
+                    string address = this.isConnectingWired ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);            
+                    string msg = string.Format("Connected to {0} Failed => {1}", address, e.Message);
+                    this.DoLog(ScadaDataClient, msg);
+                    this.NotifyEvent(this, NotifyEvents.Connected, msg); 
+                    
+                    this.OnConnectionException(e);
                 }
-
             }
         }
 
         // BeginRead~ <client>
-        private void BeginRead(TcpClient client)
+        private void BeginRead(TcpClient client, NetworkStream stream)
         {            
-            NetworkStream stream = client.GetStream();
             if (stream.CanRead)
             {
                 try
@@ -340,7 +341,7 @@ namespace Scada.Data.Client.Tcp
                 }
                 catch (Exception e)
                 {
-                    Debug.WriteLine(e.Message);
+                    this.OnConnectionException(e);
                 }
             }
         }
@@ -353,13 +354,13 @@ namespace Scada.Data.Client.Tcp
                 try
                 {
                     int c = session.Stream.EndRead(result);
+                    // Log handled in this function
                     this.DoReceivedMessages(session.GetReceivedMessage(c));
-                    this.BeginRead(session.Client);
+                    this.BeginRead(session.Client, session.Stream);
                 }
                 catch (Exception e)
                 {
-                    this.Log(ScadaDataClient, e.ToString());
-                    this.CloseClient();
+                    this.OnConnectionException(e);
                 }
             }
         }
@@ -370,6 +371,7 @@ namespace Scada.Data.Client.Tcp
             {
                 return;
             }
+
             string[] msgs = messages.Split(new string[] { "\r\n" }, StringSplitOptions.None);
             foreach (string msg in msgs)
             {
@@ -385,70 +387,26 @@ namespace Scada.Data.Client.Tcp
         {
             if ("6031" == Value.Parse(msg, "CN"))
             {
+                // Not not record KeepAlive.
                 return;
             }
-            this.Log(ScadaDataClient, msg);
-            this.NotifyEvent(this, NotifyEvents.Messages, msg);
+            this.DoLog(ScadaDataClient, msg);
+            this.NotifyEvent(this, NotifyEvents.Received, msg);
         }
 
-        /// <summary>
-        /// Final entry of send bytes.
-        /// </summary>
-        /// <param name="message"></param>
+        // Send final implements
         private bool Send(byte[] message)
         {
             try
             {
-                if (this.stream != null)
-                {
-                    this.stream.Write(message, 0, message.Length);
-                    return true;
-                }
+                this.Stream.Write(message, 0, message.Length);
+                return true;
             }
             catch(Exception e)
             {
-                this.CloseClient();
+                this.OnConnectionException(e);
                 return false;
             }
-            return false;
-        }
-
-        private void CloseClient()
-        {
-            try
-            {
-                if (this.stream != null)
-                {
-                    this.stream.Close();
-                    this.stream = null;
-                }
-            }
-            catch (Exception) { }
-
-            try
-            {
-                if (this.client != null)
-                {
-                    this.client.Close();
-                    this.client = null;
-                }
-            }
-            catch (Exception) { }
-
-            try
-            {
-                if (this.wirelessClient != null)
-                {
-                    this.wirelessClient.Close();
-                    this.wirelessClient = null;
-                }
-            }
-            catch (Exception) { }
-
-            this.stream = null;
-            this.client = null;
-            this.wirelessClient = null;
-            this.RetryConnection();
         }
 
         // A. 每30秒试图重连一次
@@ -519,6 +477,7 @@ namespace Scada.Data.Client.Tcp
             if (this.OnHistoryData)
             {
                 string s = p.ToString();
+                this.NotifyEvent(this, NotifyEvents.SentHistoryData, p.DeviceKey);
                 return this.Send(Encoding.ASCII.GetBytes(s));
             }
             return false;
@@ -542,5 +501,12 @@ namespace Scada.Data.Client.Tcp
             this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg);
         }
 
+
+        internal void SetSynchronizationContext(SynchronizationContext synchronizationContext)
+        {
+            this.MainThreadSyncContext = synchronizationContext;  
+        }
+
+        public SynchronizationContext MainThreadSyncContext { get; set; }
     }
 }

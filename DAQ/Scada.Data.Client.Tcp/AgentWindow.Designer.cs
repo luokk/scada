@@ -31,18 +31,20 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AgentWindow));
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.panel1 = new System.Windows.Forms.Panel();
             this.mainTabCtrl = new System.Windows.Forms.TabControl();
             this.connPage = new System.Windows.Forms.TabPage();
             this.mainListBox = new System.Windows.Forms.ListBox();
             this.historyPage = new System.Windows.Forms.TabPage();
+            this.connHistoryList = new System.Windows.Forms.ListBox();
             this.dataPage = new System.Windows.Forms.TabPage();
             this.detailsListView = new System.Windows.Forms.ListView();
             this.deviceCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.timeCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.historyTimeCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.countCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.OpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,11 +54,10 @@
             this.DispToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LoggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ClsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.startStripButton = new System.Windows.Forms.ToolStripButton();
             this.loggerStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.connHistoryList = new System.Windows.Forms.ListBox();
+            this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -75,7 +76,7 @@
             // 
             // toolStripContainer1.BottomToolStripPanel
             // 
-            this.toolStripContainer1.BottomToolStripPanel.Controls.Add(this.statusStrip1);
+            this.toolStripContainer1.BottomToolStripPanel.Controls.Add(this.statusStrip);
             // 
             // toolStripContainer1.ContentPanel
             // 
@@ -98,15 +99,15 @@
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.menuStrip1);
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.toolStrip1);
             // 
-            // statusStrip1
+            // statusStrip
             // 
-            this.statusStrip1.Dock = System.Windows.Forms.DockStyle.None;
-            this.statusStrip1.Location = new System.Drawing.Point(0, 0);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(520, 22);
-            this.statusStrip1.SizingGrip = false;
-            this.statusStrip1.TabIndex = 0;
-            this.statusStrip1.Text = "statusStrip1";
+            this.statusStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.statusStrip.Location = new System.Drawing.Point(0, 0);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(520, 22);
+            this.statusStrip.SizingGrip = false;
+            this.statusStrip.TabIndex = 0;
+            this.statusStrip.Text = "statusStrip1";
             // 
             // splitter1
             // 
@@ -136,6 +137,7 @@
             this.mainTabCtrl.SelectedIndex = 0;
             this.mainTabCtrl.Size = new System.Drawing.Size(520, 388);
             this.mainTabCtrl.TabIndex = 4;
+            this.mainTabCtrl.SelectedIndexChanged += new System.EventHandler(this.mainTabCtrl_SelectedIndexChanged);
             // 
             // connPage
             // 
@@ -148,12 +150,12 @@
             this.connPage.Text = "连接信息";
             this.connPage.UseVisualStyleBackColor = true;
             // 
-            // listBox1
+            // mainListBox
             // 
             this.mainListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainListBox.FormattingEnabled = true;
             this.mainListBox.Location = new System.Drawing.Point(3, 3);
-            this.mainListBox.Name = "listBox1";
+            this.mainListBox.Name = "mainListBox";
             this.mainListBox.Size = new System.Drawing.Size(506, 356);
             this.mainListBox.TabIndex = 0;
             // 
@@ -167,6 +169,15 @@
             this.historyPage.TabIndex = 1;
             this.historyPage.Text = "连接历史";
             this.historyPage.UseVisualStyleBackColor = true;
+            // 
+            // connHistoryList
+            // 
+            this.connHistoryList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.connHistoryList.FormattingEnabled = true;
+            this.connHistoryList.Location = new System.Drawing.Point(3, 3);
+            this.connHistoryList.Name = "connHistoryList";
+            this.connHistoryList.Size = new System.Drawing.Size(506, 356);
+            this.connHistoryList.TabIndex = 0;
             // 
             // dataPage
             // 
@@ -183,6 +194,7 @@
             // 
             this.detailsListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.deviceCol,
+            this.countCol,
             this.timeCol,
             this.historyTimeCol});
             this.detailsListView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -199,7 +211,7 @@
             // deviceCol
             // 
             this.deviceCol.Text = "设备";
-            this.deviceCol.Width = 142;
+            this.deviceCol.Width = 119;
             // 
             // timeCol
             // 
@@ -210,6 +222,11 @@
             // 
             this.historyTimeCol.Text = "最新历史数据上传时间";
             this.historyTimeCol.Width = 171;
+            // 
+            // countCol
+            // 
+            this.countCol.Text = "发送数量";
+            this.countCol.Width = 71;
             // 
             // menuStrip1
             // 
@@ -237,25 +254,25 @@
             // StartToolStripMenuItem
             // 
             this.StartToolStripMenuItem.Name = "StartToolStripMenuItem";
-            this.StartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.StartToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.StartToolStripMenuItem.Text = "启动";
             this.StartToolStripMenuItem.Click += new System.EventHandler(this.StartToolStripMenuItem_Click);
             // 
             // PauseToolStripMenuItem
             // 
             this.PauseToolStripMenuItem.Name = "PauseToolStripMenuItem";
-            this.PauseToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.PauseToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.PauseToolStripMenuItem.Text = "暂停";
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(97, 6);
             // 
             // QuitToolStripMenuItem
             // 
             this.QuitToolStripMenuItem.Name = "QuitToolStripMenuItem";
-            this.QuitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.QuitToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.QuitToolStripMenuItem.Text = "退出";
             this.QuitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
             // 
@@ -271,24 +288,19 @@
             // LoggerToolStripMenuItem
             // 
             this.LoggerToolStripMenuItem.Name = "LoggerToolStripMenuItem";
-            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.LoggerToolStripMenuItem.Text = "日志";
             this.LoggerToolStripMenuItem.Click += new System.EventHandler(this.LoggerToolStripMenuItem_Click);
             // 
             // ClsToolStripMenuItem1
             // 
             this.ClsToolStripMenuItem1.Name = "ClsToolStripMenuItem1";
-            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
             this.ClsToolStripMenuItem1.Text = "清屏";
-            // 
-            // sysNotifyIcon
-            // 
-            this.sysNotifyIcon.Text = "数据上传";
-            this.sysNotifyIcon.Visible = true;
             // 
             // toolStrip1
             // 
-            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Left;
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.startStripButton,
             this.loggerStripButton1});
@@ -305,6 +317,7 @@
             this.startStripButton.Name = "startStripButton";
             this.startStripButton.Size = new System.Drawing.Size(53, 20);
             this.startStripButton.Text = "启动";
+            this.startStripButton.Click += new System.EventHandler(this.startStripButton_Click);
             // 
             // loggerStripButton1
             // 
@@ -316,14 +329,10 @@
             this.loggerStripButton1.Text = "日志";
             this.loggerStripButton1.Click += new System.EventHandler(this.loggerStripButton1_Click);
             // 
-            // connHistoryList
+            // sysNotifyIcon
             // 
-            this.connHistoryList.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.connHistoryList.FormattingEnabled = true;
-            this.connHistoryList.Location = new System.Drawing.Point(3, 3);
-            this.connHistoryList.Name = "connHistoryList";
-            this.connHistoryList.Size = new System.Drawing.Size(506, 356);
-            this.connHistoryList.TabIndex = 0;
+            this.sysNotifyIcon.Text = "数据上传";
+            this.sysNotifyIcon.Visible = true;
             // 
             // AgentWindow
             // 
@@ -338,7 +347,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "数据中心代理";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AgentWindow_FormClosing);
-            this.Load += new System.EventHandler(this.AgentWindow_Load);
+            this.Load += new System.EventHandler(this.AgentWindowLoad);
             this.toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);
             this.toolStripContainer1.BottomToolStripPanel.PerformLayout();
             this.toolStripContainer1.ContentPanel.ResumeLayout(false);
@@ -362,7 +371,7 @@
         #endregion
 
         private System.Windows.Forms.ToolStripContainer toolStripContainer1;
-        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.NotifyIcon sysNotifyIcon;
@@ -388,6 +397,7 @@
         private System.Windows.Forms.ToolStripButton startStripButton;
         private System.Windows.Forms.ToolStripButton loggerStripButton1;
         private System.Windows.Forms.ListBox connHistoryList;
+        private System.Windows.Forms.ColumnHeader countCol;
 
     }
 }

@@ -493,7 +493,7 @@ namespace Scada.Data.Client.Tcp
             this.SendResultPacket(qn);
         }
 
-
+        // ?
         // 开始向国家数据中心发送数据
         private void StartConnectCountryCenter()
         {

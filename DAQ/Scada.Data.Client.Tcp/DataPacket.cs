@@ -11,6 +11,12 @@ namespace Scada.Data.Client.Tcp
 
         private string deviceKey;
 
+        public string DeviceKey
+        {
+            get { return this.deviceKey; }
+            private set { this.deviceKey = value; }
+        }
+
         private bool splitted = false;
 
         public ISettings Settings
