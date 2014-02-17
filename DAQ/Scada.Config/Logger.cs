@@ -19,7 +19,7 @@ namespace Scada.Config
         private byte[] BuildMessage(string fileName, string content)
         {
             string line = string.Format("[{0}]:{1}", fileName, content);
-            byte[] bytes = Encoding.ASCII.GetBytes(line);
+            byte[] bytes = Encoding.UTF8.GetBytes(line);
             return bytes;
         }
 

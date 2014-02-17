@@ -72,7 +72,7 @@ namespace Scada.Logger.Server
                         Stream stream2 = (Stream)asyncReadResult.AsyncState;
                         int r = stream2.EndRead(asyncReadResult);
 
-                        string content = Encoding.ASCII.GetString(bytes, 0, r);
+                        string content = Encoding.UTF8.GetString(bytes, 0, r);
                         if (!string.IsNullOrEmpty(content))
                         {
                             this.action(content);

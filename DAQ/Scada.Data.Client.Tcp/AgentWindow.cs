@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using Scada.Config;
 using Scada.DataCenterAgent.Properties;
 using System;
 using System.Collections.Generic;
@@ -94,7 +95,7 @@ namespace Scada.Data.Client.Tcp
 
         private List<ConnetionRecord> connectionHistory = new List<ConnetionRecord>();
 
-        private List<Agent> agents = new List<Agent>();
+        private Agent agent = null;
 
         private Agent countryCenterAgent;
 
@@ -102,6 +103,7 @@ namespace Scada.Data.Client.Tcp
 
         private Dictionary<string, DateTime> lastDeviceSendData = new Dictionary<string, DateTime>();
 
+        private LoggerClient logger = new LoggerClient();
 
         public bool StartState
         {
@@ -111,6 +113,7 @@ namespace Scada.Data.Client.Tcp
 
         private bool started = false;
 
+        public const string ScadaDataClient = "scada.data.client";
 
         public AgentWindow()
         {
@@ -120,8 +123,8 @@ namespace Scada.Data.Client.Tcp
 
         private void AgentWindowLoad(object sender, EventArgs e)
         {
-            // Program starts
-            Log.GetLogFile(Program.DataClient).Log("Data (upload) Program starts at " + DateTime.Now);
+            LoggerClient.Initialize();
+            this.logger.Send("ScadaDataClient", "Data (upload) Program starts at " + DateTime.Now);
 
             InitSysNotifyIcon();
             this.ShowInTaskbar = false;
@@ -141,9 +144,9 @@ namespace Scada.Data.Client.Tcp
         private string GetConnetionString()
         {
             string address = "<NoConnection>";
-            if (this.agents.Count > 0)
+            if (this.agent != null)
             {
-                address = this.agents[0].ToString();
+                address = this.agent.ToString();
             }
             return string.Format("连接到{0}", address);
         }
@@ -211,7 +214,7 @@ namespace Scada.Data.Client.Tcp
                     agent.AddWirelessInfo(dc.WirelessIp, dc.WirelessPort);
                     SynchronizationContext synchronizationContext = SynchronizationContext.Current;
                     agent.SetSynchronizationContext(synchronizationContext);
-                    this.agents.Add(agent);
+                    this.agent = agent;
 
                     agent.Connect();
                 }
@@ -252,15 +255,28 @@ namespace Scada.Data.Client.Tcp
             this.keepAliveTimer.Start();
         }
 
+
+        private void DoLog(string fileName, string msg)
+        {
+            string line = string.Format("[{0}] {1}", DateTime.Now.ToString("HH:mm:ss"), msg);
+            if (LoggerClient.Contains(fileName))
+            {
+                this.logger.Send(fileName, line);
+            }
+            Logger logger = Log.GetLogFile(fileName);
+            if (logger != null)
+            {
+                logger.Log(line);
+            }
+        }
+
+
         private void KeepAliveTick(object sender, EventArgs e)
         {
             DataPacket p = builder.GetKeepAlivePacket();
-            foreach (var agent in this.agents)
+            if (agent.Stream != null)
             {
-                if (agent.Stream != null)
-                {
-                    agent.SendPacket(p);
-                }
+                agent.SendPacket(p);
             }
         }
 
@@ -293,13 +309,7 @@ namespace Scada.Data.Client.Tcp
 
         public void SendDataPackets(DateTime time, string deviceKey)
         {
-            bool willSend = false;
-            foreach (var agent in this.agents)
-            {
-                willSend |= agent.SendDataStarted;
-            }
-
-            if (!willSend) //// TODO: !
+            if (this.agent == null || !this.agent.SendDataStarted)
             {
                 return;
             }
@@ -314,11 +324,7 @@ namespace Scada.Data.Client.Tcp
                     List<DataPacket> pks = builder.GetDataPackets(deviceKey, time, content);
                     foreach (var p in pks)
                     {
-                        // Sent by each agent.s
-                        foreach (var agent in this.agents)
-                        {
-                            agent.SendDataPacket(p);
-                        }
+                        agent.SendDataPacket(p);                        
                     }
 
                     if (pks.Count > 0)
@@ -334,7 +340,7 @@ namespace Scada.Data.Client.Tcp
 
                         if (true)
                         {
-                            this.RecordSendData(deviceKey, false);
+                            this.UpdateSendDataRecord(deviceKey, false);
                         }
                     }
                 }
@@ -361,23 +367,13 @@ namespace Scada.Data.Client.Tcp
                         p = builder.GetDataPacket(deviceKey, d, true);
                     }
 
-                    // Sent by each agent
-                    bool sent = false;
-                    foreach (var agent in this.agents)
-                    {
-                        bool result = agent.SendDataPacket(p);
-                        if (result)
-                        {
-                            string msg = string.Format("[{0}]: @{1} {2}", DateTime.Now, agent.ToString(), p.ToString());
-                            Log.GetLogFile(deviceKey).Log(msg);
-                        }
-                        sent |= result;
-                    }
 
+                    bool sent = agent.SendDataPacket(p);
                     if (sent)
                     {
-                        string msg = string.Format("{0} Agent(s): {1}", this.agents.Count, p.ToString());
-                        this.RecordSendData(deviceKey, false);
+                        string msg = string.Format("[{0}]: @{1} {2}", DateTime.Now, agent.ToString(), p.ToString());
+                        Log.GetLogFile(deviceKey).Log(msg);
+                        this.UpdateSendDataRecord(deviceKey, false);
                     }
                 }
                 else
@@ -468,7 +464,7 @@ namespace Scada.Data.Client.Tcp
                 else if (NotifyEvents.SentHistoryData == notify)
                 {
                     string deviceKey = msg.ToLower();
-                    this.RecordSendData(deviceKey, true);
+                    this.UpdateSendDataRecord(deviceKey, true);
                 }
                 /// 国家数据中心相关
                 else if (NotifyEvents.ConnectToCountryCenter == notify)
@@ -490,7 +486,7 @@ namespace Scada.Data.Client.Tcp
             if (this.countryCenterAgent != null)
             {
                 this.countryCenterAgent.Connect();
-                this.agents.Add(this.countryCenterAgent);
+                //this.agents.Add(this.countryCenterAgent);
             }
             else
             {
@@ -509,7 +505,7 @@ namespace Scada.Data.Client.Tcp
             if (this.countryCenterAgent != null)
             {
                 this.countryCenterAgent.Disconnect();
-                this.agents.Remove(this.countryCenterAgent);
+                // this.agents.Remove(this.countryCenterAgent);
             }
         }
 
@@ -525,8 +521,10 @@ namespace Scada.Data.Client.Tcp
             this.ShowAtTaskBar(false);
         }
 
+        private int updateCounter = 0;
+
         // Realtime data sending...details
-        private void RecordSendData(string deviceKey, bool history)
+        private void UpdateSendDataRecord(string deviceKey, bool history)
         {
             var details = this.detailsDict[deviceKey];
             if (history)
@@ -538,6 +536,14 @@ namespace Scada.Data.Client.Tcp
                 details.LatestSendDataTime = DateTime.Now;
             }
             details.SendDataCount += 1;
+
+            // 主动更新数据表
+            this.updateCounter++;
+            if (this.mainTabCtrl.SelectedIndex == 2 && this.updateCounter > 7)
+            {
+                this.updateCounter = 0;
+                this.UpdateDetailsListView();    
+            }
         }
 
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
@@ -591,18 +597,18 @@ namespace Scada.Data.Client.Tcp
 
         private void mainTabCtrl_SelectedIndexChanged(object sender, EventArgs e)
         {
+            this.connHistoryList.Items.Clear();
+
             if (this.mainTabCtrl.SelectedIndex == 1)
             {
-                this.connHistoryList.Items.Clear();
-
                 foreach (var cr in this.connectionHistory)
                 {
                     this.connHistoryList.Items.Insert(0, cr.ToString());
                 }
             }
-            else
+            else if (this.mainTabCtrl.SelectedIndex == 2)
             {
-                this.connHistoryList.Items.Clear();
+                this.UpdateDetailsListView();
             }
         }
 
@@ -644,9 +650,9 @@ namespace Scada.Data.Client.Tcp
 
                 DeviceDataDetails details = this.detailsDict[deviceKey];
 
-                item.SubItems[0].Text = details.SendDataCount.ToString();
-                item.SubItems[1].Text = details.LatestSendDataTime.ToString(TimeFormat);
-                item.SubItems[2].Text = details.LatestSendHistoryDataTime.ToString(TimeFormat);
+                item.SubItems[1].Text = details.SendDataCount.ToString();
+                item.SubItems[2].Text = details.LatestSendDataTime.ToString(TimeFormat);
+                item.SubItems[3].Text = details.LatestSendHistoryDataTime.ToString(TimeFormat);
             }
             
         }

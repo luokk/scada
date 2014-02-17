@@ -137,7 +137,6 @@ namespace Scada.Data.Client.Tcp
             this.ServerAddress = serverAddress;
             this.ServerPort = serverPort;
             this.handler = new MessageDataHandler(this);
-            LoggerClient.Initialize();
 
             this.IsRetryConnection = true;
         }
@@ -208,7 +207,6 @@ namespace Scada.Data.Client.Tcp
                     logger.Log(line);
                 }
             }), null);
-
         }
 
         public override string ToString()
@@ -246,16 +244,23 @@ namespace Scada.Data.Client.Tcp
         {
             try
             {
-                this.client = new TcpClient();
-                this.client.ReceiveTimeout = Timeout;
+                if (this.client == null)
+                {
+                    this.client = new TcpClient();
+                    this.client.ReceiveTimeout = Timeout;
 
-                this.client.BeginConnect(serverIpAddress, serverPort,
-                    new AsyncCallback(ConnectCallback),
-                    this.client);
+                    this.client.BeginConnect(serverIpAddress, serverPort,
+                        new AsyncCallback(ConnectCallback),
+                        this.client);
 
-                string msg = string.Format("Connecting to {0}:{1} retry times = {2}.", serverIpAddress, serverPort, this.retryCount);
-                this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Connecting, msg);
+                    string msg = string.Format("Connecting to {0}:{1} retry times = {2}.", serverIpAddress, serverPort, this.retryCount);
+                    this.DoLog(ScadaDataClient, msg);
+                    this.NotifyEvent(this, NotifyEvents.Connecting, msg);
+                }
+                else
+                {
+                    // TODO: Multi-thread;
+                }
             }
             catch (Exception e)
             {
@@ -292,28 +297,35 @@ namespace Scada.Data.Client.Tcp
 
         private void ConnectCallback(IAsyncResult result)
         {
-            if (result.IsCompleted)
+            if (!result.IsCompleted || this.MainThreadSyncContext == null)
             {
+                return;
+            }
+            this.MainThreadSyncContext.Post(new SendOrPostCallback((o) => 
+            { 
                 try
                 {
                     TcpClient client = (TcpClient)result.AsyncState;
-                    client.EndConnect(result);
-
-                    if (client.Connected)
+                    if (client != null)
                     {
-                        // Send need this.stream
-                        this.Stream = client.GetStream();
+                        client.EndConnect(result);
 
-                        this.IsWired = this.isConnectingWired;
-                        
-                        this.BeginRead(client, this.Stream);
+                        if (client.Connected)
+                        {
+                            // Send need this.stream
+                            this.Stream = client.GetStream();
 
-                        // [Auth]
-                        this.handler.SendAuthPacket();
+                            this.IsWired = this.isConnectingWired;
 
-                        string msg = string.Format("Connected to {0}", this.ToString());
-                        this.DoLog(ScadaDataClient, msg);
-                        this.NotifyEvent(this, NotifyEvents.Connected, msg);
+                            this.BeginRead(client, this.Stream);
+
+                            // [Auth]
+                            this.handler.SendAuthPacket();
+
+                            string msg = string.Format("Connected to {0}", this.ToString());
+                            this.DoLog(ScadaDataClient, msg);
+                            this.NotifyEvent(this, NotifyEvents.Connected, msg);
+                        }
                     }
                 }
                 catch (Exception e)
@@ -325,44 +337,50 @@ namespace Scada.Data.Client.Tcp
                     
                     this.OnConnectionException(e);
                 }
-            }
+            }), null);
         }
 
         // BeginRead~ <client>
         private void BeginRead(TcpClient client, NetworkStream stream)
-        {            
-            if (stream.CanRead)
+        {
+            this.MainThreadSyncContext.Post(new SendOrPostCallback((o) =>
             {
-                try
+                if (stream.CanRead)
                 {
-                    SessionState session = new SessionState(client, stream);
-                    IAsyncResult ar = stream.BeginRead(session.buffer, 0, SessionState.BufferSize,
-                        new AsyncCallback(OnReadCallback), session);
+                    try
+                    {
+                        SessionState session = new SessionState(client, stream);
+                        IAsyncResult ar = stream.BeginRead(session.buffer, 0, SessionState.BufferSize,
+                            new AsyncCallback(OnReadCallback), session);
+                    }
+                    catch (Exception e)
+                    {
+                        this.OnConnectionException(e);
+                    }
                 }
-                catch (Exception e)
-                {
-                    this.OnConnectionException(e);
-                }
-            }
+            }), null);
         }
 
         private void OnReadCallback(IAsyncResult result)
         {
-            if (result.IsCompleted)
+            this.MainThreadSyncContext.Post(new SendOrPostCallback((o) =>
             {
-                SessionState session = (SessionState)result.AsyncState;
-                try
+                if (result.IsCompleted)
                 {
-                    int c = session.Stream.EndRead(result);
-                    // Log handled in this function
-                    this.DoReceivedMessages(session.GetReceivedMessage(c));
-                    this.BeginRead(session.Client, session.Stream);
+                    SessionState session = (SessionState)result.AsyncState;
+                    try
+                    {
+                        int c = session.Stream.EndRead(result);
+                        // Log handled in this function
+                        this.DoReceivedMessages(session.GetReceivedMessage(c));
+                        this.BeginRead(session.Client, session.Stream);
+                    }
+                    catch (Exception e)
+                    {
+                        this.OnConnectionException(e);
+                    }
                 }
-                catch (Exception e)
-                {
-                    this.OnConnectionException(e);
-                }
-            }
+            }), null);
         }
 
         private void DoReceivedMessages(string messages)

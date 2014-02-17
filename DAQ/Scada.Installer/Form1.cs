@@ -111,7 +111,6 @@ namespace Scada.Installer
                 else
                 {
                     this.AddLog("更新成功!");
-                    LaunchMainSettings();
                 }
 
                 this.Invoke(new MyInvoke((object sender, string p) => 
