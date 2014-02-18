@@ -54,6 +54,8 @@ namespace Scada.Data.Client.Tcp
         Connecting,
         Connected,
         Disconnect,
+        BeginRead,
+        EndRead,
         Received,
         Sent,
         SentHistoryData,
@@ -194,6 +196,7 @@ namespace Scada.Data.Client.Tcp
         {
             if (this.MainThreadSyncContext == null)
                 return;
+
             this.MainThreadSyncContext.Post(new SendOrPostCallback((o) => 
             {
                 string line = string.Format("[{0}] {1}", DateTime.Now.ToString("HH:mm:ss"), msg);
@@ -220,11 +223,56 @@ namespace Scada.Data.Client.Tcp
 
         private void OnConnectionException(Exception e)
         {
+            this.TryToPing();
             this.Disconnect();
             if (this.IsRetryConnection)
             {
                 this.RetryConnection();
             }
+        }
+
+        private void TryToPing()
+        {
+            new Thread(new ParameterizedThreadStart((o) => 
+            {
+                Process p = new Process();
+                p.StartInfo.FileName = "cmd.exe";
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardInput = true;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.CreateNoWindow = true;
+
+                p.Start();
+
+                string addr1 = string.Format("{0}:{1}", this.ServerAddress, this.ServerPort);
+                string cmd1 = string.Format("ping -n 4 {0}", addr1);
+                p.StandardInput.WriteLine(cmd1);
+
+                if (!string.IsNullOrEmpty(WirelessServerAddress))
+                {
+                    string addr2 = string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
+                    string cmd2 = string.Format("ping -n 4 {0}", addr2);
+                    p.StandardInput.WriteLine(cmd2);
+                }
+                p.StandardInput.WriteLine("exit");
+                string content = p.StandardOutput.ReadToEnd();
+                // TODO: lines break
+                string[] lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var line in lines)
+                {
+                    var l = line.Trim();
+                    if (l.StartsWith("Reply") || l.StartsWith("Ping request"))
+                    {
+                        DoLog(ScadaDataClient, l);
+                    }
+                }
+                
+
+                p.WaitForExit();
+                int n = p.ExitCode;  // n 为进程执行返回值  
+                p.Close();
+            })).Start(null);
+
         }
 
 
@@ -355,6 +403,10 @@ namespace Scada.Data.Client.Tcp
                     }
                     catch (Exception e)
                     {
+                        string msg = string.Format("BeginRead from {0} Failed => {1}", this.ToString(), e.Message);
+                        this.DoLog(ScadaDataClient, msg);
+                        // this.NotifyEvent(this, NotifyEvents.BeginRead, msg); 
+
                         this.OnConnectionException(e);
                     }
                 }
@@ -377,6 +429,10 @@ namespace Scada.Data.Client.Tcp
                     }
                     catch (Exception e)
                     {
+                        string msg = string.Format("EndRead from {0} Failed => {1}", this.ToString(), e.Message);
+                        this.DoLog(ScadaDataClient, msg);
+                        // this.NotifyEvent(this, NotifyEvents.EndRead, msg); 
+
                         this.OnConnectionException(e);
                     }
                 }
@@ -422,6 +478,10 @@ namespace Scada.Data.Client.Tcp
             }
             catch(Exception e)
             {
+                string msg = string.Format("Sent to {0} Failed => {1}", this.ToString(), e.Message);
+                this.DoLog(ScadaDataClient, msg);
+                this.NotifyEvent(this, NotifyEvents.Sent, msg); 
+
                 this.OnConnectionException(e);
                 return false;
             }

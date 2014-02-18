@@ -457,7 +457,7 @@ namespace Scada.Data.Client.Tcp
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.DisconnectedTime = DateTime.Now;
                 }
-                else if (NotifyEvents.Received == notify)
+                else if (NotifyEvents.Sent == notify)
                 {
 
                 }
