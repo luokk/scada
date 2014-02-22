@@ -69,6 +69,31 @@ namespace Scada.Data.Client.Tcp
         Country = 2,
     }
 
+    public class ThreadMashaller
+    {
+        public ThreadMashaller(SynchronizationContext synchronizationContext)
+        {
+            this.synchronizationContext = synchronizationContext;
+            this.threadId = Thread.CurrentThread.ManagedThreadId;
+        }
+
+        public void Mashall(Action<object> action)
+        {
+            if (Thread.CurrentThread.ManagedThreadId == this.threadId)
+            {
+                action(null);
+            }
+            else
+            {
+                this.synchronizationContext.Post(new SendOrPostCallback(action), null);
+            }
+        }
+
+        private int threadId;
+
+        private SynchronizationContext synchronizationContext;
+    }
+
     // public delegate void OnReceiveMessage(Agent agent, string msg);
 
     public delegate void NotifyEventHandler(Agent agent, NotifyEvents ne, string msg);
@@ -192,15 +217,42 @@ namespace Scada.Data.Client.Tcp
             set;
         }
 
+        //////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Optimze: Only has logger.server process, the module would try HTTP connection.
+        /// Detect process every 15 sec, not every time, 
+        /// </summary>
+        private static long lastDetectTimeTicks = 0;
+
+        private static bool lastDetectResult = false;
+
+        public static void ResetDetectTime()
+        {
+            lastDetectTimeTicks = 0;
+        }
+
+        private static bool ExistLoggerConsoleProc()
+        {
+            long nowTicks = DateTime.Now.Ticks;
+            if (nowTicks - lastDetectTimeTicks > (15 * 10000000))
+            {
+                lastDetectTimeTicks = nowTicks;
+                Process[] ps = Process.GetProcessesByName(@"Scada.Logger.Server");
+                lastDetectResult = (ps != null && ps.Length > 0);
+                return lastDetectResult;
+            }
+            return lastDetectResult;
+        }
+
         private void DoLog(string fileName, string msg)
         {
-            if (this.MainThreadSyncContext == null)
+            if (this.UIThreadMashaller == null)
                 return;
 
-            this.MainThreadSyncContext.Post(new SendOrPostCallback((o) => 
+            this.UIThreadMashaller.Mashall((_n) => 
             {
                 string line = string.Format("[{0}] {1}", DateTime.Now.ToString("HH:mm:ss"), msg);
-                if (LoggerClient.Contains(fileName))
+                if (ExistLoggerConsoleProc() && LoggerClient.Contains(fileName))
                 {
                     this.logger.Send(fileName, line);
                 }
@@ -209,7 +261,7 @@ namespace Scada.Data.Client.Tcp
                 {
                     logger.Log(line);
                 }
-            }), null);
+            });
         }
 
         public override string ToString()
@@ -223,6 +275,13 @@ namespace Scada.Data.Client.Tcp
 
         private void OnConnectionException(Exception e)
         {
+            DateTime now = DateTime.Now;
+            long s = (now.Ticks - this.LastExceptionTime.Ticks) / 10000000;
+            if (s < 5)
+            {
+                return;
+            }
+            this.LastExceptionTime = now;
             this.TryToPing();
             this.Disconnect();
             if (this.IsRetryConnection)
@@ -266,7 +325,6 @@ namespace Scada.Data.Client.Tcp
                         DoLog(ScadaDataClient, l);
                     }
                 }
-                
 
                 p.WaitForExit();
                 int n = p.ExitCode;  // n 为进程执行返回值  
@@ -274,7 +332,6 @@ namespace Scada.Data.Client.Tcp
             })).Start(null);
 
         }
-
 
         public void Connect()
         {
@@ -324,7 +381,11 @@ namespace Scada.Data.Client.Tcp
             this.IsWired = null;
             try
             {
-                this.Stream = null;
+                if (this.Stream != null)
+                {
+                    this.Stream.Close();
+                }
+
                 if (this.client != null)
                 {
                     this.client.Close();
@@ -339,18 +400,14 @@ namespace Scada.Data.Client.Tcp
                 this.DoLog(ScadaDataClient, msg);
                 this.NotifyEvent(this, NotifyEvents.Disconnect, msg);
             }
-
+            this.Stream = null;
             this.client = null;
         }
 
         private void ConnectCallback(IAsyncResult result)
         {
-            if (!result.IsCompleted || this.MainThreadSyncContext == null)
+            if (result.IsCompleted)
             {
-                return;
-            }
-            this.MainThreadSyncContext.Post(new SendOrPostCallback((o) => 
-            { 
                 try
                 {
                     TcpClient client = (TcpClient)result.AsyncState;
@@ -378,65 +435,60 @@ namespace Scada.Data.Client.Tcp
                 }
                 catch (Exception e)
                 {
-                    string address = this.isConnectingWired ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);            
+                    string address = this.isConnectingWired ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
                     string msg = string.Format("Connected to {0} Failed => {1}", address, e.Message);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connected, msg); 
-                    
+                    this.NotifyEvent(this, NotifyEvents.Connected, msg);
+
                     this.OnConnectionException(e);
                 }
-            }), null);
+
+            }
         }
 
         // BeginRead~ <client>
         private void BeginRead(TcpClient client, NetworkStream stream)
         {
-            this.MainThreadSyncContext.Post(new SendOrPostCallback((o) =>
+            if (stream.CanRead)
             {
-                if (stream.CanRead)
+                try
                 {
-                    try
-                    {
-                        SessionState session = new SessionState(client, stream);
-                        IAsyncResult ar = stream.BeginRead(session.buffer, 0, SessionState.BufferSize,
-                            new AsyncCallback(OnReadCallback), session);
-                    }
-                    catch (Exception e)
-                    {
-                        string msg = string.Format("BeginRead from {0} Failed => {1}", this.ToString(), e.Message);
-                        this.DoLog(ScadaDataClient, msg);
-                        // this.NotifyEvent(this, NotifyEvents.BeginRead, msg); 
-
-                        this.OnConnectionException(e);
-                    }
+                    SessionState session = new SessionState(client, stream);
+                    IAsyncResult ar = stream.BeginRead(session.buffer, 0, SessionState.BufferSize,
+                        new AsyncCallback(OnReadCallback), session);
                 }
-            }), null);
+                catch (Exception e)
+                {
+                    string msg = string.Format("BeginRead from {0} Failed => {1}", this.ToString(), e.Message);
+                    this.DoLog(ScadaDataClient, msg);
+                    // this.NotifyEvent(this, NotifyEvents.BeginRead, msg); 
+
+                    this.OnConnectionException(e);
+                }
+            }
         }
 
         private void OnReadCallback(IAsyncResult result)
         {
-            this.MainThreadSyncContext.Post(new SendOrPostCallback((o) =>
+            if (result.IsCompleted)
             {
-                if (result.IsCompleted)
+                SessionState session = (SessionState)result.AsyncState;
+                try
                 {
-                    SessionState session = (SessionState)result.AsyncState;
-                    try
-                    {
-                        int c = session.Stream.EndRead(result);
-                        // Log handled in this function
-                        this.DoReceivedMessages(session.GetReceivedMessage(c));
-                        this.BeginRead(session.Client, session.Stream);
-                    }
-                    catch (Exception e)
-                    {
-                        string msg = string.Format("EndRead from {0} Failed => {1}", this.ToString(), e.Message);
-                        this.DoLog(ScadaDataClient, msg);
-                        // this.NotifyEvent(this, NotifyEvents.EndRead, msg); 
-
-                        this.OnConnectionException(e);
-                    }
+                    int c = session.Stream.EndRead(result);
+                    // Log handled in this function
+                    this.DoReceivedMessages(session.GetReceivedMessage(c));
+                    this.BeginRead(session.Client, session.Stream);
                 }
-            }), null);
+                catch (Exception e)
+                {
+                    string msg = string.Format("EndRead from {0} Failed => {1}", this.ToString(), e.Message);
+                    this.DoLog(ScadaDataClient, msg);
+                    // this.NotifyEvent(this, NotifyEvents.EndRead, msg); 
+
+                    this.OnConnectionException(e);
+                }
+            }
         }
 
         private void DoReceivedMessages(string messages)
@@ -473,8 +525,15 @@ namespace Scada.Data.Client.Tcp
         {
             try
             {
-                this.Stream.Write(message, 0, message.Length);
-                return true;
+                if (this.Stream != null)
+                {
+                    this.Stream.Write(message, 0, message.Length);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             catch(Exception e)
             {
@@ -483,8 +542,8 @@ namespace Scada.Data.Client.Tcp
                 this.NotifyEvent(this, NotifyEvents.Sent, msg); 
 
                 this.OnConnectionException(e);
-                return false;
             }
+            return false;
         }
 
         // A. 每30秒试图重连一次
@@ -551,20 +610,23 @@ namespace Scada.Data.Client.Tcp
         {
             if (p == null)
                 return false;
-
+            bool result = false;
             if (this.OnHistoryData)
             {
                 string s = p.ToString();
-                this.NotifyEvent(this, NotifyEvents.SentHistoryData, p.DeviceKey);
-                return this.Send(Encoding.ASCII.GetBytes(s));
+                result = this.Send(Encoding.ASCII.GetBytes(s));
+                if (result)
+                {
+                    this.NotifyEvent(this, NotifyEvents.SentHistoryData, p.DeviceKey);
+                }
             }
-            return false;
+            return result;
         }
 
-        internal void SendReplyPacket(DataPacket p, DateTime time)
+        internal bool SendReplyPacket(DataPacket p, DateTime time)
         {
             string s = p.ToString();
-            this.Send(Encoding.ASCII.GetBytes(s));
+            return this.Send(Encoding.ASCII.GetBytes(s));
         }
 
         internal void StartConnectCountryCenter()
@@ -579,12 +641,12 @@ namespace Scada.Data.Client.Tcp
             this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg);
         }
 
-
-        internal void SetSynchronizationContext(SynchronizationContext synchronizationContext)
+        public ThreadMashaller UIThreadMashaller
         {
-            this.MainThreadSyncContext = synchronizationContext;  
+            get;
+            set;
         }
 
-        public SynchronizationContext MainThreadSyncContext { get; set; }
+        public DateTime LastExceptionTime { get; set; }
     }
 }

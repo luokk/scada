@@ -213,7 +213,7 @@ namespace Scada.Data.Client.Tcp
                     Agent agent = CreateAgent(dc.Ip, dc.Port, false);
                     agent.AddWirelessInfo(dc.WirelessIp, dc.WirelessPort);
                     SynchronizationContext synchronizationContext = SynchronizationContext.Current;
-                    agent.SetSynchronizationContext(synchronizationContext);
+                    agent.UIThreadMashaller = new ThreadMashaller(synchronizationContext);
                     this.agent = agent;
 
                     agent.Connect();
@@ -330,18 +330,15 @@ namespace Scada.Data.Client.Tcp
                     if (pks.Count > 0)
                     {
                         Logger logger = Log.GetLogFile(deviceKey);
-                        logger.Log("---- A Group of NaI file-content ----");
+                        logger.Log("---- BEGIN ----");
                         foreach (var p in pks)
                         {
                             string msg = p.ToString();
                             logger.Log(msg);
                         }
-                        logger.Log("---- ---- ---- ---- ---- ---- ---- ----");
+                        logger.Log("---- END ---- ");
 
-                        if (true)
-                        {
-                            this.UpdateSendDataRecord(deviceKey, false);
-                        }
+                        this.UpdateSendDataRecord(deviceKey, false);
                     }
                 }
                 else
@@ -367,9 +364,7 @@ namespace Scada.Data.Client.Tcp
                         p = builder.GetDataPacket(deviceKey, d, true);
                     }
 
-
-                    bool sent = agent.SendDataPacket(p);
-                    if (sent)
+                    if (agent.SendDataPacket(p))
                     {
                         string msg = string.Format("[{0}]: @{1} {2}", DateTime.Now, agent.ToString(), p.ToString());
                         Log.GetLogFile(deviceKey).Log(msg);
@@ -623,7 +618,6 @@ namespace Scada.Data.Client.Tcp
             this.InitDeviceColumn("scada.isampler", "碘采样器");
             this.InitDeviceColumn("scada.shelter", "环境与安防监控");
             this.InitDeviceColumn("scada.dwd", "干湿沉降采样器");
-
         }
 
         private const string TimeFormat = "yyyy-MM-dd HH:mm:ss";
@@ -654,7 +648,6 @@ namespace Scada.Data.Client.Tcp
                 item.SubItems[2].Text = details.LatestSendDataTime.ToString(TimeFormat);
                 item.SubItems[3].Text = details.LatestSendHistoryDataTime.ToString(TimeFormat);
             }
-            
         }
 
     }
