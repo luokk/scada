@@ -136,6 +136,11 @@ namespace Scada.Data.Client.Tcp
 
         public void OnMessageDispatcher(string msg)
         {
+            if (!(msg.EndsWith("\r") || msg.EndsWith("\n")))
+            {
+                // Imcompleted Packet
+                return;
+            }
             ReceivedCommand code = (ReceivedCommand)ParseCommandCode(msg);
 
             switch (code)

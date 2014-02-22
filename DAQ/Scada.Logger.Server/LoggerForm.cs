@@ -132,6 +132,7 @@ namespace Scada.Logger.Server
                     {
                         string logMsg = content.Substring(e + 2);
                         listBox.Items.Add(logMsg);
+                        listBox.SelectedIndex = listBox.Items.Count - 1;
                         listBox.SelectedIndex = -1;
                     }
                 }

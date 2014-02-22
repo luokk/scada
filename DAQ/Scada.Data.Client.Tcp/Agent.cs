@@ -17,7 +17,7 @@ namespace Scada.Data.Client.Tcp
     /// </summary>
     public class SessionState
     {
-        public const int BufferSize = 1024;
+        public const int BufferSize = 2048;
 
         public SessionState(TcpClient client, NetworkStream stream)
         {
@@ -27,7 +27,7 @@ namespace Scada.Data.Client.Tcp
 
         public string GetReceivedMessage(int size)
         {
-            if (size > 0)
+            if (size > 0 && size <= BufferSize)
             {
                 return Encoding.ASCII.GetString(buffer, 0, size);
             }
@@ -166,6 +166,7 @@ namespace Scada.Data.Client.Tcp
             this.handler = new MessageDataHandler(this);
 
             this.IsRetryConnection = true;
+            this.ConnectRetryRoutine();
         }
 
         internal void AddWirelessInfo(string wirelessServerAddress, int wirelessServerPort)
@@ -284,10 +285,6 @@ namespace Scada.Data.Client.Tcp
             this.LastExceptionTime = now;
             this.TryToPing();
             this.Disconnect();
-            if (this.IsRetryConnection)
-            {
-                this.RetryConnection();
-            }
         }
 
         private void TryToPing()
@@ -303,14 +300,12 @@ namespace Scada.Data.Client.Tcp
 
                 p.Start();
 
-                string addr1 = string.Format("{0}:{1}", this.ServerAddress, this.ServerPort);
-                string cmd1 = string.Format("ping -n 4 {0}", addr1);
+                string cmd1 = string.Format("ping {0}", this.ServerAddress);
                 p.StandardInput.WriteLine(cmd1);
 
-                if (!string.IsNullOrEmpty(WirelessServerAddress))
+                if (!string.IsNullOrEmpty(WirelessServerAddress) && this.ServerAddress != this.WirelessServerAddress)
                 {
-                    string addr2 = string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
-                    string cmd2 = string.Format("ping -n 4 {0}", addr2);
+                    string cmd2 = string.Format("ping {0}", WirelessServerAddress);
                     p.StandardInput.WriteLine(cmd2);
                 }
                 p.StandardInput.WriteLine("exit");
@@ -353,7 +348,7 @@ namespace Scada.Data.Client.Tcp
                 {
                     this.client = new TcpClient();
                     this.client.ReceiveTimeout = Timeout;
-
+                    
                     this.client.BeginConnect(serverIpAddress, serverPort,
                         new AsyncCallback(ConnectCallback),
                         this.client);
@@ -364,7 +359,9 @@ namespace Scada.Data.Client.Tcp
                 }
                 else
                 {
-                    // TODO: Multi-thread;
+                    string msg = string.Format("Connecting to {0}:{1} Already!!", serverIpAddress, serverPort);
+                    this.DoLog(ScadaDataClient, msg);
+                    this.NotifyEvent(this, NotifyEvents.Connecting, msg);
                 }
             }
             catch (Exception e)
@@ -472,17 +469,26 @@ namespace Scada.Data.Client.Tcp
         {
             if (result.IsCompleted)
             {
-                SessionState session = (SessionState)result.AsyncState;
+                int size = 0;
                 try
                 {
-                    int c = session.Stream.EndRead(result);
+                    SessionState session = (SessionState)result.AsyncState;
+
+                    Thread.Sleep(100);
+                    size = session.Stream.EndRead(result);
+                    if (size > 0)
+                    {
+                        string content = session.GetReceivedMessage(size);
+
+                        this.DoReceivedMessages(content);
+                    }
                     // Log handled in this function
-                    this.DoReceivedMessages(session.GetReceivedMessage(c));
+                    
                     this.BeginRead(session.Client, session.Stream);
                 }
                 catch (Exception e)
                 {
-                    string msg = string.Format("EndRead from {0} Failed => {1}", this.ToString(), e.Message);
+                    string msg = string.Format("EndRead from {0} Failed => {1} Size={2}", this.ToString(), e.Message, size);
                     this.DoLog(ScadaDataClient, msg);
                     // this.NotifyEvent(this, NotifyEvents.EndRead, msg); 
 
@@ -498,13 +504,17 @@ namespace Scada.Data.Client.Tcp
                 return;
             }
 
-            string[] msgs = messages.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+            string[] msgs = messages.Split(new string[] { "\n" }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string msg in msgs)
             {
-                if (msg.Trim() != string.Empty)
+                this.ShowReceivedMessage(msg.Trim());
+                if (msg.EndsWith("\r") || msg.EndsWith("\n"))
                 {
-                    this.ShowReceivedMessage(msg);
                     this.handler.OnMessageDispatcher(msg);
+                }
+                else
+                {
+                    // 不完整的包!
                 }
             }
         }
@@ -550,35 +560,31 @@ namespace Scada.Data.Client.Tcp
         // B. 6次连接失败, 则选择无线方式
         // C. 无线连接也失败, 则重新测试连接无线4次
         // D. 无线也连接不上, 则回到A步骤
-        private void RetryConnection()
+        private void ConnectRetryRoutine()
         {
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 30 * 1000;
             timer.Elapsed += (s, e) => 
             {
-                if (timer != null)
+                if (this.client != null)
+                    return;
+
+                if (this.UIThreadMashaller != null)
                 {
-                    // Timer once;
-                    timer.Stop();
-                    timer.Dispose();
-                    // Connect to wireline Network.
-                    if (this.retryCount < 6)
+                    this.UIThreadMashaller.Mashall((o) => 
                     {
                         this.retryCount++;
-                        this.Connect();
-                    }
-                    else if (this.retryCount < 10)
-                    {
-                        this.retryCount++;
-                        this.ConnectToWireless();
-                    }
-                    else
-                    {
-                        this.retryCount = 0;
-                    }
-                }
+                        if (this.retryCount % 10 < 6)
+                        {
+                            this.Connect();
+                        }
+                        else
+                        {
+                            this.ConnectToWireless();
+                        }
+                    });
+                }                
             };
-            
             timer.Start();
         }
 
