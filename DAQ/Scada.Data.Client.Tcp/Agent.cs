@@ -287,6 +287,17 @@ namespace Scada.Data.Client.Tcp
             this.Disconnect();
         }
 
+        private IPStatus GetPingResult(string serverIpAddress)
+        {
+            Ping ping = new Ping();
+            PingOptions options = new PingOptions();
+            options.DontFragment = true;
+            string data = "Ping...";
+            byte[] buffer = Encoding.ASCII.GetBytes(data);  
+            PingReply reply = ping.Send(serverIpAddress, 200, buffer, options);
+            return reply.Status;
+        }
+
         private void TryToPing()
         {
             new Thread(new ParameterizedThreadStart((o) => 
@@ -300,14 +311,9 @@ namespace Scada.Data.Client.Tcp
 
                 p.Start();
 
-                string cmd1 = string.Format("ping {0}", this.ServerAddress);
-                p.StandardInput.WriteLine(cmd1);
+                string cmd = string.Format("ping -n 1 {0}", this.ServerAddress);
+                p.StandardInput.WriteLine(cmd);
 
-                if (!string.IsNullOrEmpty(WirelessServerAddress) && this.ServerAddress != this.WirelessServerAddress)
-                {
-                    string cmd2 = string.Format("ping {0}", WirelessServerAddress);
-                    p.StandardInput.WriteLine(cmd2);
-                }
                 p.StandardInput.WriteLine("exit");
                 string content = p.StandardOutput.ReadToEnd();
                 // TODO: lines break
@@ -563,7 +569,7 @@ namespace Scada.Data.Client.Tcp
         private void ConnectRetryRoutine()
         {
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 30 * 1000;
+            timer.Interval = 5000; // Ten seconds
             timer.Elapsed += (s, e) => 
             {
                 if (this.client != null)
@@ -571,20 +577,25 @@ namespace Scada.Data.Client.Tcp
 
                 if (this.UIThreadMashaller != null)
                 {
-                    this.UIThreadMashaller.Mashall((o) => 
+                    this.retryCount++;
+                    if (this.GetPingResult(this.ServerAddress) == IPStatus.Success)
                     {
-                        this.retryCount++;
-                        if (this.retryCount % 10 < 6)
+                        this.UIThreadMashaller.Mashall((o) =>
                         {
                             this.Connect();
-                        }
-                        else
+                        });   
+                    }
+                    else if (this.GetPingResult(this.WirelessServerAddress) == IPStatus.Success)
+                    {
+                        this.UIThreadMashaller.Mashall((o) =>
                         {
                             this.ConnectToWireless();
-                        }
-                    });
-                }                
+                        });
+                    }
+                }
+
             };
+
             timer.Start();
         }
 
