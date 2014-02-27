@@ -299,7 +299,11 @@ namespace Scada.Installer
             try
             {
                 string programPath = this.installPath.Text;
-                Directory.CreateDirectory(programPath);
+                if (!Directory.Exists(programPath))
+                {
+                    this.installMode = true;
+                    Directory.CreateDirectory(programPath);
+                }
 
                 this.AddLog("目录创建成功");
                 return true;
@@ -370,7 +374,7 @@ namespace Scada.Installer
 
         }
 
-        private bool installMode = true;
+        private bool installMode = false;
 
 
         private string GetInstallerPath()

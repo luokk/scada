@@ -507,7 +507,7 @@ namespace Scada.Main
 
         private void OpenProcessByName(string name, bool uac = false)
         {
-            string fileName = name;
+            string fileName = LogPath.GetExeFilePath(name);
             try
             {
                 ProcessStartInfo processInfo = new ProcessStartInfo();

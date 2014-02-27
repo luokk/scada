@@ -63,6 +63,57 @@ namespace Scada.Data.Client.Tcp
         public ushort wMilliseconds;
     }
 
+    class HistoryDataBundle
+    {
+        public string BeginTime
+        {
+            get;
+            set;
+        }
+
+        public string EndTime
+        {
+            get;
+            set;
+        }
+
+        public int Count
+        {
+            get;
+            set;
+        }
+
+        public string QN
+        {
+            get;
+            private set;
+        }
+
+        public string ENO
+        {
+            get;
+            private set;
+        }
+
+        public string PolId
+        {
+            get;
+            private set;
+        }
+
+
+        public HistoryDataBundle(string qn, string eno, string polId)
+        {
+            this.Count = 0;
+            this.QN = qn;
+            this.ENO = eno;
+            this.PolId = polId;
+        }
+
+
+
+    }
+
     /// <summary>
     /// DataHandler
     /// </summary>
@@ -179,9 +230,7 @@ namespace Scada.Data.Client.Tcp
                 case ReceivedCommand.HistoryData:
                 case ReceivedCommand.HistoryData2:
                     {
-                        this.agent.OnHistoryData = true;
                         this.HandleHistoryData(msg);
-                        this.agent.OnHistoryData = false;
                     }
                     break;
                 // 直接数据
@@ -287,6 +336,9 @@ namespace Scada.Data.Client.Tcp
 
             string time = Value.Parse(msg, "SystemTime");
             DateTime dt = DeviceTime.Parse(time);
+
+            this.agent.OnTimeChanged(dt);
+
             SystemTime st = new SystemTime();
 
             st.wYear = (ushort)dt.Year;
@@ -322,6 +374,61 @@ namespace Scada.Data.Client.Tcp
             this.CurrentSentCommand = SentCommand.None;
         }
 
+        private Queue<HistoryDataBundle> historyDataBundleQueue = new Queue<HistoryDataBundle>();
+
+        private Dictionary<string, HistoryDataBundle> historyDataBundleDict = new Dictionary<string, HistoryDataBundle>();
+
+        private Thread uploadHistoryDataThread;
+
+        private bool fQuit = false;
+
+        private void ActiveUploadHistoryDataThread(HistoryDataBundle bundle)
+        {
+            this.historyDataBundleQueue.Enqueue(bundle);
+            if (this.uploadHistoryDataThread == null)
+            {
+                this.agent.OnHandleHistoryData("Handle history data!");
+                this.uploadHistoryDataThread = new Thread(new ThreadStart(this.PrepareUploadHistoryData));
+                this.uploadHistoryDataThread.Start();
+            }
+        }
+
+        private void PrepareUploadHistoryData()
+        {
+            while (true)
+            {
+                if (this.fQuit)
+                    break;
+                if (this.historyDataBundleQueue.Count > 0)
+                {
+                    HistoryDataBundle hdb = this.historyDataBundleQueue.Dequeue();
+
+                    string msg = string.Format("Handle history data from {0} to {1}", hdb.BeginTime, hdb.EndTime);
+                    this.agent.OnHandleHistoryData(msg);
+                    if (string.IsNullOrEmpty(hdb.ENO))
+                    {
+                        string[] enos = new string[] { "001001", "002000", "003001", "004000", "005000", "010002", "999000" };
+                        foreach (string e in enos)
+                        {
+                            // for this Command, polId should be Null (means All polId);
+                            this.UploadHistoryData(hdb.QN, e, hdb.BeginTime, hdb.EndTime, null);
+                        }
+
+                    }
+                    else
+                    {
+                        this.UploadHistoryData(hdb.QN, hdb.ENO, hdb.BeginTime, hdb.EndTime, hdb.PolId);
+                    }
+
+                    this.SendResultPacket(hdb.QN);
+                }
+                else
+                {
+                    Thread.Sleep(2000);
+                }
+            }
+        }
+
         private void HandleHistoryData(string msg)
         {
             string qn = Value.Parse(msg, "QN");
@@ -336,22 +443,22 @@ namespace Scada.Data.Client.Tcp
 
             string polId = Value.Parse(msg, "PolId");
 
-            if (string.IsNullOrEmpty(eno))
-            {
-                string[] enos = new string[] { "001001", "002000", "003001", "004000", "005000", "010002", "999000" };
-                foreach (string e in enos)
-                {
-                    // for this Command, polId should be Null (means All polId);
-                    this.UploadHistoryData(qn, e, beginTime, endTime, null);
-                }
+            string taskId = string.Format("{0}-{1}@{2}", beginTime, endTime, polId);
 
+            if (historyDataBundleDict.ContainsKey(taskId))
+            {
+                HistoryDataBundle hdb = historyDataBundleDict[taskId];
+                hdb.Count += 1;
             }
             else
             {
-                this.UploadHistoryData(qn, eno, beginTime, endTime, polId);
-            }
+                HistoryDataBundle hdb = new HistoryDataBundle(qn, eno, polId);
+                hdb.BeginTime = beginTime;
+                hdb.EndTime = endTime;
 
-            this.SendResultPacket(qn);
+                this.historyDataBundleDict.Add(taskId, hdb);
+                this.ActiveUploadHistoryDataThread(hdb);
+            }
         }
 
         private void UploadHistoryData(string qn, string eno, string beginTime, string endTime, string polId)

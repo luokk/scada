@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><features build="17" build-date="2014-02-23">
+<?xml version="1.0" encoding="utf-8"?><features build="22" build-date="2014-02-27">
   <feature plan-date="2014-1-12" progress="50" released-date="2014-1-15" type="feature">
     进程监控功能
   </feature>
@@ -15,8 +15,8 @@
     &quot;Scada.Main&quot;程序操作方式改进
   </feature>
 
-  <feature plan-date="2014-2-16" progress="50" released-date="2014-2-23" type="feature">
-    数据上传 (重连机制，Ping，发送计数，连接历史)
+  <feature plan-date="2014-2-16" progress="50" released-date="2014-2-27" type="feature">
+    数据上传 (重连机制，Ping，发送计数，连接历史，历史数据上传)
   </feature>
 
 </features>

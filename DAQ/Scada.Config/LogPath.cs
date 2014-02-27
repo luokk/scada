@@ -16,9 +16,11 @@ namespace Scada.Config
             LogPath.Initialize();
         }
 
-        public static string GetLogFilePath(string fileName)
+        public static string GetExeFilePath(string fileName)
         {
-            return string.Empty;
+            string location = Assembly.GetExecutingAssembly().Location;
+            string path = Path.GetDirectoryName(location);
+            return Path.Combine(path, fileName);
         }
 
         // Maybe NO use

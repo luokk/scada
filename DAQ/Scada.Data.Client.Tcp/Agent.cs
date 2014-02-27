@@ -59,6 +59,8 @@ namespace Scada.Data.Client.Tcp
         Received,
         Sent,
         SentHistoryData,
+        HandleHistoryData,
+        SetTime,
         ConnectToCountryCenter,
         DisconnectToCountryCenter,
     }
@@ -148,12 +150,6 @@ namespace Scada.Data.Client.Tcp
         }
 
         internal bool SendDataDirectlyStarted
-        {
-            get;
-            set;
-        }
-
-        internal bool OnHistoryData
         {
             get;
             set;
@@ -265,6 +261,18 @@ namespace Scada.Data.Client.Tcp
             });
         }
 
+        public void OnTimeChanged(DateTime timeToSet)
+        {
+            string s = string.Format("[{0}] SET TIME = {1}", DateTime.Now, timeToSet);
+            this.NotifyEvent(this, NotifyEvents.SetTime, s);
+        }
+
+        public void OnHandleHistoryData(string msg)
+        {
+            this.DoLog(ScadaDataClient, msg);
+            this.NotifyEvent(this, NotifyEvents.HandleHistoryData, msg);
+        }
+
         public override string ToString()
         {
             if (this.IsWired.HasValue)
@@ -289,6 +297,8 @@ namespace Scada.Data.Client.Tcp
 
         private IPStatus GetPingResult(string serverIpAddress)
         {
+            return IPStatus.Success;
+            /* 虎林站问题: ping不通, 但是可以连接.
             Ping ping = new Ping();
             PingOptions options = new PingOptions();
             options.DontFragment = true;
@@ -296,6 +306,7 @@ namespace Scada.Data.Client.Tcp
             byte[] buffer = Encoding.ASCII.GetBytes(data);  
             PingReply reply = ping.Send(serverIpAddress, 200, buffer, options);
             return reply.Status;
+             * */
         }
 
         private void TryToPing()
@@ -628,14 +639,12 @@ namespace Scada.Data.Client.Tcp
             if (p == null)
                 return false;
             bool result = false;
-            if (this.OnHistoryData)
+
+            string s = p.ToString();
+            result = this.Send(Encoding.ASCII.GetBytes(s));
+            if (result)
             {
-                string s = p.ToString();
-                result = this.Send(Encoding.ASCII.GetBytes(s));
-                if (result)
-                {
-                    this.NotifyEvent(this, NotifyEvents.SentHistoryData, p.DeviceKey);
-                }
+                this.NotifyEvent(this, NotifyEvents.SentHistoryData, p.DeviceKey);
             }
             return result;
         }

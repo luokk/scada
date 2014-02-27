@@ -456,10 +456,18 @@ namespace Scada.Data.Client.Tcp
                 {
 
                 }
+                else if (NotifyEvents.HandleHistoryData == notify)
+                {
+                    this.mainListBox.Items.Add(msg);
+                }
                 else if (NotifyEvents.SentHistoryData == notify)
                 {
                     string deviceKey = msg.ToLower();
                     this.UpdateSendDataRecord(deviceKey, true);
+                }
+                else if (NotifyEvents.SetTime == notify)
+                {
+                    this.mainListBox.Items.Add(msg);
                 }
                 /// 国家数据中心相关
                 else if (NotifyEvents.ConnectToCountryCenter == notify)
@@ -573,7 +581,7 @@ namespace Scada.Data.Client.Tcp
 
         private void OpenProcessByName(string name, bool uac = false)
         {
-            string fileName = name;
+            string fileName = LogPath.GetExeFilePath(name);
             try
             {
                 ProcessStartInfo processInfo = new ProcessStartInfo();
