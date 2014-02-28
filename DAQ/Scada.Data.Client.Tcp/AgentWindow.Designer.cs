@@ -42,9 +42,9 @@
             this.dataPage = new System.Windows.Forms.TabPage();
             this.detailsListView = new System.Windows.Forms.ListView();
             this.deviceCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.countCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.timeCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.historyTimeCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.countCol = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.OpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -147,7 +147,7 @@
             this.connPage.Padding = new System.Windows.Forms.Padding(3);
             this.connPage.Size = new System.Drawing.Size(512, 362);
             this.connPage.TabIndex = 0;
-            this.connPage.Text = "连接信息";
+            this.connPage.Text = "处理事件";
             this.connPage.UseVisualStyleBackColor = true;
             // 
             // mainListBox
@@ -213,6 +213,11 @@
             this.deviceCol.Text = "设备";
             this.deviceCol.Width = 119;
             // 
+            // countCol
+            // 
+            this.countCol.Text = "发送数量";
+            this.countCol.Width = 71;
+            // 
             // timeCol
             // 
             this.timeCol.Text = "最新上传时间";
@@ -222,11 +227,6 @@
             // 
             this.historyTimeCol.Text = "最新历史数据上传时间";
             this.historyTimeCol.Width = 171;
-            // 
-            // countCol
-            // 
-            this.countCol.Text = "发送数量";
-            this.countCol.Width = 71;
             // 
             // menuStrip1
             // 
@@ -288,14 +288,14 @@
             // LoggerToolStripMenuItem
             // 
             this.LoggerToolStripMenuItem.Name = "LoggerToolStripMenuItem";
-            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.LoggerToolStripMenuItem.Text = "日志";
             this.LoggerToolStripMenuItem.Click += new System.EventHandler(this.LoggerToolStripMenuItem_Click);
             // 
             // ClsToolStripMenuItem1
             // 
             this.ClsToolStripMenuItem1.Name = "ClsToolStripMenuItem1";
-            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
+            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
             this.ClsToolStripMenuItem1.Text = "清屏";
             // 
             // toolStrip1

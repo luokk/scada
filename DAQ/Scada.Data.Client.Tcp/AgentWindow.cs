@@ -126,7 +126,8 @@ namespace Scada.Data.Client.Tcp
             LoggerClient.Initialize();
             this.logger.Send("ScadaDataClient", "Data (upload) Program starts at " + DateTime.Now);
 
-            InitSysNotifyIcon();
+            this.InitSysNotifyIcon();
+            this.MakeWindowShownFront();
             this.ShowInTaskbar = false;
             this.statusStrip.Items.Add(this.GetConnetionString());
             this.statusStrip.Items.Add(new ToolStripSeparator());
@@ -456,18 +457,15 @@ namespace Scada.Data.Client.Tcp
                 {
 
                 }
-                else if (NotifyEvents.HandleHistoryData == notify)
+                else if (NotifyEvents.HandleEvent == notify)
                 {
-                    this.mainListBox.Items.Add(msg);
+                    string line = string.Format("{0}: {1}", DateTime.Now, msg);
+                    this.mainListBox.Items.Add(line);
                 }
-                else if (NotifyEvents.SentHistoryData == notify)
+                else if (NotifyEvents.HistoryDataSent == notify)
                 {
                     string deviceKey = msg.ToLower();
                     this.UpdateSendDataRecord(deviceKey, true);
-                }
-                else if (NotifyEvents.SetTime == notify)
-                {
-                    this.mainListBox.Items.Add(msg);
                 }
                 /// 国家数据中心相关
                 else if (NotifyEvents.ConnectToCountryCenter == notify)
@@ -566,6 +564,7 @@ namespace Scada.Data.Client.Tcp
 
         private void PerformQuitByUser()
         {
+            this.agent.Quit();
             Application.Exit();
         }
 

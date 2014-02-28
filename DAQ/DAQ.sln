@@ -2,10 +2,19 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.Declare", "Scada.Declare\Scada.Declare.csproj", "{CC1F00BD-567A-4EFE-8F6E-C10E7183409D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C9A8BAFD-2C39-437E-9EE5-5FE267D80D1A} = {C9A8BAFD-2C39-437E-9EE5-5FE267D80D1A}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.Main", "Scada.Main\Scada.Main.csproj", "{9613A59D-DEC5-4F0A-9694-9B3A22D6E61B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C9A8BAFD-2C39-437E-9EE5-5FE267D80D1A} = {C9A8BAFD-2C39-437E-9EE5-5FE267D80D1A}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.MainVision", "Scada.MainVision\Scada.MainVision.csproj", "{222D3901-CCFF-4846-90A2-E7513F7DD8C7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C9A8BAFD-2C39-437E-9EE5-5FE267D80D1A} = {C9A8BAFD-2C39-437E-9EE5-5FE267D80D1A}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.Watch", "Scada.Watch\Scada.Watch.csproj", "{F1047B86-FAA7-4C6C-98BD-27DB13DCACCB}"
 EndProject
@@ -34,6 +43,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.Device.Siemens", "Scada.Device.Siemens\Scada.Device.Siemens.csproj", "{1870F7FB-08AF-4CEB-9C33-CE0E36EC1CAF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.Logger.Server", "Scada.Logger.Server\Scada.Logger.Server.csproj", "{07F60F28-900E-44B1-98C6-D8686B255DAF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C9A8BAFD-2C39-437E-9EE5-5FE267D80D1A} = {C9A8BAFD-2C39-437E-9EE5-5FE267D80D1A}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scada.About", "Scada.About\Scada.About.csproj", "{C9A8BAFD-2C39-437E-9EE5-5FE267D80D1A}"
 EndProject

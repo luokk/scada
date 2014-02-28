@@ -387,7 +387,6 @@ namespace Scada.Data.Client.Tcp
             this.historyDataBundleQueue.Enqueue(bundle);
             if (this.uploadHistoryDataThread == null)
             {
-                this.agent.OnHandleHistoryData("Handle history data!");
                 this.uploadHistoryDataThread = new Thread(new ThreadStart(this.PrepareUploadHistoryData));
                 this.uploadHistoryDataThread.Start();
             }
@@ -403,7 +402,7 @@ namespace Scada.Data.Client.Tcp
                 {
                     HistoryDataBundle hdb = this.historyDataBundleQueue.Dequeue();
 
-                    string msg = string.Format("Handle history data from {0} to {1}", hdb.BeginTime, hdb.EndTime);
+                    string msg = string.Format("Uploading history data [{0} - {1}]", DeviceTime.Parse(hdb.BeginTime), DeviceTime.Parse(hdb.EndTime));
                     this.agent.OnHandleHistoryData(msg);
                     if (string.IsNullOrEmpty(hdb.ENO))
                     {
@@ -620,6 +619,11 @@ namespace Scada.Data.Client.Tcp
             this.agent.StopConnectCountryCenter();
         }
 
-        
+
+
+        internal void Quit()
+        {
+            this.fQuit = true;
+        }
     }
 }

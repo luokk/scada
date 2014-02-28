@@ -58,9 +58,8 @@ namespace Scada.Data.Client.Tcp
         EndRead,
         Received,
         Sent,
-        SentHistoryData,
-        HandleHistoryData,
-        SetTime,
+        HistoryDataSent,
+        HandleEvent,
         ConnectToCountryCenter,
         DisconnectToCountryCenter,
     }
@@ -263,14 +262,14 @@ namespace Scada.Data.Client.Tcp
 
         public void OnTimeChanged(DateTime timeToSet)
         {
-            string s = string.Format("[{0}] SET TIME = {1}", DateTime.Now, timeToSet);
-            this.NotifyEvent(this, NotifyEvents.SetTime, s);
+            string s = string.Format("SET TIME = {0}", timeToSet);
+            this.NotifyEvent(this, NotifyEvents.HandleEvent, s);
         }
 
         public void OnHandleHistoryData(string msg)
         {
             this.DoLog(ScadaDataClient, msg);
-            this.NotifyEvent(this, NotifyEvents.HandleHistoryData, msg);
+            this.NotifyEvent(this, NotifyEvents.HandleEvent, msg);
         }
 
         public override string ToString()
@@ -444,6 +443,7 @@ namespace Scada.Data.Client.Tcp
                             string msg = string.Format("Connected to {0}", this.ToString());
                             this.DoLog(ScadaDataClient, msg);
                             this.NotifyEvent(this, NotifyEvents.Connected, msg);
+                            this.NotifyEvent(this, NotifyEvents.HandleEvent, msg);
                         }
                     }
                 }
@@ -644,7 +644,7 @@ namespace Scada.Data.Client.Tcp
             result = this.Send(Encoding.ASCII.GetBytes(s));
             if (result)
             {
-                this.NotifyEvent(this, NotifyEvents.SentHistoryData, p.DeviceKey);
+                this.NotifyEvent(this, NotifyEvents.HistoryDataSent, p.DeviceKey);
             }
             return result;
         }
@@ -674,5 +674,12 @@ namespace Scada.Data.Client.Tcp
         }
 
         public DateTime LastExceptionTime { get; set; }
+
+        internal void Quit()
+        {
+            this.handler.Quit();
+            this.Disconnect();
+            this.DoLog(ScadaDataClient, "<Quit>");
+        }
     }
 }
