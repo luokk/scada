@@ -50,7 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Agent.cs" />
+    <Compile Include="DataAgent.cs" />
     <Compile Include="AgentWindow.cs">
       <SubType>Form</SubType>
     </Compile>

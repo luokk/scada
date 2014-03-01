@@ -24,7 +24,7 @@ namespace Scada.Data.Client
                 {
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
-                    AgentWindow form = new AgentWindow();
+                    MainDataAgentWindow form = new MainDataAgentWindow();
                     if (args.Length > 0 && args[0] == "--start")
                     {
                         form.StartState = true;

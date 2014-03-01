@@ -48,7 +48,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.OpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.PauseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SetTimeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.QuitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DispToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -244,7 +244,7 @@
             // 
             this.OpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.StartToolStripMenuItem,
-            this.PauseToolStripMenuItem,
+            this.SetTimeToolStripMenuItem,
             this.toolStripSeparator2,
             this.QuitToolStripMenuItem});
             this.OpToolStripMenuItem.Name = "OpToolStripMenuItem";
@@ -254,25 +254,27 @@
             // StartToolStripMenuItem
             // 
             this.StartToolStripMenuItem.Name = "StartToolStripMenuItem";
-            this.StartToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.StartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.StartToolStripMenuItem.Text = "启动";
             this.StartToolStripMenuItem.Click += new System.EventHandler(this.StartToolStripMenuItem_Click);
             // 
-            // PauseToolStripMenuItem
+            // SetTimeToolStripMenuItem
             // 
-            this.PauseToolStripMenuItem.Name = "PauseToolStripMenuItem";
-            this.PauseToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
-            this.PauseToolStripMenuItem.Text = "暂停";
+            this.SetTimeToolStripMenuItem.CheckOnClick = true;
+            this.SetTimeToolStripMenuItem.Name = "SetTimeToolStripMenuItem";
+            this.SetTimeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.SetTimeToolStripMenuItem.Text = "处理校时";
+            this.SetTimeToolStripMenuItem.Click += new System.EventHandler(this.SetTimeToolStripMenuItemClick);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(97, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // QuitToolStripMenuItem
             // 
             this.QuitToolStripMenuItem.Name = "QuitToolStripMenuItem";
-            this.QuitToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.QuitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.QuitToolStripMenuItem.Text = "退出";
             this.QuitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
             // 
@@ -288,14 +290,14 @@
             // LoggerToolStripMenuItem
             // 
             this.LoggerToolStripMenuItem.Name = "LoggerToolStripMenuItem";
-            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.LoggerToolStripMenuItem.Text = "日志";
             this.LoggerToolStripMenuItem.Click += new System.EventHandler(this.LoggerToolStripMenuItem_Click);
             // 
             // ClsToolStripMenuItem1
             // 
             this.ClsToolStripMenuItem1.Name = "ClsToolStripMenuItem1";
-            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
             this.ClsToolStripMenuItem1.Text = "清屏";
             // 
             // toolStrip1
@@ -383,7 +385,7 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem OpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem StartToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem PauseToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SetTimeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem QuitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DispToolStripMenuItem;

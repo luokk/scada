@@ -339,17 +339,20 @@ namespace Scada.Data.Client.Tcp
 
             this.agent.OnTimeChanged(dt);
 
-            SystemTime st = new SystemTime();
+            if (this.CanHandleSetTime)
+            {
+                SystemTime st = new SystemTime();
 
-            st.wYear = (ushort)dt.Year;
-            st.wMonth = (ushort)dt.Month;
-            st.wDay = (ushort)dt.Day;
-            st.whour = (ushort)dt.Hour;
-            st.wMinute = (ushort)dt.Minute;
-            st.wSecond = (ushort)dt.Second;
-            st.wMilliseconds = 0;
+                st.wYear = (ushort)dt.Year;
+                st.wMonth = (ushort)dt.Month;
+                st.wDay = (ushort)dt.Day;
+                st.whour = (ushort)dt.Hour;
+                st.wMinute = (ushort)dt.Minute;
+                st.wSecond = (ushort)dt.Second;
+                st.wMilliseconds = 0;
 
-            SetLocalTime(st);
+                SetLocalTime(st);
+            }
             this.SendResultPacket(qn);
         }
 
@@ -625,5 +628,7 @@ namespace Scada.Data.Client.Tcp
         {
             this.fQuit = true;
         }
+
+        public bool CanHandleSetTime { get; set; }
     }
 }

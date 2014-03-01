@@ -285,7 +285,7 @@ namespace Scada.Data.Client.Tcp
         {
             DateTime now = DateTime.Now;
             long s = (now.Ticks - this.LastExceptionTime.Ticks) / 10000000;
-            if (s < 5)
+            if (s < 3)
             {
                 return;
             }
@@ -580,7 +580,7 @@ namespace Scada.Data.Client.Tcp
         private void ConnectRetryRoutine()
         {
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 5000; // Ten seconds
+            timer.Interval = 6000; // 6 seconds
             timer.Elapsed += (s, e) => 
             {
                 if (this.client != null)
@@ -680,6 +680,18 @@ namespace Scada.Data.Client.Tcp
             this.handler.Quit();
             this.Disconnect();
             this.DoLog(ScadaDataClient, "<Quit>");
+        }
+
+        public bool CanHandleSetTime 
+        {
+            get
+            {
+                return this.handler.CanHandleSetTime;
+            }
+            set
+            {
+                this.handler.CanHandleSetTime = value;
+            }
         }
     }
 }

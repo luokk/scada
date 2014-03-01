@@ -129,6 +129,7 @@ namespace Scada.Data.Client.Tcp
             this.InitSysNotifyIcon();
             this.MakeWindowShownFront();
             this.ShowInTaskbar = false;
+            this.SetTimeToolStripMenuItem.Checked = false;
             this.statusStrip.Items.Add(this.GetConnetionString());
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add("MS: " + Settings.Instance.Mn);
@@ -217,7 +218,8 @@ namespace Scada.Data.Client.Tcp
                     agent.UIThreadMashaller = new ThreadMashaller(synchronizationContext);
                     this.agent = agent;
 
-                    agent.Connect();
+                    this.agent.Connect();
+                    this.agent.CanHandleSetTime = this.SetTimeToolStripMenuItem.Checked;
                 }
             }
         }
@@ -564,7 +566,10 @@ namespace Scada.Data.Client.Tcp
 
         private void PerformQuitByUser()
         {
-            this.agent.Quit();
+            if (this.agent != null)
+            {
+                this.agent.Quit();
+            }
             Application.Exit();
         }
 
@@ -655,6 +660,11 @@ namespace Scada.Data.Client.Tcp
                 item.SubItems[2].Text = details.LatestSendDataTime.ToString(TimeFormat);
                 item.SubItems[3].Text = details.LatestSendHistoryDataTime.ToString(TimeFormat);
             }
+        }
+
+        private void SetTimeToolStripMenuItemClick(object sender, EventArgs e)
+        {
+            this.agent.CanHandleSetTime = this.SetTimeToolStripMenuItem.Checked;
         }
 
     }

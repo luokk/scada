@@ -11,13 +11,13 @@ using System.Windows.Forms;
 
 namespace Scada.Data.Client
 {
-    public partial class AgentWindow : Form
+    public partial class MainDataAgentWindow : Form
     {
         private Timer sendDataTimer;
 
         private Timer recvDataTimer;
 
-        private List<Agent> agents = new List<Agent>();
+        private DataAgent agent;
 
         private PacketBuilder builder = new PacketBuilder();
 
@@ -25,7 +25,15 @@ namespace Scada.Data.Client
 
         private RealTimeForm detailForm;
 
-        private const int TimerInterval = 4000; 
+        private const int TimerInterval = 4000;
+
+        private ToolStripLabel statusLabel = new ToolStripLabel();
+
+        private ToolStripLabel addressLabel = new ToolStripLabel();
+
+        private ToolStripLabel counterLabel = new ToolStripLabel();
+
+        private ToolStripLabel pingLabel = new ToolStripLabel();
 
         public bool StartState
         {
@@ -35,7 +43,7 @@ namespace Scada.Data.Client
 
         private bool started = false;
 
-        public AgentWindow()
+        public MainDataAgentWindow()
         {
             this.StartState = false;
             InitializeComponent();
@@ -45,14 +53,14 @@ namespace Scada.Data.Client
         {
             InitSysNotifyIcon();
             this.ShowInTaskbar = false;
-            this.statusStrip1.Items.Add("状态: 等待");
-            this.statusStrip1.Items.Add(new ToolStripSeparator());
-            this.statusStrip1.Items.Add("IP ADDR:PORT");
-            ToolStripLabel label = new ToolStripLabel();
-            label.Alignment = ToolStripItemAlignment.Right;
-            label.Text = "";
-            this.statusStrip1.Items.Add(label);
 
+            this.statusStrip.Items.Add(this.statusLabel);
+            this.statusStrip.Items.Add(new ToolStripSeparator());
+            this.statusStrip.Items.Add(this.addressLabel);
+            this.statusStrip.Items.Add(new ToolStripSeparator());
+            this.statusStrip.Items.Add(this.counterLabel);
+            this.statusStrip.Items.Add(new ToolStripSeparator());
+            this.statusStrip.Items.Add(this.pingLabel);
             // Start if have the --start args.
             if (this.StartState)
             {
@@ -69,7 +77,7 @@ namespace Scada.Data.Client
             if (packet != null)
             {
                 string msg = packet.ToString();
-                this.agents[0].SendPacket(packet);
+                this.agent.SendPacket(packet);
             }
         }
 
@@ -83,7 +91,7 @@ namespace Scada.Data.Client
             if (packet != null)
             {
                 string msg = packet.ToString();
-                this.agents[0].SendFilePacket(packet);
+                this.agent.SendFilePacket(packet);
             }
         }
         #endif
@@ -96,10 +104,36 @@ namespace Scada.Data.Client
             sysNotifyIcon.Visible = true;
             this.WindowState = FormWindowState.Minimized;
             this.Hide();
-            sysNotifyIcon.Click += new EventHandler(OnSysNotifyIconContextMenu);
+            sysNotifyIcon.DoubleClick += new EventHandler(OnSysNotifyIcon);
+             
+            ContextMenu notifyContextMenu = new ContextMenu();
+            
+            
+            MenuItem exitMenuItem = new MenuItem("退出");
+            exitMenuItem.Click += (s, e) =>
+            {
+                this.PerformQuitByUser();
+            };
+
+            MenuItem detailMenuItem = new MenuItem("详情");
+            detailMenuItem.Click += (s, e) =>
+            {
+                this.ShowDetailsForm();
+            };
+
+            notifyContextMenu.MenuItems.Add(detailMenuItem);
+            notifyContextMenu.MenuItems.Add(new MenuItem("-"));
+            notifyContextMenu.MenuItems.Add(exitMenuItem);
+            
+            sysNotifyIcon.ContextMenu = notifyContextMenu;
         }
 
-        private void OnSysNotifyIconContextMenu(object sender, EventArgs e)
+        private void PerformQuitByUser()
+        {
+            Application.Exit();
+        }
+
+        private void OnSysNotifyIcon(object sender, EventArgs e)
         {
             this.Show();
             this.WindowState = FormWindowState.Normal;
@@ -112,31 +146,30 @@ namespace Scada.Data.Client
             {
                 return;
             }
-            this.InitializeAgents();
+            this.InitializeAgent();
             this.InitializeTimer();
             this.started = true;
-            Log.GetLogFile(Program.DataClient).Log("Data (upload) Agent starts at " + DateTime.Now);
+
+            string startsLine = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
+            Log.GetLogFile(Program.DataClient).Log(startsLine);
         }
 
-        private void InitializeAgents()
+        private void InitializeAgent()
         {
             Settings s = Settings.Instance;
             // TODO: Create Agent for DataCenter2
             if (s.DataCenters.Count() > 0)
             {
-                foreach (var dc in s.DataCenters)
-                {
-                    Agent agent = this.CreateAgent(dc);
-                    agent.Connect();
-                    this.agents.Add(agent);
-                }
-                this.statusStrip1.Items[0].Text = string.Format("状态: 开始 ({0})", DateTime.Now);
+                this.agent = this.CreateAgent(s.DataCenters[0]);
+                this.agent.Connect();
+
+                this.statusLabel.Text = string.Format("开始:({0})", DateTime.Now);
             }
         }
 
-        private Agent CreateAgent(Settings.DataCenter2 dataCenter)
+        private DataAgent CreateAgent(Settings.DataCenter2 dataCenter)
         {
-            Agent agent = new Agent(dataCenter.Ip, dataCenter.Port);
+            DataAgent agent = new DataAgent(dataCenter.Ip, dataCenter.Port);
             return agent;
         }
 
@@ -155,10 +188,7 @@ namespace Scada.Data.Client
 
         private void HttpRecvDataTick(object sender, EventArgs e)
         {
-            foreach (var agent in this.agents)
-            {
-                agent.FetchCommands();
-            }
+            this.agent.FetchCommands();
         }
 
         private void HttpSendDataTick(object sender, EventArgs e)
@@ -211,12 +241,9 @@ namespace Scada.Data.Client
 
         private void SendPackets(List<Packet> packets)
         {
-            foreach (var agent in this.agents)
+            foreach (var packet in packets)
             {
-                foreach (var packet in packets)
-                {
-                    agent.SendPacket(packet);
-                }
+                this.agent.SendPacket(packet);
             }
         }
 
@@ -250,13 +277,7 @@ namespace Scada.Data.Client
         private Packet GetPacket(DateTime time, string deviceKey, out int errorCode)
         {
             errorCode = 0;
-            bool couldSend = false;
-            foreach (var agent in this.agents)
-            {
-                couldSend |= agent.SendDataStarted;
-            }
-
-            if (!couldSend) //// TODO: !
+            if (!this.agent.SendDataStarted)
             {
                 // return null;
             }
@@ -321,105 +342,69 @@ namespace Scada.Data.Client
             return false;
         }
 
-        /*
-        private static bool IsDeviceSendTimeOK(DateTime dt, string deviceKey)
-        {
-            if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
-            {
-                // 00, 05, 10, ...55,
-                // Send data after 1 min.
-                if ((dt.Minute - 1) % 5 == 0)
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                // 5 < current.second < 15 OR
-                // 35 < current.second < 45
-                int sec = dt.Second - 5;
-                if ((sec >= 0 && sec <= 10) || ((sec >= 30) && sec <= 40))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }*/
-
-
-        private void OnReceiveMessage(Agent agent, string msg)
-        {
-            this.SafeInvoke(() => 
-            {
-                string line = string.Format("{0}: {1}", "Agent.ToString()", msg);
-                this.listBox1.Items.Add(line);
-            });
-        }
-
-        private void OnNotifyEvent(Agent agent, NotifyEvent ne, string msg)
+        private void OnNotifyEvent(DataAgent agent, NotifyEvents ne, string msg)
         {
             this.SafeInvoke(() =>
             {
-                if (NotifyEvent.Connected == ne)
+                /*
+                if (NotifyEvents.Connected == ne)
                 {
                     string logger = agent.ToString() + " 已连接";
                     this.statusStrip1.Items[1].Text = logger;
                     Log.GetLogFile(Program.DataClient).Log(logger);
                 }
-                else if (NotifyEvent.ConnectError == ne)
+                else if (NotifyEvents.ConnectError == ne)
                 {
                     this.statusStrip1.Items[1].Text = msg;
                     Log.GetLogFile(Program.DataClient).Log(msg);
                 }
-                else if (NotifyEvent.ConnectToCountryCenter == ne)
+                else if (NotifyEvents.ConnectToCountryCenter == ne)
                 {
                     // this.StartConnectCountryCenter();
                     this.listBox1.Items.Add(msg);
                     Log.GetLogFile(Program.DataClient).Log(msg);
                 }
-                else if (NotifyEvent.DisconnectToCountryCenter == ne)
+                else if (NotifyEvents.DisconnectToCountryCenter == ne)
                 {
                     // this.StopConnectCountryCenter();
                     this.listBox1.Items.Add(msg);
                     Log.GetLogFile(Program.DataClient).Log(msg);
                 }
+                 * */
             });
         }
 
 
         // 开始
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        private void OnStartStripButtonClick(object sender, EventArgs e)
         {
             this.Start();
         }
 
-        // 暂停
-        private void toolStripButton2_Click(object sender, EventArgs e)
+        private void OnDetailsButtonClick(object sender, EventArgs e)
         {
-
+            this.ShowDetailsForm();
         }
 
-        private void detailsButton_Click(object sender, EventArgs e)
+        private void ShowDetailsForm()
         {
-            this.detailForm = new RealTimeForm(() => 
+            if (this.detailForm == null)
             {
-                this.detailForm = null;
-            });
+                this.detailForm = new RealTimeForm(this.BeforeCloseDetailForm);
+            }
+
             this.detailForm.Show();
         }
 
-
-        private void AgentWindow_FormClosing(object sender, FormClosingEventArgs e)
+        private void BeforeCloseDetailForm()
         {
-            DialogResult dr = MessageBox.Show("退出数据上传程序?", "数据上传", MessageBoxButtons.YesNo);
-            if (DialogResult.No == dr)
-            {
-                e.Cancel = true;
-            }
-            else
-            {
+            this.detailForm = null;
+        }
 
-            }
+        private void AgentWindowClosingForm(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            this.WindowState = FormWindowState.Minimized;
         }
 
         private void SendDetails(string deviceKey, string msg)
@@ -430,17 +415,5 @@ namespace Scada.Data.Client
             }
         }
 
-        private void AgentWindow_MinimumSizeChanged(object sender, EventArgs e)
-        {
-            // Not invoked.
-        }
-
-        private void AgentWindow_SizeChanged(object sender, EventArgs e)
-        {
-            if (this.WindowState == FormWindowState.Minimized)
-            {
-                this.Hide();
-            }
-        }
     }
 }
