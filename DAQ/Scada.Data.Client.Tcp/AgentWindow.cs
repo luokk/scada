@@ -105,6 +105,8 @@ namespace Scada.Data.Client.Tcp
 
         private LoggerClient logger = new LoggerClient();
 
+        private Dictionary<string, object> data = new Dictionary<string, object>(20);
+
         public bool StartState
         {
             get;
@@ -192,6 +194,7 @@ namespace Scada.Data.Client.Tcp
             {
                 return;
             }
+            DBDataSource.Instance.Initialize();
             this.InitializeAgents();
             this.InitializeTimer();
             this.started = true;
@@ -346,13 +349,14 @@ namespace Scada.Data.Client.Tcp
                 }
                 else
                 {
-                    Log.GetLogFile(deviceKey).Log("<Real-Time> NaI file Content is empty!");
+                    Log.GetLogFile(deviceKey).Log("RD Error: Empty NaI-file");
                 }
             }
             else
             {
-                var d = DBDataSource.Instance.GetData(deviceKey, time);
-                if (d != null && d.Count > 0)
+                this.data.Clear();
+                var r = DBDataSource.Instance.GetData(deviceKey, time, null, this.data);
+                if (r == ReadResult.ReadOK)
                 {
                     DataPacket p = null;
                     // By different device.
@@ -360,24 +364,24 @@ namespace Scada.Data.Client.Tcp
                     if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
                         deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
                     {
-                        p = builder.GetFlowDataPacket(deviceKey, d, true);
+                        p = builder.GetFlowDataPacket(deviceKey, this.data, true);
                     }
                     else
                     {
-                        p = builder.GetDataPacket(deviceKey, d, true);
+                        p = builder.GetDataPacket(deviceKey, this.data, true);
                     }
 
                     if (agent.SendDataPacket(p))
                     {
-                        string msg = string.Format("[{0}]: @{1} {2}", DateTime.Now, agent.ToString(), p.ToString());
+                        string msg = string.Format("RD: {0}", p.ToString());
                         Log.GetLogFile(deviceKey).Log(msg);
                         this.UpdateSendDataRecord(deviceKey, false);
                     }
                 }
                 else
                 {
-                    string logger = string.Format("{0}: No data found from the table", DateTime.Now);
-                    Log.GetLogFile(deviceKey).Log(logger);
+                    string line = string.Format("RD Error: {0}", r.ToString());
+                    Log.GetLogFile(deviceKey).Log(line);
 
                 }
             }
@@ -432,7 +436,7 @@ namespace Scada.Data.Client.Tcp
         }
         */
 
-        private void OnNotifyEvent(Agent agent, NotifyEvents notify, string msg)
+        private void OnNotifyEvent(Agent agent, NotifyEvents notify, string msg1, string msg2)
         {
             this.SafeInvoke(() =>
             {
@@ -455,30 +459,28 @@ namespace Scada.Data.Client.Tcp
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.DisconnectedTime = DateTime.Now;
                 }
-                else if (NotifyEvents.Sent == notify)
-                {
-
-                }
                 else if (NotifyEvents.HandleEvent == notify)
                 {
-                    string line = string.Format("{0}: {1}", DateTime.Now, msg);
+                    string line = string.Format("{0}: {1}", DateTime.Now, msg1);
                     this.mainListBox.Items.Add(line);
                 }
                 else if (NotifyEvents.HistoryDataSent == notify)
                 {
-                    string deviceKey = msg.ToLower();
+                    string deviceKey = msg1.ToLower();
+                    string line = string.Format("HD: {0}", msg2);
+                    Log.GetLogFile(deviceKey).Log(line);
                     this.UpdateSendDataRecord(deviceKey, true);
                 }
                 /// 国家数据中心相关
                 else if (NotifyEvents.ConnectToCountryCenter == notify)
                 {
                     this.StartConnectCountryCenter();
-                    this.mainListBox.Items.Add(msg);
+                    this.mainListBox.Items.Add(msg1);
                 }
                 else if (NotifyEvents.DisconnectToCountryCenter == notify)
                 {
                     this.StopConnectCountryCenter();
-                    this.mainListBox.Items.Add(msg);
+                    this.mainListBox.Items.Add(msg1);
                 }
             });
         }

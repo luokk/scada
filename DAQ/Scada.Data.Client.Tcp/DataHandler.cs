@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -134,6 +135,8 @@ namespace Scada.Data.Client.Tcp
 
         [DllImport("Kernel32.dll")]
         public static extern void SetLocalTime(SystemTime st);
+
+        private MySqlCommand command = null;
 
         private SentCommand CurrentSentCommand
         {
@@ -390,6 +393,8 @@ namespace Scada.Data.Client.Tcp
             this.historyDataBundleQueue.Enqueue(bundle);
             if (this.uploadHistoryDataThread == null)
             {
+                this.command = DBDataSource.Instance.CreateCommand();
+
                 this.uploadHistoryDataThread = new Thread(new ThreadStart(this.PrepareUploadHistoryData));
                 this.uploadHistoryDataThread.Start();
             }
@@ -406,7 +411,7 @@ namespace Scada.Data.Client.Tcp
                     HistoryDataBundle hdb = this.historyDataBundleQueue.Dequeue();
 
                     string msg = string.Format("Uploading history data [{0} - {1}]", DeviceTime.Parse(hdb.BeginTime), DeviceTime.Parse(hdb.EndTime));
-                    this.agent.OnHandleHistoryData(msg);
+                    this.agent.OnHandleHistoryData(msg, true);
                     if (string.IsNullOrEmpty(hdb.ENO))
                     {
                         string[] enos = new string[] { "001001", "002000", "003001", "004000", "005000", "010002", "999000" };
@@ -474,6 +479,7 @@ namespace Scada.Data.Client.Tcp
             string deviceKey = Settings.Instance.GetDeviceKeyByEno(eno);
             string deviceKeyLower = deviceKey.ToLower();
             DateTime dt = f;
+            Dictionary<string, object> data = new Dictionary<string, object>(20);
             while (dt <= t)
             {
                 if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
@@ -495,22 +501,30 @@ namespace Scada.Data.Client.Tcp
                 else
                 {
                     // Non NaIDevice
-                    var d = DBDataSource.Instance.GetData(deviceKey, dt, polId);
-
-                    DataPacket p = null;
-                    // By different device.
-
-                    if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
-                        deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
+                    data.Clear();
+                    var r = DBDataSource.GetData(this.command, deviceKey, dt, polId, data);
+                    if (r == ReadResult.ReadOK)
                     {
-                        p = builder.GetFlowDataPacket(deviceKey, d);
+                        DataPacket p = null;
+                        // By different device.
+
+                        if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
+                            deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
+                        {
+                            p = builder.GetFlowDataPacket(deviceKey, data);
+                        }
+                        else
+                        {
+                            p = builder.GetDataPacket(deviceKey, data);
+                        }
+
+                        this.agent.SendHistoryDataPacket(p);
                     }
                     else
                     {
-                        p = builder.GetDataPacket(deviceKey, d);
+                        string msg = string.Format("Error: {0} [{1}@<{2}>]", r.ToString(), deviceKey, dt);
+                        this.agent.OnHandleHistoryData(msg, true);
                     }
-
-                    this.agent.SendHistoryDataPacket(p);
                     dt = dt.AddSeconds(30);
                 }
 

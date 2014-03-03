@@ -57,7 +57,6 @@ namespace Scada.Data.Client.Tcp
         BeginRead,
         EndRead,
         Received,
-        Sent,
         HistoryDataSent,
         HandleEvent,
         ConnectToCountryCenter,
@@ -97,7 +96,7 @@ namespace Scada.Data.Client.Tcp
 
     // public delegate void OnReceiveMessage(Agent agent, string msg);
 
-    public delegate void NotifyEventHandler(Agent agent, NotifyEvents ne, string msg);
+    public delegate void NotifyEventHandler(Agent agent, NotifyEvents ne, string msg1, string msg2);
 
     /// <summary>
     /// 
@@ -263,13 +262,16 @@ namespace Scada.Data.Client.Tcp
         public void OnTimeChanged(DateTime timeToSet)
         {
             string s = string.Format("SET TIME = {0}", timeToSet);
-            this.NotifyEvent(this, NotifyEvents.HandleEvent, s);
+            this.NotifyEvent(this, NotifyEvents.HandleEvent, s, null);
         }
 
-        public void OnHandleHistoryData(string msg)
+        public void OnHandleHistoryData(string msg, bool notify)
         {
             this.DoLog(ScadaDataClient, msg);
-            this.NotifyEvent(this, NotifyEvents.HandleEvent, msg);
+            if (notify)
+            {
+                this.NotifyEvent(this, NotifyEvents.HandleEvent, msg, null);
+            }
         }
 
         public override string ToString()
@@ -371,20 +373,20 @@ namespace Scada.Data.Client.Tcp
 
                     string msg = string.Format("Connecting to {0}:{1} retry times = {2}.", serverIpAddress, serverPort, this.retryCount);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connecting, msg);
+                    this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
                 }
                 else
                 {
                     string msg = string.Format("Connecting to {0}:{1} Already!!", serverIpAddress, serverPort);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connecting, msg);
+                    this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
                 }
             }
             catch (Exception e)
             {
                 string msg = string.Format("Connecting to {0}:{1} failed => {2}", serverIpAddress, serverPort, e.Message);
                 this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Connecting, msg);
+                this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
                 this.OnConnectionException(e);
             }
         }
@@ -405,13 +407,13 @@ namespace Scada.Data.Client.Tcp
                 }
                 string msg = string.Format("Disconnect from {0}", this.ToString());
                 this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Disconnect, msg);
+                this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
             }
             catch (Exception e)
             {
                 string msg = string.Format("Disconnect from {0} Failed => {1}", this.ToString(), e.Message);
                 this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Disconnect, msg);
+                this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
             }
             this.Stream = null;
             this.client = null;
@@ -442,8 +444,8 @@ namespace Scada.Data.Client.Tcp
 
                             string msg = string.Format("Connected to {0}", this.ToString());
                             this.DoLog(ScadaDataClient, msg);
-                            this.NotifyEvent(this, NotifyEvents.Connected, msg);
-                            this.NotifyEvent(this, NotifyEvents.HandleEvent, msg);
+                            this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
+                            this.NotifyEvent(this, NotifyEvents.HandleEvent, msg, null);
                         }
                     }
                 }
@@ -452,7 +454,7 @@ namespace Scada.Data.Client.Tcp
                     string address = this.isConnectingWired ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
                     string msg = string.Format("Connected to {0} Failed => {1}", address, e.Message);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connected, msg);
+                    this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
 
                     this.OnConnectionException(e);
                 }
@@ -544,7 +546,7 @@ namespace Scada.Data.Client.Tcp
                 return;
             }
             this.DoLog(ScadaDataClient, msg);
-            this.NotifyEvent(this, NotifyEvents.Received, msg);
+            this.NotifyEvent(this, NotifyEvents.Received, msg, null);
         }
 
         // Send final implements
@@ -566,7 +568,6 @@ namespace Scada.Data.Client.Tcp
             {
                 string msg = string.Format("Sent to {0} Failed => {1}", this.ToString(), e.Message);
                 this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Sent, msg); 
 
                 this.OnConnectionException(e);
             }
@@ -644,7 +645,7 @@ namespace Scada.Data.Client.Tcp
             result = this.Send(Encoding.ASCII.GetBytes(s));
             if (result)
             {
-                this.NotifyEvent(this, NotifyEvents.HistoryDataSent, p.DeviceKey);
+                this.NotifyEvent(this, NotifyEvents.HistoryDataSent, p.DeviceKey, p.ToString());
             }
             return result;
         }
@@ -658,13 +659,13 @@ namespace Scada.Data.Client.Tcp
         internal void StartConnectCountryCenter()
         {
             string msg = string.Format("启动到国家数据中心的连接!");
-            this.NotifyEvent(this, NotifyEvents.ConnectToCountryCenter, msg);
+            this.NotifyEvent(this, NotifyEvents.ConnectToCountryCenter, msg, null);
         }
 
         internal void StopConnectCountryCenter()
         {
             string msg = string.Format("国家数据中心连接已断开");
-            this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg);
+            this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg, null);
         }
 
         public ThreadMashaller UIThreadMashaller

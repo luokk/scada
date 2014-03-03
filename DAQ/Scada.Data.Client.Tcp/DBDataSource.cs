@@ -10,6 +10,16 @@ namespace Scada.Data.Client.Tcp
     using System.IO;
     using System.Threading;
     using Scada.Config;
+
+    public enum ReadResult
+    {
+        SqlCommandError,
+        RecordsWithoutId,
+        NoThisField,
+        ReadError,
+        ReadOK,
+
+    }
     
     /// <summary>
     /// Each Device has a Listener.
@@ -31,9 +41,8 @@ namespace Scada.Data.Client.Tcp
 
         private List<string> deviceKeyList = new List<string>();
 
-        private int minuteAdjustForNaI = 0;
+        //private int minuteAdjustForNaI = 0;
       
-
         // <DeviceKey, dict[data]>
         private Dictionary<string, object> latestData = new Dictionary<string, object>();
 
@@ -48,12 +57,20 @@ namespace Scada.Data.Client.Tcp
                 string connectionString = new DBConnectionString().ToString();
                 this.conn = new MySqlConnection(connectionString);
                 this.conn.Open();
-                this.cmd = this.conn.CreateCommand();
             }
             catch (Exception e)
             {
                 string msg = e.Message;
             }
+        }
+
+        public MySqlCommand CreateCommand()
+        {
+            if (this.conn != null)
+            {
+                return this.conn.CreateCommand();
+            }
+            return null;
         }
 
         private static DBDataSource instance = null;
@@ -70,13 +87,18 @@ namespace Scada.Data.Client.Tcp
             }
         }
 
+        public void Initialize()
+        {
+            // private ctor would to this work, but MUST invoke
+            this.cmd = this.CreateCommand();
+        }
 
         DataPacket GetDataPacket(string deviceKey, DateTime time)
         {
             return default(DataPacket);
         }
 
-        private string GetSelectStatement(string tableName, DateTime time)
+        private static string GetSelectStatement(string tableName, DateTime time)
         {
             // Get the recent <count> entries.
             string format = "select * from {0} where time='{1}'";
@@ -91,22 +113,26 @@ namespace Scada.Data.Client.Tcp
             return sql;
         }
 
-        public Dictionary<string, object> GetData(string deviceKey, DateTime time, string code = null)
+
+
+        public ReadResult GetData(string deviceKey, DateTime time, string code, Dictionary<string, object> data)
         {
             if (this.cmd == null)
             {
-                return new Dictionary<string,object>(0);
+                return ReadResult.SqlCommandError;
             }
-            // Return values
-            const int MaxItemCount = 20;
-            var ret = new Dictionary<string, object>(MaxItemCount);
 
+            return GetData(this.cmd, deviceKey, time, code, data);
+        }
+
+        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime time, string code, Dictionary<string, object> data)
+        {
             string tableName = Settings.Instance.GetTableName(deviceKey);
 
-            this.cmd.CommandText = this.GetSelectStatement(tableName, time);
+            command.CommandText = GetSelectStatement(tableName, time);
             try
             {
-                using (MySqlDataReader reader = this.cmd.ExecuteReader())
+                using (MySqlDataReader reader = command.ExecuteReader())
                 {
                     if (reader.Read())
                     {
@@ -116,18 +142,18 @@ namespace Scada.Data.Client.Tcp
 
                         if (string.IsNullOrEmpty(id))
                         {
-                            return null;
+                            return ReadResult.RecordsWithoutId;
                         }
 
-                        ret.Add(Id, id);
+                        data.Add(Id, id);
 
                         List<Settings.DeviceCode> codes = Settings.Instance.GetCodes(deviceKey);
 
                         string dataTime = reader.GetString("Time");
-                        ret.Add("time", dataTime);
+                        data.Add("time", dataTime);
                         foreach (var c in codes)
                         {
-                            if (code != null && code != c.Code)
+                            if (!string.IsNullOrEmpty(code) && code != c.Code)
                             {
                                 continue;
                             }
@@ -135,31 +161,28 @@ namespace Scada.Data.Client.Tcp
                             try
                             {
                                 string v = reader.GetString(field);
-                                ret.Add(c.Code, v);
+                                data.Add(c.Code, v);
                             }
                             catch (SqlNullValueException)
                             {
                                 // TODO: Has Null Value
-                                ret.Add(c.Code, string.Empty);
+                                data.Add(c.Code, string.Empty);
                             }
                             catch (Exception)
                             {
-                                // No this field.
+                                return ReadResult.NoThisField;
                             }
                         }
-
-
-
+                        return ReadResult.ReadOK;
                     }
                 }
             }
             catch (Exception e)
             {
                 Thread.Sleep(500);
+                return ReadResult.ReadError;
             }
-
-            return ret;
-
+            return ReadResult.ReadError;
         }
 
         private string GetDatePath(DateTime date)
