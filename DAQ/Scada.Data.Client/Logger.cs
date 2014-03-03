@@ -14,7 +14,7 @@ namespace Scada.Data.Client
 
         public Logger(string fileName)
         {
-            this.writer = new StreamWriter(fileName);
+            this.writer = new StreamWriter(fileName, true);
         }
 
         public void Log(string msg)
