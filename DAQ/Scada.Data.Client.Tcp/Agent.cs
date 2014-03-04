@@ -285,15 +285,8 @@ namespace Scada.Data.Client.Tcp
 
         private void OnConnectionException(Exception e)
         {
-            DateTime now = DateTime.Now;
-            long s = (now.Ticks - this.LastExceptionTime.Ticks) / 10000000;
-            if (s < 3)
-            {
-                return;
-            }
-            this.LastExceptionTime = now;
-            this.TryToPing();
             this.Disconnect();
+            this.TryToPing();
         }
 
         private IPStatus GetPingResult(string serverIpAddress)
@@ -426,28 +419,25 @@ namespace Scada.Data.Client.Tcp
                 try
                 {
                     TcpClient client = (TcpClient)result.AsyncState;
-                    if (client != null)
+                    client.EndConnect(result);
+
+                    if (client.Connected)
                     {
-                        client.EndConnect(result);
+                        // Send need this.stream
+                        this.Stream = client.GetStream();
 
-                        if (client.Connected)
-                        {
-                            // Send need this.stream
-                            this.Stream = client.GetStream();
+                        this.IsWired = this.isConnectingWired;
 
-                            this.IsWired = this.isConnectingWired;
+                        this.BeginRead(client, this.Stream);
 
-                            this.BeginRead(client, this.Stream);
+                        // [Auth]
+                        this.handler.SendAuthPacket();
 
-                            // [Auth]
-                            this.handler.SendAuthPacket();
-
-                            string msg = string.Format("Connected to {0}", this.ToString());
-                            this.DoLog(ScadaDataClient, msg);
-                            this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
-                            this.NotifyEvent(this, NotifyEvents.HandleEvent, msg, null);
-                        }
-                    }
+                        string msg = string.Format("Connected to {0}", this.ToString());
+                        this.DoLog(ScadaDataClient, msg);
+                        this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
+                        this.NotifyEvent(this, NotifyEvents.HandleEvent, msg, null);
+                    }   
                 }
                 catch (Exception e)
                 {
@@ -673,8 +663,6 @@ namespace Scada.Data.Client.Tcp
             get;
             set;
         }
-
-        public DateTime LastExceptionTime { get; set; }
 
         internal void Quit()
         {
