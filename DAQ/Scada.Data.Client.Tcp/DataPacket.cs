@@ -296,7 +296,7 @@ namespace Scada.Data.Client.Tcp
             this.Mn = this.Settings.Mn;
             this.St = Value.SysReply;
             string p = string.Format(
-                "ST={0};CN={1};PW={2};MN={3};Flag=1;CP=&&QN={4};QnRtn={5}&&",
+                "ST={0};CN={1};PW={2};MN={3};Flag=0;CP=&&QN={4};QnRtn={5}&&",
                 this.St, this.Cn, this.Password, this.Mn, qn, reply);
             return p;
         }
@@ -306,7 +306,7 @@ namespace Scada.Data.Client.Tcp
             this.Mn = this.Settings.Mn;
             this.St = Value.SysReply;
             string p = string.Format(
-                "ST={0};CN={1};PW={2};MN={3};Flag=1;CP=&&QN={4};ExeRtn={5}&&",
+                "ST={0};CN={1};PW={2};MN={3};CP=&&QN={4};ExeRtn={5}&&",
                 this.St, this.Cn, this.Password, this.Mn, qn, result);
             return p;
         }
