@@ -380,7 +380,7 @@ namespace Scada.Data.Client.Tcp
                 }
                 else
                 {
-                    string line = string.Format("RD Error: {0}", r.ToString());
+                    string line = string.Format("RD Error: {0} [{1} <{2}>]", r.ToString(), deviceKey, time);
                     Log.GetLogFile(deviceKey).Log(line);
 
                 }

@@ -393,8 +393,6 @@ namespace Scada.Data.Client.Tcp
             this.historyDataBundleQueue.Enqueue(bundle);
             if (this.uploadHistoryDataThread == null)
             {
-                this.command = DBDataSource.Instance.CreateCommand();
-
                 this.uploadHistoryDataThread = new Thread(new ThreadStart(this.PrepareUploadHistoryData));
                 this.uploadHistoryDataThread.Start();
             }
@@ -402,6 +400,8 @@ namespace Scada.Data.Client.Tcp
 
         private void PrepareUploadHistoryData()
         {
+            this.command = DBDataSource.Instance.CreateCommand();
+
             while (true)
             {
                 if (this.fQuit)
@@ -492,7 +492,7 @@ namespace Scada.Data.Client.Tcp
                         List<DataPacket> pks = builder.GetDataPackets(deviceKey, dt, content, true);
                         foreach (var p in pks)
                         {
-                            Thread.Sleep(100);
+                            Thread.Sleep(50);
                             this.agent.SendHistoryDataPacket(p);
                         }
                     }
@@ -522,14 +522,14 @@ namespace Scada.Data.Client.Tcp
                     }
                     else
                     {
-                        string msg = string.Format("Error: {0} [{1}@<{2}>]", r.ToString(), deviceKey, dt);
-                        this.agent.OnHandleHistoryData(msg, true);
+                        string line = string.Format("HD Error: {0} [{1} <{2}>]", r.ToString(), deviceKey, dt);
+                        this.agent.OnHandleHistoryData(line, true);
                     }
                     dt = dt.AddSeconds(30);
                 }
 
                 // Sleeping
-                Thread.Sleep(500);
+                Thread.Sleep(50);
             }
 
         }
