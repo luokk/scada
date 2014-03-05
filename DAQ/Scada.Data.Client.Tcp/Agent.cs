@@ -239,7 +239,7 @@ namespace Scada.Data.Client.Tcp
             return lastDetectResult;
         }
 
-        private void DoLog(string fileName, string msg)
+        private void DoLog(string deviceKey, string msg)
         {
             if (this.UIThreadMashaller == null)
                 return;
@@ -247,11 +247,11 @@ namespace Scada.Data.Client.Tcp
             this.UIThreadMashaller.Mashall((_n) => 
             {
                 string line = string.Format("[{0}] {1}", DateTime.Now.ToString("HH:mm:ss"), msg);
-                if (ExistLoggerConsoleProc() && LoggerClient.Contains(fileName))
+                if (ExistLoggerConsoleProc() && LoggerClient.Contains(deviceKey))
                 {
-                    this.logger.Send(fileName, line);
+                    this.logger.Send(deviceKey, line);
                 }
-                Logger logger = Log.GetLogFile(fileName);
+                Logger logger = Log.GetLogFile(deviceKey);
                 if (logger != null)
                 {
                     logger.Log(line);
@@ -265,12 +265,13 @@ namespace Scada.Data.Client.Tcp
             this.NotifyEvent(this, NotifyEvents.HandleEvent, s, null);
         }
 
-        public void OnHandleHistoryData(string msg, bool notify)
+        public void OnHandleHistoryData(string deviceKey, string msg, bool notify)
         {
-            this.DoLog(ScadaDataClient, msg);
+            deviceKey = string.IsNullOrEmpty(deviceKey) ? ScadaDataClient : deviceKey;
+            this.DoLog(deviceKey, msg);
             if (notify)
             {
-                this.NotifyEvent(this, NotifyEvents.HandleEvent, msg, null);
+                this.NotifyEvent(this, NotifyEvents.HandleEvent, deviceKey, msg);
             }
         }
 

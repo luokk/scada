@@ -400,7 +400,16 @@ namespace Scada.Data.Client.Tcp
 
         private void PrepareUploadHistoryData()
         {
-            this.command = DBDataSource.Instance.CreateCommand();
+            try
+            {
+                this.command = DBDataSource.Instance.CreateHistoryDataCommand();
+            }
+            catch (Exception e)
+            {
+                string line = string.Format("DB Connection: {0}", e.ToString());
+                this.agent.OnHandleHistoryData("", line, true);
+                return;
+            }
 
             while (true)
             {
@@ -411,7 +420,7 @@ namespace Scada.Data.Client.Tcp
                     HistoryDataBundle hdb = this.historyDataBundleQueue.Dequeue();
 
                     string msg = string.Format("Uploading history data [{0} - {1}]", DeviceTime.Parse(hdb.BeginTime), DeviceTime.Parse(hdb.EndTime));
-                    this.agent.OnHandleHistoryData(msg, true);
+                    this.agent.OnHandleHistoryData("", msg, true);
                     if (string.IsNullOrEmpty(hdb.ENO))
                     {
                         string[] enos = new string[] { "001001", "002000", "003001", "004000", "005000", "010002", "999000" };
@@ -420,7 +429,6 @@ namespace Scada.Data.Client.Tcp
                             // for this Command, polId should be Null (means All polId);
                             this.UploadHistoryData(hdb.QN, e, hdb.BeginTime, hdb.EndTime, null);
                         }
-
                     }
                     else
                     {
@@ -523,7 +531,7 @@ namespace Scada.Data.Client.Tcp
                     else
                     {
                         string line = string.Format("HD Error: {0} [{1} <{2}>]", r.ToString(), deviceKey, dt);
-                        this.agent.OnHandleHistoryData(line, true);
+                        this.agent.OnHandleHistoryData(deviceKey, line, true);
                     }
                     dt = dt.AddSeconds(30);
                 }

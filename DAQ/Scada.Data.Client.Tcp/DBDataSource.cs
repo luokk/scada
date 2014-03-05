@@ -32,9 +32,11 @@ namespace Scada.Data.Client.Tcp
 
         private const string Time = "time";
 
-        private MySqlConnection conn = null;
+        private MySqlConnection mainThreadConn = null;
 
-        private MySqlCommand cmd = null;
+        private MySqlConnection historyDataThreadConn = null;
+
+        private MySqlCommand mainSqlCmd = null;
 
 
         private List<string> tables = new List<string>();
@@ -42,36 +44,9 @@ namespace Scada.Data.Client.Tcp
         private List<string> deviceKeyList = new List<string>();
 
         //private int minuteAdjustForNaI = 0;
-      
+
         // <DeviceKey, dict[data]>
         private Dictionary<string, object> latestData = new Dictionary<string, object>();
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private DBDataSource()
-        {
-            try
-            {
-                string connectionString = new DBConnectionString().ToString();
-                this.conn = new MySqlConnection(connectionString);
-                this.conn.Open();
-            }
-            catch (Exception e)
-            {
-                string msg = e.Message;
-            }
-        }
-
-        public MySqlCommand CreateCommand()
-        {
-            if (this.conn != null)
-            {
-                return this.conn.CreateCommand();
-            }
-            return null;
-        }
 
         private static DBDataSource instance = null;
 
@@ -89,8 +64,25 @@ namespace Scada.Data.Client.Tcp
 
         public void Initialize()
         {
-            // private ctor would to this work, but MUST invoke
-            this.cmd = this.CreateCommand();
+            try
+            {
+                string connectionString = new DBConnectionString().ToString();
+                this.mainThreadConn = new MySqlConnection(connectionString);
+                this.mainThreadConn.Open();
+                this.mainSqlCmd = this.mainThreadConn.CreateCommand();
+            }
+            catch (Exception e)
+            {
+                string msg = e.Message;
+            }
+        }
+
+        public MySqlCommand CreateHistoryDataCommand()
+        {
+            string connectionString = new DBConnectionString().ToString();
+            this.historyDataThreadConn = new MySqlConnection(connectionString);
+            this.historyDataThreadConn.Open();
+            return this.historyDataThreadConn.CreateCommand();
         }
 
         DataPacket GetDataPacket(string deviceKey, DateTime time)
@@ -113,16 +105,14 @@ namespace Scada.Data.Client.Tcp
             return sql;
         }
 
-
-
         public ReadResult GetData(string deviceKey, DateTime time, string code, Dictionary<string, object> data)
         {
-            if (this.cmd == null)
+            if (this.mainSqlCmd == null)
             {
                 return ReadResult.SqlCommandError;
             }
 
-            return GetData(this.cmd, deviceKey, time, code, data);
+            return GetData(this.mainSqlCmd, deviceKey, time, code, data);
         }
 
         public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime time, string code, Dictionary<string, object> data)

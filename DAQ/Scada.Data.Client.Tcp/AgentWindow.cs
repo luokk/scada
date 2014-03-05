@@ -461,7 +461,7 @@ namespace Scada.Data.Client.Tcp
                 }
                 else if (NotifyEvents.HandleEvent == notify)
                 {
-                    string line = string.Format("{0}: {1}", DateTime.Now, msg1);
+                    string line = string.Format("{0}: {1} {2}", DateTime.Now, msg1, msg2);
                     this.mainListBox.Items.Add(line);
                 }
                 else if (NotifyEvents.HistoryDataSent == notify)
