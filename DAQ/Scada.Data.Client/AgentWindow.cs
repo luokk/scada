@@ -44,6 +44,7 @@ namespace Scada.Data.Client
 
         private void AgentWindow_Load(object sender, EventArgs e)
         {
+            this.CancelQuit = true;
             InitSysNotifyIcon();
             this.statusStrip.Items.Add(this.statusLabel);
             this.statusStrip.Items.Add(new ToolStripSeparator());
@@ -87,7 +88,7 @@ namespace Scada.Data.Client
         private void InitSysNotifyIcon()
         {
             // Notify Icon
-            sysNotifyIcon.Text = "数据上传v2.0";
+            sysNotifyIcon.Text = "数据上传程序v2.0";
             sysNotifyIcon.Icon = new Icon(Resources.AppIcon, new Size(16, 16));
             sysNotifyIcon.Visible = true;
             sysNotifyIcon.DoubleClick += new EventHandler(OnSysNotifyIcon);
@@ -114,6 +115,7 @@ namespace Scada.Data.Client
 
         private void PerformQuitByUser()
         {
+            this.CancelQuit = false;
             Application.Exit();
         }
 
@@ -133,19 +135,24 @@ namespace Scada.Data.Client
 
                 string line = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
                 Log.GetLogFile(Program.DataClient).Log(line);
+
+
+                this.TestSendPacket();
             }
         }
 
         private bool InitializeAgent()
         {
+            Settings.Instance.LoadSettings();
             Settings s = Settings.Instance;
-            // TODO: Create Agent for DataCenter2
+
             if (s.DataCenters.Count() == 0)
             {
                 this.pingLabel.Text = "配置错误";
                 return false;
             }
-            this.agent = this.CreateAgent(s.DataCenters[0]);
+
+            this.agent = new DataAgent(s.DataCenters[0]);
             this.agent.DoAuth();
 
             this.statusLabel.Text = string.Format("开始:[{0}]", DateTime.Now);
@@ -154,7 +161,7 @@ namespace Scada.Data.Client
 
         private DataAgent CreateAgent(Settings.DataCenter2 dataCenter)
         {
-            DataAgent agent = new DataAgent(dataCenter.Ip, dataCenter.Port);
+            DataAgent agent = new DataAgent(dataCenter);
             return agent;
         }
 
@@ -381,7 +388,7 @@ namespace Scada.Data.Client
 
         private void AgentWindowClosingForm(object sender, FormClosingEventArgs e)
         {
-            e.Cancel = true;
+            e.Cancel = this.CancelQuit;
             this.WindowState = FormWindowState.Minimized;
         }
 
@@ -393,5 +400,7 @@ namespace Scada.Data.Client
             }
         }
 
+
+        public bool CancelQuit { get; set; }
     }
 }

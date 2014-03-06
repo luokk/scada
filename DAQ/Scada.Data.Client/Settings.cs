@@ -68,14 +68,13 @@ namespace Scada.Data.Client
         /// </summary>
         public class DataCenter2
         {
-            public string Ip { get; set; }
-            public string WirelessIp { get; set; }
+            public string BaseUrl { get; set; }
 
-            public int Port { get; set; }
-            public int WirelessPort { get; set; }
+            public string GetUrl(string api)
+            {
+                return string.Format("{0}/{1}", this.BaseUrl, api);
+            }
 
-
-            public bool CountryCenter { get; set; }
         }
 
         /// <summary>
@@ -150,7 +149,11 @@ namespace Scada.Data.Client
 
         private List<Device> devices = new List<Device>();
 
-        public Settings()
+        private Settings()
+        {
+        }
+
+        public void LoadSettings()
         {
             string settingFileName = ConfigPath.GetConfigFilePath("agent.settings");
             if (File.Exists(settingFileName))
@@ -162,11 +165,9 @@ namespace Scada.Data.Client
             foreach (XmlNode dcn in datacenters)
             {
                 DataCenter2 dc = new DataCenter2();
-                
-                dc.Ip = this.GetAttribute(dcn, "ip");
-                dc.Port = int.Parse(this.GetAttribute(dcn, "port", "0"));
-                // dc.WirelessIp = this.GetAttribute(dcn, "wirelessip");
-                // dc.WirelessPort = int.Parse(this.GetAttribute(dcn, "wirelessport", "0"));
+
+                dc.BaseUrl = this.GetAttribute(dcn, "BaseUrl");
+
                 dataCenters.Add(dc);
             }
 

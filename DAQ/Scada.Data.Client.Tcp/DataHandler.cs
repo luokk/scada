@@ -434,7 +434,7 @@ namespace Scada.Data.Client.Tcp
                     {
                         this.UploadHistoryData(hdb.QN, hdb.ENO, hdb.BeginTime, hdb.EndTime, hdb.PolId);
                     }
-
+                    Thread.Sleep(12000);
                     this.SendResultPacket(hdb.QN);
                 }
                 else

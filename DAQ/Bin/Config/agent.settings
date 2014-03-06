@@ -2,20 +2,20 @@
 <settings>
 	<!-- Default Port is 6000 and 7000 -->
 	<datacenters>
-		<datacenter ip="122.224.74.82" port="13812" wirelessip="" wirelessport="7000" type="1"/>
+		<datacenter ip="122.224.74.82" port="14213" wirelessip="" wirelessport="7000" type="1"/>
 		<!--
 		<datacenter ip="122.224.74.82" port="6700" wirelessip="" wirelessport="7000" type="1"/>
 		<datacenter ip="127.0.0.1" port="6000" wirelessip="" wirelessport="7000"/>
 		<datacenter ip="" port="6000" wirelessip="" wirelessport="7000"/>
 		<datacenter ip="" port="6000" wirelessip="" wirelessport="7000"/>
 		-->
-		<datacenter2 ip="127.0.0.1" port="80" wirelessip="" wirelessport="7000" />
+		<datacenter2 BaseUrl="http://127.0.0.1"/>
 	</datacenters>
 
 
 	<!-- NOTICE SNO -->
 	<site 	sysname="" sysst="213213123213123213" adapter="" name="" station="128" 
-			sno="1203A01" mn="1203A010000000">
+			sno="0313A08" mn="0313A080000000">
 	</site>
 
 	<devices>

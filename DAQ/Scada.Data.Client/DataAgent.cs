@@ -34,15 +34,12 @@ namespace Scada.Data.Client
             set;
         }
 
-        public DataAgent(string serverAddress, int serverPort, string serverAddress2 = "", int serverPort2 = 0)
+        public DataAgent(Settings.DataCenter2 dataCenter)
         {
-            this.ServerAddress = serverAddress;
-            this.ServerPort = serverPort;
-
-
+            this.DataCenter = dataCenter;
         }
 
-        public string ServerAddress
+        public Settings.DataCenter2 DataCenter
         {
             get;
             set;
@@ -60,51 +57,15 @@ namespace Scada.Data.Client
            
         }
 
-        private string GetUrl(string api)
-        {
-            return string.Format("http://{0}:{1}/{2}", this.ServerAddress, this.ServerPort, api);
-        }
 
         internal void SendDataPacket(Packet packet, DateTime time)
         {
-            this.Send("data/commit", packet, time);
-        }
-
-        private void Send(string api, Packet packet, DateTime time)
-        {
-            try
-            {
-                Uri uri = new Uri(this.GetUrl(api));
-                byte[] data = Encoding.ASCII.GetBytes(packet.ToString());
-                using (WebClient wc = new WebClient())
-                {
-                    wc.UploadDataCompleted += (object sender, UploadDataCompletedEventArgs e) =>
-                        {
-                            if (e.Error != null)
-                            {
-                                return;
-                            }
-                            Packet p = (Packet)e.UserState;
-                            if (p != null)
-                            {
-                                string result = Encoding.ASCII.GetString(e.Result);
-                                // TODO: with result
-                            }
-
-                        };
-                    wc.UploadDataAsync(uri, Post, data, packet);
-                }
-                
-            }
-            catch (Exception e)
-            {
-
-            }
+            Packet.Send(this.DataCenter.GetUrl("data/commit"), packet, time);
         }
 
         internal void FetchCommands()
         {
-            Uri uri = new Uri(this.GetUrl("cmd/query"));
+            Uri uri = new Uri(this.DataCenter.GetUrl("cmd/query"));
             try
             {
                 WebClient wc = new WebClient();
@@ -142,7 +103,7 @@ namespace Scada.Data.Client
 
         internal void SendFilePacket(Packet packet)
         {
-            Uri uri = new Uri(this.GetUrl("data/upload"));
+            Uri uri = new Uri(this.DataCenter.GetUrl("data/upload"));
             try
             {
                 using (WebClient wc = new WebClient())
@@ -180,5 +141,6 @@ namespace Scada.Data.Client
             // TODO: Send Packet of init.
 
         }
+
     }
 }

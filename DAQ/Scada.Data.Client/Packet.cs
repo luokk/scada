@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 
 namespace Scada.Data.Client
@@ -206,5 +207,61 @@ namespace Scada.Data.Client
                 this.filePacket = true;
             }
         }
+
+
+        public static void Send(string api, Packet packet, DateTime time)
+        {
+            try
+            {
+                Uri uri = new Uri(api);
+                byte[] data = Encoding.ASCII.GetBytes(packet.ToString());
+                using (WebClient wc = new WebClient())
+                {
+                    wc.UploadDataCompleted += (object sender, UploadDataCompletedEventArgs e) =>
+                    {
+                        if (e.Error != null)
+                        {
+                            Packet.HandleWebException(e.Error);
+                            return;
+                        }
+
+                        Packet p = (Packet)e.UserState;
+                        if (p != null)
+                        {
+                            string result = Encoding.ASCII.GetString(e.Result);
+                            // TODO: with result
+                        }
+
+                    };
+                    wc.UploadDataAsync(uri, "POST", data, packet);
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+        private static void HandleWebException(Exception e)
+        {
+            WebException we = e as WebException;
+
+            if (we == null)
+            {
+                return;
+            }
+
+            HttpWebResponse hwr = we.Response as HttpWebResponse;
+            switch (hwr.StatusCode)
+            {
+                case HttpStatusCode.InternalServerError:
+                    break;
+                default:
+                    break;
+
+
+            }
+        }
+
     }
 }
