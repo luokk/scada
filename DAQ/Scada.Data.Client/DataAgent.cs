@@ -76,22 +76,24 @@ namespace Scada.Data.Client
             {
                 Uri uri = new Uri(this.GetUrl(api));
                 byte[] data = Encoding.ASCII.GetBytes(packet.ToString());
-                WebClient wc = new WebClient();
-                wc.UploadDataCompleted += (object sender, UploadDataCompletedEventArgs e) => 
-                    {
-                        if (e.Error != null)
+                using (WebClient wc = new WebClient())
+                {
+                    wc.UploadDataCompleted += (object sender, UploadDataCompletedEventArgs e) =>
                         {
-                            return;
-                        }
-                        Packet p = (Packet)e.UserState;
-                        if (p != null)
-                        {
-                            string result = Encoding.ASCII.GetString(e.Result);
-                            // TODO: with result
-                        }
+                            if (e.Error != null)
+                            {
+                                return;
+                            }
+                            Packet p = (Packet)e.UserState;
+                            if (p != null)
+                            {
+                                string result = Encoding.ASCII.GetString(e.Result);
+                                // TODO: with result
+                            }
 
-                    };
-                wc.UploadDataAsync(uri, Post, data, packet);
+                        };
+                    wc.UploadDataAsync(uri, Post, data, packet);
+                }
                 
             }
             catch (Exception e)
@@ -173,7 +175,7 @@ namespace Scada.Data.Client
         }
 
         // Connect means first HTTP packet to the data Center.
-        internal void Connect()
+        internal void DoAuth()
         {
             // TODO: Send Packet of init.
 

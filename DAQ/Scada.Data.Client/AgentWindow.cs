@@ -35,25 +35,16 @@ namespace Scada.Data.Client
 
         private ToolStripLabel pingLabel = new ToolStripLabel();
 
-        public bool StartState
-        {
-            get;
-            set;
-        }
-
         private bool started = false;
 
         public MainDataAgentWindow()
         {
-            this.StartState = false;
             InitializeComponent();
         }
 
         private void AgentWindow_Load(object sender, EventArgs e)
         {
             InitSysNotifyIcon();
-            this.ShowInTaskbar = false;
-
             this.statusStrip.Items.Add(this.statusLabel);
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add(this.addressLabel);
@@ -61,11 +52,8 @@ namespace Scada.Data.Client
             this.statusStrip.Items.Add(this.counterLabel);
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add(this.pingLabel);
-            // Start if have the --start args.
-            if (this.StartState)
-            {
-                Start();
-            }
+
+            this.Start();            
         }
         #if DEBUG
         private void TestSendPacket()
@@ -99,16 +87,12 @@ namespace Scada.Data.Client
         private void InitSysNotifyIcon()
         {
             // Notify Icon
-            sysNotifyIcon.Text = "系统设备管理器";
+            sysNotifyIcon.Text = "数据上传v2.0";
             sysNotifyIcon.Icon = new Icon(Resources.AppIcon, new Size(16, 16));
             sysNotifyIcon.Visible = true;
-            this.WindowState = FormWindowState.Minimized;
-            this.Hide();
             sysNotifyIcon.DoubleClick += new EventHandler(OnSysNotifyIcon);
-             
-            ContextMenu notifyContextMenu = new ContextMenu();
-            
-            
+
+            ContextMenu notifyContextMenu = new ContextMenu();            
             MenuItem exitMenuItem = new MenuItem("退出");
             exitMenuItem.Click += (s, e) =>
             {
@@ -142,29 +126,30 @@ namespace Scada.Data.Client
 
         private void Start()
         {
-            if (this.started)
+            if (this.InitializeAgent())
             {
-                return;
-            }
-            this.InitializeAgent();
-            this.InitializeTimer();
-            this.started = true;
+                this.InitializeTimer();
+                // this.started = true;
 
-            string startsLine = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
-            Log.GetLogFile(Program.DataClient).Log(startsLine);
+                string line = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
+                Log.GetLogFile(Program.DataClient).Log(line);
+            }
         }
 
-        private void InitializeAgent()
+        private bool InitializeAgent()
         {
             Settings s = Settings.Instance;
             // TODO: Create Agent for DataCenter2
-            if (s.DataCenters.Count() > 0)
+            if (s.DataCenters.Count() == 0)
             {
-                this.agent = this.CreateAgent(s.DataCenters[0]);
-                this.agent.Connect();
-
-                this.statusLabel.Text = string.Format("开始:({0})", DateTime.Now);
+                this.pingLabel.Text = "配置错误";
+                return false;
             }
+            this.agent = this.CreateAgent(s.DataCenters[0]);
+            this.agent.DoAuth();
+
+            this.statusLabel.Text = string.Format("开始:[{0}]", DateTime.Now);
+            return true;
         }
 
         private DataAgent CreateAgent(Settings.DataCenter2 dataCenter)
@@ -372,13 +357,6 @@ namespace Scada.Data.Client
                 }
                  * */
             });
-        }
-
-
-        // 开始
-        private void OnStartStripButtonClick(object sender, EventArgs e)
-        {
-            this.Start();
         }
 
         private void OnDetailsButtonClick(object sender, EventArgs e)
