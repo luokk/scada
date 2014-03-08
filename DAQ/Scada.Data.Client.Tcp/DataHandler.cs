@@ -149,7 +149,6 @@ namespace Scada.Data.Client.Tcp
             this.agent = agent;
         }
 
-
         public void SendAuthPacket()
         {
             // TODO:QN=20090516010101001;ST=38;CN=6011;PW=123456;

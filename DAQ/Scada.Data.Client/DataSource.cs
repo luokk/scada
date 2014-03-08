@@ -1,5 +1,5 @@
-﻿
-namespace Scada.Data.Client.Tcp
+
+namespace Scada.Data.Client
 {
     using System;
     using System.Collections.Generic;
@@ -18,26 +18,19 @@ namespace Scada.Data.Client.Tcp
         NoThisField,
         ReadError,
         ReadOK,
-        NoDataFound,
-
+        DataNotFound,
     }
-    
+
     /// <summary>
     /// Each Device has a Listener.
     /// </summary>
-    internal class DBDataSource
+    internal class DataSource
     {
         private const int MaxCountFetchRecent = 10;
 
         private const string Id = "Id";
 
         private const string Time = "time";
-
-        private MySqlConnection mainThreadConn = null;
-
-        private MySqlConnection historyDataThreadConn = null;
-
-        private MySqlCommand mainSqlCmd = null;
 
 
         private List<string> tables = new List<string>();
@@ -49,46 +42,31 @@ namespace Scada.Data.Client.Tcp
         // <DeviceKey, dict[data]>
         private Dictionary<string, object> latestData = new Dictionary<string, object>();
 
-        private static DBDataSource instance = null;
+        private static DataSource instance = null;
 
-        public static DBDataSource Instance
+        public static DataSource Instance
         {
             get
             {
-                if (DBDataSource.instance == null)
+                if (DataSource.instance == null)
                 {
-                    DBDataSource.instance = new DBDataSource();
+                    DataSource.instance = new DataSource();
                 }
-                return DBDataSource.instance;
+                return DataSource.instance;
             }
         }
 
-        public void Initialize()
-        {
-            try
-            {
-                string connectionString = new DBConnectionString().ToString();
-                this.mainThreadConn = new MySqlConnection(connectionString);
-                this.mainThreadConn.Open();
-                this.mainSqlCmd = this.mainThreadConn.CreateCommand();
-            }
-            catch (Exception e)
-            {
-                string msg = e.Message;
-            }
-        }
-
-        public MySqlCommand CreateHistoryDataCommand()
+        internal MySqlConnection GetDBConnection()
         {
             string connectionString = new DBConnectionString().ToString();
-            this.historyDataThreadConn = new MySqlConnection(connectionString);
-            this.historyDataThreadConn.Open();
-            return this.historyDataThreadConn.CreateCommand();
+            var conn = new MySqlConnection(connectionString);
+            conn.Open();
+            return conn;
         }
 
-        DataPacket GetDataPacket(string deviceKey, DateTime time)
+        Packet GetDataPacket(string deviceKey, DateTime time)
         {
-            return default(DataPacket);
+            return default(Packet);
         }
 
         private static string GetSelectStatement(string tableName, DateTime time)
@@ -104,16 +82,6 @@ namespace Scada.Data.Client.Tcp
             string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Id DESC";
             string sql = string.Format(format, tableName, toTime, fromTime);
             return sql;
-        }
-
-        public ReadResult GetData(string deviceKey, DateTime time, string code, Dictionary<string, object> data)
-        {
-            if (this.mainSqlCmd == null)
-            {
-                return ReadResult.SqlCommandError;
-            }
-
-            return GetData(this.mainSqlCmd, deviceKey, time, code, data);
         }
 
         public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime time, string code, Dictionary<string, object> data)
@@ -168,7 +136,8 @@ namespace Scada.Data.Client.Tcp
                     }
                     else
                     {
-                        return ReadResult.NoDataFound;
+                        return ReadResult.DataNotFound;
+
                     }
                 }
             }
@@ -199,7 +168,7 @@ namespace Scada.Data.Client.Tcp
             {
                 Log.GetLogFile("scada.naidevice").Log(string.Format("{0} Not_Found", filePath));
             }
-            
+
             return content;
         }
 
@@ -235,5 +204,6 @@ namespace Scada.Data.Client.Tcp
             }
             return 1;
         }
+
     }
 }

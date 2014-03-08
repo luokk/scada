@@ -38,9 +38,9 @@ namespace Scada.Data.Client
 
         public bool CancelQuit { get; set; }
 
-        public MySqlCommand MySqlCmd { get; set; }
+        public MySqlConnection MySqlConn { get; set; }
 
-        private bool started = false;
+        public MySqlCommand MySqlCmd { get; set; }
 
         /// <summary>
         /// Test code goes here
@@ -124,6 +124,15 @@ namespace Scada.Data.Client
         private void PerformQuitByUser()
         {
             this.CancelQuit = false;
+            // Close DB connection
+            if (this.MySqlConn != null)
+            {
+                try
+                {
+                    this.MySqlConn.Close();
+                }
+                catch (Exception) { }
+            }
             Application.Exit();
         }
 
@@ -175,7 +184,8 @@ namespace Scada.Data.Client
 
         private void ConnectToMySQL()
         {
-            this.MySqlCmd = DataSource.Instance.GetSqlCommand();
+            this.MySqlConn = DataSource.Instance.GetDBConnection();
+            this.MySqlCmd = this.MySqlConn.CreateCommand();
         }
 
         private void InitializeTimer()
@@ -297,7 +307,7 @@ namespace Scada.Data.Client
             }
 
             var d = DataSource.GetData(this.MySqlCmd, deviceKey, time, null, this.data);
-            if (d == ReadResult.ReadSuccess)
+            if (d == ReadResult.ReadOK)
             {
                 Packet p = builder.GetPacket(deviceKey, this.data, true);
                 return p;
