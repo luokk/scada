@@ -577,7 +577,7 @@ namespace Scada.Data.Client.Tcp
         {
             if (this.agent != null)
             {
-                //this.agent.Quit();
+                this.agent.Quit();
             }
             this.quitPressed = true;
             Application.Exit();

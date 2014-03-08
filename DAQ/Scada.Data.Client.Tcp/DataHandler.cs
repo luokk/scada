@@ -147,9 +147,6 @@ namespace Scada.Data.Client.Tcp
         public MessageDataHandler(Agent agent)
         {
             this.agent = agent;
-
-
-            this.ActiveUploadHistoryDataThread(new HistoryDataBundle("", "", ""));
         }
 
 
