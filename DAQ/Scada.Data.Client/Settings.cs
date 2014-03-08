@@ -179,6 +179,10 @@ namespace Scada.Data.Client
             this.Sno = this.GetAttribute(siteNode, "sno");
             this.Station = this.GetAttribute(siteNode, "station");
 
+            // debug-data-time
+            string debugDataTime = this.GetAttribute(siteNode, "debug-data-time");
+            this.DebugDataTime = DateTime.Parse(debugDataTime);
+            // Load Password
             this.LoadPassword();
             
             // Devices
@@ -487,6 +491,12 @@ namespace Scada.Data.Client
         { 
             get;
             set; 
+        }
+
+        public DateTime DebugDataTime
+        {
+            get;
+            set;
         }
     }
 }

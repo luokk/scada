@@ -103,12 +103,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Scada.Common\Scada.Common.csproj">
-      <Project>{d18cb829-8870-41e7-b4ec-d9033aced3c5}</Project>
-      <Name>Scada.Common</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Monitor.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

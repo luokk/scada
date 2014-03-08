@@ -6,8 +6,9 @@ using System.Text;
 
 namespace Scada.Watch
 {
-
-
+    /// <summary>
+    /// 
+    /// </summary>
     class LogWatcher
     {
         private DateTime lastModifyTime;

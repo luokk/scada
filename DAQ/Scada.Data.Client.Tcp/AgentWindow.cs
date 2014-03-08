@@ -89,6 +89,9 @@ namespace Scada.Data.Client.Tcp
             public DateTime DisconnectedTime { get; set; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private System.Windows.Forms.Timer timer;
 
         private System.Windows.Forms.Timer keepAliveTimer;
@@ -106,6 +109,8 @@ namespace Scada.Data.Client.Tcp
         private LoggerClient logger = new LoggerClient();
 
         private Dictionary<string, object> data = new Dictionary<string, object>(20);
+
+        private bool quitPressed = false;
 
         public bool StartState
         {
@@ -438,6 +443,8 @@ namespace Scada.Data.Client.Tcp
 
         private void OnNotifyEvent(Agent agent, NotifyEvents notify, string msg1, string msg2)
         {
+            if (this.quitPressed)
+                return;
             this.SafeInvoke(() =>
             {
                 this.statusStrip.Items[0].Text = this.GetConnetionString();
@@ -570,8 +577,9 @@ namespace Scada.Data.Client.Tcp
         {
             if (this.agent != null)
             {
-                this.agent.Quit();
+                //this.agent.Quit();
             }
+            this.quitPressed = true;
             Application.Exit();
         }
 

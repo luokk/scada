@@ -14,7 +14,7 @@ namespace Scada.Data.Client.Tcp
         {
             if (control.InvokeRequired)
             {
-                control.Invoke(handler);
+                control.Invoke(handler);   
             }
             else
             {

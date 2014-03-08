@@ -326,26 +326,16 @@ namespace Scada.Installer
             using (StreamWriter sw = new StreamWriter(fs))
             {
                 string fullBinPath = Path.Combine(this.installPath.Text, this.binPath);
-                // Run MDS.exe
-                string startMDSScript = string.Format("start {0}\\mds.exe", fullBinPath);
-                sw.WriteLine(startMDSScript);
-                sw.WriteLine("ping -n 5 127.0.0.1");
 
-                // Run AIS.exe
-                string startAISScript = string.Format("start {0}\\ais.exe", fullBinPath);
-                sw.WriteLine(startAISScript);
-                sw.WriteLine("ping -n 5 127.0.0.1");
-
-                // Run Scada.Main.exe
-                string startMainScript = string.Format("start {0}\\Scada.Main.exe /ALL", fullBinPath);
-                sw.WriteLine(startMainScript);
-                sw.WriteLine("ping -n 30 127.0.0.1");
-                sw.WriteLine();
-
-                // Run Scada.DataCenterAgent.exe
-                string startAgentScript = string.Format("start {0}\\Scada.DataCenterAgent.exe --start", fullBinPath);
-                sw.WriteLine(startAgentScript);
-                sw.WriteLine();
+                //1
+                string changeDir = string.Format("cd {0}", fullBinPath);
+                sw.WriteLine(changeDir);
+                // 2: copy Scada.Watch.exe watcher.exe
+                string copyWatcher = string.Format("copy Scada.Watch.exe watcher.exe");
+                sw.WriteLine(copyWatcher);
+                // 3: Run Watcher.exe
+                string startWatcher = string.Format("start {0}\\watcher.exe", fullBinPath);
+                sw.WriteLine(startWatcher);
             }
             fs.Close();
 

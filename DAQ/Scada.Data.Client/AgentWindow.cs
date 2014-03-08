@@ -1,4 +1,5 @@
-﻿using Scada.Data.Client;
+﻿using MySql.Data.MySqlClient;
+using Scada.Data.Client;
 using Scada.Data.Client.Properties;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,42 @@ namespace Scada.Data.Client
 
         private ToolStripLabel pingLabel = new ToolStripLabel();
 
+        public bool CancelQuit { get; set; }
+
+        public MySqlCommand MySqlCmd { get; set; }
+
         private bool started = false;
+
+        /// <summary>
+        /// Test code goes here
+        /// </summary>
+#if DEBUG
+        private void TestSendPacket()
+        {
+            string deviceKey = "scada.shelter";
+            DateTime sendTime = DateTime.Parse("2013-11-30 20:33:00");
+            int errorCode = 0;
+            Packet packet = this.GetPacket(sendTime, deviceKey, out errorCode);
+            if (packet != null)
+            {
+                string msg = packet.ToString();
+                this.agent.SendPacket(packet);
+            }
+        }
+        private void TestSendFilePacket()
+        {
+            // TODO: FIND A n42 file
+            string deviceKey = "scada.naidevice";
+            DateTime sendTime = DateTime.Parse("2012-09-01 11:50:00");
+            int errorCode = 0;
+            Packet packet = this.GetPacket(sendTime, deviceKey, out errorCode);
+            if (packet != null)
+            {
+                string msg = packet.ToString();
+                this.agent.SendFilePacket(packet);
+            }
+        }
+#endif
 
         public MainDataAgentWindow()
         {
@@ -54,46 +90,18 @@ namespace Scada.Data.Client
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add(this.pingLabel);
 
-            this.Start();            
+            this.Start();
         }
-        #if DEBUG
-        private void TestSendPacket()
-        {
-            string deviceKey = "scada.shelter";
-            DateTime sendTime = DateTime.Parse("2013-11-30 20:33:00");
-            int errorCode = 0;
-            Packet packet = this.GetPacket(sendTime, deviceKey, out errorCode);
-            if (packet != null)
-            {
-                string msg = packet.ToString();
-                this.agent.SendPacket(packet);
-            }
-        }
-
-        private void TestSendFilePacket()
-        {
-            // TODO: FIND A n42 file
-            string deviceKey = "scada.naidevice";
-            DateTime sendTime = DateTime.Parse("2012-09-01 11:50:00");
-            int errorCode = 0;
-            Packet packet = this.GetPacket(sendTime, deviceKey, out errorCode);
-            if (packet != null)
-            {
-                string msg = packet.ToString();
-                this.agent.SendFilePacket(packet);
-            }
-        }
-        #endif
 
         private void InitSysNotifyIcon()
         {
             // Notify Icon
-            sysNotifyIcon.Text = "数据上传程序v2.0";
+            sysNotifyIcon.Text = "数据上传 v2.0";
             sysNotifyIcon.Icon = new Icon(Resources.AppIcon, new Size(16, 16));
             sysNotifyIcon.Visible = true;
             sysNotifyIcon.DoubleClick += new EventHandler(OnSysNotifyIcon);
 
-            ContextMenu notifyContextMenu = new ContextMenu();            
+            ContextMenu notifyContextMenu = new ContextMenu();
             MenuItem exitMenuItem = new MenuItem("退出");
             exitMenuItem.Click += (s, e) =>
             {
@@ -109,7 +117,7 @@ namespace Scada.Data.Client
             notifyContextMenu.MenuItems.Add(detailMenuItem);
             notifyContextMenu.MenuItems.Add(new MenuItem("-"));
             notifyContextMenu.MenuItems.Add(exitMenuItem);
-            
+
             sysNotifyIcon.ContextMenu = notifyContextMenu;
         }
 
@@ -137,7 +145,7 @@ namespace Scada.Data.Client
                 Log.GetLogFile(Program.DataClient).Log(line);
 
 
-                this.TestSendPacket();
+                // this.TestSendPacket();
             }
         }
 
@@ -163,6 +171,11 @@ namespace Scada.Data.Client
         {
             DataAgent agent = new DataAgent(dataCenter);
             return agent;
+        }
+
+        private void ConnectToMySQL()
+        {
+            this.MySqlCmd = DataSource.Instance.GetSqlCommand();
         }
 
         private void InitializeTimer()
@@ -205,6 +218,12 @@ namespace Scada.Data.Client
             foreach (var deviceKey in deviceKeys)
             {
                 DateTime sendTime = GetDeviceSendTime(now, deviceKey);
+#if DEBUG
+                if (Settings.Instance.DebugDataTime != default(DateTime))
+                {
+                    sendTime = Settings.Instance.DebugDataTime;
+                }
+#endif
 
                 if (!this.lastDeviceSendData.ContainsKey(deviceKey))
                 {
@@ -266,37 +285,27 @@ namespace Scada.Data.Client
             return packets;
         }
 
+        private Dictionary<string, object> data = new Dictionary<string, object>(20);
+
         private Packet GetPacket(DateTime time, string deviceKey, out int errorCode)
         {
             errorCode = 0;
-            if (!this.agent.SendDataStarted)
+
+            if (this.MySqlCmd == null)
             {
-                // return null;
+                this.ConnectToMySQL();
             }
 
-            var d = DBDataSource.Instance.GetData(deviceKey, time);
-            if (d != null && d.Count > 0)
+            var d = DataSource.GetData(this.MySqlCmd, deviceKey, time, null, this.data);
+            if (d == ReadResult.ReadSuccess)
             {
-                Packet p = builder.GetPacket(deviceKey, d, true);
+                Packet p = builder.GetPacket(deviceKey, this.data, true);
                 return p;
             }
             errorCode = 100;
             return null;
-
-            /*
-             *  if (!this.checkBoxUpdateNaI.Checked)
-                {
-                    return null;
-                }
-
-                string fileName = DBDataSource.Instance.GetNaIDeviceFile(time);
-                if (!string.IsNullOrEmpty(fileName))
-                {
-                    return builder.GetFilePacket(fileName);
-                }
-             */
         }
-  
+
 
 
         private DateTime lastSendTime;
@@ -399,8 +408,5 @@ namespace Scada.Data.Client
                 this.detailForm.OnSendDetails(deviceKey, msg);
             }
         }
-
-
-        public bool CancelQuit { get; set; }
     }
 }

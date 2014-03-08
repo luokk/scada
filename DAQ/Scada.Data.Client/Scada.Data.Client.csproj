@@ -57,7 +57,7 @@
     <Compile Include="AgentWindow.designer.cs">
       <DependentUpon>AgentWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="DBDataSource.cs" />
+    <Compile Include="DataSource.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Packet.cs" />
     <Compile Include="PacketBuilder.cs" />

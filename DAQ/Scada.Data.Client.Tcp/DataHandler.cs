@@ -147,6 +147,9 @@ namespace Scada.Data.Client.Tcp
         public MessageDataHandler(Agent agent)
         {
             this.agent = agent;
+
+
+            this.ActiveUploadHistoryDataThread(new HistoryDataBundle("", "", ""));
         }
 
 
@@ -418,23 +421,25 @@ namespace Scada.Data.Client.Tcp
                 if (this.historyDataBundleQueue.Count > 0)
                 {
                     HistoryDataBundle hdb = this.historyDataBundleQueue.Dequeue();
-
-                    string msg = string.Format("Uploading history data [{0} - {1}]", DeviceTime.Parse(hdb.BeginTime), DeviceTime.Parse(hdb.EndTime));
-                    this.agent.OnHandleHistoryData("", msg, true);
-                    if (string.IsNullOrEmpty(hdb.ENO))
+                    if (!string.IsNullOrEmpty(hdb.QN))
                     {
-                        string[] enos = new string[] { "001001", "002000", "003001", "004000", "005000", "010002", "999000" };
-                        foreach (string e in enos)
+                        string msg = string.Format("Uploading history data [{0} - {1}]", DeviceTime.Parse(hdb.BeginTime), DeviceTime.Parse(hdb.EndTime));
+                        this.agent.OnHandleHistoryData("", msg, true);
+                        if (string.IsNullOrEmpty(hdb.ENO))
                         {
-                            // for this Command, polId should be Null (means All polId);
-                            this.UploadHistoryData(hdb.QN, e, hdb.BeginTime, hdb.EndTime, null);
+                            string[] enos = new string[] { "001001", "002000", "003001", "004000", "005000", "010002", "999000" };
+                            foreach (string e in enos)
+                            {
+                                // for this Command, polId should be Null (means All polId);
+                                this.UploadHistoryData(hdb.QN, e, hdb.BeginTime, hdb.EndTime, null);
+                            }
+                        }
+                        else
+                        {
+                            this.UploadHistoryData(hdb.QN, hdb.ENO, hdb.BeginTime, hdb.EndTime, hdb.PolId);
                         }
                     }
-                    else
-                    {
-                        this.UploadHistoryData(hdb.QN, hdb.ENO, hdb.BeginTime, hdb.EndTime, hdb.PolId);
-                    }
-                    Thread.Sleep(12000);
+                    Thread.Sleep(50);
                     this.SendResultPacket(hdb.QN);
                 }
                 else

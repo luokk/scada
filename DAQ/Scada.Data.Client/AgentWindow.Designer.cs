@@ -172,7 +172,7 @@
             this.detailsButton});
             this.toolStrip1.Location = new System.Drawing.Point(3, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(102, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(71, 25);
             this.toolStrip1.TabIndex = 0;
             // 
             // toolStripLabel1
@@ -209,7 +209,7 @@
             this.MaximizeBox = false;
             this.Name = "MainDataAgentWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "数据中心代理 v2.0";
+            this.Text = "数据上传 v2.0";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AgentWindowClosingForm);
             this.Load += new System.EventHandler(this.AgentWindow_Load);
             this.toolStripContainer1.BottomToolStripPanel.ResumeLayout(false);

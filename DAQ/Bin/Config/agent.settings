@@ -15,7 +15,7 @@
 
 	<!-- NOTICE SNO -->
 	<site 	sysname="" sysst="213213123213123213" adapter="" name="" station="128" 
-			sno="0313A08" mn="0313A080000000">
+			sno="0313A08" mn="0313A080000000" debug-data-time="2013-11-30 20:33:00">
 	</site>
 
 	<devices>
