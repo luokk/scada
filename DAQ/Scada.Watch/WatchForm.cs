@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.Win32;
 using Scada.Watch.Properties;
 using System;
 using System.Collections.Generic;
@@ -11,13 +12,14 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Scada.Watch
 {
 	public partial class WatchForm : Form
 	{
-        private Timer checkTimer = null;
+        private System.Windows.Forms.Timer checkTimer = null;
 
         private int delayCounter = 0;
 
@@ -30,6 +32,11 @@ namespace Scada.Watch
 		public WatchForm()
 		{
 			InitializeComponent();
+        }
+
+        private static string Format(DateTime time)
+        {
+            return time.ToString("yy/MM/dd HH:mm");
         }
 
         private void InitSysNotifyIcon()
@@ -48,16 +55,15 @@ namespace Scada.Watch
             this.Visible = true;
         }
 
-
 		private void WatchForm_Load(object sender, EventArgs e)
 		{
-            // MessageBox.Show("");
+            /// MessageBox.Show("Break for Attach");
             this.InitSysNotifyIcon();
-
+            this.startStripStatusLabel.Text = string.Format("启动[{0}]", Format(DateTime.Now));
             this.ShowInTaskbar = false;
             this.Visible = false;
-            // Watch Main 
-            this.checkTimer = new Timer();
+            // Watch timer
+            this.checkTimer = new System.Windows.Forms.Timer();
             this.checkTimer.Interval = WatchInterval;    // Defines.KeepAliveInterval;
             this.checkTimer.Tick += Per30secTimerTick;
             this.checkTimer.Start();
@@ -67,7 +73,23 @@ namespace Scada.Watch
             this.SetAutoUpdateDir();
             this.textPath.Enabled = false;
             this.buttonWatch.Enabled = false;
+
+            SystemEvents.SessionEnding += SystemEvents_SessionEnding;
 		}
+
+        private bool Shutdown = false;
+
+        void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            this.Shutdown = true;
+
+            this.KillScada(new string[]
+                {
+                    "MDS.exe",
+                    "AIS.exe",
+                    "Scada.*",
+                });
+        }
 
         private void SetAutoUpdateSearchDir(string dir)
         {
@@ -94,12 +116,14 @@ namespace Scada.Watch
         private void UpdateBin(string filePath)
         {
             this.KillScada(new string[]
-                {   "MDS.exe", 
-                    "AIS.exe", 
-                    "Scada.*", 
+                {
+                    "MDS.exe",
+                    "AIS.exe",
+                    "Scada.*",
                 });
             this.delayCounter = 0;
-            this.updateStripStatusLabel.Text = string.Format("更新: {0}", DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
+            this.updateStripStatusLabel.Text = string.Format("更新[{0}]", Format(DateTime.Now));
+            Thread.Sleep(1000);
             this.OpenProcessByName("Scada.Update", string.Format("\"{0}\"", filePath));
         }
 
@@ -120,7 +144,6 @@ namespace Scada.Watch
             }
             p.StandardInput.WriteLine("exit");
         }
-
 
         private void Per30secTimerTick(object sender, EventArgs e)
 		{
@@ -170,7 +193,7 @@ namespace Scada.Watch
             }
         }
 
-        public static string GetExeFilePath(string fileName)
+        private static string GetExeFilePath(string fileName)
         {
             string location = Assembly.GetExecutingAssembly().Location;
             string path = Path.GetDirectoryName(location);
@@ -179,7 +202,6 @@ namespace Scada.Watch
 
         private void OpenProcessByName(string name, string arg)
         {
-
             string fileName = GetExeFilePath(name + ".exe");
             try
             {
@@ -212,7 +234,7 @@ namespace Scada.Watch
         private void buttonPathClick(object sender, EventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
-            fbd.SelectedPath = @"C:\";
+            fbd.SelectedPath = @"C:\Scada\Install";
             DialogResult dr = fbd.ShowDialog();
             if (dr == DialogResult.OK)
             {
@@ -229,6 +251,11 @@ namespace Scada.Watch
 
         private void WatchForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (this.Shutdown)
+            {
+                return;
+            }
+
             DialogResult dr = MessageBox.Show("您确定要退出[系统监控程序]吗？", "Scada.Watch", MessageBoxButtons.OKCancel);
             if (dr != DialogResult.OK)
             {
@@ -242,6 +269,11 @@ namespace Scada.Watch
             {
                 this.Visible = false;
             }
+        }
+
+        private void toolStripSplitButton1_ButtonClick(object sender, EventArgs e)
+        {
+
         }
 
 

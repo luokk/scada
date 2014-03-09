@@ -13,12 +13,6 @@ namespace Scada.Data.Client
             throw new NotImplementedException();
         }
 
-        internal Packet GetFlowPacket(string deviceKey, Dictionary<string, object> d, bool p)
-        {
-            // throw new NotImplementedException();
-            return null;
-        }
-
         internal Packet GetPacket(string deviceKey, Dictionary<string, object> data, bool p)
         {
             Packet packet = new Packet("");
@@ -47,7 +41,6 @@ namespace Scada.Data.Client
                 return packet1;
             }
             return packet2;
-            
         }
     }
 }

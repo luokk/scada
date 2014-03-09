@@ -64,7 +64,6 @@ namespace Scada.Data.Client
             return string.Empty;
         }
 
-
         public string Station
         {
             get

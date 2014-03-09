@@ -16,10 +16,12 @@ namespace Scada.Watch
         static void Main()
         {
             string processName = Process.GetCurrentProcess().ProcessName;
+#if !DEBUG
             if (processName.ToLower() != "watcher")
             {
                 return;
             }
+#endif
             bool createNew = false;
             using (Mutex mutex = new Mutex(true, Application.ProductName, out createNew))
             {
@@ -28,9 +30,7 @@ namespace Scada.Watch
 
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
-                    WatchForm wf = new WatchForm();
-                    wf.Text = processName + " in running";
-                    Application.Run(wf);
+                    Application.Run(new WatchForm());
                 }
                 else
                 {

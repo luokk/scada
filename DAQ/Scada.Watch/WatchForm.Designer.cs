@@ -40,6 +40,7 @@
             this.versionCheck = new System.Windows.Forms.CheckBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.updateStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.startStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -50,7 +51,7 @@
             this.groupBox2.Controls.Add(this.buttonWatch);
             this.groupBox2.Controls.Add(this.buttonPath);
             this.groupBox2.Controls.Add(this.textPath);
-            this.groupBox2.Location = new System.Drawing.Point(12, 214);
+            this.groupBox2.Location = new System.Drawing.Point(12, 157);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(359, 87);
             this.groupBox2.TabIndex = 0;
@@ -95,7 +96,7 @@
             this.groupBox1.Controls.Add(this.aisCheck);
             this.groupBox1.Controls.Add(this.mdsCheck);
             this.groupBox1.Controls.Add(this.versionCheck);
-            this.groupBox1.Location = new System.Drawing.Point(12, 83);
+            this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(359, 125);
             this.groupBox1.TabIndex = 0;
@@ -134,25 +135,35 @@
             // 
             // statusStrip1
             // 
+            this.statusStrip1.AutoSize = false;
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.startStripStatusLabel,
             this.updateStripStatusLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 433);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 273);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(383, 22);
+            this.statusStrip1.SizingGrip = false;
+            this.statusStrip1.Stretch = false;
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // updateStripStatusLabel
             // 
             this.updateStripStatusLabel.Name = "updateStripStatusLabel";
-            this.updateStripStatusLabel.Size = new System.Drawing.Size(124, 17);
-            this.updateStripStatusLabel.Text = "更新:0000-00-00 00:00";
+            this.updateStripStatusLabel.Size = new System.Drawing.Size(63, 17);
+            this.updateStripStatusLabel.Text = "更新:TIME";
+            // 
+            // startStripStatusLabel
+            // 
+            this.startStripStatusLabel.Name = "startStripStatusLabel";
+            this.startStripStatusLabel.Size = new System.Drawing.Size(63, 17);
+            this.startStripStatusLabel.Text = "启动:TIME";
             // 
             // WatchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(383, 455);
+            this.ClientSize = new System.Drawing.Size(383, 295);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -160,7 +171,7 @@
             this.Name = "WatchForm";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Watch";
+            this.Text = "系统监控程序";
             this.TopMost = true;
             this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WatchForm_FormClosing);
@@ -173,7 +184,6 @@
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -190,6 +200,7 @@
         private System.Windows.Forms.CheckBox aisCheck;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel updateStripStatusLabel;
+        private System.Windows.Forms.ToolStripStatusLabel startStripStatusLabel;
     }
 }
 
