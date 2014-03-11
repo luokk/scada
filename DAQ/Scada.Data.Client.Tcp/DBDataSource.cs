@@ -10,15 +10,19 @@ namespace Scada.Data.Client.Tcp
     using System.IO;
     using System.Threading;
     using Scada.Config;
+    using System.Data.SqlClient;
 
     public enum ReadResult
     {
         SqlCommandError,
         RecordsWithoutId,
         NoThisField,
-        ReadError,
+        ReadDBException,
         ReadOK,
         NoDataFound,
+        ReadIOException,
+        ReadSqlException,
+        ReadInvalidOpException,
 
     }
     
@@ -98,11 +102,15 @@ namespace Scada.Data.Client.Tcp
             return string.Format(format, tableName, time.ToString());
         }
 
-        private string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
+        private static string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime, bool sort = false)
         {
             // Get the recent <count> entries.
-            string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Id DESC";
-            string sql = string.Format(format, tableName, toTime, fromTime);
+            string format = "select * from {0}  where time>='{1}' and time<='{2}'";
+            if (sort)
+            {
+                format += " order by time DESC";
+            }
+            string sql = string.Format(format, tableName, fromTime, toTime);
             return sql;
         }
 
@@ -175,9 +183,90 @@ namespace Scada.Data.Client.Tcp
             catch (Exception e)
             {
                 Thread.Sleep(500);
-                return ReadResult.ReadError;
+                return ReadResult.ReadDBException;
             }
         }
+
+        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime startTime, DateTime stopTime, string code, List<Dictionary<string, object>> data)
+        {
+            string tableName = Settings.Instance.GetTableName(deviceKey);
+
+            command.CommandText = GetSelectStatement(tableName, startTime, stopTime);
+
+            try
+            {
+                data.Clear();
+                using (MySqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Dictionary<string, object> item = new Dictionary<string, object>();
+                        // Must Has an Id.
+                        string id = reader.GetString(Id);
+                        id = id.Trim();
+
+                        if (string.IsNullOrEmpty(id))
+                        {
+                            return ReadResult.RecordsWithoutId;
+                        }
+
+                        item.Add(Id, id);
+
+                        List<Settings.DeviceCode> codes = Settings.Instance.GetCodes(deviceKey);
+
+                        string dataTime = reader.GetString("Time");
+                        item.Add("time", dataTime);
+                        foreach (var c in codes)
+                        {
+                            if (!string.IsNullOrEmpty(code) && code != c.Code)
+                            {
+                                continue;
+                            }
+                            string field = c.Field.ToLower();
+                            try
+                            {
+                                string v = reader.GetString(field);
+                                item.Add(c.Code, v);
+                            }
+                            catch (SqlNullValueException)
+                            {
+                                // TODO: Has Null Value
+                                item.Add(c.Code, string.Empty);
+                            }
+                            catch (Exception)
+                            {
+                                return ReadResult.NoThisField;
+                            }
+                        }
+
+                        data.Add(item);
+                    }// While
+
+                    if (data.Count == 0)
+                    {
+                        return ReadResult.NoDataFound;
+                    }
+                    return ReadResult.ReadOK;
+                }
+            }
+            catch (IOException e)
+            {
+                return ReadResult.ReadIOException;
+            }
+            catch (SqlException e)
+            {
+                return ReadResult.ReadSqlException;
+            }
+            catch (InvalidOperationException e)
+            {
+                return ReadResult.ReadInvalidOpException;
+            }
+            catch (Exception e)
+            {
+                return ReadResult.ReadDBException;
+            }
+        }
+
 
         private string GetDatePath(DateTime date)
         {

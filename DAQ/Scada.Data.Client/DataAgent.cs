@@ -129,12 +129,6 @@ namespace Scada.Data.Client
             }
         }
       
-        internal void SendReplyPacket(Packet p, DateTime time)
-        {
-            string s = p.ToString();
-            // this.Send(Encoding.ASCII.GetBytes(s));
-        }
-
         // Connect means first HTTP packet to the data Center.
         internal void DoAuth()
         {

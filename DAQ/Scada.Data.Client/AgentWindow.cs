@@ -38,7 +38,7 @@ namespace Scada.Data.Client
 
         public bool CancelQuit { get; set; }
 
-        public MySqlConnection MySqlConn { get; set; }
+        public MySqlConnection MySqlConnection { get; set; }
 
         public MySqlCommand MySqlCmd { get; set; }
 
@@ -82,6 +82,7 @@ namespace Scada.Data.Client
         {
             this.CancelQuit = true;
             InitSysNotifyIcon();
+            // StatusBar labels
             this.statusStrip.Items.Add(this.statusLabel);
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add(this.addressLabel);
@@ -125,11 +126,11 @@ namespace Scada.Data.Client
         {
             this.CancelQuit = false;
             // Close DB connection
-            if (this.MySqlConn != null)
+            if (this.MySqlConnection != null)
             {
                 try
                 {
-                    this.MySqlConn.Close();
+                    this.MySqlConnection.Close();
                 }
                 catch (Exception) { }
             }
@@ -148,13 +149,14 @@ namespace Scada.Data.Client
             if (this.InitializeAgent())
             {
                 this.InitializeTimer();
-                // this.started = true;
 
                 string line = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
                 Log.GetLogFile(Program.DataClient).Log(line);
-
-
-                // this.TestSendPacket();
+            }
+            else
+            {
+                this.CancelQuit = false;
+                Application.Exit();
             }
         }
 
@@ -176,16 +178,10 @@ namespace Scada.Data.Client
             return true;
         }
 
-        private DataAgent CreateAgent(Settings.DataCenter2 dataCenter)
-        {
-            DataAgent agent = new DataAgent(dataCenter);
-            return agent;
-        }
-
         private void ConnectToMySQL()
         {
-            this.MySqlConn = DataSource.Instance.GetDBConnection();
-            this.MySqlCmd = this.MySqlConn.CreateCommand();
+            this.MySqlConnection = DataSource.Instance.GetDBConnection();
+            this.MySqlCmd = this.MySqlConnection.CreateCommand();
         }
 
         private void InitializeTimer()
@@ -247,8 +243,7 @@ namespace Scada.Data.Client
 
                 this.lastDeviceSendData[deviceKey] = sendTime;
 
-                int errorCode = 0;
-                Packet packet = GetPacket(sendTime, deviceKey, out errorCode);
+                Packet packet = this.GetPacket(sendTime, deviceKey);
                 if (packet != null)
                 {
                     packets.Add(packet);
@@ -256,7 +251,7 @@ namespace Scada.Data.Client
             }
 
             // Send ...
-            packets = this.CombinePackets(packets);
+            packets = this.builder.CombinePackets(packets);
             this.SendPackets(packets);
         }
 
@@ -268,54 +263,35 @@ namespace Scada.Data.Client
             }
         }
 
-        private List<Packet> CombinePackets(List<Packet> packets)
+        private List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
+
+        private Packet GetPacket(DateTime time, string deviceKey)
         {
-            if (packets.Count > 1)
-            {
-                List<Packet> ret = new List<Packet>();
-                Packet pn = null;
-                foreach (var p in packets)
-                {
-                    if (string.IsNullOrEmpty(p.Path))
-                    {
-                        // 目前认为Path为空的Packet是Data Packet
-                        pn = this.builder.CombinePacket(pn, p);
-                    }
-                    else
-                    {
-                        ret.Add(p); // p is file packet
-                    }
-                }
-                if (pn != null)
-                {
-                    ret.Add(pn);
-                }
-                return ret;
-            }
-            return packets;
-        }
-
-        private Dictionary<string, object> data = new Dictionary<string, object>(20);
-
-        private Packet GetPacket(DateTime time, string deviceKey, out int errorCode)
-        {
-            errorCode = 0;
-
             if (this.MySqlCmd == null)
             {
                 this.ConnectToMySQL();
             }
 
-            var d = DataSource.GetData(this.MySqlCmd, deviceKey, time, null, this.data);
-            if (d == ReadResult.ReadOK)
+            string errorMsg;
+            ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, time, default(DateTime), this.data, out errorMsg);
+            if (d == ReadResult.ReadDataOK)
             {
-                Packet p = builder.GetPacket(deviceKey, this.data, true);
-                return p;
+                if (this.data.Count > 0)
+                {
+                    Packet p = builder.GetPacket(deviceKey, this.data[0], true);
+                    return p;
+                }
+                else
+                {
+                    return null;
+                }
             }
-            errorCode = 100;
-            return null;
+            else
+            {
+                // TODO: errorMsg
+                return null;
+            }
         }
-
 
 
         private DateTime lastSendTime;

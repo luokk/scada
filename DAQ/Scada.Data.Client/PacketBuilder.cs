@@ -8,6 +8,17 @@ namespace Scada.Data.Client
 {
     public class PacketBuilder
     {
+        internal string Token
+        {
+            get;
+            set;
+        }
+
+        internal PacketBuilder()
+        {
+            this.Token = "";
+        }
+
         internal List<Packet> GetPackets(string deviceKey, DateTime time, string content)
         {
             throw new NotImplementedException();
@@ -15,20 +26,20 @@ namespace Scada.Data.Client
 
         internal Packet GetPacket(string deviceKey, Dictionary<string, object> data, bool p)
         {
-            Packet packet = new Packet("");
+            Packet packet = new Packet(this.Token);
             packet.AddData(deviceKey, data);
             return packet;
         }
 
         internal Packet GetReplyCommandPacket()
         {
-            Packet packet = new Packet("");
+            Packet packet = new Packet(this.Token);
             return packet;
         }
 
         internal Packet GetFilePacket(string fileName)
         {
-            Packet packet = new Packet("");
+            Packet packet = new Packet(this.Token);
             packet.Path = fileName;
             return packet;
         }
@@ -42,5 +53,34 @@ namespace Scada.Data.Client
             }
             return packet2;
         }
+
+        internal List<Packet> CombinePackets(List<Packet> packets)
+        {
+            if (packets.Count > 1)
+            {
+                List<Packet> ret = new List<Packet>();
+                Packet pn = null;
+                foreach (var p in packets)
+                {
+                    if (string.IsNullOrEmpty(p.Path))
+                    {
+                        // 目前认为Path为空的Packet是Data Packet
+                        pn = this.CombinePacket(pn, p);
+                    }
+                    else
+                    {
+                        ret.Add(p); // p is file packet
+                    }
+                }
+                if (pn != null)
+                {
+                    ret.Add(pn);
+                }
+                return ret;
+            }
+            return packets;
+        }
+
+
     }
 }

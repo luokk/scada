@@ -487,14 +487,15 @@ namespace Scada.Data.Client.Tcp
             }
             string deviceKey = Settings.Instance.GetDeviceKeyByEno(eno);
             string deviceKeyLower = deviceKey.ToLower();
-            DateTime dt = f;
-            Dictionary<string, object> data = new Dictionary<string, object>(20);
-            while (dt <= t)
+            
+            if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
             {
-                if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
+                // NaIDevice ... Gose here.
+                // 分包
+                DateTime dt = f;
+                Dictionary<string, object> data = new Dictionary<string, object>(20);
+                while (dt <= t)
                 {
-                    // NaIDevice ... Gose here.
-                    // 分包
                     string content = DBDataSource.Instance.GetNaIDeviceData(dt);
                     if (!string.IsNullOrEmpty(content))
                     {
@@ -506,13 +507,20 @@ namespace Scada.Data.Client.Tcp
                         }
                     }
                     dt = dt.AddSeconds(60 * 5);
+                    Thread.Sleep(1000);
                 }
-                else
+            }
+            else
+            {
+                List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
+                var r = DBDataSource.GetData(this.command, deviceKey, f, t, polId, data);
+                if (r == ReadResult.ReadOK)
                 {
-                    // Non NaIDevice
-                    data.Clear();
-                    var r = DBDataSource.GetData(this.command, deviceKey, dt, polId, data);
-                    if (r == ReadResult.ReadOK)
+                    if (data.Count == 0)
+                    {
+                        return;
+                    }
+                    foreach (var item in data)
                     {
                         DataPacket p = null;
                         // By different device.
@@ -520,27 +528,22 @@ namespace Scada.Data.Client.Tcp
                         if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
                             deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
                         {
-                            p = builder.GetFlowDataPacket(deviceKey, data);
+                            p = builder.GetFlowDataPacket(deviceKey, item);
                         }
                         else
                         {
-                            p = builder.GetDataPacket(deviceKey, data);
+                            p = builder.GetDataPacket(deviceKey, item);
                         }
 
                         this.agent.SendHistoryDataPacket(p);
                     }
-                    else
-                    {
-                        string line = string.Format("HD Error: {0} [{1} <{2}>]", r.ToString(), deviceKey, dt);
-                        this.agent.OnHandleHistoryData(deviceKey, line, true);
-                    }
-                    dt = dt.AddSeconds(30);
                 }
-
-                // Sleeping
-                Thread.Sleep(50);
+                else
+                {
+                    string line = string.Format("HD Error: {0} [{1}: {2} ~ {3}]", r.ToString(), deviceKey, f, t);
+                    this.agent.OnHandleHistoryData(deviceKey, line, true);
+                }
             }
-
         }
 
         private void OnInitializeRequest(string msg)

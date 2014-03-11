@@ -10,15 +10,17 @@ namespace Scada.Data.Client
     using System.IO;
     using System.Threading;
     using Scada.Config;
+    using System.Data.SqlClient;
 
     public enum ReadResult
     {
-        SqlCommandError,
-        RecordsWithoutId,
-        NoThisField,
-        ReadError,
-        ReadOK,
+        FieldNotFound,
+        UnknownReadDataError,
+        ReadDataOK,
         DataNotFound,
+        ReadDataIOError,
+        ReadDataSqlError,
+        ReadDataInvalidOperation,
     }
 
     /// <summary>
@@ -76,75 +78,97 @@ namespace Scada.Data.Client
             return string.Format(format, tableName, time.ToString());
         }
 
-        private string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
+        private static string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
         {
             // Get the recent <count> entries.
-            string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Id DESC";
-            string sql = string.Format(format, tableName, toTime, fromTime);
+            string format = "select * from {0}  where time>='{1}' and time<='{2}'";
+            string sql = string.Format(format, tableName, fromTime, toTime);
             return sql;
         }
 
-        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime time, string code, Dictionary<string, object> data)
+        // Not care PolId in HTTP uploading.
+        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime time1, DateTime time2, List<Dictionary<string, object>> data, out string errorMsg)
         {
+            errorMsg = string.Empty;
             string tableName = Settings.Instance.GetTableName(deviceKey);
 
-            command.CommandText = GetSelectStatement(tableName, time);
+            if (time2 == default(DateTime))
+            {
+                command.CommandText = GetSelectStatement(tableName, time1);
+            }
+            else
+            {
+                command.CommandText = GetSelectStatement(tableName, time1, time2);
+            }
+
             try
             {
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
-                    if (reader.Read())
+                    data.Clear();
+                    while (reader.Read())
                     {
                         // Must Has an Id.
                         string id = reader.GetString(Id);
                         id = id.Trim();
 
-                        if (string.IsNullOrEmpty(id))
-                        {
-                            return ReadResult.RecordsWithoutId;
-                        }
-
-                        data.Add(Id, id);
+                        Dictionary<string, object> item = new Dictionary<string, object>(20);
+                        item.Add(Id, id);
 
                         List<Settings.DeviceCode> codes = Settings.Instance.GetCodes(deviceKey);
 
                         string dataTime = reader.GetString("Time");
-                        data.Add("time", dataTime);
+                        item.Add("time", dataTime);
                         foreach (var c in codes)
                         {
-                            if (!string.IsNullOrEmpty(code) && code != c.Code)
-                            {
-                                continue;
-                            }
                             string field = c.Field.ToLower();
                             try
                             {
                                 string v = reader.GetString(field);
-                                data.Add(c.Code, v);
+                                item.Add(c.Code, v);
                             }
                             catch (SqlNullValueException)
                             {
                                 // TODO: Has Null Value
-                                data.Add(c.Code, string.Empty);
+                                item.Add(c.Code, string.Empty);
                             }
-                            catch (Exception)
+                            catch (Exception e)
                             {
-                                return ReadResult.NoThisField;
+                                errorMsg = e.Message;
+                                return ReadResult.FieldNotFound;
                             }
                         }
-                        return ReadResult.ReadOK;
-                    }
-                    else
-                    {
-                        return ReadResult.DataNotFound;
 
+                        data.Add(item);
                     }
+
+                    if (data.Count == 0)
+                    {
+                        errorMsg = string.Format("Data Not Found ({0}: {1} ~ {2})", deviceKey, time1, time2);
+                        return ReadResult.DataNotFound;
+                    }
+                    return ReadResult.ReadDataOK;
                 }
+            }
+            catch (IOException e)
+            {
+                errorMsg = e.Message;
+                return ReadResult.ReadDataIOError;
+            }
+            catch (SqlException e)
+            {
+                errorMsg = e.Message;
+                return ReadResult.ReadDataSqlError;
+            }
+            catch (InvalidOperationException e)
+            {
+                errorMsg = e.Message;
+                return ReadResult.ReadDataInvalidOperation;
             }
             catch (Exception e)
             {
-                Thread.Sleep(500);
-                return ReadResult.ReadError;
+                errorMsg = e.Message;
+                return ReadResult.UnknownReadDataError;
             }
         }
 

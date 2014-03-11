@@ -642,19 +642,24 @@ namespace Scada.Data.Client.Tcp
             this.InitDeviceColumn("scada.dwd", "干湿沉降采样器");
         }
 
-        private const string TimeFormat = "yyyy-MM-dd HH:mm:ss";
+        private static string FormatTime(DateTime time)
+        {
+            if (time != default(DateTime))
+                return time.ToString("yyyy-MM-dd HH:mm");
+            else
+                return "-";
+        }
 
         private void InitDeviceColumn(string deviceKey, string deviceName)
         {
             ListViewItem lvi = new ListViewItem(deviceName);
             lvi.Tag = deviceKey;
-            var t = DateTime.MinValue.ToString(TimeFormat);
+
             lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, "0"));
-            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, t));
-            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, t));
+            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, "-"));
+            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, "-"));
 
             this.detailsListView.Items.Add(lvi);
-
             this.detailsDict.Add(deviceKey, new DeviceDataDetails());
         }
 
@@ -667,8 +672,8 @@ namespace Scada.Data.Client.Tcp
                 DeviceDataDetails details = this.detailsDict[deviceKey];
 
                 item.SubItems[1].Text = details.SendDataCount.ToString();
-                item.SubItems[2].Text = details.LatestSendDataTime.ToString(TimeFormat);
-                item.SubItems[3].Text = details.LatestSendHistoryDataTime.ToString(TimeFormat);
+                item.SubItems[2].Text = FormatTime(details.LatestSendDataTime);
+                item.SubItems[3].Text = FormatTime(details.LatestSendHistoryDataTime);
             }
         }
 

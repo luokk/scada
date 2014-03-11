@@ -207,7 +207,6 @@ namespace Scada.Data.Client
             }
         }
 
-
         public static void Send(string api, Packet packet, DateTime time)
         {
             try
