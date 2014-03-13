@@ -90,14 +90,14 @@ namespace Scada.Declare
             this.Connect();
         }
 
-		public bool AddRecordData(string commandText, DateTime time, params object[] items)
+		public bool AddRecordData(string commandText, DeviceData data)
 		{
             try
             {
                 if (this.cmd != null)
                 {
                     cmd.CommandText = commandText;
-
+                    var items = data.Data;
                     for (int i = 0; i < items.Length; ++i)
                     {
                         string at = string.Format("@{0}", i + 1);
@@ -115,6 +115,7 @@ namespace Scada.Declare
             }
             catch (Exception e)
             {
+                RecordManager.DoSystemEventRecord(data.Device, e.Message, RecordType.Error);
                 this.RetryConnection(e);
                 return false;
             }

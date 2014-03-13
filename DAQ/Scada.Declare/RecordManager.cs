@@ -31,15 +31,15 @@ namespace Scada.Declare
 		private static int flushCtrlCount = 0;
 
 		/// <summary>
-		/// StreamHolder presents a Daily stream for log.
+		/// FileWriterHolder presents a Daily stream for log.
 		/// </summary>
-        public struct StreamHolder
+        public struct FileWriterHolder
         {
-            private FileStream fileStream;
+            private StreamWriter fileStream;
 
             private string filePath;
 
-            public FileStream FileStream
+            public StreamWriter FileWriter
             {
                 get { return this.fileStream; }
                 set { this.fileStream = value; }
@@ -53,7 +53,7 @@ namespace Scada.Declare
             
         }
 
-        private static Dictionary<string, StreamHolder> streams = new Dictionary<string, StreamHolder>();
+        private static Dictionary<string, FileWriterHolder> streams = new Dictionary<string, FileWriterHolder>();
 
 		public static void Initialize()
 		{
@@ -110,21 +110,19 @@ namespace Scada.Declare
 		{
             // To Log File
 			DateTime now = DateTime.Now;
-			FileStream stream = RecordManager.GetLogFileStream(device, now);
+            StreamWriter fileWriter = RecordManager.GetLogFileStream(device, now);
 			string time = string.Format("[{0:HH:mm:ss}] ", now);
 			StringBuilder sb = new StringBuilder(time);
             sb.Append(string.Format(" <{0}> ", recordType.ToString()));
 			sb.Append(content);
-			sb.Append("\r\n");
 			string line = sb.ToString();
 
-			byte[] bytes = Encoding.ASCII.GetBytes(line);
-			stream.Write(bytes, 0, bytes.Length);
+            fileWriter.WriteLine(line);
 
 			// Flush Control.
 			if (flushCtrlCount % 10 == 0)
 			{
-				stream.Flush();
+                fileWriter.Flush();
 			}
 			flushCtrlCount = (flushCtrlCount + 1) % 5;
 
@@ -167,45 +165,45 @@ namespace Scada.Declare
         }
         //////////////////////////////////////////////////////////////////////////////
 
-        private static FileStream GetLogFileStream(Device device, DateTime now)
+        private static StreamWriter GetLogFileStream(Device device, DateTime now)
         {
             string path = GetDeviceLogPath(device, now);
             string deviceName = device.Name;
             if (streams.ContainsKey(deviceName))
             {
-                StreamHolder holder = streams[deviceName];
+                FileWriterHolder holder = streams[deviceName];
                 if (holder.FilePath.ToLower() == path.ToLower())
                 {
-                    return holder.FileStream;
+                    return holder.FileWriter;
                 }
                 else
                 {
-                    FileStream fileStream = holder.FileStream;
-                    if (fileStream != null)
+                    StreamWriter fileWriter = holder.FileWriter;
+                    if (fileWriter != null)
                     {
-                        fileStream.Close();
-                        fileStream.Dispose();
+                        fileWriter.Close();
+                        fileWriter.Dispose();
                     }
                     streams.Remove(deviceName);
                 }
             }
 
-            StreamHolder newHolder = new StreamHolder() { FilePath = path };
+            FileWriterHolder newHolder = new FileWriterHolder() { FilePath = path };
             if (!File.Exists(path))
             {
                 // TODO: TO TEST!
                 // string logPath = GetDeviceLogPath(device, DateTime.Now);
-                FileStream fs = File.Create(path);
-                newHolder.FileStream = fs;
+                StreamWriter fsw = new StreamWriter(path, true);
+                newHolder.FileWriter = fsw;
                 streams[deviceName] = newHolder;
-                return fs;
+                return fsw;
             }
             else
             {
-                FileStream fs = File.Open(path, FileMode.Append);
-                newHolder.FileStream = fs;
+                StreamWriter fsw = new StreamWriter(path, true);
+                newHolder.FileWriter = fsw;
                 streams[deviceName] = newHolder;
-                return fs;
+                return fsw;
             }
         }
 
