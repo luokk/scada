@@ -39,11 +39,6 @@ namespace Scada.Data.Client.Tcp
 
         private MySqlConnection mainThreadConn = null;
 
-        // private MySqlConnection historyDataThreadConn = null;
-
-        private MySqlCommand mainSqlCmd = null;
-
-
         private List<string> tables = new List<string>();
 
         private List<string> deviceKeyList = new List<string>();
@@ -64,21 +59,6 @@ namespace Scada.Data.Client.Tcp
                     DBDataSource.instance = new DBDataSource();
                 }
                 return DBDataSource.instance;
-            }
-        }
-
-        public void Initialize()
-        {
-            try
-            {
-                string connectionString = new DBConnectionString().ToString();
-                this.mainThreadConn = new MySqlConnection(connectionString);
-                this.mainThreadConn.Open();
-                this.mainSqlCmd = this.mainThreadConn.CreateCommand();
-            }
-            catch (Exception e)
-            {
-                string msg = e.Message;
             }
         }
 
@@ -111,81 +91,6 @@ namespace Scada.Data.Client.Tcp
             string sql = string.Format(format, tableName, fromTime, toTime);
             return sql;
         }
-
-        /*
-        public ReadResult GetData(string deviceKey, DateTime time, string code, Dictionary<string, object> data)
-        {
-            if (this.mainSqlCmd == null)
-            {
-                return ReadResult.SqlCommandError;
-            }
-
-            return GetData(this.mainSqlCmd, deviceKey, time, code, data);
-        }
-
-        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime time, string code, Dictionary<string, object> data)
-        {
-            string tableName = Settings.Instance.GetTableName(deviceKey);
-
-            command.CommandText = GetSelectStatement(tableName, time);
-            try
-            {
-                using (MySqlDataReader reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        // Must Has an Id.
-                        string id = reader.GetString(Id);
-                        id = id.Trim();
-
-                        if (string.IsNullOrEmpty(id))
-                        {
-                            return ReadResult.RecordsWithoutId;
-                        }
-
-                        data.Add(Id, id);
-
-                        List<Settings.DeviceCode> codes = Settings.Instance.GetCodes(deviceKey);
-
-                        string dataTime = reader.GetString("Time");
-                        data.Add("time", dataTime);
-                        foreach (var c in codes)
-                        {
-                            if (!string.IsNullOrEmpty(code) && code != c.Code)
-                            {
-                                continue;
-                            }
-                            string field = c.Field.ToLower();
-                            try
-                            {
-                                string v = reader.GetString(field);
-                                data.Add(c.Code, v);
-                            }
-                            catch (SqlNullValueException)
-                            {
-                                // TODO: Has Null Value
-                                data.Add(c.Code, string.Empty);
-                            }
-                            catch (Exception)
-                            {
-                                return ReadResult.NoThisField;
-                            }
-                        }
-                        return ReadResult.ReadOK;
-                    }
-                    else
-                    {
-                        return ReadResult.NoDataFound;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Thread.Sleep(500);
-                return ReadResult.ReadDBException;
-            }
-        }
-        */
 
         public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime startTime, DateTime stopTime, string code, List<Dictionary<string, object>> data, out string errorMessage)
         {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using MySql.Data.MySqlClient;
 using Scada.Config;
 using Scada.DataCenterAgent.Properties;
 using System;
@@ -199,10 +200,18 @@ namespace Scada.Data.Client.Tcp
             {
                 return;
             }
-            DBDataSource.Instance.Initialize();
-            this.InitializeAgents();
-            this.InitializeTimer();
-            this.started = true;
+            try
+            {
+                this.MySqlConnection = DBDataSource.Instance.CreateMySqlConnection();
+                this.MySqlCommand = this.MySqlConnection.CreateCommand();
+                this.InitializeAgents();
+                this.InitializeTimer();
+
+                this.started = true;
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void InitializeAgents()
@@ -359,8 +368,26 @@ namespace Scada.Data.Client.Tcp
             }
             else
             {
+                if (this.MySqlConnection != null && this.MySqlConnection.State != ConnectionState.Open)
+                {
+                    try
+                    {
+                        this.MySqlConnection.Close();
+                        this.MySqlConnection = null;
+                    }
+                    catch (Exception e)
+                    {
+                        string line = string.Format("RD Error: MySQL Connection reset");
+                        Log.GetLogFile(ScadaDataClient).Log(line);
+
+                        this.MySqlConnection = DBDataSource.Instance.CreateMySqlConnection();
+                        this.MySqlCommand = this.MySqlConnection.CreateCommand();
+                    }
+
+                }
+
                 this.data.Clear();
-                string errorMessage;
+                string errorMessage = string.Empty;
                 var r = DBDataSource.GetData(this.MySqlCommand, deviceKey, time, default(DateTime), null, this.data, out errorMessage);
                 if (r == ReadResult.ReadOK)
                 {
@@ -434,15 +461,6 @@ namespace Scada.Data.Client.Tcp
             }
             return false;
         }
-
-        // Main Thread Yet
-        /*
-        private void ShowAgentMessage(Agent agent, string msg)
-        {
-            string line = string.Format("{0}: {1}", agent.ToString(), msg);
-            this.mainListBox.Items.Add(line);
-        }
-        */
 
         private void OnNotifyEvent(Agent agent, NotifyEvents notify, string msg1, string msg2)
         {
@@ -685,7 +703,8 @@ namespace Scada.Data.Client.Tcp
             this.agent.CanHandleSetTime = this.SetTimeToolStripMenuItem.Checked;
         }
 
+        private MySqlConnection MySqlConnection { get; set; }
 
-        public MySql.Data.MySqlClient.MySqlCommand MySqlCommand { get; set; }
+        public MySqlCommand MySqlCommand { get; set; }
     }
 }
