@@ -540,6 +540,7 @@ namespace Scada.Data.Client.Tcp
                         }
 
                         this.agent.SendHistoryDataPacket(p);
+                        Thread.Sleep(100);
                     }
                 }
                 else

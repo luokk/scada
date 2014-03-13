@@ -113,7 +113,7 @@ namespace Scada.Data.Client.Tcp
                 {
                     while (reader.Read())
                     {
-                        Dictionary<string, object> item = new Dictionary<string, object>();
+                        Dictionary<string, object> item = new Dictionary<string, object>(12);
                         // Must Has an Id.
                         string id = reader.GetString(Id);
                         id = id.Trim();

@@ -203,7 +203,9 @@ namespace Scada.Data.Client.Tcp
             try
             {
                 this.MySqlConnection = DBDataSource.Instance.CreateMySqlConnection();
+                this.MySqlConnection.Open();
                 this.MySqlCommand = this.MySqlConnection.CreateCommand();
+                this.DoLog(ScadaDataClient, "Connected to MySQL");
                 this.InitializeAgents();
                 this.InitializeTimer();
 
@@ -368,22 +370,22 @@ namespace Scada.Data.Client.Tcp
             }
             else
             {
+                
                 if (this.MySqlConnection != null && this.MySqlConnection.State != ConnectionState.Open)
                 {
                     try
                     {
                         this.MySqlConnection.Close();
-                        this.MySqlConnection = null;
+
+                        this.MySqlConnection = DBDataSource.Instance.CreateMySqlConnection();
+                        this.MySqlConnection.Open();
+                        this.MySqlCommand = this.MySqlConnection.CreateCommand();
                     }
                     catch (Exception e)
                     {
-                        string line = string.Format("RD Error: MySQL Connection reset");
-                        Log.GetLogFile(ScadaDataClient).Log(line);
-
-                        this.MySqlConnection = DBDataSource.Instance.CreateMySqlConnection();
-                        this.MySqlCommand = this.MySqlConnection.CreateCommand();
+                        string line = string.Format("RD: MySQL Connection Reset - {0}", e.Message);
+                        this.DoLog(ScadaDataClient, line);
                     }
-
                 }
 
                 this.data.Clear();
@@ -391,35 +393,40 @@ namespace Scada.Data.Client.Tcp
                 var r = DBDataSource.GetData(this.MySqlCommand, deviceKey, time, default(DateTime), null, this.data, out errorMessage);
                 if (r == ReadResult.ReadOK)
                 {
-                    if (this.data.Count == 0)
-                        return;
-
-                    DataPacket p = null;
-
-                    if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
-                        deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
+                    if (this.data.Count > 0)
                     {
-                        p = builder.GetFlowDataPacket(deviceKey, this.data[0], true);
+                        DataPacket p = null;
+
+                        if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
+                            deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
+                        {
+                            p = builder.GetFlowDataPacket(deviceKey, this.data[0], true);
+                        }
+                        else
+                        {
+                            p = builder.GetDataPacket(deviceKey, this.data[0], true);
+                        }
+
+                        if (agent.SendDataPacket(p))
+                        {
+                            string msg = string.Format("RD: {0}", p.ToString());
+                            Log.GetLogFile(deviceKey).Log(msg);
+                            this.UpdateSendDataRecord(deviceKey, false);
+                        }
                     }
                     else
                     {
-                        p = builder.GetDataPacket(deviceKey, this.data[0], true);
+                        string line = string.Format("RD Error: count={0} [{1}: {2}]", this.data.Count, deviceKey, time);
+                        Log.GetLogFile(deviceKey).Log(line);
                     }
 
-                    if (agent.SendDataPacket(p))
-                    {
-                        string msg = string.Format("RD: {0}", p.ToString());
-                        Log.GetLogFile(deviceKey).Log(msg);
-                        this.UpdateSendDataRecord(deviceKey, false);
-                    }
                 }
                 else
                 {
                     string line = string.Format("RD Error: {0} - {1} [{2}: {3}]", r.ToString(), errorMessage, deviceKey, time);
                     Log.GetLogFile(deviceKey).Log(line);
-
                 }
-            }
+            } // Non File transfer
         }
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
