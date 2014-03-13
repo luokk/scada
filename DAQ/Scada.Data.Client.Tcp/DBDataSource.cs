@@ -39,7 +39,7 @@ namespace Scada.Data.Client.Tcp
 
         private MySqlConnection mainThreadConn = null;
 
-        private MySqlConnection historyDataThreadConn = null;
+        // private MySqlConnection historyDataThreadConn = null;
 
         private MySqlCommand mainSqlCmd = null;
 
@@ -82,12 +82,10 @@ namespace Scada.Data.Client.Tcp
             }
         }
 
-        public MySqlCommand CreateHistoryDataCommand()
+        public MySqlConnection CreateMySqlConnection()
         {
             string connectionString = new DBConnectionString().ToString();
-            this.historyDataThreadConn = new MySqlConnection(connectionString);
-            this.historyDataThreadConn.Open();
-            return this.historyDataThreadConn.CreateCommand();
+            return new MySqlConnection(connectionString);
         }
 
         DataPacket GetDataPacket(string deviceKey, DateTime time)
@@ -114,6 +112,7 @@ namespace Scada.Data.Client.Tcp
             return sql;
         }
 
+        /*
         public ReadResult GetData(string deviceKey, DateTime time, string code, Dictionary<string, object> data)
         {
             if (this.mainSqlCmd == null)
@@ -186,12 +185,21 @@ namespace Scada.Data.Client.Tcp
                 return ReadResult.ReadDBException;
             }
         }
+        */
 
-        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime startTime, DateTime stopTime, string code, List<Dictionary<string, object>> data)
+        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime startTime, DateTime stopTime, string code, List<Dictionary<string, object>> data, out string errorMessage)
         {
+            errorMessage = string.Empty;
             string tableName = Settings.Instance.GetTableName(deviceKey);
 
-            command.CommandText = GetSelectStatement(tableName, startTime, stopTime);
+            if (stopTime != default(DateTime))
+            {
+                command.CommandText = GetSelectStatement(tableName, startTime, stopTime);
+            }
+            else
+            {
+                command.CommandText = GetSelectStatement(tableName, startTime);
+            }
 
             try
             {
@@ -233,8 +241,9 @@ namespace Scada.Data.Client.Tcp
                                 // TODO: Has Null Value
                                 item.Add(c.Code, string.Empty);
                             }
-                            catch (Exception)
+                            catch (Exception e)
                             {
+                                errorMessage = e.Message;
                                 return ReadResult.NoThisField;
                             }
                         }
@@ -244,6 +253,7 @@ namespace Scada.Data.Client.Tcp
 
                     if (data.Count == 0)
                     {
+                        errorMessage = "data.Count == 0";
                         return ReadResult.NoDataFound;
                     }
                     return ReadResult.ReadOK;
@@ -251,18 +261,22 @@ namespace Scada.Data.Client.Tcp
             }
             catch (IOException e)
             {
+                errorMessage = e.Message;
                 return ReadResult.ReadIOException;
             }
             catch (SqlException e)
             {
+                errorMessage = e.Message;
                 return ReadResult.ReadSqlException;
             }
             catch (InvalidOperationException e)
             {
+                errorMessage = e.Message;
                 return ReadResult.ReadInvalidOpException;
             }
             catch (Exception e)
             {
+                errorMessage = e.Message;
                 return ReadResult.ReadDBException;
             }
         }

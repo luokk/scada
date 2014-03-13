@@ -136,8 +136,6 @@ namespace Scada.Data.Client.Tcp
         [DllImport("Kernel32.dll")]
         public static extern void SetLocalTime(SystemTime st);
 
-        private MySqlCommand command = null;
-
         private SentCommand CurrentSentCommand
         {
             get;
@@ -399,17 +397,6 @@ namespace Scada.Data.Client.Tcp
 
         private void PrepareUploadHistoryData()
         {
-            try
-            {
-                this.command = DBDataSource.Instance.CreateHistoryDataCommand();
-            }
-            catch (Exception e)
-            {
-                string line = string.Format("DB Connection: {0}", e.ToString());
-                this.agent.OnHandleHistoryData("", line, true);
-                return;
-            }
-
             while (true)
             {
                 if (this.fQuit)
@@ -513,7 +500,24 @@ namespace Scada.Data.Client.Tcp
             else
             {
                 List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
-                var r = DBDataSource.GetData(this.command, deviceKey, f, t, polId, data);
+                ReadResult r = ReadResult.NoDataFound;
+                string errorMessage = string.Empty;
+                using (var conn = DBDataSource.Instance.CreateMySqlConnection())
+                {
+                    try
+                    {
+                        conn.Open();
+                        var cmd = conn.CreateCommand();
+                        r = DBDataSource.GetData(cmd, deviceKey, f, t, polId, data, out errorMessage);
+                    }
+                    catch (Exception e)
+                    {
+                        string line = string.Format("HD Error: {0} [{1}: {2} ~ {3}]", e.Message, deviceKey, f, t);
+                        this.agent.OnHandleHistoryData(deviceKey, line, true);
+                        return;
+                    }
+                }
+
                 if (r == ReadResult.ReadOK)
                 {
                     if (data.Count == 0)
@@ -540,7 +544,7 @@ namespace Scada.Data.Client.Tcp
                 }
                 else
                 {
-                    string line = string.Format("HD Error: {0} [{1}: {2} ~ {3}]", r.ToString(), deviceKey, f, t);
+                    string line = string.Format("HD Error: {0} - {1} [{2}: {3} ~ {4}]", r.ToString(), errorMessage, deviceKey, f, t);
                     this.agent.OnHandleHistoryData(deviceKey, line, true);
                 }
             }

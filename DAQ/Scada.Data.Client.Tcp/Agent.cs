@@ -246,15 +246,14 @@ namespace Scada.Data.Client.Tcp
 
             this.UIThreadMashaller.Mashall((_n) => 
             {
-                string line = string.Format("[{0}] {1}", DateTime.Now.ToString("HH:mm:ss"), msg);
                 if (ExistLoggerConsoleProc() && LoggerClient.Contains(deviceKey))
                 {
-                    this.logger.Send(deviceKey, line);
+                    this.logger.Send(deviceKey, msg);
                 }
                 Logger logger = Log.GetLogFile(deviceKey);
                 if (logger != null)
                 {
-                    logger.Log(line);
+                    logger.Log(msg);
                 }
             });
         }

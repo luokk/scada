@@ -108,7 +108,7 @@ namespace Scada.Data.Client.Tcp
 
         private LoggerClient logger = new LoggerClient();
 
-        private Dictionary<string, object> data = new Dictionary<string, object>(20);
+        private List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
 
         private bool quitPressed = false;
 
@@ -360,20 +360,23 @@ namespace Scada.Data.Client.Tcp
             else
             {
                 this.data.Clear();
-                var r = DBDataSource.Instance.GetData(deviceKey, time, null, this.data);
+                string errorMessage;
+                var r = DBDataSource.GetData(this.MySqlCommand, deviceKey, time, default(DateTime), null, this.data, out errorMessage);
                 if (r == ReadResult.ReadOK)
                 {
+                    if (this.data.Count == 0)
+                        return;
+
                     DataPacket p = null;
-                    // By different device.
 
                     if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
                         deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
                     {
-                        p = builder.GetFlowDataPacket(deviceKey, this.data, true);
+                        p = builder.GetFlowDataPacket(deviceKey, this.data[0], true);
                     }
                     else
                     {
-                        p = builder.GetDataPacket(deviceKey, this.data, true);
+                        p = builder.GetDataPacket(deviceKey, this.data[0], true);
                     }
 
                     if (agent.SendDataPacket(p))
@@ -385,7 +388,7 @@ namespace Scada.Data.Client.Tcp
                 }
                 else
                 {
-                    string line = string.Format("RD Error: {0} [{1} <{2}>]", r.ToString(), deviceKey, time);
+                    string line = string.Format("RD Error: {0} - {1} [{2}: {3}]", r.ToString(), errorMessage, deviceKey, time);
                     Log.GetLogFile(deviceKey).Log(line);
 
                 }
@@ -682,5 +685,7 @@ namespace Scada.Data.Client.Tcp
             this.agent.CanHandleSetTime = this.SetTimeToolStripMenuItem.Checked;
         }
 
+
+        public MySql.Data.MySqlClient.MySqlCommand MySqlCommand { get; set; }
     }
 }
