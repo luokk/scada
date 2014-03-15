@@ -50,8 +50,8 @@ namespace Scada.Data.Client
         {
             string deviceKey = "scada.shelter";
             DateTime sendTime = DateTime.Parse("2013-11-30 20:33:00");
-            int errorCode = 0;
-            Packet packet = this.GetPacket(sendTime, deviceKey, out errorCode);
+            
+            Packet packet = this.GetPacket(sendTime, deviceKey);
             if (packet != null)
             {
                 string msg = packet.ToString();
