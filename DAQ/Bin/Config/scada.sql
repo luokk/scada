@@ -103,6 +103,14 @@ CREATE TABLE `Environment_rec` (
 PRIMARY KEY (`Id`)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+CREATE TABLE `environment_door_rec` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `Time` datetime DEFAULT NULL,
+  `IfDoorOpen` bit(1) DEFAULT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+
+
 
 
 DROP TABLE IF EXISTS `NaI_Rec`;
