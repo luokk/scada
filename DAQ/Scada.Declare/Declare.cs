@@ -67,8 +67,7 @@ namespace Scada.Declare
 			this.action = null;
             this.time = default(DateTime);
             this.originData = string.Empty;
-            this.insertIntoCommand = string.Empty;
-            
+            this.insertIntoCommand = string.Empty;            
 			// this.fieldsConfig = null;
 		}
 
@@ -124,7 +123,7 @@ namespace Scada.Declare
 			set { this.fieldsConfig = value; }
 		}
 		*/
-	}
+    }
 
     /// <summary>
     /// 

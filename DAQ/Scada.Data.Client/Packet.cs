@@ -250,14 +250,19 @@ namespace Scada.Data.Client
             }
 
             HttpWebResponse hwr = we.Response as HttpWebResponse;
-            switch (hwr.StatusCode)
+            if (hwr != null)
             {
-                case HttpStatusCode.InternalServerError:
-                    break;
-                default:
-                    break;
-
-
+                switch (hwr.StatusCode)
+                {
+                    case HttpStatusCode.InternalServerError:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                // TODO: No response!
             }
         }
 

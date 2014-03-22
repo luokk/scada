@@ -136,6 +136,10 @@ namespace Scada.Declare
 
     public class ShelterDataParser : DataParser
     {
+        private bool lastDoorStatus = false;
+
+        private bool isDoorStatusChanged = false;
+
         public ShelterDataParser()
 		{
 			// this.lineParser = new LineParser();
@@ -241,6 +245,9 @@ namespace Scada.Declare
             if (!string.IsNullOrEmpty(item))
             {
                 bool ifOpen = (item.Trim() == "0");
+                this.isDoorStatusChanged = (ifOpen != this.lastDoorStatus);
+                this.lastDoorStatus = ifOpen;
+
                 ret[6] = ifOpen ? "1" : "0";
             }
 
@@ -258,6 +265,15 @@ namespace Scada.Declare
 			//}
 			return data;
 		}
+
+        public override bool IsChangedAtIndex(int p)
+        {
+            if (p == 6)
+            {
+                return this.isDoorStatusChanged;
+            }
+            return false;
+        }
     }
 
 

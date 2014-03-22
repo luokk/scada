@@ -31,5 +31,9 @@ namespace Scada.Declare
 
 		public abstract string[] Search(byte[] data, byte[] lastData);
 
-	}
+        public virtual bool IsChangedAtIndex(int p)
+        {
+            return false;
+        }
+    }
 }

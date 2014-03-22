@@ -59,9 +59,15 @@ namespace Scada.Declare
 
         private bool sensitive = false;
 
+        private int sensitiveIndex = -1;
+
+        private string sensitiveDataTable = string.Empty;
+        
 		//private string fieldsConfig = string.Empty;
 
 		private FieldConfig[] fieldsConfig = null;
+
+        private FieldConfig[] sensitiveFieldsConfig = null;
 
 		private DataParser dataParser = null;
 		
@@ -82,6 +88,7 @@ namespace Scada.Declare
         // private static int MaxDelay = 10;
 
         private DateTime currentActionTime = default(DateTime);
+
 
 
         private byte[] lastLine;
@@ -156,6 +163,11 @@ namespace Scada.Declare
             var sensitive = this.GetValue(entry, DeviceEntry.Sensitive, "false");
             this.sensitive = (sensitive.ToLower() == "true");
 
+            string sensitiveIndexStr = this.GetValue(entry, "SensitiveIndex", "-1");
+            this.sensitiveIndex = int.Parse(sensitiveIndexStr);
+
+            this.sensitiveDataTable = this.GetValue(entry, "SensitiveDataTable", "");
+
             this.calcDataWithLastData = this.GetValue(entry, "CalcLast", 0) == 1;
 
             
@@ -182,6 +194,13 @@ namespace Scada.Declare
 			string fieldsConfigStr = (StringValue)entry[DeviceEntry.FieldsConfig];
             List<FieldConfig> fieldConfigList = ParseDataFieldConfig(fieldsConfigStr);
 			this.fieldsConfig = fieldConfigList.ToArray<FieldConfig>();
+
+            if (this.sensitive)
+            {
+                string sensitiveFieldsConfigStr = (StringValue)entry["SensitiveFieldsConfig"];
+                List<FieldConfig> sensitiveFieldConfigList = ParseDataFieldConfig(sensitiveFieldsConfigStr);
+                this.sensitiveFieldsConfig = sensitiveFieldConfigList.ToArray<FieldConfig>();
+            }
 
 			if (!this.IsRealDevice)
 			{
@@ -391,11 +410,15 @@ namespace Scada.Declare
                     return;
 				}
 
-                // For Sensitive data!
                 if (this.sensitive)
                 {
-
+                    DeviceData sdd;
+                    if (this.GetSensitiveData(line, out sdd))
+                    {
+                        this.SynchronizationContext.Post(this.DataReceived, sdd);
+                    }
                 }
+
 
                 // Defect: HPIC need check the right time here.
                 // if ActionInterval == 0, the time trigger not depends send-time.
@@ -438,6 +461,35 @@ namespace Scada.Declare
             this.SynchronizationContext.Post(this.DataReceived, dd);
         }
 
+        private bool GetSensitiveData(byte[] line, out DeviceData data)
+        {
+            data = default(DeviceData);
+            string[] items = this.dataParser.Search(line, lastLine);
+            if (this.sensitive)
+            {
+                if (this.dataParser.IsChangedAtIndex(this.sensitiveIndex))
+                {
+                    object[] fields = Device.GetFieldsData(items, DateTime.Now, this.sensitiveFieldsConfig);
+                    data = new DeviceData(this, fields);
+
+                    string tableFields = (StringValue)entry["SensitiveDataTableFields"];
+
+                    string[] fieldNames = tableFields.Split(',');
+                    string atList = string.Empty;
+                    for (int i = 0; i < fieldNames.Length; ++i)
+                    {
+                        string at = string.Format("@{0}, ", i + 1);
+                        atList += at;
+                    }
+                    atList = atList.TrimEnd(',', ' ');
+
+                    string cmd = string.Format("insert into {0}({1}) values({2})", this.sensitiveDataTable, tableFields, atList);
+                    data.InsertIntoCommand = cmd;
+                    return true;
+                }
+            }
+            return false;
+        }
 
 		private bool GetDeviceData(byte[] line, DateTime time, out DeviceData dd)
 		{
@@ -449,6 +501,7 @@ namespace Scada.Declare
             try
             {
                 data = this.dataParser.Search(line, lastLine);
+
                 this.lastLine = line;
             }
             catch (Exception e)
@@ -465,6 +518,7 @@ namespace Scada.Declare
             object[] fields = Device.GetFieldsData(data, time, this.fieldsConfig);
 			dd = new DeviceData(this, fields);
 			dd.InsertIntoCommand = this.insertIntoCommand;
+
 			// deviceData.FieldsConfig = this.fieldsConfig;
 			return true;
 		}

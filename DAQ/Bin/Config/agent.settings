@@ -9,13 +9,17 @@
 		<datacenter ip="" port="6000" wirelessip="" wirelessport="7000"/>
 		<datacenter ip="" port="6000" wirelessip="" wirelessport="7000"/>
 		-->
+
+		<!--
 		<datacenter2 BaseUrl="http://127.0.0.1"/>
+		-->
+		<datacenter2 BaseUrl="http://192.168.1.203"/>
 	</datacenters>
 
 
-	<!-- NOTICE SNO -->
+	<!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
 	<site 	sysname="" sysst="213213123213123213" adapter="" name="" station="128" 
-			sno="0313A08" mn="0313A080000000" debug-data-time="2013-11-30 20:33:00">
+			sno="0313A08" mn="0313A080000000" >
 	</site>
 
 	<devices>

@@ -39,13 +39,19 @@ namespace Scada.Data.Client
     {
         public static Dictionary<string, Logger> dict = new Dictionary<string, Logger>();
 
+
+        public static string GetLogFileName(string deviceKey, DateTime t)
+        {
+            string logFileName = string.Format("{0}-{1:D2}-{2:D2}.{3}.log", t.Year, t.Month, t.Day, deviceKey);
+            return logFileName;
+        }
+
         public static Logger GetLogFile(string deviceKey)
         {
             string logPath = Program.GetLogPath(deviceKey);
             DateTime t = DateTime.Now;
-            string logFileName = string.Format("{0}-{1:D2}-{2:D2}.h.log", t.Year, t.Month, t.Day);
-            string logFilePath = string.Format("{0}\\{1}", logPath, logFileName);
 
+            string logFilePath = string.Format("{0}\\{1}", logPath, GetLogFileName(deviceKey, t));
 
             string key = logFilePath.ToLower();
             if (dict.ContainsKey(key))
@@ -64,12 +70,38 @@ namespace Scada.Data.Client
             }
         }
 
+        public static void CollectTodayLogs(string[] deviceKeys, string path = null)
+        {
+            DateTime t = DateTime.Now;
+            
+            foreach (var deviceKey in deviceKeys)
+            {
+                string logPath = Program.GetLogPath(deviceKey);
+                var logFileName = GetLogFileName(deviceKey, t);
+
+                string logFilePath = string.Format("{0}\\{1}", logPath, logFileName);
+                if (File.Exists(logFilePath))
+                {
+                    string destLogFilePath;
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        destLogFilePath = Path.Combine("c:\\", logFileName);
+                    }
+                    else
+                    {
+                        destLogFilePath = Path.Combine(path, logFileName);
+                    }
+                    File.Copy(logFilePath, destLogFilePath, true);
+                }
+            }
+        }
+
         private static void CloseLastLogFile(string deviceKey, DateTime time)
         {
             string logPath = Program.GetLogPath(deviceKey);
             DateTime t = time;
-            string logFileName = string.Format("{0}-{1:D2}-{2:D2}", t.Year, t.Month, t.Day);
-            string logFilePath = string.Format("{0}\\{1}", logPath, logFileName);
+
+            string logFilePath = string.Format("{0}\\{1}", logPath, GetLogFileName(deviceKey, t));
 
             string key = logFilePath.ToLower();
             if (dict.ContainsKey(key))

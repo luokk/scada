@@ -14,6 +14,43 @@ namespace Scada.Data.Client
 {
     public partial class MainDataAgentWindow : Form
     {
+        public class DeviceDataDetails
+        {
+
+            public DeviceDataDetails()
+            {
+                this.SendDataCount = 0;
+                this.LatestSendDataTime = default(DateTime);
+                this.LatestSendHistoryDataTime = default(DateTime);
+            }
+
+            public string DeviceName
+            {
+                get;
+                set;
+            }
+
+            public long SendDataCount
+            {
+                get;
+                set;
+            }
+
+            public DateTime LatestSendDataTime
+            {
+                get;
+                set;
+            }
+
+
+            public DateTime LatestSendHistoryDataTime
+            {
+                get;
+                set;
+            }
+        }
+
+
         private Timer sendDataTimer;
 
         private Timer recvDataTimer;
@@ -29,6 +66,8 @@ namespace Scada.Data.Client
         private const int TimerInterval = 4000;
 
         private ToolStripLabel statusLabel = new ToolStripLabel();
+
+        private ToolStripLabel uploadLabel = new ToolStripLabel();
 
         private ToolStripLabel addressLabel = new ToolStripLabel();
 
@@ -63,8 +102,7 @@ namespace Scada.Data.Client
             // TODO: FIND A n42 file
             string deviceKey = "scada.naidevice";
             DateTime sendTime = DateTime.Parse("2012-09-01 11:50:00");
-            int errorCode = 0;
-            Packet packet = this.GetPacket(sendTime, deviceKey, out errorCode);
+            Packet packet = this.GetPacket(sendTime, deviceKey);
             if (packet != null)
             {
                 string msg = packet.ToString();
@@ -89,8 +127,11 @@ namespace Scada.Data.Client
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add(this.counterLabel);
             this.statusStrip.Items.Add(new ToolStripSeparator());
+            this.statusStrip.Items.Add(this.uploadLabel);
+            this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add(this.pingLabel);
 
+            this.InitDetailsListView();
             this.Start();
         }
 
@@ -171,10 +212,14 @@ namespace Scada.Data.Client
                 return false;
             }
 
-            this.agent = new DataAgent(s.DataCenters[0]);
+            Settings.DataCenter2 dc = s.DataCenters[0];
+            this.agent = new DataAgent(dc);
             this.agent.DoAuth();
 
             this.statusLabel.Text = string.Format("开始:[{0}]", DateTime.Now);
+            this.addressLabel.Text = string.Format("<{0}>", dc.BaseUrl);
+            this.counterLabel.Text = string.Format("已发送: 0");
+            this.uploadLabel.Text = string.Format("实时数据最后上传时间: {0}", FormatTime(DateTime.Now));
             return true;
         }
 
@@ -293,9 +338,6 @@ namespace Scada.Data.Client
             }
         }
 
-
-        private DateTime lastSendTime;
-
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
         {
             if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
@@ -394,5 +436,57 @@ namespace Scada.Data.Client
                 this.detailForm.OnSendDetails(deviceKey, msg);
             }
         }
+
+
+
+        private Dictionary<string, DeviceDataDetails> detailsDict = new Dictionary<string, DeviceDataDetails>();
+
+        private void InitDetailsListView()
+        {
+            this.InitDeviceColumn("scada.hpic", "高压电离室");
+            this.InitDeviceColumn("scada.naidevice", "NaI谱仪");
+            this.InitDeviceColumn("scada.weather", "气象站");
+            this.InitDeviceColumn("scada.hvsampler", "超大流量气溶胶采样器");
+            this.InitDeviceColumn("scada.isampler", "碘采样器");
+            this.InitDeviceColumn("scada.shelter", "环境与安防监控");
+            this.InitDeviceColumn("scada.dwd", "干湿沉降采样器");
+        }
+
+        private static string FormatTime(DateTime time)
+        {
+            if (time != default(DateTime))
+                return time.ToString("yyyy-MM-dd HH:mm");
+            else
+                return "-";
+        }
+
+        private void InitDeviceColumn(string deviceKey, string deviceName)
+        {
+            ListViewItem lvi = new ListViewItem(deviceName);
+            lvi.Tag = deviceKey;
+
+            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, "0"));
+            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, "0.0%"));
+            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, "0"));
+            lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, "-"));
+
+            this.detailsListView.Items.Add(lvi);
+            this.detailsDict.Add(deviceKey, new DeviceDataDetails());
+        }
+
+        private void UpdateDetailsListView()
+        {
+            foreach (ListViewItem item in this.detailsListView.Items)
+            {
+                string deviceKey = (string)item.Tag;
+
+                DeviceDataDetails details = this.detailsDict[deviceKey];
+
+                item.SubItems[1].Text = details.SendDataCount.ToString();
+                item.SubItems[2].Text = FormatTime(details.LatestSendDataTime);
+                item.SubItems[3].Text = FormatTime(details.LatestSendHistoryDataTime);
+            }
+        }
+
     }
 }

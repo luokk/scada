@@ -181,7 +181,10 @@ namespace Scada.Data.Client
 
             // debug-data-time
             string debugDataTime = this.GetAttribute(siteNode, "debug-data-time");
-            this.DebugDataTime = DateTime.Parse(debugDataTime);
+            if (!string.IsNullOrEmpty(debugDataTime))
+            {
+                this.DebugDataTime = DateTime.Parse(debugDataTime);
+            }
             // Load Password
             this.LoadPassword();
             
