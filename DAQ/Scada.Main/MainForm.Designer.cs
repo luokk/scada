@@ -42,6 +42,7 @@
             this.stopMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startMainVisionMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dataUploadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataCenterSetMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.logToolMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -59,14 +60,13 @@
             this.toolBar = new System.Windows.Forms.ToolStrip();
             this.startToolBarButton = new System.Windows.Forms.ToolStripButton();
             this.stopToolBarButton = new System.Windows.Forms.ToolStripButton();
+            this.dataUploadItem = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.loggerServer = new System.Windows.Forms.ToolStripButton();
             this.statusBar = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.deviceListView = new System.Windows.Forms.ListView();
-            this.dataUploadItem = new System.Windows.Forms.ToolStripButton();
-            this.dataUploadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuBar.SuspendLayout();
             this.toolBar.SuspendLayout();
             this.statusBar.SuspendLayout();
@@ -87,7 +87,7 @@
             this.helpMenuItem});
             this.menuBar.Location = new System.Drawing.Point(0, 0);
             this.menuBar.Name = "menuBar";
-            this.menuBar.Size = new System.Drawing.Size(704, 24);
+            this.menuBar.Size = new System.Drawing.Size(479, 24);
             this.menuBar.TabIndex = 2;
             this.menuBar.Text = "menuStrip1";
             // 
@@ -98,26 +98,26 @@
             this.toolStripSeparator1,
             this.exitMenuItem});
             this.fileMenuItem.Name = "fileMenuItem";
-            this.fileMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.fileMenuItem.Size = new System.Drawing.Size(43, 20);
             this.fileMenuItem.Text = "文件";
             this.fileMenuItem.Click += new System.EventHandler(this.fileMenuItem_Click);
             // 
             // settingToolStripMenuItem
             // 
             this.settingToolStripMenuItem.Name = "settingToolStripMenuItem";
-            this.settingToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.settingToolStripMenuItem.Size = new System.Drawing.Size(98, 22);
             this.settingToolStripMenuItem.Text = "设置";
             this.settingToolStripMenuItem.Click += new System.EventHandler(this.settingToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(95, 6);
             // 
             // exitMenuItem
             // 
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.exitMenuItem.Size = new System.Drawing.Size(98, 22);
             this.exitMenuItem.Text = "退出";
             this.exitMenuItem.Click += new System.EventHandler(this.exitMenuItem_Click);
             // 
@@ -128,27 +128,27 @@
             this.StartAllToolStripMenuItem2,
             this.stopMenuItem});
             this.operateMenuItem.Name = "operateMenuItem";
-            this.operateMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.operateMenuItem.Size = new System.Drawing.Size(43, 20);
             this.operateMenuItem.Text = "操作";
             // 
             // startMenuItem
             // 
             this.startMenuItem.Name = "startMenuItem";
-            this.startMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.startMenuItem.Size = new System.Drawing.Size(122, 22);
             this.startMenuItem.Text = "启动";
             this.startMenuItem.Click += new System.EventHandler(this.startMenuItem_Click);
             // 
             // StartAllToolStripMenuItem2
             // 
             this.StartAllToolStripMenuItem2.Name = "StartAllToolStripMenuItem2";
-            this.StartAllToolStripMenuItem2.Size = new System.Drawing.Size(126, 22);
+            this.StartAllToolStripMenuItem2.Size = new System.Drawing.Size(122, 22);
             this.StartAllToolStripMenuItem2.Text = "启动全部";
             this.StartAllToolStripMenuItem2.Click += new System.EventHandler(this.StartAllToolStripMenuItem2_Click);
             // 
             // stopMenuItem
             // 
             this.stopMenuItem.Name = "stopMenuItem";
-            this.stopMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.stopMenuItem.Size = new System.Drawing.Size(122, 22);
             this.stopMenuItem.Text = "停止";
             this.stopMenuItem.Click += new System.EventHandler(this.stopMenuItem_Click);
             // 
@@ -159,20 +159,27 @@
             this.dataUploadToolStripMenuItem,
             this.dataCenterSetMenuItem});
             this.dataMenuItem.Name = "dataMenuItem";
-            this.dataMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.dataMenuItem.Size = new System.Drawing.Size(43, 20);
             this.dataMenuItem.Text = "数据";
             // 
             // startMainVisionMenuItem
             // 
             this.startMainVisionMenuItem.Name = "startMainVisionMenuItem";
-            this.startMainVisionMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.startMainVisionMenuItem.Size = new System.Drawing.Size(146, 22);
             this.startMainVisionMenuItem.Text = "启动数据视图";
             this.startMainVisionMenuItem.Click += new System.EventHandler(this.startMainVisionMenuItem_Click);
+            // 
+            // dataUploadToolStripMenuItem
+            // 
+            this.dataUploadToolStripMenuItem.Name = "dataUploadToolStripMenuItem";
+            this.dataUploadToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.dataUploadToolStripMenuItem.Text = "数据上传";
+            this.dataUploadToolStripMenuItem.Click += new System.EventHandler(this.dataUploadToolStripMenuItem_Click);
             // 
             // dataCenterSetMenuItem
             // 
             this.dataCenterSetMenuItem.Name = "dataCenterSetMenuItem";
-            this.dataCenterSetMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.dataCenterSetMenuItem.Size = new System.Drawing.Size(146, 22);
             this.dataCenterSetMenuItem.Text = "数据中心设置";
             // 
             // logMenuItem
@@ -182,27 +189,27 @@
             this.logBankMenuItem,
             this.logDelMenuItem});
             this.logMenuItem.Name = "logMenuItem";
-            this.logMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.logMenuItem.Size = new System.Drawing.Size(43, 20);
             this.logMenuItem.Text = "日志";
             // 
             // logToolMenuItem
             // 
             this.logToolMenuItem.Name = "logToolMenuItem";
-            this.logToolMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.logToolMenuItem.Size = new System.Drawing.Size(146, 22);
             this.logToolMenuItem.Text = "日志分析工具";
             this.logToolMenuItem.Click += new System.EventHandler(this.logToolMenuItem_Click);
             // 
             // logBankMenuItem
             // 
             this.logBankMenuItem.Name = "logBankMenuItem";
-            this.logBankMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.logBankMenuItem.Size = new System.Drawing.Size(146, 22);
             this.logBankMenuItem.Text = "备份日志";
             this.logBankMenuItem.Click += new System.EventHandler(this.logBankMenuItem_Click);
             // 
             // logDelMenuItem
             // 
             this.logDelMenuItem.Name = "logDelMenuItem";
-            this.logDelMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.logDelMenuItem.Size = new System.Drawing.Size(146, 22);
             this.logDelMenuItem.Text = "删除日志";
             this.logDelMenuItem.Click += new System.EventHandler(this.logDelMenuItem_Click);
             // 
@@ -213,25 +220,25 @@
             this.toolStripSeparator2,
             this.aboutMenuItem});
             this.helpMenuItem.Name = "helpMenuItem";
-            this.helpMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.helpMenuItem.Size = new System.Drawing.Size(43, 20);
             this.helpMenuItem.Text = "帮助";
             // 
             // docMenuItem
             // 
             this.docMenuItem.Name = "docMenuItem";
-            this.docMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.docMenuItem.Size = new System.Drawing.Size(98, 22);
             this.docMenuItem.Text = "文档";
             this.docMenuItem.Click += new System.EventHandler(this.docMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(97, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(95, 6);
             // 
             // aboutMenuItem
             // 
             this.aboutMenuItem.Name = "aboutMenuItem";
-            this.aboutMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.aboutMenuItem.Size = new System.Drawing.Size(98, 22);
             this.aboutMenuItem.Text = "关于";
             this.aboutMenuItem.Click += new System.EventHandler(this.aboutMenuItem_Click);
             // 
@@ -281,7 +288,7 @@
             this.loggerServer});
             this.toolBar.Location = new System.Drawing.Point(0, 24);
             this.toolBar.Name = "toolBar";
-            this.toolBar.Size = new System.Drawing.Size(704, 28);
+            this.toolBar.Size = new System.Drawing.Size(479, 28);
             this.toolBar.TabIndex = 3;
             this.toolBar.Text = "toolStrip1";
             // 
@@ -290,7 +297,7 @@
             this.startToolBarButton.Image = ((System.Drawing.Image)(resources.GetObject("startToolBarButton.Image")));
             this.startToolBarButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.startToolBarButton.Name = "startToolBarButton";
-            this.startToolBarButton.Size = new System.Drawing.Size(53, 25);
+            this.startToolBarButton.Size = new System.Drawing.Size(51, 25);
             this.startToolBarButton.Text = "启动";
             this.startToolBarButton.Click += new System.EventHandler(this.startToolBarButton_Click);
             // 
@@ -299,9 +306,18 @@
             this.stopToolBarButton.Image = ((System.Drawing.Image)(resources.GetObject("stopToolBarButton.Image")));
             this.stopToolBarButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.stopToolBarButton.Name = "stopToolBarButton";
-            this.stopToolBarButton.Size = new System.Drawing.Size(53, 25);
+            this.stopToolBarButton.Size = new System.Drawing.Size(51, 25);
             this.stopToolBarButton.Text = "停止";
             this.stopToolBarButton.Click += new System.EventHandler(this.stopMenuItem_Click);
+            // 
+            // dataUploadItem
+            // 
+            this.dataUploadItem.Image = ((System.Drawing.Image)(resources.GetObject("dataUploadItem.Image")));
+            this.dataUploadItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.dataUploadItem.Name = "dataUploadItem";
+            this.dataUploadItem.Size = new System.Drawing.Size(75, 25);
+            this.dataUploadItem.Text = "数据上传";
+            this.dataUploadItem.Click += new System.EventHandler(this.dataUploadItem_Click);
             // 
             // toolStripButton2
             // 
@@ -309,7 +325,7 @@
             this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton2.Margin = new System.Windows.Forms.Padding(4);
             this.toolStripButton2.Name = "toolStripButton2";
-            this.toolStripButton2.Size = new System.Drawing.Size(53, 20);
+            this.toolStripButton2.Size = new System.Drawing.Size(51, 20);
             this.toolStripButton2.Text = "设置";
             this.toolStripButton2.Click += new System.EventHandler(this.settingClick);
             // 
@@ -318,7 +334,7 @@
             this.loggerServer.Image = ((System.Drawing.Image)(resources.GetObject("loggerServer.Image")));
             this.loggerServer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.loggerServer.Name = "loggerServer";
-            this.loggerServer.Size = new System.Drawing.Size(53, 25);
+            this.loggerServer.Size = new System.Drawing.Size(51, 25);
             this.loggerServer.Text = "日志";
             this.loggerServer.Click += new System.EventHandler(this.loggerServer_Click);
             // 
@@ -327,9 +343,9 @@
             this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel,
             this.toolStripStatusLabel1});
-            this.statusBar.Location = new System.Drawing.Point(0, 459);
+            this.statusBar.Location = new System.Drawing.Point(0, 466);
             this.statusBar.Name = "statusBar";
-            this.statusBar.Size = new System.Drawing.Size(704, 22);
+            this.statusBar.Size = new System.Drawing.Size(479, 22);
             this.statusBar.TabIndex = 4;
             this.statusBar.Text = "statusStrip1";
             // 
@@ -337,7 +353,7 @@
             // 
             this.statusLabel.BorderStyle = System.Windows.Forms.Border3DStyle.Sunken;
             this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(59, 17);
+            this.statusLabel.Size = new System.Drawing.Size(55, 17);
             this.statusLabel.Text = "系统就绪";
             // 
             // toolStripStatusLabel1
@@ -348,7 +364,7 @@
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
             this.toolStripStatusLabel1.Overflow = System.Windows.Forms.ToolStripItemOverflow.Always;
             this.toolStripStatusLabel1.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(33, 17);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(31, 17);
             this.toolStripStatusLabel1.Text = "帮助";
             // 
             // deviceListView
@@ -362,7 +378,7 @@
             this.deviceListView.Location = new System.Drawing.Point(0, 52);
             this.deviceListView.Margin = new System.Windows.Forms.Padding(5);
             this.deviceListView.Name = "deviceListView";
-            this.deviceListView.Size = new System.Drawing.Size(704, 407);
+            this.deviceListView.Size = new System.Drawing.Size(479, 414);
             this.deviceListView.TabIndex = 0;
             this.deviceListView.UseCompatibleStateImageBehavior = false;
             this.deviceListView.View = System.Windows.Forms.View.Details;
@@ -370,27 +386,11 @@
             this.deviceListView.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.deviceListView_ItemChecked);
             this.deviceListView.SelectedIndexChanged += new System.EventHandler(this.deviceListView_SelectedIndexChanged);
             // 
-            // dataUploadItem
-            // 
-            this.dataUploadItem.Image = ((System.Drawing.Image)(resources.GetObject("dataUploadItem.Image")));
-            this.dataUploadItem.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.dataUploadItem.Name = "dataUploadItem";
-            this.dataUploadItem.Size = new System.Drawing.Size(79, 25);
-            this.dataUploadItem.Text = "数据上传";
-            this.dataUploadItem.Click += new System.EventHandler(this.dataUploadItem_Click);
-            // 
-            // dataUploadToolStripMenuItem
-            // 
-            this.dataUploadToolStripMenuItem.Name = "dataUploadToolStripMenuItem";
-            this.dataUploadToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.dataUploadToolStripMenuItem.Text = "数据上传";
-            this.dataUploadToolStripMenuItem.Click += new System.EventHandler(this.dataUploadToolStripMenuItem_Click);
-            // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(704, 481);
+            this.ClientSize = new System.Drawing.Size(479, 488);
             this.Controls.Add(this.deviceListView);
             this.Controls.Add(this.statusBar);
             this.Controls.Add(this.toolBar);

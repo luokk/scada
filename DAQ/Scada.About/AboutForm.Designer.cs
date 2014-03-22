@@ -37,46 +37,46 @@
             // 
             // featureTextBox
             // 
-            this.featureTextBox.Location = new System.Drawing.Point(25, 103);
+            this.featureTextBox.Location = new System.Drawing.Point(25, 82);
             this.featureTextBox.Multiline = true;
             this.featureTextBox.Name = "featureTextBox";
             this.featureTextBox.ReadOnly = true;
             this.featureTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.featureTextBox.Size = new System.Drawing.Size(419, 237);
+            this.featureTextBox.Size = new System.Drawing.Size(419, 232);
             this.featureTextBox.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(22, 13);
+            this.label1.Location = new System.Drawing.Point(22, 12);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(79, 13);
+            this.label1.Size = new System.Drawing.Size(77, 12);
             this.label1.TabIndex = 1;
             this.label1.Text = "北京中检维康";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(22, 39);
+            this.label2.Location = new System.Drawing.Point(22, 36);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(52, 13);
+            this.label2.Size = new System.Drawing.Size(83, 12);
             this.label2.TabIndex = 2;
-            this.label2.Text = "版本: 0.2";
+            this.label2.Text = "版本: 1.0.0.2";
             // 
             // buildLabel
             // 
             this.buildLabel.AutoSize = true;
-            this.buildLabel.Location = new System.Drawing.Point(22, 62);
+            this.buildLabel.Location = new System.Drawing.Point(22, 57);
             this.buildLabel.Name = "buildLabel";
-            this.buildLabel.Size = new System.Drawing.Size(67, 13);
+            this.buildLabel.Size = new System.Drawing.Size(77, 12);
             this.buildLabel.TabIndex = 2;
             this.buildLabel.Text = "Build: 0127A";
             // 
             // sureButton
             // 
-            this.sureButton.Location = new System.Drawing.Point(368, 357);
+            this.sureButton.Location = new System.Drawing.Point(368, 330);
             this.sureButton.Name = "sureButton";
-            this.sureButton.Size = new System.Drawing.Size(75, 30);
+            this.sureButton.Size = new System.Drawing.Size(75, 28);
             this.sureButton.TabIndex = 0;
             this.sureButton.Text = "确定";
             this.sureButton.UseVisualStyleBackColor = true;
@@ -84,9 +84,9 @@
             // 
             // AboutForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(466, 401);
+            this.ClientSize = new System.Drawing.Size(466, 370);
             this.Controls.Add(this.sureButton);
             this.Controls.Add(this.buildLabel);
             this.Controls.Add(this.label2);

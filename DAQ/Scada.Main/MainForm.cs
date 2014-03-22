@@ -25,6 +25,8 @@ namespace Scada.Main
 
         private bool deviceRunning = false;
 
+        private bool quitByUser = false;
+
         public MainForm()
         {
             InitializeComponent();
@@ -61,13 +63,24 @@ namespace Scada.Main
 
             deviceListView.ShowGroups = true;
 
+            Dictionary<string, ListViewGroup> groups = new Dictionary<string, ListViewGroup>();
+
             foreach (string deviceName in Program.DeviceManager.DeviceNames)
             {
                 string deviceKey = deviceName.ToLower();
                 string displayName = Program.DeviceManager.GetDeviceDisplayName(deviceKey);
                 if (displayName != null)
                 {
-                    ListViewGroup g = deviceListView.Groups.Add(deviceKey, displayName);
+                    ListViewGroup g = null;
+                    if (groups.ContainsKey(displayName))
+                    {
+                        g = groups[displayName];
+                    }
+                    else
+                    {
+                        g = deviceListView.Groups.Add("", displayName);
+                        groups.Add(displayName, g);
+                    }
 
                     List<string> versions = Program.DeviceManager.GetVersions(deviceKey);
                     ListViewItem lvi = this.AddDeviceToList(deviceName, versions[0], "就绪");
@@ -298,6 +311,11 @@ namespace Scada.Main
 
         private void PerformQuitByUser()
         {
+            this.quitByUser = true;
+
+            this.UpdateDevicesWaitStatus();
+            Program.DeviceManager.CloseAllDevices();
+
             RecordManager.DoSystemEventRecord(Device.Main, "Scada.Main Closed by Admin!");
             Program.Exit();
             Application.Exit();
@@ -477,11 +495,6 @@ namespace Scada.Main
             if (all)
             {
                 this.CheckAllDevices();
-
-                // TODO:!
-                Thread.Sleep(1000);
-                this.PressVBFormConnectToCPUButtons();
-
             }
             this.SelectDevices();
             this.RunDevices();
@@ -494,9 +507,12 @@ namespace Scada.Main
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
-            this.ShowAtTaskBar(false);
-            e.Cancel = true;
+            if (!this.quitByUser)
+            {
+                this.WindowState = FormWindowState.Minimized;
+                this.ShowAtTaskBar(false);
+                e.Cancel = true;
+            }
         }
 
         private void loggerServer_Click(object sender, EventArgs e)
