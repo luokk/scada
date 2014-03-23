@@ -208,7 +208,6 @@ namespace Scada.Declare
                 finally
                 {
                     // TODO: Gzip the file, put it into the Date-folder, then delete this xml file.
- 
                 }
             }
 		}

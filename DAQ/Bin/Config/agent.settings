@@ -31,7 +31,7 @@
 			<code field="temperature">0102069903</code>
 		</device>
 
-		<device id="scada.weather" table="Weather" eno="002000">
+		<device id="scada.weather" table="weather_rec" eno="002000">
 			<code field="Temperature">0901040101</code>
 			<code field="Humidity">0901040102</code>
 			<code field="Pressure">0901040103</code>

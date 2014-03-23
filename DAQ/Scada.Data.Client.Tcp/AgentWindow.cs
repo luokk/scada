@@ -208,7 +208,10 @@ namespace Scada.Data.Client.Tcp
                 this.DoLog(ScadaDataClient, "Connected to MySQL");
                 this.InitializeAgents();
                 this.InitializeTimer();
-
+#if DEBUG
+                this.agent.SendDataStarted = true;
+                SendDataPackets(DateTime.Parse("2014-03-23 12:00:30"), "Scada.Shelter");
+#endif
                 this.started = true;
             }
             catch (Exception)

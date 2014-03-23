@@ -30,10 +30,7 @@ namespace Scada.Data.Client
     {
         private const int MaxCountFetchRecent = 10;
 
-        private const string Id = "Id";
-
         private const string Time = "time";
-
 
         private List<string> tables = new List<string>();
 
@@ -81,7 +78,7 @@ namespace Scada.Data.Client
         private static string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
         {
             // Get the recent <count> entries.
-            string format = "select * from {0}  where time>='{1}' and time<='{2}'";
+            string format = "select * from {0} where time>='{1}' and time<='{2}'";
             string sql = string.Format(format, tableName, fromTime, toTime);
             return sql;
         }
@@ -108,12 +105,7 @@ namespace Scada.Data.Client
                     data.Clear();
                     while (reader.Read())
                     {
-                        // Must Has an Id.
-                        string id = reader.GetString(Id);
-                        id = id.Trim();
-
                         Dictionary<string, object> item = new Dictionary<string, object>(20);
-                        item.Add(Id, id);
 
                         List<Settings.DeviceCode> codes = Settings.Instance.GetCodes(deviceKey);
 

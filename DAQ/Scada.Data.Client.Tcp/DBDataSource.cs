@@ -33,8 +33,6 @@ namespace Scada.Data.Client.Tcp
     {
         private const int MaxCountFetchRecent = 10;
 
-        private const string Id = "Id";
-
         private const string Time = "time";
 
         private MySqlConnection mainThreadConn = null;
@@ -114,16 +112,6 @@ namespace Scada.Data.Client.Tcp
                     while (reader.Read())
                     {
                         Dictionary<string, object> item = new Dictionary<string, object>(12);
-                        // Must Has an Id.
-                        string id = reader.GetString(Id);
-                        id = id.Trim();
-
-                        if (string.IsNullOrEmpty(id))
-                        {
-                            return ReadResult.RecordsWithoutId;
-                        }
-
-                        item.Add(Id, id);
 
                         List<Settings.DeviceCode> codes = Settings.Instance.GetCodes(deviceKey);
 
@@ -185,7 +173,6 @@ namespace Scada.Data.Client.Tcp
                 return ReadResult.ReadDBException;
             }
         }
-
 
         private string GetDatePath(DateTime date)
         {
