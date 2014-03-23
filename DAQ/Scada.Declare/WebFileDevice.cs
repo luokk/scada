@@ -137,7 +137,9 @@ namespace Scada.Declare
             string filePath = string.Empty;
             if (this.IsVirtual)
             {
-                filePath = this.DeviceConfigPath + "/sara0240_2013-01-19T06_05_00Z-5min.n42";
+                filePath = this.DeviceConfigPath + "/sara0231_2012-09-01T03_50_00Z-5min.n42";
+
+                File.Copy(filePath, tempFile, true);
             }
             else
             {

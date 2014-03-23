@@ -84,11 +84,10 @@ namespace Scada.Config
                     File.Delete(this.fileName);
                     File.Move(tempFileName, this.fileName);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
 
                 }
-
 
             }
         }
