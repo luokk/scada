@@ -13,10 +13,8 @@
             </LinearGradientBrush.GradientStops>
         </LinearGradientBrush>
     </Window.Background>
-    
+
     <Grid x:Name="Grid" ShowGridLines="False">
-        
-            
         <Grid.Resources>
             <ResourceDictionary>
                 <ResourceDictionary.MergedDictionaries>
@@ -27,8 +25,8 @@
         <!-- Definitions -->
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
-            <RowDefinition Height="10"/>
-            <RowDefinition Height="172" x:Name="DataPanelRow"/>
+            <RowDefinition Height="30"/>
+
             <RowDefinition Height="*"/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
@@ -38,6 +36,22 @@
             <ColumnDefinition Width="220" x:Name="DeviceListColumn"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+
+        <DockPanel Name="panel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File" FontSize="14">
+                    <MenuItem Header="_Open" FontSize="14"></MenuItem>
+                    <MenuItem Header="_Save" ></MenuItem>
+                    <Separator/>
+                    <MenuItem Header="E_xit" />
+                </MenuItem>
+                <MenuItem Header="_Help">
+                    <MenuItem Header="_Content"></MenuItem>
+                    <Separator/>
+                    <MenuItem Header="_About"/>
+                </MenuItem>
+            </Menu>
+        </DockPanel>
 
         <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Background="#EEEEEE">
             <!-- Background="#535353"
@@ -69,19 +83,6 @@
             </StackPanel>
         </Grid>
 
-        <!-- Hide -->
-        <Button Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top"
-                BorderThickness="0" BorderBrush="Transparent" Click="OnHideDataPanelButton"
-                Style="{StaticResource SystemButton}"
-                Width="35" Height="10" Background="#CCCCCC">
-            <Button.Content>
-                <Image Source="Images/Hide2.png" Width="9" Height="8" Stretch="None" HorizontalAlignment="Center">
-                </Image>
-            </Button.Content>
-        </Button>
-        <!-- Panel -->
-        <m:HerePane x:Name="herePane" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="10, 0, 0, 0"></m:HerePane>
-        
         <!-- Hide Button -->
         <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Top"
                 BorderThickness="0" BorderBrush="Transparent" Click="OnHideDeviceButton" 
@@ -91,8 +92,12 @@
             </Button.Content>
         </Button>
         <!-- Device -->
-        <m:DeviceListPanel Grid.Row="3" Grid.Column="1" x:Name="DeviceList" Margin="0,0,4,0"/>
-
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical">
+            <m:NaviLabel x:Name="AutoStationLabel" Margin="0,0,4,2"></m:NaviLabel>
+            <m:DeviceListPanel x:Name="DeviceList" Margin="0,0,4,2"/>
+            <m:NaviLabel x:Name="CommStatusLabel" Margin="0,0,4,2"></m:NaviLabel>
+            <m:NaviLabel x:Name="DataCounterLabel" Margin="0,0,4,2"></m:NaviLabel>
+        </StackPanel>
 
         <Grid Grid.Row="4" Grid.ColumnSpan="3" Background="#66217A">
             <TextBlock x:Name="StatusBar" HorizontalAlignment="Left" Foreground="White" Margin="8, 0, 5, 0">就绪</TextBlock>

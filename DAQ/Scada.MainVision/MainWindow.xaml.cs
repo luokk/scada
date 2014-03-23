@@ -29,7 +29,6 @@ namespace Scada.MainVision
 
 		private PanelManager panelManager;
 
-        private List<HerePaneItem> panes;
 
         private Timer refreshPanelDataTimer;
 
@@ -79,9 +78,8 @@ namespace Scada.MainVision
 			// TODO: Window Loaded.
 			this.LoadConfig();
 			this.LoadDataProvider();
-            this.SetRefreshPanelDataTimer();
 
-			// Device List
+            // Device List
             this.DeviceList.ClickDeviceItem += this.OnDeviceItemClicked;
             this.DeviceList.MainWindow = this;
 
@@ -95,21 +93,15 @@ namespace Scada.MainVision
 					this.DeviceList.AddDevice(displayName, deviceKey);
 				}
             }
-            this.AddDevicePanes();
+
+            this.AutoStationLabel.Text = "山东威海站";
+            this.CommStatusLabel.Text = "通信状态";
+            this.DataCounterLabel.Text = "数据统计";
             this.ShowDataViewPanel("scada.hpic");
             // this.OnDeviceItemClicked(null, null);
             this.loaded = true;
             // Max when startup;
             this.OnMaxButton(null, null);
-        }
-
-        private void SetRefreshPanelDataTimer()
-        {
-            this.refreshPanelDataTimer = new Timer();
-            this.refreshPanelDataTimer.Interval = 2000;
-            this.refreshPanelDataTimer.Tick += RefreshPanelDataTimerTick;
-
-            this.refreshPanelDataTimer.Start();
         }
 
 		private void LoadConfig()
@@ -118,28 +110,6 @@ namespace Scada.MainVision
             Config.Instance().Load(fileName);
 		}
 
-        private void AddDevicePanes()
-        {
-            this.panes = new List<HerePaneItem>();
-			Config cfg = Config.Instance();
-			string[] deviceKeys = cfg.DeviceKeys;
-			foreach (string deviceKey in deviceKeys)
-            {
-				string displayName = cfg.GetDisplayName(deviceKey);
-				if (!string.IsNullOrEmpty(displayName))
-				{
-                    string icon = cfg[deviceKey].Icon;
-                    HerePaneItem herePaneItem = this.herePane.AddItem(deviceKey, displayName);
-                    herePaneItem.SetIcon(icon);
-					panes.Add(herePaneItem);
-				}
-            }
-
-            if (true)
-            {
-                var herePaneItem = panes[0];
-            }
-        }
 
         /*
 		void RefreshDataTimerTick(object sender, EventArgs e)
@@ -193,6 +163,7 @@ namespace Scada.MainVision
         }
 
         // #007ACC
+        /*
         private void CheckAlarm(HerePaneItem panel, string deviceKey, string item, int index, double value)
         {
             var i = Config.Instance()[deviceKey].GetConfigItem(item);
@@ -271,6 +242,8 @@ namespace Scada.MainVision
             }
             
         }
+        */
+        
         // 2 总剂量率、发现核素（置信度=100，剂量率>5nSv/h，最好可以设置剂量率的阈值）
         /*
          *  K-40 = K-40; (0, 100, 100) 
@@ -287,6 +260,7 @@ namespace Scada.MainVision
             Ru-103 = Ru-103; (0, 100, 100)
             Te-129 = Te-129;(0, 100, 100)
          */
+        /*
         private void UpdatePanel_NaI(HerePaneItem panel)
         {
             var d = this.dataProvider.GetLatestData(DataProvider.DeviceKey_NaI);
@@ -317,22 +291,6 @@ namespace Scada.MainVision
                         
                         nuclideMsgs[i / 3] += string.Format("{0}, ", nuclide);
                         i++;
-                        /*
-                        string nuclideDoserate = (string)d[nuclide.ToLower()];
-                        if (nuclideDoserate.Length > 0)
-                        {
-                            double v;
-                            if (ConvertDouble(nuclideDoserate, out v))
-                            {
-                                nuclideMsgs[i] = string.Format("{0}: {1}uSv/h", nuclide, v);
-                                i++;
-                                if (i >= 3)
-                                {
-                                    break;
-                                }
-                            }
-                        }
-                        */
                     }
                 }
 
@@ -504,21 +462,7 @@ namespace Scada.MainVision
             string LidOpenMsg = (isLidOpen == "1") ? "雨水采集" : "沉降灰采集";
             this.DisplayPanelData(panel, "采样状态:" + LidOpenMsg);
         }
-
-        void RefreshPanelDataTimerTick(object sender, EventArgs e)
-        {
-            this.dataProvider.RefreshTimeNow();
-
-            this.UpdatePanel_HPIC(this.panes[0]);
-            this.UpdatePanel_NaI(this.panes[1]);
-            this.UpdatePanel_Weather(this.panes[2]);
-
-            this.UpdatePanel_HV(this.panes[3]);
-            this.UpdatePanel_I(this.panes[4]);
-
-            this.UpdatePanel_Shelter(this.panes[5]);
-            this.UpdatePanel_DWD(this.panes[6]);
-        }
+        */
 
         private string GetDisplayString(Dictionary<string, object> d, string key)
         {
@@ -547,7 +491,7 @@ namespace Scada.MainVision
                 this.Grid.Children.Add(panel);
             }
 
-			this.panelManager.SetListViewPanelPos(panel, 3, 2);
+			this.panelManager.SetListViewPanelPos(panel, 2, 2);
 		}
 
       
@@ -571,19 +515,6 @@ namespace Scada.MainVision
             if (di != null)
             {
                 this.ShowDataViewPanel(di.DeviceKey);
-                this.ShowHerePane(di.DeviceKey);
-            }
-        }
-
-        private void ShowHerePane(string deviceKey)
-        {
-            foreach (var pane in panes)
-            {
-                if (pane.DeviceKey == deviceKey)
-                {
-                    pane.Visibility = Visibility.Visible;
-                    break;
-                }
             }
         }
 
@@ -658,44 +589,23 @@ namespace Scada.MainVision
                 this.WindowState = WindowState.Maximized;
 
                 this.SideColumn.Width = new GridLength(16.0);
-                this.herePane.Margin = new Thickness(15, 0, 0, 0);
             }
             else
             {
                 this.WindowState = WindowState.Normal;
                 this.SideColumn.Width = new GridLength(10.0);
-                this.herePane.Margin = new Thickness(10, 0, 0, 0);
             }
         }
 
         private void OnMinButton(object sender, RoutedEventArgs e)
         {
-            // TODO: ? Ask?
             this.WindowState = WindowState.Minimized;
         }
 
-        /// <summary>
-        /// /////////////////////////////////////////////////////////////////////////////////
-        /// </summary>
         private bool dataPanelHide = false;
 
         private bool devicePanelHide = false;
 
-        private void OnHideDataPanelButton(object sender, RoutedEventArgs e)
-        {
-            if (this.dataPanelHide)
-            {
-                this.dataPanelHide = false;
-                this.DataPanelRow.Height = new GridLength(172.0);
-                this.herePane.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                this.dataPanelHide = true;
-                this.DataPanelRow.Height = new GridLength(0.0);
-                this.herePane.Visibility = Visibility.Collapsed;
-            }
-        }
 
         public void OnHideDeviceButton(object sender, RoutedEventArgs e)
         {

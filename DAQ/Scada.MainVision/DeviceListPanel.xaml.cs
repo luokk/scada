@@ -28,24 +28,11 @@ namespace Scada.MainVision
 	{
         private const string DeviceItemTemplate = "DeviceTreeViewItem";
 
-		private TreeViewItem deviceGroup;
+		// private TreeViewItem deviceGroup;
 
 		public DeviceListPanel()
 		{
 			InitializeComponent();
-			this.AddDeviceGroup();
-		}
-
-
-		public void AddDeviceGroup()
-		{
-            /*
-			this.deviceGroup = new TreeViewItem();
-			deviceGroup.Header = "设备列表";
-			deviceGroup.IsExpanded = true;
-
-			this.DeviceList.Items.Add(deviceGroup);
-             * */
 		}
 
 		public void AddDevice(string deviceName, string deviceKey)
@@ -64,10 +51,7 @@ namespace Scada.MainVision
 			tvi.Header = deviceName;
             tvi.FontSize = 14.0;
             tvi.FontFamily = new FontFamily("微软雅黑");
-
-
             this.DeviceList.Items.Add(tvi);
-
 		}
 
 		private void OnDeviceItemClick(object sender, RoutedEventArgs args)

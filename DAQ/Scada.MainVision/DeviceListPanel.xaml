@@ -45,13 +45,14 @@
                 <Image Source="Images\coderwall-26.png" Width="17" Height="14"></Image>
                 <TextBlock x:Name="Title" Margin="5,0,0,0" Height="20" FontSize="14" 
                        Foreground="White" FontWeight="Bold" FontFamily="微软雅黑"
-                       VerticalAlignment="Center">设备列表</TextBlock>
+                       VerticalAlignment="Center" TextOptions.TextFormattingMode="Display">设备列表</TextBlock>
             </StackPanel>
 
-
+            <!-- No Close Button 
             <Button Width="18" Height="18" Grid.Row="0" Grid.Column="2" Margin="0, 1, 1, 0"
                     HorizontalAlignment="Right" VerticalAlignment="Top" Click="OnHideDeviceButton"
                     Template="{StaticResource CloseButtonTemplateKey}"/>
+            -->
         </Grid>
 
         <TreeView x:Name="DeviceList" Grid.Row="1" Grid.Column="0"

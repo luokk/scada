@@ -335,15 +335,7 @@ namespace Scada.MainVision
                 int index = 0;
                 while (reader.Read())
                 {
-                    // Must Has an Id.
-                    string id = reader.GetString(Id);
-                    id = id.Trim();
-
-                    if (string.IsNullOrEmpty(id) || this.dataCache.ContainsKey(id)) { continue; }
-                    
                     Dictionary<string, object> data = new Dictionary<string, object>(10);
-                    data.Add("Id", id);
-
                     foreach (var i in entry.ConfigItems)
                     {
                         string key = i.Key.ToLower();
@@ -371,7 +363,6 @@ namespace Scada.MainVision
                         entry.DataFilter.Fill(data);
                     }
                     ret.Add(data);
-                    // this.dataCache.Add(id, data);
 
                     index++;
                 }
@@ -383,14 +374,14 @@ namespace Scada.MainVision
         private string GetSelectStatement(string tableName, int count)
         {
             // Get the recent <count> entries.
-            string format = "select * from {0} order by Id DESC limit {1}";
+            string format = "select * from {0} order by Time DESC limit {1}";
             return string.Format(format, tableName, count);
         }
 
         private string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
         {
             // Get the recent <count> entries.
-            string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Id DESC";
+            string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
             string sql = string.Format(format, tableName, toTime, fromTime);
             return sql;
         }

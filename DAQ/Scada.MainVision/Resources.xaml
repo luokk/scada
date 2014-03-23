@@ -80,10 +80,10 @@
                                       Padding="0,0,0,0">
                             
                                 <StackPanel Orientation="Horizontal">
-                                <Label Foreground="Black" FontFamily="Times" FontSize="12" Margin="2, 2, 2, 2">
+                                <Label Foreground="Black" FontFamily="Times" FontSize="12" Margin="2, 2, 2, 2" TextOptions.TextFormattingMode="Display">
                                     &gt;
                                 </Label>
-                                    <ContentPresenter x:Name="PART_Header" ContentSource="Header"
+                                <ContentPresenter x:Name="PART_Header" ContentSource="Header" TextOptions.TextFormattingMode="Display"
                                                         HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                         VerticalAlignment="Center"/>
                                 </StackPanel>
