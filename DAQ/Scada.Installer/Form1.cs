@@ -100,8 +100,8 @@ namespace Scada.Installer
                 return false;
             }
 
-            if (CreateDesktopIcons("Scada.Main.exe", "系统设备管理器") &&
-                CreateDesktopIcons("Scada.MainVision.exe", "Nuclover - SCADA"))
+            // 以后MainVision是唯一的用户操作入口
+            if (CreateDesktopIcons("Scada.MainVision.exe", "Nuclover - SCADA"))
             {
                 if (this.installMode)
                 {

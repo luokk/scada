@@ -9,9 +9,9 @@ DROP TABLE IF EXISTS `weather_rec`;
 CREATE TABLE `weather_rec` (
 `Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 `Windspeed` varchar(8) DEFAULT NULL,
-`Direction` varchar(8) DEFAULT NULL,
-`Temperature` varchar(8) DEFAULT NULL,
-`Humidity` varchar(8) DEFAULT NULL,
+`Direction` char(5) DEFAULT NULL,
+`Temperature` tinyint DEFAULT NULL,
+`Humidity` tinyint DEFAULT NULL,
 `Pressure` varchar(8) DEFAULT NULL,
 `Raingauge` varchar(8) DEFAULT NULL,
 `Rainspeed` varchar(8) DEFAULT NULL,
@@ -110,7 +110,7 @@ DROP TABLE IF EXISTS `RDSampler_rec`;
 CREATE TABLE `RDSampler_rec` (
 `Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 `IfRain` bit, /*感雨，单位：无，数据格式：0或1表示是否下雨*/
-`Barrel` int(4), /*桶状态，单位：无，数据格式：0、1、2表示哪个桶正在使用*/
+`Barrel` tinyint, /*桶状态，单位：无，数据格式：0、1、2表示哪个桶正在使用*/
 `Alarm` bit,/*报警，单位：无；数据格式：0、1、2,，代表不同的报警类型，保留字段*/
 `IsLidOpen` bit,
 `CurrentRainTime` varchar(10) ,
@@ -136,11 +136,11 @@ PARTITION yend VALUES LESS THAN MAXVALUE );
 DROP TABLE IF EXISTS `environment_rec`;
 CREATE TABLE `environment_rec` (
 `Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-`Temperature` varchar(8), /*温度，单位：℃，数据格式：N8*/
-`Humidity` varchar(8), /*湿度，单位：%，数据格式：N8*/
+`Temperature` tinyint, /*温度，单位：℃，数据格式：N8*/
+`Humidity` tinyint, /*湿度，单位：%，数据格式：N8*/
 `IfMainPowerOff` bit,
 `BatteryHours` varchar(10),
-`IfSmoke` bit, /*烟感报警，单位：无，数据格式：0或1表示是否报警*/
+`IfSmoke` bit, /*烟感报警，单位：无，数据格式：0或1表示tinyint否报警*/
 `IfWater` bit, /*浸水报警，单位：无，数据格式：0或1表示是否报警*/
 `IfDoorOpen` bit, /*门禁报警，单位：无，数据格式：0或1表示是否报警*/
 `Alarm` bit, /*报警，单位：无；数据格式：0、1、2,，代表不同的报警类型，保留字段*/
@@ -173,11 +173,11 @@ CREATE TABLE `NaI_Rec` (
 `StartTime` datetime, 
 `EndTime` datetime, 
 `Coefficients` varchar(48), 
-`ChannelData` varchar(10000), 
+`ChannelData` varchar(8000), 
 `DoseRate` varchar(16), 
-`Temperature` varchar(16), 
+`Temperature` tinyint, 
 `HighVoltage` varchar(16),
-`NuclideFound` bit,
+`NuclideFound` bit(1),
 `EnergyFromPosition` varchar(16),
 PRIMARY KEY (`Time`)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8
@@ -197,8 +197,7 @@ CREATE TABLE `NaINuclide_Rec` (
 `Indication` varchar(16),
 `DoseRate` varchar(16),
 `Channel` varchar(16), 
-`Energy` varchar(16),
-PRIMARY KEY (`Time`)
+`Energy` varchar(16)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8
 PARTITION BY RANGE (TO_DAYS(Time)) 
 (
