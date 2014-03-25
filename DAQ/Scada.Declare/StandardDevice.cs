@@ -176,20 +176,24 @@ namespace Scada.Declare
             this.dataParser = this.GetDataParser(dataParserClz);
             this.SetDataParserFactors(this.dataParser, entry);
 
-			string tableName = (StringValue)entry[DeviceEntry.TableName];
-			string tableFields = (StringValue)entry[DeviceEntry.TableFields];
+            string tableName = (StringValue)entry[DeviceEntry.TableName];
+            if (!string.IsNullOrEmpty(tableName))
+            {
+                string tableFields = (StringValue)entry[DeviceEntry.TableFields];
 
-			string[] fields = tableFields.Split(',');
-			string atList = string.Empty;
-			for (int i = 0; i < fields.Length; ++i)
-			{
-				string at = string.Format("@{0}, ", i + 1);
-				atList += at;
-			}
-			atList = atList.TrimEnd(',', ' ');
+                string[] fields = tableFields.Split(',');
+                string atList = string.Empty;
+                for (int i = 0; i < fields.Length; ++i)
+                {
+                    string at = string.Format("@{0}, ", i + 1);
+                    atList += at;
+                }
+                atList = atList.TrimEnd(',', ' ');
 
-			string cmd = string.Format("insert into {0}({1}) values({2})", tableName, tableFields, atList);
-			this.insertIntoCommand = cmd;
+                // Insert into
+                string cmd = string.Format("insert into {0}({1}) values({2})", tableName, tableFields, atList);
+                this.insertIntoCommand = cmd;
+            }
 
 			string fieldsConfigStr = (StringValue)entry[DeviceEntry.FieldsConfig];
             List<FieldConfig> fieldConfigList = ParseDataFieldConfig(fieldsConfigStr);
@@ -301,20 +305,20 @@ namespace Scada.Declare
                 this.senderTimer.Start(() => 
                 {
                     DateTime rightTime = default(DateTime);
-                    if (!this.sensitive)
+                    if (this.sensitive)
                     {
-                        if (!this.recordTimePolicy.NowAtRightTime(out rightTime) || 
+                        // Send every MinInterval seconds.
+                        this.Send(this.actionSend, rightTime);
+                    }
+                    else
+                    {
+                        if (!this.recordTimePolicy.NowAtRightTime(out rightTime) ||
                             rightTime == this.currentActionTime)
                         {
                             return;
                         }
                         this.currentActionTime = rightTime;
                         // Send every 30 seconds.
-                        this.Send(this.actionSend, rightTime);
-                    }
-                    else
-                    {
-                        // Send every MinInterval seconds.
                         this.Send(this.actionSend, rightTime);
                     }
                 });
@@ -419,31 +423,11 @@ namespace Scada.Declare
                     }
                 }
 
-                this.OnReceiveData(line);
-
-                // Defect: HPIC need check the right time here.
-                // if ActionInterval == 0, the time trigger not depends send-time.
-                if (this.actionInterval == 0)
+                if (this.OnReceiveData(line))
                 {
-                    DateTime rightTime = default(DateTime);
-                    if (!this.recordTimePolicy.NowAtRightTime(out rightTime) ||
-                        this.currentActionTime == rightTime)
-                    {
-                        return;
-                    }
-
-                    this.currentActionTime = rightTime;
+                    this.RecordData(line);
                 }
 
-                DeviceData dd;
-                if (!this.GetDeviceData(line, this.currentActionTime, out dd))
-                {
-                    return;
-                }
-
-                // Post to Main thread to record.
-                dd.OriginData = Encoding.ASCII.GetString(line);
-                this.SynchronizationContext.Post(this.DataReceived, dd);
 			}
 			catch (InvalidOperationException e)
 			{
@@ -454,6 +438,30 @@ namespace Scada.Declare
 				handled = true;
 			}
 		}
+
+        internal void RecordData(byte[] line)
+        {
+            // Defect: HPIC need check the right time here.
+            // if ActionInterval == 0, the time trigger not depends send-time.
+            DateTime rightTime = default(DateTime);
+            if (!this.recordTimePolicy.NowAtRightTime(out rightTime) ||
+                this.currentActionTime == rightTime)
+            {
+                return;
+            }
+
+            this.currentActionTime = rightTime;
+
+            DeviceData dd;
+            if (!this.GetDeviceData(line, this.currentActionTime, out dd))
+            {
+                return;
+            }
+
+            // Post to Main thread to record.
+            dd.OriginData = Encoding.ASCII.GetString(line);
+            this.SynchronizationContext.Post(this.DataReceived, dd);
+        }
 
         private void PostStartStatus()
         {
@@ -583,8 +591,9 @@ namespace Scada.Declare
             }
         }
 
-        public override void OnReceiveData(byte[] line)
+        public override bool OnReceiveData(byte[] line)
         {
+            return true;
         }
 
 #region virtual-device

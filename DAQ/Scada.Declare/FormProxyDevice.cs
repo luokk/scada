@@ -384,8 +384,9 @@ namespace Scada.Declare
             return false;
         }
 
-        public override void OnReceiveData(byte[] line)
+        public override bool OnReceiveData(byte[] line)
         {
+            return false;
         }
 	}
 }

@@ -220,7 +220,7 @@ namespace Scada.Declare
 		public abstract void Send(byte[] action, DateTime time);
 
 
-        public abstract void OnReceiveData(byte[] line);
+        public abstract bool OnReceiveData(byte[] line);
 
         public static object[] GetFieldsData(string[] data, DateTime now, FieldConfig[] fieldsConfig)
         {
@@ -448,8 +448,9 @@ namespace Scada.Declare
         {
         }
 
-        public override void OnReceiveData(byte[] line)
+        public override bool OnReceiveData(byte[] line)
         {
+            return false;
         }
     }
 
@@ -474,8 +475,9 @@ namespace Scada.Declare
         {
         }
 
-        public override void OnReceiveData(byte[] line)
+        public override bool OnReceiveData(byte[] line)
         {
+            return false;
         }
     }
 
