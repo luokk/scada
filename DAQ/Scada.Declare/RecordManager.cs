@@ -120,6 +120,9 @@ namespace Scada.Declare
             fileWriter.WriteLine(line);
 
 			// Flush Control.
+#if DEBUG
+            fileWriter.Flush();
+#endif
 			if (flushCtrlCount % 10 == 0)
 			{
                 fileWriter.Flush();

@@ -20,16 +20,15 @@ namespace Scada.Main
 		{
             // Record.
 			RecordManager.DoDataRecord(deviceData);
-
             // For Rescue
             Device device = deviceData.Device;
             if (device != null)
             {
                 string deviceKey = device.Id.ToLower();
                 Program.DeviceManager.UpdateLastModifyTime(deviceKey, DateTime.Now.Ticks);
+                return true;
             }
-
-			return true;
+			return false;
 		}
 
 		////////////////////////////////////////////////////////
@@ -38,8 +37,6 @@ namespace Scada.Main
 			if (state is DeviceData)
 			{
 				this.OnDataArrival((DeviceData)state);
-
-
 			}
 		}
 

@@ -265,7 +265,10 @@ namespace Scada.Main
             {
                 return new FormProxyDevice(entry);
             }
-
+            else if (typeof(CinderlDataDevice).ToString() == className)
+            {
+                return new CinderlDataDevice(entry);
+            }
 			// Other Device defined in some Assemblies.
             if (entry[DeviceEntry.Assembly] != null)
             {
@@ -273,11 +276,11 @@ namespace Scada.Main
                 Type deviceClass = assembly.GetType((StringValue)entry[DeviceEntry.ClassName]);
                 if (deviceClass != null)
                 {
-                    object device = Activator.CreateInstance(deviceClass, new object[] { });
+                    object device = Activator.CreateInstance(deviceClass, new object[] { entry });
                     return device as Device;
                 }
             }
-
+            MessageBox.Show("Create Device Failed");
             return (Device)null;
         }
 

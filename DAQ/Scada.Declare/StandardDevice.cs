@@ -104,7 +104,6 @@ namespace Scada.Declare
 				string initFailedEvent = string.Format("Device '{0}' initialized failed. Error is {1}.", entry[DeviceEntry.Identity], error);
 				RecordManager.DoSystemEventRecord(this, initFailedEvent);
 			}
-
 		}
 
         ~StandardDevice()
@@ -170,7 +169,6 @@ namespace Scada.Declare
 
             this.calcDataWithLastData = this.GetValue(entry, "CalcLast", 0) == 1;
 
-            
 			// Set DataParser & factors
             string dataParserClz = (StringValue)entry[DeviceEntry.DataParser];
             this.dataParser = this.GetDataParser(dataParserClz);
@@ -249,6 +247,7 @@ namespace Scada.Declare
                 this.serialPort.RtsEnable = true;
                 this.serialPort.NewLine = "/r/n";	        //?
                 this.serialPort.DataReceived += this.SerialPortDataReceived;
+
                 // Real Devie begins here.
                 if (this.IsRealDevice)
 				{
@@ -259,12 +258,11 @@ namespace Scada.Declare
 						this.StartSenderTimer(this.actionInterval);
 					}
 					else
-					{
+                    {
                         this.Send(this.actionSend, default(DateTime));
 					}
                     // Set status of starting.
                     PostStartStatus();
-
 
                     /* TODO: Remove after test.
                     if (this.actionCondition == null || this.actionCondition.Length == 0)
@@ -408,7 +406,6 @@ namespace Scada.Declare
 				byte[] buffer = this.ReadData();
 
 				byte[] line = this.dataParser.GetLineBytes(buffer);
-
 				if (line == null || line.Length == 0)
 				{
                     return;
@@ -441,6 +438,7 @@ namespace Scada.Declare
 
         internal void RecordData(byte[] line)
         {
+
             // Defect: HPIC need check the right time here.
             // if ActionInterval == 0, the time trigger not depends send-time.
             DateTime rightTime = default(DateTime);

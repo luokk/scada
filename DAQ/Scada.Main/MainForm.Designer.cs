@@ -87,7 +87,7 @@
             this.helpMenuItem});
             this.menuBar.Location = new System.Drawing.Point(0, 0);
             this.menuBar.Name = "menuBar";
-            this.menuBar.Size = new System.Drawing.Size(479, 24);
+            this.menuBar.Size = new System.Drawing.Size(501, 24);
             this.menuBar.TabIndex = 2;
             this.menuBar.Text = "menuStrip1";
             // 
@@ -288,7 +288,7 @@
             this.loggerServer});
             this.toolBar.Location = new System.Drawing.Point(0, 24);
             this.toolBar.Name = "toolBar";
-            this.toolBar.Size = new System.Drawing.Size(479, 28);
+            this.toolBar.Size = new System.Drawing.Size(501, 28);
             this.toolBar.TabIndex = 3;
             this.toolBar.Text = "toolStrip1";
             // 
@@ -343,9 +343,9 @@
             this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.statusLabel,
             this.toolStripStatusLabel1});
-            this.statusBar.Location = new System.Drawing.Point(0, 466);
+            this.statusBar.Location = new System.Drawing.Point(0, 482);
             this.statusBar.Name = "statusBar";
-            this.statusBar.Size = new System.Drawing.Size(479, 22);
+            this.statusBar.Size = new System.Drawing.Size(501, 22);
             this.statusBar.TabIndex = 4;
             this.statusBar.Text = "statusStrip1";
             // 
@@ -378,7 +378,7 @@
             this.deviceListView.Location = new System.Drawing.Point(0, 52);
             this.deviceListView.Margin = new System.Windows.Forms.Padding(5);
             this.deviceListView.Name = "deviceListView";
-            this.deviceListView.Size = new System.Drawing.Size(479, 414);
+            this.deviceListView.Size = new System.Drawing.Size(501, 430);
             this.deviceListView.TabIndex = 0;
             this.deviceListView.UseCompatibleStateImageBehavior = false;
             this.deviceListView.View = System.Windows.Forms.View.Details;
@@ -390,7 +390,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(479, 488);
+            this.ClientSize = new System.Drawing.Size(501, 504);
             this.Controls.Add(this.deviceListView);
             this.Controls.Add(this.statusBar);
             this.Controls.Add(this.toolBar);

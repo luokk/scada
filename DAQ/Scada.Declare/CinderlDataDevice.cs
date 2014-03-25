@@ -15,11 +15,11 @@ namespace Scada.Declare
         public CinderlDataDevice(DeviceEntry entry)
             :base(entry)
         {
-
         }
 
         public override bool OnReceiveData(byte[] line)
         {
+            RecordManager.DoSystemEventRecord(this, Encoding.ASCII.GetString(line));
             return true;
         }
     }
