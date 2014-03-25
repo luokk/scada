@@ -419,6 +419,7 @@ namespace Scada.Declare
                     }
                 }
 
+                this.OnReceiveData(line);
 
                 // Defect: HPIC need check the right time here.
                 // if ActionInterval == 0, the time trigger not depends send-time.
@@ -580,6 +581,10 @@ namespace Scada.Declare
             {
                 this.serialPort.Close();
             }
+        }
+
+        public override void OnReceiveData(byte[] line)
+        {
         }
 
 #region virtual-device

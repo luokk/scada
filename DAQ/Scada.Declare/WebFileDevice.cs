@@ -422,5 +422,9 @@ namespace Scada.Declare
             }
         }
 
-	}
+
+        public override void OnReceiveData(byte[] line)
+        {
+        }
+    }
 }

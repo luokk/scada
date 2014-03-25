@@ -220,6 +220,8 @@ namespace Scada.Declare
 		public abstract void Send(byte[] action, DateTime time);
 
 
+        public abstract void OnReceiveData(byte[] line);
+
         public static object[] GetFieldsData(string[] data, DateTime now, FieldConfig[] fieldsConfig)
         {
             int count = fieldsConfig.Length;
@@ -445,6 +447,10 @@ namespace Scada.Declare
         public override void Send(byte[] action, DateTime time)
         {
         }
+
+        public override void OnReceiveData(byte[] line)
+        {
+        }
     }
 
     public class MainVisionVirtualDevice : Device
@@ -465,6 +471,10 @@ namespace Scada.Declare
         }
 
         public override void Send(byte[] action, DateTime time)
+        {
+        }
+
+        public override void OnReceiveData(byte[] line)
         {
         }
     }

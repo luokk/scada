@@ -78,6 +78,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CinderlDataDevice.cs" />
+    <Compile Include="CinderlStatusDevice.cs" />
     <Compile Include="DataParsers.cs" />
     <Compile Include="DBConnection.cs" />
     <Compile Include="DBConnectionForSid.cs" />
