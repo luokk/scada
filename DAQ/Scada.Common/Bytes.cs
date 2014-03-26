@@ -7,7 +7,12 @@ namespace Scada.Common
 {
 	public class Bytes
 	{
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
 		public static bool Equals(byte[] a, byte[] b)
 		{
             if (a == b)

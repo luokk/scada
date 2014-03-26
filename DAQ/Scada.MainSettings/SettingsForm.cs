@@ -31,6 +31,8 @@ namespace Scada.Main
             this.tabPage5.Controls.Add(new IsCfgForm());
             this.tabPage6.Controls.Add(new EnvCfgForm());
             this.tabPage7.Controls.Add(new DwdCfgForm());
+            this.tabPage8.Controls.Add(new CinderlCfgForm());
+            this.tabPage9.Controls.Add(new HPGECfgForm());
         }
 
         private void sureButton_Click(object sender, EventArgs e)

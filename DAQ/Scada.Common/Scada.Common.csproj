@@ -40,24 +40,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bytes.cs" />
+    <Compile Include="CommandReceiver.cs" />
     <Compile Include="MessageTimer.cs" />
-    <Compile Include="PipeConnection.cs" />
-    <Compile Include="ClientPipeConnection.cs" />
     <Compile Include="CopyData.cs" />
-    <Compile Include="IChannelManager.cs" />
-    <Compile Include="IClientChannel.cs" />
-    <Compile Include="IInterProcessConnection.cs" />
-    <Compile Include="InterProcessConnectionState.cs" />
-    <Compile Include="InterProcessIOException.cs" />
     <Compile Include="MessageCode.cs" />
-    <Compile Include="NamedPipeIOException.cs" />
-    <Compile Include="NamedPipeNative.cs" />
-    <Compile Include="NamedPipeWrapper.cs" />
-    <Compile Include="PipeHandle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scanner.cs" />
     <Compile Include="SerialPorts.cs" />
-    <Compile Include="ServerPipeConnection.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

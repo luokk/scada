@@ -16,6 +16,8 @@ using Scada.Config;
 using Microsoft.Win32;
 using System.Security.Principal;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Scada.Main
 {
@@ -34,7 +36,7 @@ namespace Scada.Main
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            InitSysNotifyIcon();
+            this.InitSysNotifyIcon();
             this.SetStatusText("系统就绪");
 
             bool recover = false;
@@ -106,6 +108,28 @@ namespace Scada.Main
                     this.StartDevices(true);
                 }
             }
+
+            this.OpenLocalCommandReceiver();
+        }
+
+        private void OpenLocalCommandReceiver()
+        {
+            try
+            {
+                CommandReceiver cr = new CommandReceiver(3000);
+                cr.Start(OnReceivedCommandLine);
+            }
+            catch(Exception e)
+            {
+            }
+        }
+
+        private void OnReceivedCommandLine(string line)
+        {
+            SynchronizationContext.Current.Post(new SendOrPostCallback((cmd) => 
+            {
+
+            }), line);
         }
 
         private bool RecoverCheck()

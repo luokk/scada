@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
 
@@ -485,6 +487,22 @@ namespace Scada.Data.Client
                 item.SubItems[1].Text = details.SendDataCount.ToString();
                 item.SubItems[2].Text = FormatTime(details.LatestSendDataTime);
                 item.SubItems[3].Text = FormatTime(details.LatestSendHistoryDataTime);
+            }
+        }
+
+        private void testToolStripButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IPAddress localIp = IPAddress.Parse("127.0.0.1");
+                IPEndPoint localIpEndPoint = new IPEndPoint(localIp, 3000);
+                var receiveUpdClient = new UdpClient();
+                receiveUpdClient.Connect(localIpEndPoint);
+                int a = receiveUpdClient.Send(Encoding.ASCII.GetBytes("Hello"), 5);
+            }
+            catch (Exception ex)
+            {
+
             }
         }
 

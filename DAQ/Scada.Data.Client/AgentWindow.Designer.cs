@@ -39,16 +39,17 @@
             this.mainListBox = new System.Windows.Forms.ListBox();
             this.packTabPage = new System.Windows.Forms.TabPage();
             this.detailsListView = new System.Windows.Forms.ListView();
+            this.deviceHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.countHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.percentHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.historyHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.historyLatestHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.detailsButton = new System.Windows.Forms.ToolStripButton();
             this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.deviceHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.historyHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.countHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.percentHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.historyLatestHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.testToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -131,7 +132,7 @@
             this.eventTabPage.Location = new System.Drawing.Point(4, 22);
             this.eventTabPage.Name = "eventTabPage";
             this.eventTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.eventTabPage.Size = new System.Drawing.Size(679, 349);
+            this.eventTabPage.Size = new System.Drawing.Size(836, 349);
             this.eventTabPage.TabIndex = 0;
             this.eventTabPage.Text = "事件记录";
             this.eventTabPage.UseVisualStyleBackColor = true;
@@ -146,7 +147,7 @@
             this.mainListBox.Location = new System.Drawing.Point(3, 3);
             this.mainListBox.Margin = new System.Windows.Forms.Padding(3, 3, 3, 28);
             this.mainListBox.Name = "mainListBox";
-            this.mainListBox.Size = new System.Drawing.Size(673, 343);
+            this.mainListBox.Size = new System.Drawing.Size(830, 343);
             this.mainListBox.TabIndex = 1;
             // 
             // packTabPage
@@ -179,16 +180,42 @@
             this.detailsListView.UseCompatibleStateImageBehavior = false;
             this.detailsListView.View = System.Windows.Forms.View.Details;
             // 
+            // deviceHeader
+            // 
+            this.deviceHeader.Text = "设备";
+            this.deviceHeader.Width = 100;
+            // 
+            // countHeader
+            // 
+            this.countHeader.Text = "实时数据上传数量";
+            this.countHeader.Width = 121;
+            // 
+            // percentHeader
+            // 
+            this.percentHeader.Text = "实时数据上传率(当日)";
+            this.percentHeader.Width = 139;
+            // 
+            // historyHeader
+            // 
+            this.historyHeader.Text = "历史数据上传数量";
+            this.historyHeader.Width = 143;
+            // 
+            // historyLatestHeader
+            // 
+            this.historyLatestHeader.Text = "历史数据最后上传时间";
+            this.historyLatestHeader.Width = 207;
+            // 
             // toolStrip1
             // 
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
             this.toolStripSeparator1,
-            this.detailsButton});
+            this.detailsButton,
+            this.testToolStripButton});
             this.toolStrip1.Location = new System.Drawing.Point(3, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(69, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(151, 25);
             this.toolStrip1.TabIndex = 0;
             // 
             // toolStripLabel1
@@ -215,30 +242,14 @@
             this.sysNotifyIcon.Text = "数据上传";
             this.sysNotifyIcon.Visible = true;
             // 
-            // deviceHeader
+            // testToolStripButton
             // 
-            this.deviceHeader.Text = "设备";
-            this.deviceHeader.Width = 100;
-            // 
-            // historyHeader
-            // 
-            this.historyHeader.Text = "历史数据上传数量";
-            this.historyHeader.Width = 143;
-            // 
-            // countHeader
-            // 
-            this.countHeader.Text = "实时数据上传数量";
-            this.countHeader.Width = 121;
-            // 
-            // percentHeader
-            // 
-            this.percentHeader.Text = "实时数据上传率(当日)";
-            this.percentHeader.Width = 139;
-            // 
-            // historyLatestHeader
-            // 
-            this.historyLatestHeader.Text = "历史数据最后上传时间";
-            this.historyLatestHeader.Width = 207;
+            this.testToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("testToolStripButton.Image")));
+            this.testToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.testToolStripButton.Name = "testToolStripButton";
+            this.testToolStripButton.Size = new System.Drawing.Size(51, 22);
+            this.testToolStripButton.Text = "同步";
+            this.testToolStripButton.Click += new System.EventHandler(this.testToolStripButton_Click);
             // 
             // MainDataAgentWindow
             // 
@@ -291,6 +302,7 @@
         private System.Windows.Forms.ColumnHeader countHeader;
         private System.Windows.Forms.ColumnHeader percentHeader;
         private System.Windows.Forms.ColumnHeader historyLatestHeader;
+        private System.Windows.Forms.ToolStripButton testToolStripButton;
 
     }
 }

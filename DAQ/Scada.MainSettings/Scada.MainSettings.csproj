@@ -93,6 +93,18 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CinderlCfgForm.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CinderlCfgForm.Designer.cs">
+      <DependentUpon>CinderlCfgForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HPGECfgForm.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HPGECfgForm.Designer.cs">
+      <DependentUpon>HPGECfgForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="WeatherCfgForm.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -128,6 +140,12 @@
     </Compile>
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CinderlCfgForm.resx">
+      <DependentUpon>CinderlCfgForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HPGECfgForm.resx">
+      <DependentUpon>HPGECfgForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WeatherCfgForm.resx">
       <DependentUpon>WeatherCfgForm.cs</DependentUpon>
