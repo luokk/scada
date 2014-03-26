@@ -312,4 +312,24 @@ namespace Scada.Declare
             return ret;
         }
     }
+
+    // CinderlStatusDataParser
+    public class CinderlStatusDataParser : DataParser
+    {
+        public CinderlStatusDataParser()
+		{
+		}
+
+        public override byte[] GetLineBytes(byte[] data)
+        {
+            return data;
+        }
+
+        public override string[] Search(byte[] data, byte[] lastData)
+        {
+            string[] ret = new string[0];
+
+            return ret;
+        }
+    }
 }

@@ -20,7 +20,8 @@ namespace Scada.Declare
 
         public override bool OnReceiveData(byte[] line)
         {
-            return false;
+            RecordManager.DoSystemEventRecord(this, Encoding.ASCII.GetString(line));
+            return true;
         }
     }
 }

@@ -578,5 +578,19 @@ namespace Scada.Main
         {
             this.BringDataUploadUI();
         }
+
+        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!selectAllToolStripMenuItem.Checked)
+            {
+                this.CheckAllDevices(true);
+                selectAllToolStripMenuItem.Checked = true;
+            }
+            else
+            {
+                this.CheckAllDevices(false);
+                selectAllToolStripMenuItem.Checked = false;
+            }
+        }
     }
 }

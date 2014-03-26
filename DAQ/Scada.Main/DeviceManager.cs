@@ -269,6 +269,10 @@ namespace Scada.Main
             {
                 return new CinderlDataDevice(entry);
             }
+            else if (typeof(CinderlStatusDevice).ToString() == className)
+            {
+                return new CinderlStatusDevice(entry);
+            }
 			// Other Device defined in some Assemblies.
             if (entry[DeviceEntry.Assembly] != null)
             {
