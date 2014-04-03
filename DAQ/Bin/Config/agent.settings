@@ -10,10 +10,10 @@
 		<datacenter ip="" port="6000" wirelessip="" wirelessport="7000"/>
 		-->
 
-		<!--
 		<datacenter2 BaseUrl="http://127.0.0.1"/>
-		-->
+		<!--
 		<datacenter2 BaseUrl="http://192.168.1.203"/>
+		-->
 	</datacenters>
 
 

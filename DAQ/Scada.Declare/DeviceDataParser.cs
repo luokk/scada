@@ -307,7 +307,7 @@ namespace Scada.Declare
 
         public override string[] Search(byte[] data, byte[] lastData)
         {
-            string[] ret = new string[0];
+            string[] ret = new string[1] { "A" };
 
             return ret;
         }
