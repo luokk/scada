@@ -76,9 +76,14 @@ namespace Scada.Declare
 			// TODO: Record it in the files.
             if (deviceData.OriginData != null && deviceData.OriginData.Length > 0)
             {
+                if (deviceData.OriginData == DeviceData.BeginFlag)
+                {
+                    return;
+                }
                 string originLine = deviceData.OriginData;
                 RecordManager.WriteDataToLog(deviceData.Device, originLine.Trim(), RecordType.Origin);
             }
+
 			string line = RecordManager.PackDeviceData(deviceData);
 			RecordManager.WriteDataToLog(deviceData.Device, line, RecordType.Data);
 
@@ -95,6 +100,11 @@ namespace Scada.Declare
             {
                 return "<DeviceData::Data Is Null>";
             }
+            else if (deviceData.Data.Length == 0)
+            {
+                return "<DeviceData::Data Is Empty>";
+            }
+
             StringBuilder sb = new StringBuilder();
             foreach (object o in deviceData.Data)
             {

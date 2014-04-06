@@ -6,7 +6,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="210">
     <Grid>
-        <Grid Background="#404040" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2">
+        <Grid Background="#404040" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2"
+              MouseLeftButtonDown="MouseLeftButtonDown">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>

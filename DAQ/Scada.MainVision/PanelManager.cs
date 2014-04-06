@@ -16,7 +16,7 @@ namespace Scada.MainVision
      */
     public class PanelManager
 	{
-		private Window window;
+		private Grid theGrid;
 
 		private List<ListViewPanel> panelList = new List<ListViewPanel>();
 
@@ -24,9 +24,9 @@ namespace Scada.MainVision
 
 		private ListViewPanel currentPanel;
 
-		public PanelManager(Window window)
+        public PanelManager(Grid theGrid)
 		{
-			this.window = window;
+            this.theGrid = theGrid;
 		}
 
         public ListViewPanel CreateDataViewPanel(DataProvider dataProvider, ConfigEntry entry, bool showList = true)
@@ -189,10 +189,14 @@ namespace Scada.MainVision
 			listViewPanel.SetValue(Grid.RowProperty, row);
 		}
 
-        public void SetGraphViewPanelPos(GraphView listViewPanel, int row, int column)
+        public void SetPage(Page page)
         {
-            listViewPanel.SetValue(Grid.ColumnProperty, column);
-            listViewPanel.SetValue(Grid.RowProperty, row);
+
+
+            ContainerPage containerPage = new ContainerPage();
+
+            containerPage.SetValue(Grid.ColumnProperty, 2);
+            containerPage.SetValue(Grid.RowProperty, 2);
         }
 
 		public void HideListViewPanel(ListViewPanel listViewPanel)

@@ -38,17 +38,25 @@
         </Grid.ColumnDefinitions>
 
         <DockPanel Name="panel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4">
-            <Menu DockPanel.Dock="Top">
-                <MenuItem Header="_File" FontSize="14">
-                    <MenuItem Header="_Open" FontSize="14"></MenuItem>
-                    <MenuItem Header="_Save" ></MenuItem>
+            <Menu DockPanel.Dock="Top" Padding="10,0,0,0">
+                <Menu.Background>
+                    <LinearGradientBrush>
+                        <LinearGradientBrush.GradientStops>
+                            <GradientStop Color="#EEEEEE" Offset="0.0" />
+                            <GradientStop Color="#EEEEFF" Offset="1.0" />
+                        </LinearGradientBrush.GradientStops>
+                    </LinearGradientBrush>
+                </Menu.Background>
+                <MenuItem Header="文件" FontSize="14">
+                    <MenuItem Header="打开" FontSize="14"></MenuItem>
+                    <MenuItem Header="保存" FontSize="14"></MenuItem>
                     <Separator/>
-                    <MenuItem Header="E_xit" />
+                    <MenuItem Header="退出" FontSize="14" />
                 </MenuItem>
-                <MenuItem Header="_Help">
-                    <MenuItem Header="_Content"></MenuItem>
+                <MenuItem Header="帮助" FontSize="14">
+                    <MenuItem Header="文档" FontSize="14"></MenuItem>
                     <Separator/>
-                    <MenuItem Header="_About"/>
+                    <MenuItem Header="关于" FontSize="14"/>
                 </MenuItem>
             </Menu>
         </DockPanel>

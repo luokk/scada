@@ -43,13 +43,13 @@ namespace Scada.Declare
 
 	public struct DeviceData
 	{
+        public const string BeginFlag = "<BEGIN>";
+
 		private object[] data;
 
 		private Device device;
 
 		private int delay;
-
-		private Action action;
 
         private DateTime time;
 
@@ -64,7 +64,6 @@ namespace Scada.Declare
 			this.device = device;
 			this.data = data;
 			this.delay = 0;
-			this.action = null;
             this.time = default(DateTime);
             this.originData = string.Empty;
             this.insertIntoCommand = string.Empty;            
@@ -98,12 +97,6 @@ namespace Scada.Declare
                 this.time = value;
             }
         }
-
-		public Action Action
-		{
-			get { return this.action; }
-			set { this.action = value; }
-		}
 
 		public string InsertIntoCommand
 		{

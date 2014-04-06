@@ -82,8 +82,14 @@ namespace Scada.MainVision
             this.dataListeners = new Dictionary<string, DBDataCommonListerner>(30);
 
             // 192.168.1.24
+            this.timelineSource = new List<Dictionary<string, object>>();
+        }
+
+        public MySqlCommand GetMySqlCommand()
+        {
             string installPath = Assembly.GetExecutingAssembly().Location;
             string fileName = string.Format("{0}\\..\\local.ip", installPath);
+
             var s = new DBConnectionString();
             s.Address = "127.0.0.1";
             if (File.Exists(fileName))
@@ -97,7 +103,6 @@ namespace Scada.MainVision
                     }
                 }
             }
-
             this.ConnectionString = s.ToString();
             this.conn = new MySqlConnection(this.ConnectionString);
 
@@ -106,20 +111,15 @@ namespace Scada.MainVision
                 try
                 {
                     this.conn.Open();
-                    this.cmd = this.conn.CreateCommand();
+                    MySqlCommand cmd = this.conn.CreateCommand();
+                    return cmd;
                 }
                 catch (Exception e)
                 {
                     string msg = e.Message;
                 }
             }
-
-            // 192.168.1.24
-
-
-
-
-            this.timelineSource = new List<Dictionary<string, object>>();
+            return null;
         }
 
         public override DataListener GetDataListener(string deviceKey)
@@ -242,7 +242,7 @@ namespace Scada.MainVision
         {
             if (this.cmd == null)
             {
-                return null;
+                this.cmd = this.GetMySqlCommand();
             }
             // Return values
             const int MaxItemCount = 20;
@@ -315,7 +315,7 @@ namespace Scada.MainVision
         {
             if (this.cmd == null)
             {
-                return null;
+                this.cmd = this.GetMySqlCommand();
             }
             // Return values
             var ret = new List<Dictionary<string, object>>();
@@ -428,6 +428,11 @@ namespace Scada.MainVision
 
         public string GetNaIDeviceChannelData(DateTime time)
         {
+            if (this.cmd == null)
+            {
+                this.cmd = this.GetMySqlCommand();
+            }
+
             string sql = string.Format("select ChannelData from nai_rec where time='{0}'", time);
             this.cmd.CommandText = sql;
 

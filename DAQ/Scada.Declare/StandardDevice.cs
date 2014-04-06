@@ -464,7 +464,7 @@ namespace Scada.Declare
         private void PostStartStatus()
         {
             DeviceData dd = new DeviceData(this, null);
-            
+            dd.OriginData = DeviceData.BeginFlag;
             this.SynchronizationContext.Post(this.DataReceived, dd);
         }
 

@@ -50,7 +50,7 @@ namespace Scada.MainVision
         public MainWindow()
         {
             InitializeComponent();
-			this.panelManager = new PanelManager(this);
+			this.panelManager = new PanelManager(this.Grid);
         }
 
         /// <summary>
@@ -82,6 +82,8 @@ namespace Scada.MainVision
             // Device List
             this.DeviceList.ClickDeviceItem += this.OnDeviceItemClicked;
             this.DeviceList.MainWindow = this;
+
+            this.AutoStationLabel.OnClick += OnNaviItemClicked;
 
 			Config cfg = Config.Instance();
 			string[] deviceKeys = cfg.DeviceKeys;
@@ -494,20 +496,16 @@ namespace Scada.MainVision
 			this.panelManager.SetListViewPanelPos(panel, 2, 2);
 		}
 
-      
-
-		private void Button_Click_1(object sender, RoutedEventArgs e)
-		{
-            DeviceItem di = (DeviceItem)sender;
-            this.ShowDataViewPanel(di.DeviceKey);
-
-		}
-
 		void ClosePanelButtonClick(object sender, RoutedEventArgs e)
 		{
 			ListViewPanel panel = (ListViewPanel)sender;
 			this.panelManager.CloseListViewPanel(panel);
 		}
+
+        void OnNaviItemClicked(object sender, EventArgs e)
+        {
+
+        }
 
         void OnDeviceItemClicked(object sender, EventArgs e)
         {

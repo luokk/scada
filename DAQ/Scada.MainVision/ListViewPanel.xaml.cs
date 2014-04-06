@@ -17,6 +17,7 @@ namespace Scada.Controls
     using System.Diagnostics;
     using System.Windows.Media.Imaging;
     using System.Windows.Input;
+
 	/// <summary>
 	/// Interaction logic for ListViewPanel.xaml
 	/// </summary>
@@ -49,7 +50,7 @@ namespace Scada.Controls
 
         private int searchDataIndex = 0;
 
-        private DataArrivalConfig config;
+        //private DataArrivalConfig config;
 
         private const string Time = "time";
 
