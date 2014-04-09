@@ -17,7 +17,7 @@ namespace Scada.MainVision
     /// <summary>
     /// Interaction logic for AllDevicesPage.xaml
     /// </summary>
-    public partial class AllDevicesPage : Page
+    public partial class AllDevicesPage : UserControl
     {
         public AllDevicesPage()
         {

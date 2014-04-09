@@ -486,7 +486,6 @@ namespace Scada.MainVision
             
 			panel.CloseClick += this.ClosePanelButtonClick;
 
-
 			// Manage
             if (!this.Grid.Children.Contains(panel))
             {
@@ -504,15 +503,35 @@ namespace Scada.MainVision
 
         void OnNaviItemClicked(object sender, EventArgs e)
         {
-
+            NaviLabel nv = (NaviLabel)sender;
+            string name = nv.Value;
+            System.Windows.Controls.UserControl page = this.panelManager.GetPage(name);
+            if (page == null)
+            {
+                page = this.panelManager.CreatePage(name);
+            }
+            this.panelManager.SetPage(name, page);
         }
 
         void OnDeviceItemClicked(object sender, EventArgs e)
         {
-            DeviceItem di = sender as DeviceItem;
-            if (di != null)
+            if (sender is DeviceItem)
             {
-                this.ShowDataViewPanel(di.DeviceKey);
+                DeviceItem di = sender as DeviceItem;
+                if (di != null)
+                {
+                    this.ShowDataViewPanel(di.DeviceKey);
+                }
+            }
+            else if (sender is DeviceListPanel)
+            {
+                string name = "device-summary";
+                System.Windows.Controls.UserControl page = this.panelManager.GetPage(name);
+                if (page == null)
+                {
+                    page = this.panelManager.CreatePage(name);
+                }
+                this.panelManager.SetPage(name, page);
             }
         }
 

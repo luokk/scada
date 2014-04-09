@@ -80,5 +80,10 @@ namespace Scada.MainVision
             get; 
             set; 
         }
+
+        private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.ClickDeviceItem(this, e);
+        }
     }
 }

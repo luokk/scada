@@ -26,6 +26,21 @@ namespace Scada.MainVision
             InitializeComponent();
         }
 
+        public static readonly DependencyProperty ValueProperty =
+            DependencyProperty.Register("Value", typeof(string), typeof(NaviLabel));
+
+        public string Value
+        {
+            get
+            {
+                return (string)this.GetValue(ValueProperty);
+            }
+
+            set
+            {
+                this.SetValue(ValueProperty, (string)value);
+            }
+        }
 
         public string Text
         {
@@ -42,7 +57,8 @@ namespace Scada.MainVision
 
         private new void MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            this.OnClick(sender, e);
+            if (this.OnClick != null)
+                this.OnClick(this, e);
         }
     }
 }

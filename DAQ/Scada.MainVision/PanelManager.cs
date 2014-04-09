@@ -58,7 +58,8 @@ namespace Scada.MainVision
                     panel.GraphView = this.ShowGraphView(panel, dataListener);
                     panel.GraphSearchView = this.ShowSearchGraphView(panel, dataListener);
 
-                    panel.ListRecentData();
+                    // Notice; Comment 4-7.
+                    // panel.ListRecentData();
                     // 是否显示 控制面板
                     if (deviceKey == DataProvider.DeviceKey_HvSampler)
                     {
@@ -189,14 +190,56 @@ namespace Scada.MainVision
 			listViewPanel.SetValue(Grid.RowProperty, row);
 		}
 
-        public void SetPage(Page page)
+        private Dictionary<string, UserControl> pageDict = new Dictionary<string, UserControl>();
+
+        public UserControl GetPage(string name)
         {
+            if (this.pageDict.ContainsKey(name))
+            {
+                return this.pageDict[name];
+            }
+            return null;
+        }
 
+        public void SetPage(string name, UserControl mainPage)
+        {
+            ContainerPage containerPage = (ContainerPage)this.GetPage(name);
+            if (containerPage == null)
+            {
+                containerPage = new ContainerPage();
+                this.theGrid.Children.Add(containerPage);
+                containerPage.SetValue(Grid.ColumnProperty, 2);
+                containerPage.SetValue(Grid.RowProperty, 2);
+                
+                this.pageDict.Add(name, containerPage);
 
-            ContainerPage containerPage = new ContainerPage();
-
-            containerPage.SetValue(Grid.ColumnProperty, 2);
-            containerPage.SetValue(Grid.RowProperty, 2);
+                // --------------------------------------
+                if (name == "AutoStation")
+                {
+                    containerPage.AddTab(name, "自动站", mainPage);
+                    // TODO: add other tab
+                }
+                else if (name == "CommStatus")
+                {
+                    containerPage.AddTab(name, "通信状态", mainPage);
+                    // TODO: add other tab
+                }
+                else if (name == "DataCounter")
+                {
+                    containerPage.AddTab(name, "数据统计", mainPage);
+                    // TODO: add other tab
+                }
+                else if (name == "device-summary")
+                {
+                    containerPage.AddTab(name, "设备管理", mainPage);
+                    // TODO: add other tab
+                }
+            }
+            else
+            {
+                containerPage.SetValue(Grid.ColumnProperty, 2);
+                containerPage.SetValue(Grid.RowProperty, 2);
+            }
         }
 
 		public void HideListViewPanel(ListViewPanel listViewPanel)
@@ -208,5 +251,26 @@ namespace Scada.MainVision
 		{
 			listViewPanel.Visibility = Visibility.Hidden;
 		}
-	}
+
+        internal UserControl CreatePage(string name)
+        {
+            if (name == "AutoStation")
+            {
+                return new StationInfoPage();
+            }
+            else if (name == "CommStatus")
+            {
+                return new CommStatusPage();
+            }
+            else if (name == "DataCounter")
+            {
+                return new DataCounterPane();
+            }
+            else if (name == "device-summary")
+            {
+                return new AllDevicesPage();
+            }
+            return null;
+        }
+    }
 }

@@ -32,7 +32,7 @@
             </Rectangle.Effect>
         </Rectangle>
         -->
-        <Grid Background="#404040" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2">
+        <Grid Background="#404040" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" MouseLeftButtonDown="OnMouseLeftButtonDown">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
@@ -41,12 +41,15 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="30"/>
             </Grid.ColumnDefinitions>
-            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="5, 0, 0, 0">
-                <Image Source="Images\coderwall-26.png" Width="17" Height="14"></Image>
-                <TextBlock x:Name="Title" Margin="5,0,0,0" Height="20" FontSize="14" 
+            <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                <StackPanel Orientation="Horizontal" Margin="5, 0, 0, 0" >
+                    <Image Source="Images\coderwall-26.png" Width="17" Height="14"></Image>
+                    <TextBlock x:Name="Title" Margin="5,0,10,0" Height="20" FontSize="14" 
                        Foreground="White" FontWeight="Bold" FontFamily="微软雅黑"
-                       VerticalAlignment="Center" TextOptions.TextFormattingMode="Display">设备列表</TextBlock>
-            </StackPanel>
+                       VerticalAlignment="Center" TextOptions.TextFormattingMode="Display">所属设备</TextBlock>
+                </StackPanel>
+            </Grid>
+
 
             <!-- No Close Button 
             <Button Width="18" Height="18" Grid.Row="0" Grid.Column="2" Margin="0, 1, 1, 0"
