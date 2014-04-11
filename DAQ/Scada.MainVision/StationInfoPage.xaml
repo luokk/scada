@@ -6,6 +6,14 @@
              mc:Ignorable="d" 
              d:DesignHeight="1190" d:DesignWidth="790" Background="White">
     <Canvas>
-        <Label Content="自动站" Canvas.Left="28" Canvas.Top="39"></Label>
+        <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold">高压电离室</Label>
+        <Label Canvas.Left="220" Canvas.Top="25" FontSize="16" Foreground="Green">运行中</Label>
+
+        <Label Canvas.Left="24" Canvas.Top="65" FontSize="16" FontWeight="Bold">NaI谱仪</Label>
+        <Label Canvas.Left="220" Canvas.Top="65" FontSize="16" Foreground="Green">运行中</Label>
+
+        <Label Canvas.Left="24" Canvas.Top="105" FontSize="16" FontWeight="Bold">气象站</Label>
+        <Label Canvas.Left="220" Canvas.Top="105" FontSize="16" Foreground="Green">运行中</Label>
+
     </Canvas>
 </UserControl>

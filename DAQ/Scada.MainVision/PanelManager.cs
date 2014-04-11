@@ -16,13 +16,26 @@ namespace Scada.MainVision
      */
     public class PanelManager
 	{
+        public const string StationIntroduction = "Station-Introduction";
+
+        public const string DevicesRunStatus = "Devices-Run-Status";
+
+        public const string CurrentCommStatus = "Current-Comm-Status";
+
+        public const string HistoryCommStatus = "History-Comm-Status";
+
+        public const string DataCounter = "Station-Data-Counter";
+
+
+
+
 		private Grid theGrid;
 
 		private List<ListViewPanel> panelList = new List<ListViewPanel>();
 
         private Dictionary<string, ListViewPanel> panelDict = new Dictionary<string, ListViewPanel>();
 
-		private ListViewPanel currentPanel;
+		private UserControl currentPanel;
 
         public PanelManager(Grid theGrid)
 		{
@@ -214,22 +227,22 @@ namespace Scada.MainVision
                 this.pageDict.Add(name, containerPage);
 
                 // --------------------------------------
-                if (name == "AutoStation")
+                if (name == PanelManager.StationIntroduction)
                 {
                     containerPage.AddTab(name, "自动站", mainPage);
                     // TODO: add other tab
                 }
-                else if (name == "CommStatus")
+                else if (name == PanelManager.CurrentCommStatus)
                 {
                     containerPage.AddTab(name, "通信状态", mainPage);
                     // TODO: add other tab
                 }
-                else if (name == "DataCounter")
+                else if (name == PanelManager.DataCounter)
                 {
                     containerPage.AddTab(name, "数据统计", mainPage);
                     // TODO: add other tab
                 }
-                else if (name == "device-summary")
+                else if (name == PanelManager.DevicesRunStatus)
                 {
                     containerPage.AddTab(name, "设备管理", mainPage);
                     // TODO: add other tab
@@ -239,7 +252,14 @@ namespace Scada.MainVision
             {
                 containerPage.SetValue(Grid.ColumnProperty, 2);
                 containerPage.SetValue(Grid.RowProperty, 2);
+                containerPage.Visibility = Visibility.Visible;
             }
+
+            if (this.currentPanel != null)
+            {
+                this.currentPanel.Visibility = Visibility.Hidden;
+            }
+            currentPanel = containerPage;
         }
 
 		public void HideListViewPanel(ListViewPanel listViewPanel)
@@ -254,19 +274,19 @@ namespace Scada.MainVision
 
         internal UserControl CreatePage(string name)
         {
-            if (name == "AutoStation")
+            if (name == PanelManager.StationIntroduction)
             {
                 return new StationInfoPage();
             }
-            else if (name == "CommStatus")
+            else if (name == PanelManager.CurrentCommStatus)
             {
                 return new CommStatusPage();
             }
-            else if (name == "DataCounter")
+            else if (name == PanelManager.DataCounter)
             {
                 return new DataCounterPane();
             }
-            else if (name == "device-summary")
+            else if (name == PanelManager.DevicesRunStatus)
             {
                 return new AllDevicesPage();
             }

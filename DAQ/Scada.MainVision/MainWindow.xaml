@@ -5,6 +5,14 @@
         Height="600" Width="920" BorderBrush="Purple" BorderThickness="1"
         Loaded="WindowLoaded" MouseLeftButtonDown="WindowMoveHandler">
     <!-- Gradient Color Brush-->
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <Window.Background>
         <LinearGradientBrush>
             <LinearGradientBrush.GradientStops>
@@ -15,13 +23,7 @@
     </Window.Background>
 
     <Grid x:Name="Grid" ShowGridLines="False">
-        <Grid.Resources>
-            <ResourceDictionary>
-                <ResourceDictionary.MergedDictionaries>
-                    <ResourceDictionary Source="Resources.xaml"/>
-                </ResourceDictionary.MergedDictionaries>
-            </ResourceDictionary>
-        </Grid.Resources>
+
         <!-- Definitions -->
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -42,7 +44,7 @@
                 <Menu.Background>
                     <LinearGradientBrush>
                         <LinearGradientBrush.GradientStops>
-                            <GradientStop Color="#EEEEEE" Offset="0.0" />
+                            <GradientStop Color="#EEEEFF" Offset="0.0" />
                             <GradientStop Color="#EEEEFF" Offset="1.0" />
                         </LinearGradientBrush.GradientStops>
                     </LinearGradientBrush>
@@ -111,10 +113,28 @@
         </Button>
         <!-- Device -->
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical">
-            <m:NaviLabel x:Name="AutoStationLabel" Margin="0,0,4,2" Value="AutoStation"></m:NaviLabel>
+            <m:NaviLabel x:Name="AutoStationLabel" Margin="0,0,4,0" Value="AutoStation"></m:NaviLabel>
+            <Border BorderBrush="#404040" BorderThickness="1" Margin="0,0,4,2">
+                <TreeView x:Name="FirstShowTree" Grid.Row="1" Grid.Column="0"
+                  Background="#F9F9F9" Margin="0" BorderBrush="Transparent" Grid.ColumnSpan="2">
+                </TreeView>
+
+            </Border>
             <m:DeviceListPanel x:Name="DeviceList" Margin="0,0,4,2"/>
-            <m:NaviLabel x:Name="CommStatusLabel" Margin="0,0,4,2" Value="CommStatus"></m:NaviLabel>
-            <m:NaviLabel x:Name="DataCounterLabel" Margin="0,0,4,2" Value="DataCounter"></m:NaviLabel>
+            <m:NaviLabel x:Name="CommStatusLabel" Margin="0,0,4,0" Value="CommStatus"></m:NaviLabel>
+            <Border BorderBrush="#404040" BorderThickness="1" Margin="0,0,4,2">
+                <TreeView x:Name="CommStatusTree" Grid.Row="1" Grid.Column="0"
+                  Background="#F9F9F9" Margin="0" BorderBrush="Transparent" Grid.ColumnSpan="2">
+                </TreeView>
+            </Border>
+
+
+            <m:NaviLabel x:Name="DataCounterLabel" Margin="0,0,4,0" Value="DataCounter"></m:NaviLabel>
+            <Border BorderBrush="#404040" BorderThickness="1" Margin="0,0,4,2">
+                <TreeView x:Name="CounterTree" Grid.Row="1" Grid.Column="0"
+                  Background="#F9F9F9" Margin="0" BorderBrush="Transparent" Grid.ColumnSpan="2">
+                </TreeView>
+            </Border>
         </StackPanel>
 
         <Grid Grid.Row="4" Grid.ColumnSpan="3" Background="#66217A">

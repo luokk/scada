@@ -83,8 +83,6 @@ namespace Scada.MainVision
             this.DeviceList.ClickDeviceItem += this.OnDeviceItemClicked;
             this.DeviceList.MainWindow = this;
 
-            this.AutoStationLabel.OnClick += OnNaviItemClicked;
-
 			Config cfg = Config.Instance();
 			string[] deviceKeys = cfg.DeviceKeys;
 			foreach (string deviceKey in deviceKeys)
@@ -99,6 +97,17 @@ namespace Scada.MainVision
             this.AutoStationLabel.Text = "山东威海站";
             this.CommStatusLabel.Text = "通信状态";
             this.DataCounterLabel.Text = "数据统计";
+
+            this.AddPageEntry("自动站介绍", PanelManager.StationIntroduction, this.FirstShowTree);
+            this.AddPageEntry("设备运行状态", PanelManager.DevicesRunStatus, this.FirstShowTree);
+
+            this.AddPageEntry("当前通信状态", PanelManager.CurrentCommStatus, this.CommStatusTree);
+            this.AddPageEntry("历史通信状态", PanelManager.HistoryCommStatus, this.CommStatusTree);
+
+            this.AddPageEntry("数据统计", PanelManager.DataCounter, this.CounterTree);
+            // this.AddPageEntry("数据统计", this.CounterTree);
+
+
             this.ShowDataViewPanel("scada.hpic");
             // this.OnDeviceItemClicked(null, null);
             this.loaded = true;
@@ -640,6 +649,40 @@ namespace Scada.MainVision
             }
         }
 
+        private const string DeviceItemTemplate = "DeviceTreeViewItem";
+
+        public void AddPageEntry(string entryName, string tag, System.Windows.Controls.TreeView treeRoot)
+        {
+            Style ct = (Style)this.Resources[DeviceItemTemplate];
+
+            TreeViewItem tvi = new TreeViewItem();
+            tvi.Tag = tag;
+            tvi.Style = ct;
+            /*
+            tvi.DataContext = new DeviceItem()
+            {
+                DisplayName = deviceName,
+                DeviceKey = deviceKey
+            };
+            */
+            tvi.Selected += PageEntrySelected;
+            tvi.Header = entryName;
+            tvi.FontSize = 14.0;
+            tvi.FontFamily = new FontFamily("微软雅黑");
+            treeRoot.Items.Add(tvi);
+        }
+
+        void PageEntrySelected(object sender, RoutedEventArgs e)
+        {
+            TreeViewItem tvi = (TreeViewItem)sender;
+            string name = (string)tvi.Tag;
+            System.Windows.Controls.UserControl page = this.panelManager.GetPage(name);
+            if (page == null)
+            {
+                page = this.panelManager.CreatePage(name);
+            }
+            this.panelManager.SetPage(name, page);
+        }
 
 
     }

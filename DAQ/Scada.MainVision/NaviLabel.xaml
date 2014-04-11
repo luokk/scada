@@ -6,8 +6,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="210">
     <Grid>
-        <Grid Background="#404040" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2"
-              MouseLeftButtonDown="MouseLeftButtonDown">
+        <Grid Background="#404040" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
@@ -23,11 +22,6 @@
                        VerticalAlignment="Center" TextOptions.TextFormattingMode="Display"></TextBlock>
             </StackPanel>
 
-            <!-- No Close Button 
-            <Button Width="18" Height="18" Grid.Row="0" Grid.Column="2" Margin="0, 1, 1, 0"
-                    HorizontalAlignment="Right" VerticalAlignment="Top" Click="OnHideDeviceButton"
-                    Template="{StaticResource CloseButtonTemplateKey}"/>
-            -->
         </Grid>
 
     </Grid>

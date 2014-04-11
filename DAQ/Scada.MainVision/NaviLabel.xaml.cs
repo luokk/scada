@@ -19,8 +19,6 @@ namespace Scada.MainVision
     /// </summary>
     public partial class NaviLabel : UserControl
     {
-        public event EventHandler OnClick;
-
         public NaviLabel()
         {
             InitializeComponent();
@@ -55,10 +53,5 @@ namespace Scada.MainVision
             }
         }
 
-        private new void MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (this.OnClick != null)
-                this.OnClick(this, e);
-        }
     }
 }
