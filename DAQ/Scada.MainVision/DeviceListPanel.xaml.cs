@@ -58,6 +58,8 @@ namespace Scada.MainVision
 		{
             TreeViewItem tvi = (TreeViewItem)sender;
             this.ClickDeviceItem(tvi.DataContext, args);
+
+            this.MainWindow.OnSelectionChanged(tvi);
 		}
 
 		private void DeviceListLoaded(object sender, RoutedEventArgs e)
@@ -79,11 +81,6 @@ namespace Scada.MainVision
         { 
             get; 
             set; 
-        }
-
-        private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            this.ClickDeviceItem(this, e);
         }
     }
 }

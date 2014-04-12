@@ -10,7 +10,7 @@ namespace Scada.MainVision
 {
 	internal class VirtualDataProvider : DataProvider
 	{
-		private DBDataCommonListerner dataListener;
+		// private DBDataCommonListerner dataListener;
 
         private List<string> deviceKeyList = new List<string>();
 

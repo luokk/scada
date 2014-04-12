@@ -25,8 +25,6 @@ namespace Scada.MainVision
     {
         public const string TimeKey = "Time";
 
-        private int i = 0;
-
         DateTime now = DateTime.Now;
 
         // private DataListener dataListener;
@@ -40,9 +38,9 @@ namespace Scada.MainVision
         
         // private DataArrivalConfig config;
 
-        private Dictionary<string, object> lastEntry;
+        // private Dictionary<string, object> lastEntry;
 
-        private bool baseTimeSet = false;
+        // private bool baseTimeSet = false;
 
         public SearchGraphView()
         {

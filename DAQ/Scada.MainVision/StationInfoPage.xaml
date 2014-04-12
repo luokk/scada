@@ -6,14 +6,45 @@
              mc:Ignorable="d" 
              d:DesignHeight="1190" d:DesignWidth="790" Background="White">
     <Canvas>
-        <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold">高压电离室</Label>
-        <Label Canvas.Left="220" Canvas.Top="25" FontSize="16" Foreground="Green">运行中</Label>
+        <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold" Width="452">欢迎使用 核辐射自动监测站管理系统</Label>
 
-        <Label Canvas.Left="24" Canvas.Top="65" FontSize="16" FontWeight="Bold">NaI谱仪</Label>
-        <Label Canvas.Left="220" Canvas.Top="65" FontSize="16" Foreground="Green">运行中</Label>
+        <Label Canvas.Left="24" Canvas.Top="65" FontSize="16" FontWeight="Bold">站点名称: 山东威海站</Label>
+        <Label Canvas.Left="220" Canvas.Top="65" FontSize="16" Foreground="Green">(试运行)</Label>
 
-        <Label Canvas.Left="24" Canvas.Top="105" FontSize="16" FontWeight="Bold">气象站</Label>
-        <Label Canvas.Left="220" Canvas.Top="105" FontSize="16" Foreground="Green">运行中</Label>
+        <Label Canvas.Left="24" Canvas.Top="105" FontSize="16" FontWeight="Bold">站点 ID: 00A380N2000</Label>
+        
+        
+        <Rectangle Canvas.Left="0" Canvas.Top="150" Fill="#aaa" VerticalAlignment="Top" Width="2000" Height="1"/>
+        
+        <Canvas Canvas.Left="24" Canvas.Top="160">
+            <StackPanel Canvas.Left="10" Canvas.Top="0" Orientation="Horizontal">
+                <Label FontSize="16" >数据采集管理器:</Label>
+                <Label FontSize="16" Foreground="Blue">运行中</Label>
+            </StackPanel>
+
+            <StackPanel Canvas.Left="10" Canvas.Top="30" Orientation="Horizontal">
+                <Label FontSize="16" >数据采集管理器:</Label>
+                <Label FontSize="16" Foreground="Blue">运行中</Label>
+            </StackPanel>
+
+            <StackPanel Canvas.Left="10" Canvas.Top="60" Orientation="Horizontal">
+                <Label FontSize="16" >累计数据采集量:</Label>
+                <Label FontSize="16" Foreground="Blue">240601</Label>
+            </StackPanel>
+
+            <StackPanel Canvas.Left="10" Canvas.Top="90" Orientation="Horizontal">
+                <Label FontSize="16" >累计数据上传量:</Label>
+                <Label FontSize="16" Foreground="Blue">240601</Label>
+            </StackPanel>
+
+            <StackPanel Canvas.Left="10" Canvas.Top="120" Orientation="Horizontal">
+                <Label FontSize="16" >系统运行时间:</Label>
+                <Label FontSize="16" Foreground="Blue" FontWeight="Bold">120天</Label>
+                <Label FontSize="13" Foreground="Blue" VerticalContentAlignment="Bottom">9小时30分</Label>
+            </StackPanel>
+
+        </Canvas>
+
 
     </Canvas>
 </UserControl>

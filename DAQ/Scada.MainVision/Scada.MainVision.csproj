@@ -91,6 +91,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CommStatusPage2.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ContainerPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -165,6 +169,9 @@
     </Compile>
     <Compile Include="CommStatusPage.xaml.cs">
       <DependentUpon>CommStatusPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CommStatusPage2.xaml.cs">
+      <DependentUpon>CommStatusPage2.xaml</DependentUpon>
     </Compile>
     <Compile Include="Config.cs" />
     <Compile Include="ContainerPage.xaml.cs">

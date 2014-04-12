@@ -12,21 +12,21 @@
         </Canvas.Background>
         
         <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold">高压电离室</Label>
-        <Label Canvas.Left="220" Canvas.Top="25" FontSize="16" Foreground="Green">运行中</Label>
+        <Label Canvas.Left="220" Canvas.Top="25" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
 
         <Label Canvas.Left="24" Canvas.Top="65" FontSize="16" FontWeight="Bold">NaI谱仪</Label>
-        <Label Canvas.Left="220" Canvas.Top="65" FontSize="16" Foreground="Green">运行中</Label>
+        <Label Canvas.Left="220" Canvas.Top="65" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
 
         <Label Canvas.Left="24" Canvas.Top="105" FontSize="16" FontWeight="Bold">气象站</Label>
-        <Label Canvas.Left="220" Canvas.Top="105" FontSize="16" Foreground="Green">运行中</Label>
+        <Label Canvas.Left="220" Canvas.Top="105" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
 
         <Label Canvas.Left="24" Canvas.Top="145" FontSize="16" FontWeight="Bold">超大流量气溶胶采样器</Label>
-        <Label Canvas.Left="220" Canvas.Top="145" FontSize="16" Foreground="Green">运行中</Label>
+        <Label Canvas.Left="220" Canvas.Top="145" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
 
         <Label Canvas.Left="24" Canvas.Top="185" FontSize="16" FontWeight="Bold">碘采样器</Label>
-        <Label Canvas.Left="220" Canvas.Top="185" FontSize="16" Foreground="Green">运行中</Label>
+        <Label Canvas.Left="220" Canvas.Top="185" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
 
         <Label Canvas.Left="24" Canvas.Top="225" FontSize="16" FontWeight="Bold">安防与环境监控</Label>
-        <Label Canvas.Left="220" Canvas.Top="225" FontSize="16" Foreground="Green">运行中</Label>
+        <Label Canvas.Left="220" Canvas.Top="225" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
     </Canvas>
 </UserControl>

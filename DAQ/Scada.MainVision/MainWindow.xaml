@@ -40,7 +40,7 @@
         </Grid.ColumnDefinitions>
 
         <DockPanel Name="panel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4">
-            <Menu DockPanel.Dock="Top" Padding="10,0,0,0">
+            <Menu DockPanel.Dock="Top" Padding="10,3,0,0">
                 <Menu.Background>
                     <LinearGradientBrush>
                         <LinearGradientBrush.GradientStops>

@@ -32,7 +32,7 @@
             </Rectangle.Effect>
         </Rectangle>
         -->
-        <Grid Background="#404040" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" MouseLeftButtonDown="OnMouseLeftButtonDown">
+        <Grid Background="#404040" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>

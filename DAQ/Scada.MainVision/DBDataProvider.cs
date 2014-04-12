@@ -230,7 +230,7 @@ namespace Scada.MainVision
                 result.Reverse();
                 return result;
             }
-            catch (Exception e)
+            catch (Exception)
             {
 
             }
@@ -412,11 +412,13 @@ namespace Scada.MainVision
             DateTime dt2 = DateTime.MinValue;
             if (t1 != null)
             {
-                if (DateTime.TryParse((string)t1, out dt1));
+                if (!DateTime.TryParse((string)t1, out dt1))
+                    return 1;
             }
             if (t2 != null)
             {
-                if (DateTime.TryParse((string)t2, out dt2));
+                if (!DateTime.TryParse((string)t2, out dt2))
+                    return 1;
             }
 
             if (dt1 > dt2)

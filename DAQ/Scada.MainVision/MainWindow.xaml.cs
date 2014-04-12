@@ -628,7 +628,7 @@ namespace Scada.MainVision
             this.WindowState = WindowState.Minimized;
         }
 
-        private bool dataPanelHide = false;
+        // private bool dataPanelHide = false;
 
         private bool devicePanelHide = false;
 
@@ -658,13 +658,7 @@ namespace Scada.MainVision
             TreeViewItem tvi = new TreeViewItem();
             tvi.Tag = tag;
             tvi.Style = ct;
-            /*
-            tvi.DataContext = new DeviceItem()
-            {
-                DisplayName = deviceName,
-                DeviceKey = deviceKey
-            };
-            */
+
             tvi.Selected += PageEntrySelected;
             tvi.Header = entryName;
             tvi.FontSize = 14.0;
@@ -682,8 +676,21 @@ namespace Scada.MainVision
                 page = this.panelManager.CreatePage(name);
             }
             this.panelManager.SetPage(name, page);
+
+            this.OnSelectionChanged(tvi);
         }
 
+        // 控制多个TreeView Selected变化的代码
+        private TreeViewItem currentSelectedTreeViewItem = null;
 
+        internal void OnSelectionChanged(TreeViewItem tvi)
+        {
+            if (this.currentSelectedTreeViewItem != null)
+            {
+                this.currentSelectedTreeViewItem.IsSelected = false;
+            }
+
+            this.currentSelectedTreeViewItem = tvi;
+        }
     }
 }

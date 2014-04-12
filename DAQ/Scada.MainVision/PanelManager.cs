@@ -237,6 +237,11 @@ namespace Scada.MainVision
                     containerPage.AddTab(name, "通信状态", mainPage);
                     // TODO: add other tab
                 }
+                else if (name == PanelManager.HistoryCommStatus)
+                {
+                    containerPage.AddTab(name, "历史通信状态", mainPage);
+                    // TODO: add other tab
+                }
                 else if (name == PanelManager.DataCounter)
                 {
                     containerPage.AddTab(name, "数据统计", mainPage);
@@ -281,6 +286,10 @@ namespace Scada.MainVision
             else if (name == PanelManager.CurrentCommStatus)
             {
                 return new CommStatusPage();
+            }
+            else if (name == PanelManager.HistoryCommStatus)
+            {
+                return new CommStatusPage2();
             }
             else if (name == PanelManager.DataCounter)
             {
