@@ -30,7 +30,7 @@ namespace Scada.MainVision
 		private PanelManager panelManager;
 
 
-        private Timer refreshPanelDataTimer;
+        // private Timer refreshPanelDataTimer;
 
 		private bool connectedToDataBase = true;
 
@@ -102,10 +102,10 @@ namespace Scada.MainVision
             this.AddPageEntry("设备运行状态", PanelManager.DevicesRunStatus, this.FirstShowTree);
 
             this.AddPageEntry("当前通信状态", PanelManager.CurrentCommStatus, this.CommStatusTree);
-            this.AddPageEntry("历史通信状态", PanelManager.HistoryCommStatus, this.CommStatusTree);
+            // this.AddPageEntry("历史通信状态", PanelManager.HistoryCommStatus, this.CommStatusTree);
 
             this.AddPageEntry("数据统计", PanelManager.DataCounter, this.CounterTree);
-            // this.AddPageEntry("数据统计", this.CounterTree);
+            // this.AddPageEntry("数据分析", this.CounterTree);
 
 
             this.ShowDataViewPanel("scada.hpic");

@@ -3,9 +3,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-            
-    </Grid>
+             mc:Ignorable="d" Background="White"
+             d:DesignHeight="600" d:DesignWidth="600">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Canvas>
+
+        <StackPanel Canvas.Left="10" Canvas.Top="30" Orientation="Horizontal">
+            <Label FontSize="16" FontWeight="Bold" Width="125">通信网络(主):</Label>
+            <Label FontSize="16" Foreground="Green">192.168.0.2：6000 (已连接)</Label>
+            <Button Content=" 测试连接 " Style="{StaticResource ButtonKey}"></Button>
+        </StackPanel>
+
+        <StackPanel Canvas.Left="10" Canvas.Top="100" Orientation="Horizontal">
+            <Label FontSize="16" FontWeight="Bold" Width="125">通信网络(辅助):</Label>
+            <Label FontSize="16" Foreground="Green">192.168.0.2：7000 (未连接)</Label>
+            <Button Content=" 测试连接 " Style="{StaticResource ButtonKey}"></Button>
+        </StackPanel>
+    </Canvas>
+
+
+
 </UserControl>
