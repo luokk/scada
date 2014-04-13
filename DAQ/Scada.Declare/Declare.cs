@@ -45,6 +45,8 @@ namespace Scada.Declare
 	{
         public const string BeginFlag = "<BEGIN>";
 
+        public const string ErrorFlag = "<ERROR>";
+
 		private object[] data;
 
 		private Device device;

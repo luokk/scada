@@ -9,7 +9,7 @@
 
     <Canvas>
         <Canvas.Background>
-            <ImageBrush ImageSource="Images/backg.jpg" Stretch="UniformToFill"></ImageBrush>
+            <ImageBrush ImageSource="Images/background.png" Stretch="UniformToFill"></ImageBrush>
         </Canvas.Background>
         <!--
         <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold">高压电离室</Label>
@@ -50,7 +50,7 @@
         </m:SmartDataPane>
 
 
-        <m:SmartDataPane x:Name="dwdPane" Title="干湿沉降采样器" Canvas.Left="752" Canvas.Top="271">
+        <m:SmartDataPane x:Name="dwdPane" Title="干湿沉降采样器" Canvas.Left="904" Canvas.Top="268">
         </m:SmartDataPane>
     </Canvas>
 </UserControl>

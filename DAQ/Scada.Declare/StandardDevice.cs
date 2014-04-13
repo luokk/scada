@@ -453,6 +453,9 @@ namespace Scada.Declare
             DeviceData dd;
             if (!this.GetDeviceData(line, this.currentActionTime, out dd))
             {
+                dd = new DeviceData(this, null);
+                dd.OriginData = DeviceData.ErrorFlag;
+                this.SynchronizationContext.Post(this.DataReceived, dd);
                 return;
             }
 

@@ -80,6 +80,11 @@ namespace Scada.Declare
                 {
                     return;
                 }
+                else if (deviceData.OriginData == DeviceData.ErrorFlag)
+                {
+                    RecordManager.WriteDataToLog(deviceData.Device, "Error or No Data Received.", RecordType.Origin);
+                    return;
+                }
                 string originLine = deviceData.OriginData;
                 RecordManager.WriteDataToLog(deviceData.Device, originLine.Trim(), RecordType.Origin);
             }
