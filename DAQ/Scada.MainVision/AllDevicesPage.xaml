@@ -7,10 +7,10 @@
       mc:Ignorable="d" Background="White"
       d:DesignHeight="800" d:DesignWidth="1000" Loaded="UserControl_Loaded">
 
-    <Canvas>
-        <Canvas.Background>
+    <m:CanvasEx AllowDragging="True">
+        <m:CanvasEx.Background>
             <ImageBrush ImageSource="Images/background.png" Stretch="UniformToFill"></ImageBrush>
-        </Canvas.Background>
+        </m:CanvasEx.Background>
         <!--
         <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold">高压电离室</Label>
         <Label Canvas.Left="220" Canvas.Top="25" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
@@ -52,5 +52,5 @@
 
         <m:SmartDataPane x:Name="dwdPane" Title="干湿沉降采样器" Canvas.Left="904" Canvas.Top="268">
         </m:SmartDataPane>
-    </Canvas>
+    </m:CanvasEx>
 </UserControl>

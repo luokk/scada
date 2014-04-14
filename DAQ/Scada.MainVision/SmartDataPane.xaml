@@ -6,7 +6,7 @@
              mc:Ignorable="d" Opacity="10"
              d:DesignHeight="200" d:DesignWidth="150">
     
-    <Grid>
+    <Grid >
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>

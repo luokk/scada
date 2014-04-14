@@ -68,5 +68,12 @@ namespace Scada.MainVision
                 this.labels[i].Content = (string)values[i];
             }
         }
+
+        private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+          
+        }
+
+
     }
 }

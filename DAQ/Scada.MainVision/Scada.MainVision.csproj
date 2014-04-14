@@ -187,6 +187,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CanvasEx.cs" />
     <Compile Include="CommStatusPage.xaml.cs">
       <DependentUpon>CommStatusPage.xaml</DependentUpon>
     </Compile>
