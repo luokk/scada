@@ -249,6 +249,12 @@ namespace Scada.Declare
                 this.lastDoorStatus = ifOpen;
 
                 ret[6] = ifOpen ? "1" : "0";
+
+                                        // TODO: Refactor
+                if (this.isDoorStatusChanged)
+                {
+                    Command.Send(3002, string.Format("DOOR={0}", ifOpen ? "1" : "0"));
+                }
             }
 
             ret[7] = "";

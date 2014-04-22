@@ -109,7 +109,7 @@ namespace Scada.Main
                 }
             }
 
-            this.OpenLocalCommandReceiver();
+            // this.OpenLocalCommandReceiver();
         }
 
         private void OpenLocalCommandReceiver()
@@ -489,6 +489,7 @@ namespace Scada.Main
 
         private void settingClick(object sender, EventArgs e)
         {
+            Command.Send(3001, "MainSettings Launched! <就绪>");
             this.OpenProcessByName("Scada.MainSettings.exe");
         }
 

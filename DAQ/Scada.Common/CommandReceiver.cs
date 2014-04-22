@@ -4,40 +4,93 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace Scada.Common
 {
+    public class StateObject
+    {
+        public Socket Socket
+        {
+            get;
+            set;
+        }
+
+        public byte[] bytes
+        {
+            get;
+            set;
+        }
+    }
+
     public class CommandReceiver
     {
-        private UdpClient receiver = null;
+        private Socket WinSocket = null;
 
         private Action<string> callbackAction;
 
+        private Thread commandThread;
+
+        private int port;
+
+        private const string Quit = "<!--QUIT-->";
+
         public CommandReceiver(int port)
         {
-            IPAddress localIp = IPAddress.Parse("127.0.0.1");
-            IPEndPoint localIpEndPoint = new IPEndPoint(localIp, port);
-            this.receiver = new UdpClient(localIpEndPoint);
+            this.port = port;
+            IPEndPoint ServerEndPoint = new IPEndPoint(IPAddress.Any, port);
+            this.WinSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            this.WinSocket.Bind(ServerEndPoint);
+        }
+
+        public void Close()
+        {
+            Command.Send(this.port, "<QUIT>");
+            this.commandThread.Abort();
         }
 
         public void Start(Action<string> callbackAction)
         {
-            this.callbackAction = callbackAction;
-            this.receiver.BeginReceive(new AsyncCallback(OnReceiveCommand), this.receiver);
-        }
-
-        public void OnReceiveCommand(IAsyncResult r)
-        {
-            if (r.AsyncState != null)
+            this.commandThread = new Thread(new ThreadStart(() =>
             {
-                UdpClient c = (UdpClient)r.AsyncState;
-                var remoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                byte[] bytes = c.EndReceive(r, ref remoteIpEndPoint);
-                string line = Encoding.ASCII.GetString(bytes);
-                this.callbackAction(line);
-            }
-            this.receiver.BeginReceive(new AsyncCallback(OnReceiveCommand), this.receiver);
+                while (true)
+                {
+                    IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+                    EndPoint Remote = (EndPoint)(sender);
+
+                    byte[] buffer = new byte[1024];
+                    int size = this.WinSocket.ReceiveFrom(buffer, ref Remote);
+                    if (size > 0)
+                    {
+                        string msg = Encoding.UTF8.GetString(buffer, 0, size);
+                        if (msg == Quit)
+                        {
+                            break;
+                        }
+                        callbackAction(msg);
+                    }
+
+                }
+            }));
+            this.commandThread.Start();
         }
 
+    }
+
+    /// <summary>
+    /// Command Sender
+    /// </summary>
+    public class Command
+    {
+        public static int Send(int port, string msg)
+        {
+            IPEndPoint RemoteEndPoint = new IPEndPoint( IPAddress.Parse("127.0.0.1"), port );
+            UdpClient client = new UdpClient();
+
+            var data = Encoding.UTF8.GetBytes(msg);
+            int r = client.Send(data, data.Length, RemoteEndPoint);
+            client.Close();
+            return r;
+        }
     }
 }

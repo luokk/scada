@@ -19,7 +19,7 @@ namespace Scada.Data.Client.Tcp
 
         private bool splitted = false;
 
-        public ISettings Settings
+        public Settings Settings
         {
             get;
             set;
@@ -35,7 +35,7 @@ namespace Scada.Data.Client.Tcp
             this.deviceKey = deviceKey;
             if (realTime)
             {
-                this.Cn = string.Format("{0}", (int)SentCommand.Data);;
+                this.Cn = string.Format("{0}", (int)SentCommand.Data);
             }
             else
             {
@@ -106,7 +106,7 @@ namespace Scada.Data.Client.Tcp
         public string Cn
         {
             get;
-            private set;
+            internal set;
         }
 
         // MN=监测点编号，用作数据来源识别。编码规
@@ -162,7 +162,38 @@ namespace Scada.Data.Client.Tcp
             sb.Append(data);
             this.Cp = sb.ToString();
         }
-        
+
+        // For 
+        public void SetRunStatusContent(string sno, string dataTime, string[] devices, string[] status)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(string.Format("SNO={0};DataTime={1};", sno, dataTime));
+
+            for (int i = 0; i < devices.Length; ++i)
+            {
+                string state = status[i];
+                // state = "1";
+                string eno = this.Settings.GetEquipNumber(devices[i]);
+                string p = string.Format("ENO={0},State={1};", eno, state);
+                sb.Append(p);
+            }
+            string content = sb.ToString();
+            content = content.TrimEnd(';');
+            this.Cp = content;
+        }
+
+        public void SetExceptionNotifyContent(string sno, string dataTime, string device, string status)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(string.Format("SNO={0};BeginTime={1};", sno, dataTime));
+
+            string eno = this.Settings.GetEquipNumber(device);
+            string p = string.Format("ENO={0},State={1}", eno, status);
+            sb.Append(p);
+
+            string content = sb.ToString();
+            this.Cp = content;
+        }
 
         public void SetReply(int reply)
         {
@@ -337,5 +368,28 @@ namespace Scada.Data.Client.Tcp
 
         public int PacketIndex { get; set; }
 
+
+        internal void SetThresholdContent(string sno, string eno, string polId, string v1, string v2)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(string.Format("SNO={0};ENO={1};", sno, eno));
+
+            string template = string.Format("PolId=_,_-UseType=1,_-LowValue={0},_-UpValue={1}", v1, v2);
+            string content = template.Replace("_", polId);
+
+            sb.Append(content);
+
+            content = sb.ToString();
+            this.Cp = content;
+        }
+
+        // Now only for HPIC
+        internal void SetDoorStateContent(string sno, string dateTime, string state)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(string.Format("SNO={0};ENO=999000;DateTime={1};0102069906={2}", sno, dateTime, state));
+            string content = sb.ToString();
+            this.Cp = content;
+        }
     }
 }

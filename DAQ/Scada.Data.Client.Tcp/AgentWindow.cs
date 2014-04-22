@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using MySql.Data.MySqlClient;
+using Scada.Common;
 using Scada.Config;
 using Scada.DataCenterAgent.Properties;
 using System;
@@ -121,6 +122,8 @@ namespace Scada.Data.Client.Tcp
 
         private bool started = false;
 
+        private CommandReceiver cmdReceiver;
+
         public const string ScadaDataClient = "scada.data.client";
 
         public AgentWindow()
@@ -137,18 +140,34 @@ namespace Scada.Data.Client.Tcp
             this.InitSysNotifyIcon();
             this.MakeWindowShownFront();
             this.ShowInTaskbar = false;
-            this.SetTimeToolStripMenuItem.Checked = false;
+            this.SetExceptionToolStripMenuItem.Checked = false;
             this.statusStrip.Items.Add(this.GetConnetionString());
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add("MS: " + Settings.Instance.Mn);
             this.statusStrip.Items.Add(new ToolStripSeparator());
             // this.statusStrip.Items.Add("数据中心IP:");
 
+            this.cmdReceiver = new CommandReceiver(3001);
+            cmdReceiver.Start(this.OnLocalCommand);
+
             this.InitDetailsListView();
             if (this.StartState)
             {
                 this.Start();
             }
+        }
+
+        private void OnLocalCommand(string msg)
+        {
+            this.SafeInvoke(() =>
+            {
+                if (msg.IndexOf("DOOR=") == 0)
+                {
+                    string state = msg.Substring(5);
+                    var packet = this.builder.GetDoorStatePacket(state);
+                    this.agent.SendPacket(packet);
+                }
+            });
         }
 
         private string GetConnetionString()
@@ -202,6 +221,7 @@ namespace Scada.Data.Client.Tcp
             }
             try
             {
+                Settings s = Settings.Instance;
                 this.MySqlConnection = DBDataSource.Instance.CreateMySqlConnection();
                 this.MySqlConnection.Open();
                 this.MySqlCommand = this.MySqlConnection.CreateCommand();
@@ -241,7 +261,7 @@ namespace Scada.Data.Client.Tcp
                     this.agent = agent;
 
                     this.agent.Connect();
-                    this.agent.CanHandleSetTime = this.SetTimeToolStripMenuItem.Checked;
+                    this.agent.CanHandleSetTime = this.SetExceptionToolStripMenuItem.Checked;
                 }
             }
         }
@@ -373,7 +393,7 @@ namespace Scada.Data.Client.Tcp
             }
             else
             {
-                
+                // This part of data need MySQL
                 if (this.MySqlConnection != null && this.MySqlConnection.State != ConnectionState.Open)
                 {
                     try
@@ -391,9 +411,10 @@ namespace Scada.Data.Client.Tcp
                     }
                 }
 
+                // TO get data
                 this.data.Clear();
                 string errorMessage = string.Empty;
-                var r = DBDataSource.GetData(this.MySqlCommand, deviceKey, time, default(DateTime), null, this.data, out errorMessage);
+                var r = DBDataSource.GetData(this.MySqlCommand, deviceKey, time, default(DateTime), null, null, this.data, out errorMessage);
                 if (r == ReadResult.ReadOK)
                 {
                     if (this.data.Count > 0)
@@ -403,18 +424,43 @@ namespace Scada.Data.Client.Tcp
                         if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
                             deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
                         {
+                            // '大流量' 数据
                             p = builder.GetFlowDataPacket(deviceKey, this.data[0], true);
+                            if (agent.SendDataPacket(p))
+                            {
+                                string msg = string.Format("RD: {0}", p.ToString());
+                                Log.GetLogFile(deviceKey).Log(msg);
+                                this.UpdateSendDataRecord(deviceKey, false);
+                            }
+                        }
+                        else if (deviceKey.ToLower() == "scada.shelter")
+                        {
+                            // 门禁数据
+                            p = builder.GetShelterPacket(deviceKey, this.data[0], true);
+                            if (agent.SendDataPacket(p))
+                            {
+                                string msg = string.Format("RD: {0}", p.ToString());
+                                Log.GetLogFile(deviceKey).Log(msg);
+                                this.UpdateSendDataRecord(deviceKey, false);
+                            }
                         }
                         else
                         {
-                            p = builder.GetDataPacket(deviceKey, this.data[0], true);
-                        }
+                            // 其他数据
+                            if (deviceKey == "scada.hpic" && this.InHpicException)
+                            {
+                                this.InHpicException = false;
+                                DataPacket packet = this.builder.GetExceptionNotifyPacket(deviceKey, false);
+                                this.agent.SendExceptionNotify(packet);
+                            }
 
-                        if (agent.SendDataPacket(p))
-                        {
-                            string msg = string.Format("RD: {0}", p.ToString());
-                            Log.GetLogFile(deviceKey).Log(msg);
-                            this.UpdateSendDataRecord(deviceKey, false);
+                            p = builder.GetDataPacket(deviceKey, this.data[0], true);
+                            if (agent.SendDataPacket(p))
+                            {
+                                string msg = string.Format("RD: {0}", p.ToString());
+                                Log.GetLogFile(deviceKey).Log(msg);
+                                this.UpdateSendDataRecord(deviceKey, false);
+                            }
                         }
                     }
                     else
@@ -426,6 +472,14 @@ namespace Scada.Data.Client.Tcp
                 }
                 else
                 {
+                    // 发送异常通知
+                    if (r == ReadResult.NoDataFound && deviceKey == "scada.hpic")
+                    {
+                        this.InHpicException = true;
+                        DataPacket packet = this.builder.GetExceptionNotifyPacket(deviceKey, true);
+                        this.agent.SendExceptionNotify(packet);
+                    }
+
                     string line = string.Format("RD Error: {0} - {1} [{2}: {3}]", r.ToString(), errorMessage, deviceKey, time);
                     Log.GetLogFile(deviceKey).Log(line);
                 }
@@ -612,6 +666,7 @@ namespace Scada.Data.Client.Tcp
             {
                 this.agent.Quit();
             }
+            this.cmdReceiver.Close();
             this.quitPressed = true;
             Application.Exit();
         }
@@ -712,11 +767,38 @@ namespace Scada.Data.Client.Tcp
 
         private void SetTimeToolStripMenuItemClick(object sender, EventArgs e)
         {
-            this.agent.CanHandleSetTime = this.SetTimeToolStripMenuItem.Checked;
+            if (this.agent != null )
+            {
+                this.agent.CanHandleSetTime = this.setTimeToolStripMenuItem1.Checked;
+            }
         }
 
         private MySqlConnection MySqlConnection { get; set; }
 
         public MySqlCommand MySqlCommand { get; set; }
+
+        public bool InHpicException { get; set; }
+
+        private void SetExceptionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.InHpicException)
+            {
+                this.InHpicException = false;
+                var packet = this.builder.GetExceptionNotifyPacket("scada.hpic", false);
+                if (this.agent != null)
+                {
+                    this.agent.SendExceptionNotify(packet);
+                }
+            }
+            else
+            {
+                this.InHpicException = true;
+                var packet = this.builder.GetExceptionNotifyPacket("scada.hpic", true);
+                if (this.agent != null)
+                {
+                    this.agent.SendExceptionNotify(packet);
+                }
+            }
+        }
     }
 }

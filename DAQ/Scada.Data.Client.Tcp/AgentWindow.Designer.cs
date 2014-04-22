@@ -48,7 +48,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.OpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SetTimeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SetExceptionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.QuitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DispToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,6 +58,7 @@
             this.startStripButton = new System.Windows.Forms.ToolStripButton();
             this.loggerStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.setTimeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -82,7 +83,7 @@
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.splitter1);
             this.toolStripContainer1.ContentPanel.Controls.Add(this.panel1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(520, 388);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(520, 351);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
@@ -90,7 +91,7 @@
             // toolStripContainer1.RightToolStripPanel
             // 
             this.toolStripContainer1.RightToolStripPanel.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.toolStripContainer1.Size = new System.Drawing.Size(520, 457);
+            this.toolStripContainer1.Size = new System.Drawing.Size(520, 422);
             this.toolStripContainer1.TabIndex = 0;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -113,7 +114,7 @@
             // 
             this.splitter1.Location = new System.Drawing.Point(0, 0);
             this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 388);
+            this.splitter1.Size = new System.Drawing.Size(3, 351);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
@@ -123,7 +124,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(520, 388);
+            this.panel1.Size = new System.Drawing.Size(520, 351);
             this.panel1.TabIndex = 1;
             // 
             // mainTabCtrl
@@ -135,7 +136,7 @@
             this.mainTabCtrl.Location = new System.Drawing.Point(0, 0);
             this.mainTabCtrl.Name = "mainTabCtrl";
             this.mainTabCtrl.SelectedIndex = 0;
-            this.mainTabCtrl.Size = new System.Drawing.Size(520, 388);
+            this.mainTabCtrl.Size = new System.Drawing.Size(520, 351);
             this.mainTabCtrl.TabIndex = 4;
             this.mainTabCtrl.SelectedIndexChanged += new System.EventHandler(this.mainTabCtrl_SelectedIndexChanged);
             // 
@@ -145,7 +146,7 @@
             this.connPage.Location = new System.Drawing.Point(4, 22);
             this.connPage.Name = "connPage";
             this.connPage.Padding = new System.Windows.Forms.Padding(3);
-            this.connPage.Size = new System.Drawing.Size(512, 362);
+            this.connPage.Size = new System.Drawing.Size(512, 325);
             this.connPage.TabIndex = 0;
             this.connPage.Text = "处理事件";
             this.connPage.UseVisualStyleBackColor = true;
@@ -154,9 +155,10 @@
             // 
             this.mainListBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainListBox.FormattingEnabled = true;
+            this.mainListBox.ItemHeight = 12;
             this.mainListBox.Location = new System.Drawing.Point(3, 3);
             this.mainListBox.Name = "mainListBox";
-            this.mainListBox.Size = new System.Drawing.Size(506, 356);
+            this.mainListBox.Size = new System.Drawing.Size(506, 319);
             this.mainListBox.TabIndex = 0;
             // 
             // historyPage
@@ -165,7 +167,7 @@
             this.historyPage.Location = new System.Drawing.Point(4, 22);
             this.historyPage.Name = "historyPage";
             this.historyPage.Padding = new System.Windows.Forms.Padding(3);
-            this.historyPage.Size = new System.Drawing.Size(512, 362);
+            this.historyPage.Size = new System.Drawing.Size(512, 330);
             this.historyPage.TabIndex = 1;
             this.historyPage.Text = "连接历史";
             this.historyPage.UseVisualStyleBackColor = true;
@@ -174,9 +176,10 @@
             // 
             this.connHistoryList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.connHistoryList.FormattingEnabled = true;
+            this.connHistoryList.ItemHeight = 12;
             this.connHistoryList.Location = new System.Drawing.Point(3, 3);
             this.connHistoryList.Name = "connHistoryList";
-            this.connHistoryList.Size = new System.Drawing.Size(506, 356);
+            this.connHistoryList.Size = new System.Drawing.Size(506, 324);
             this.connHistoryList.TabIndex = 0;
             // 
             // dataPage
@@ -185,7 +188,7 @@
             this.dataPage.Location = new System.Drawing.Point(4, 22);
             this.dataPage.Name = "dataPage";
             this.dataPage.Padding = new System.Windows.Forms.Padding(3);
-            this.dataPage.Size = new System.Drawing.Size(512, 362);
+            this.dataPage.Size = new System.Drawing.Size(512, 330);
             this.dataPage.TabIndex = 2;
             this.dataPage.Text = "数据上传";
             this.dataPage.UseVisualStyleBackColor = true;
@@ -203,7 +206,7 @@
             this.detailsListView.Location = new System.Drawing.Point(3, 3);
             this.detailsListView.MultiSelect = false;
             this.detailsListView.Name = "detailsListView";
-            this.detailsListView.Size = new System.Drawing.Size(506, 356);
+            this.detailsListView.Size = new System.Drawing.Size(506, 324);
             this.detailsListView.TabIndex = 0;
             this.detailsListView.UseCompatibleStateImageBehavior = false;
             this.detailsListView.View = System.Windows.Forms.View.Details;
@@ -234,9 +237,9 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.OpToolStripMenuItem,
             this.DispToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Location = new System.Drawing.Point(0, 24);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(520, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(520, 25);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -244,11 +247,12 @@
             // 
             this.OpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.StartToolStripMenuItem,
-            this.SetTimeToolStripMenuItem,
+            this.setTimeToolStripMenuItem1,
+            this.SetExceptionToolStripMenuItem,
             this.toolStripSeparator2,
             this.QuitToolStripMenuItem});
             this.OpToolStripMenuItem.Name = "OpToolStripMenuItem";
-            this.OpToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.OpToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.OpToolStripMenuItem.Text = "操作";
             // 
             // StartToolStripMenuItem
@@ -258,13 +262,13 @@
             this.StartToolStripMenuItem.Text = "启动";
             this.StartToolStripMenuItem.Click += new System.EventHandler(this.StartToolStripMenuItem_Click);
             // 
-            // SetTimeToolStripMenuItem
+            // SetExceptionToolStripMenuItem
             // 
-            this.SetTimeToolStripMenuItem.CheckOnClick = true;
-            this.SetTimeToolStripMenuItem.Name = "SetTimeToolStripMenuItem";
-            this.SetTimeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.SetTimeToolStripMenuItem.Text = "处理校时";
-            this.SetTimeToolStripMenuItem.Click += new System.EventHandler(this.SetTimeToolStripMenuItemClick);
+            this.SetExceptionToolStripMenuItem.CheckOnClick = true;
+            this.SetExceptionToolStripMenuItem.Name = "SetExceptionToolStripMenuItem";
+            this.SetExceptionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.SetExceptionToolStripMenuItem.Text = "异常模拟";
+            this.SetExceptionToolStripMenuItem.Click += new System.EventHandler(this.SetExceptionToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
@@ -284,20 +288,20 @@
             this.LoggerToolStripMenuItem,
             this.ClsToolStripMenuItem1});
             this.DispToolStripMenuItem.Name = "DispToolStripMenuItem";
-            this.DispToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.DispToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.DispToolStripMenuItem.Text = "显示";
             // 
             // LoggerToolStripMenuItem
             // 
             this.LoggerToolStripMenuItem.Name = "LoggerToolStripMenuItem";
-            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.LoggerToolStripMenuItem.Text = "日志";
             this.LoggerToolStripMenuItem.Click += new System.EventHandler(this.LoggerToolStripMenuItem_Click);
             // 
             // ClsToolStripMenuItem1
             // 
             this.ClsToolStripMenuItem1.Name = "ClsToolStripMenuItem1";
-            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
+            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
             this.ClsToolStripMenuItem1.Text = "清屏";
             // 
             // toolStrip1
@@ -307,9 +311,9 @@
             this.startStripButton,
             this.loggerStripButton1});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            this.toolStrip1.Location = new System.Drawing.Point(5, 24);
+            this.toolStrip1.Location = new System.Drawing.Point(5, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(107, 23);
+            this.toolStrip1.Size = new System.Drawing.Size(105, 24);
             this.toolStrip1.TabIndex = 1;
             // 
             // startStripButton
@@ -317,7 +321,7 @@
             this.startStripButton.Image = ((System.Drawing.Image)(resources.GetObject("startStripButton.Image")));
             this.startStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.startStripButton.Name = "startStripButton";
-            this.startStripButton.Size = new System.Drawing.Size(53, 20);
+            this.startStripButton.Size = new System.Drawing.Size(52, 21);
             this.startStripButton.Text = "启动";
             this.startStripButton.Click += new System.EventHandler(this.startStripButton_Click);
             // 
@@ -326,7 +330,7 @@
             this.loggerStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("loggerStripButton1.Image")));
             this.loggerStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.loggerStripButton1.Name = "loggerStripButton1";
-            this.loggerStripButton1.Size = new System.Drawing.Size(53, 20);
+            this.loggerStripButton1.Size = new System.Drawing.Size(52, 21);
             this.loggerStripButton1.Tag = "";
             this.loggerStripButton1.Text = "日志";
             this.loggerStripButton1.Click += new System.EventHandler(this.loggerStripButton1_Click);
@@ -336,12 +340,20 @@
             this.sysNotifyIcon.Text = "数据上传";
             this.sysNotifyIcon.Visible = true;
             // 
+            // setTimeToolStripMenuItem1
+            // 
+            this.setTimeToolStripMenuItem1.CheckOnClick = true;
+            this.setTimeToolStripMenuItem1.Name = "setTimeToolStripMenuItem1";
+            this.setTimeToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.setTimeToolStripMenuItem1.Text = "处理校时";
+            this.setTimeToolStripMenuItem1.Click += new System.EventHandler(this.SetTimeToolStripMenuItemClick);
+            // 
             // AgentWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(520, 457);
+            this.ClientSize = new System.Drawing.Size(520, 422);
             this.Controls.Add(this.toolStripContainer1);
             this.MainMenuStrip = this.menuStrip1;
             this.MaximizeBox = false;
@@ -385,7 +397,7 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem OpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem StartToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SetTimeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SetExceptionToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem QuitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DispToolStripMenuItem;
@@ -400,6 +412,7 @@
         private System.Windows.Forms.ToolStripButton loggerStripButton1;
         private System.Windows.Forms.ListBox connHistoryList;
         private System.Windows.Forms.ColumnHeader countCol;
+        private System.Windows.Forms.ToolStripMenuItem setTimeToolStripMenuItem1;
 
     }
 }

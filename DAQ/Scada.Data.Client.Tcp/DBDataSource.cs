@@ -78,10 +78,15 @@ namespace Scada.Data.Client.Tcp
             return string.Format(format, tableName, time.ToString());
         }
 
-        private static string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime, bool sort = false)
+        private static string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime, string sid, bool sort = false)
         {
             // Get the recent <count> entries.
             string format = "select * from {0}  where time>='{1}' and time<='{2}'";
+            if (!string.IsNullOrEmpty(sid))
+            {
+                format += " and sid='" + sid + "'";
+            }
+
             if (sort)
             {
                 format += " order by time DESC";
@@ -90,14 +95,14 @@ namespace Scada.Data.Client.Tcp
             return sql;
         }
 
-        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime startTime, DateTime stopTime, string code, List<Dictionary<string, object>> data, out string errorMessage)
+        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime startTime, DateTime stopTime, string sid, string code, List<Dictionary<string, object>> data, out string errorMessage)
         {
             errorMessage = string.Empty;
             string tableName = Settings.Instance.GetTableName(deviceKey);
 
             if (stopTime != default(DateTime))
             {
-                command.CommandText = GetSelectStatement(tableName, startTime, stopTime);
+                command.CommandText = GetSelectStatement(tableName, startTime, stopTime, sid);
             }
             else
             {

@@ -566,7 +566,8 @@ namespace Scada.Declare
 				if (this.IsRealDevice)
 				{
                     // RecordManager.DoSystemEventRecord(this, Encoding.ASCII.GetString(action));
-                    this.currentActionTime = time;
+                    // BUG for shelter!, Duplicated time key!!
+                    // this.currentActionTime = time;
 					this.serialPort.Write(action, 0, action.Length);
                 }
                 #region Virtual-Device

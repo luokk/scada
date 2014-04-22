@@ -17,12 +17,18 @@ namespace Scada.Data.Client.Tcp
         SetPassword = 1072,
         GetTime = 1011,
         SetTime = 1012,
+        GetAlertThreshold = 1021,
+        SetAlertThreshold = 1022,
+        GetFactor = 1028,
         StartSendData =  2011,
         StopSendData = 2012,
 
+        GetFlowData = 2013,
+        GetRunStatus = 2023,
         HistoryData = 2042,
         HistoryData2 = 2043,
-
+        GetException = 2017,
+        GetAlertHistory = 2071,
         StartSendDataDirectly = 3101,
         StopSendDataDirectly = 3102,
         Init = 6021,
@@ -32,7 +38,8 @@ namespace Scada.Data.Client.Tcp
 
         SetNewIp = 3103,
         ApplyNewIp = 3104,
-     
+        SetFreq = 3105,
+        
         Reply = 9012
     }
 
@@ -42,12 +49,18 @@ namespace Scada.Data.Client.Tcp
         GetTime = 1011,
         Data = 2011,
         FlowData = 2014,
+        DoorState = 2015,   // TODO:
+
+        RunStatus = 2023,
         HistoryData = 2042,
+        WentException = 2073,
+        AfterException = 2074,
         Auth = 6011,
         KeepAlive = 6031,
         Reply = 9011,
         Result = 9012,
         Notify = 9013,
+        GetAlertThreshold = ReceivedCommand.GetAlertThreshold,
 
     }
 
@@ -100,6 +113,12 @@ namespace Scada.Data.Client.Tcp
         {
             get;
             private set;
+        }
+
+        public string Sid
+        {
+            get;
+            set;
         }
 
 
@@ -166,15 +185,15 @@ namespace Scada.Data.Client.Tcp
 
         public void SendReplyPacket(string qn)
         {
-            // QN=20090516010101001;ST=38;CN=6031;PW=123456;
-            // MN=0101A010000000;CP=&&&&
             var p = this.builder.GetReplyPacket(qn);
+            
             this.agent.SendPacket(p, default(DateTime));
         }
 
         private void SendResultPacket(string qn)
         {
             var p = this.builder.GetResultPacket(qn);
+
             this.agent.SendPacket(p, default(DateTime));
         }
 
@@ -233,6 +252,29 @@ namespace Scada.Data.Client.Tcp
                         this.HandleHistoryData(msg);
                     }
                     break;
+                // 大流量数据(历史 2013)
+                case ReceivedCommand.GetFlowData:
+                    {
+                        this.HandleFlowData(msg);
+                    }
+                    break;
+                // 运行状态
+                case ReceivedCommand.GetRunStatus:
+                    this.GetRunStatus(msg);
+                    break;
+                // 异常??
+                case ReceivedCommand.GetException:
+                    this.GetException(msg);
+                    break;
+                case ReceivedCommand.GetAlertHistory:
+                    this.GetAlertHistory(msg);
+                    break;
+                case ReceivedCommand.GetAlertThreshold:
+                    this.GetAlertThreshold(msg);
+                    break;
+                case ReceivedCommand.SetAlertThreshold:
+                    this.SetAlertThreshold(msg);
+                    break;
                 // 直接数据
                 case ReceivedCommand.StartSendDataDirectly:
                     {
@@ -288,12 +330,78 @@ namespace Scada.Data.Client.Tcp
                         this.AddNewIpAddress(msg, true);
                     }
                     break;
+                case ReceivedCommand.SetFreq:
+                    {
+                        this.SetFrequence(msg);
+                    }
+                    break;
+                case ReceivedCommand.GetFactor:
+                    {
+                        this.GetFactor(msg);
+                    }
+                    break;
                 // Error!
                 case ReceivedCommand.None:
                 case ReceivedCommand.Unknown:
                 default:
                     break;
             }
+        }
+
+        private void SetAlertThreshold(string msg)
+        {
+            string qn = Value.Parse(msg, "QN");
+            string polId = Value.Parse(msg, "PolId");
+
+            string ut = Value.Parse(msg, string.Format("{0}-UseType", polId));
+            string th1 = Value.Parse(msg, string.Format("{0}-LowValue", polId));
+            string th2 = Value.Parse(msg, string.Format("{0}-UpValue", polId));
+            try
+            {
+                Settings.Instance.SetThreshold(polId, th1, th2);
+            }
+            catch
+            {
+                this.agent.DoLog(Agent.ScadaDataClient, "Failed to [SetAlertThreshold]");
+            }
+
+            this.SendReplyPacket(qn);
+            this.SendResultPacket(qn);
+        }
+
+        private void GetAlertThreshold(string msg)
+        {
+            string qn = Value.Parse(msg, "QN");
+            string eno = Value.Parse(msg, "ENO");
+            string polId = Value.Parse(msg, "PolId");
+            this.SendReplyPacket(qn);
+            string v1, v2;
+            if (Settings.Instance.GetThreshold(polId, out v1, out v2))
+            {
+                this.builder.GetThresholdPacket(polId, eno, v1, v2);
+                this.SendResultPacket(qn);
+            }
+            else
+            {
+                this.SendResultPacket(qn);
+            }
+        }
+
+
+
+        // TODO: 采样周期(无实现)
+        private void SetFrequence(string msg)
+        {
+            string qn = Value.Parse(msg, "QN");
+            this.SendReplyPacket(qn);
+            this.SendResultPacket(qn);
+        }
+
+        private void GetFactor(string msg)
+        {
+            string qn = Value.Parse(msg, "QN");
+            this.SendReplyPacket(qn);
+            this.SendResultPacket(qn);
         }
 
         private void AddNewIpAddress(string msg, bool apply = false)
@@ -304,19 +412,47 @@ namespace Scada.Data.Client.Tcp
             string wireIp = Value.Parse(msg, "WireIp");
             string wirePort = Value.Parse(msg, "WirePort");
 
+            string qn = Value.Parse(msg, "QN");
+            this.SendReplyPacket(qn);
+
             Settings.Instance.AddNewIpAddress(wireIp, wirePort, wirelessIp, wirelessPort, centerType == "2");
             if (apply)
             {
-                // TODO:
+                this.agent.DoLog(Agent.ScadaDataClient, "Password changed!");
             }
+
+            this.SendResultPacket(qn);
+        }
+
+        private void GetRunStatus(string msg)
+        {
+            string qn = Value.Parse(msg, "QN");
+            this.SendReplyPacket(qn);
+            
+            // 获得运行状态包
+            var packet = this.builder.GetRunStatusPacket(qn,
+                Settings.Instance.DeviceKeys,
+                new string[] { "1", "1", "1", "1", "1", "1", "1" });
+            this.agent.SendPacket(packet);
+
+            string runStatus = string.Format("RUNNING-STATUS: {0}", packet.ToString());
+            this.agent.DoLog(Agent.ScadaDataClient, runStatus);
+            // 
+            this.SendResultPacket(qn);
+        }
+
+        private void GetException(string msg)
+        {
             string qn = Value.Parse(msg, "QN");
             this.SendReplyPacket(qn);
             this.SendResultPacket(qn);
         }
 
-        private void OnKeepAlive(string msg)
+        private void GetAlertHistory(string msg)
         {
-            // TODO: Handle Timeout, but NO doc details talk about this.
+            string qn = Value.Parse(msg, "QN");
+            this.SendReplyPacket(qn);
+            this.SendResultPacket(qn);
         }
 
         private void OnGetTime(string msg)
@@ -414,12 +550,12 @@ namespace Scada.Data.Client.Tcp
                             foreach (string e in enos)
                             {
                                 // for this Command, polId should be Null (means All polId);
-                                this.UploadHistoryData(hdb.QN, e, hdb.BeginTime, hdb.EndTime, null);
+                                this.UploadHistoryData(hdb.QN, e, hdb.BeginTime, hdb.EndTime, hdb.Sid, null);
                             }
                         }
                         else
                         {
-                            this.UploadHistoryData(hdb.QN, hdb.ENO, hdb.BeginTime, hdb.EndTime, hdb.PolId);
+                            this.UploadHistoryData(hdb.QN, hdb.ENO, hdb.BeginTime, hdb.EndTime, hdb.Sid, hdb.PolId);
                         }
                     }
 
@@ -427,9 +563,35 @@ namespace Scada.Data.Client.Tcp
                 }
                 else
                 {
-                    Thread.Sleep(500);
+                    Thread.Sleep(150);
                 }
             }
+        }
+
+        private void HandleFlowData(string msg)
+        {
+            string qn = Value.Parse(msg, "QN");
+            string sno = Value.Parse(msg, "SNO");
+
+            string eno = Value.Parse(msg, "ENO");
+
+            string sid = Value.Parse(msg, "WorkID");
+
+            string beginTime = Value.Parse(msg, "BeginTime");
+            string endTime = Value.Parse(msg, "EndTime");
+
+            string polId = Value.Parse(msg, "PolId");
+
+            string taskId = string.Format("{0}-{1}@{2}", beginTime, endTime, polId);
+
+            this.SendReplyPacket(qn);
+
+            HistoryDataBundle hdb = new HistoryDataBundle(qn, eno, polId);
+            hdb.Sid = sid;
+            hdb.BeginTime = beginTime;
+            hdb.EndTime = endTime;
+
+            this.ActiveUploadHistoryDataThread(hdb);
         }
 
         private void HandleHistoryData(string msg)
@@ -455,7 +617,7 @@ namespace Scada.Data.Client.Tcp
             this.ActiveUploadHistoryDataThread(hdb);
         }
 
-        private void UploadHistoryData(string qn, string eno, string beginTime, string endTime, string polId)
+        private void UploadHistoryData(string qn, string eno, string beginTime, string endTime, string sid, string polId)
         {
             DateTime f = DeviceTime.Parse(beginTime);
             DateTime t = DeviceTime.Parse(endTime);
@@ -499,7 +661,7 @@ namespace Scada.Data.Client.Tcp
                     {
                         conn.Open();
                         var cmd = conn.CreateCommand();
-                        r = DBDataSource.GetData(cmd, deviceKey, f, t, polId, data, out errorMessage);
+                        r = DBDataSource.GetData(cmd, deviceKey, f, t, sid, polId, data, out errorMessage);
                     }
                     catch (Exception e)
                     {
@@ -523,7 +685,11 @@ namespace Scada.Data.Client.Tcp
                         if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
                             deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
                         {
-                            p = builder.GetFlowDataPacket(deviceKey, item);
+                            p = builder.GetFlowDataPacket(deviceKey, item, false);
+                        }
+                        else if (deviceKey.Equals("Scada.Shelter", StringComparison.OrdinalIgnoreCase))
+                        {
+                            p = builder.GetShelterPacket(deviceKey, item);
                         }
                         else
                         {
@@ -621,10 +787,12 @@ namespace Scada.Data.Client.Tcp
 
         private void HandleSetPassword(string msg)
         {
-            Settings.Instance.Password = Value.Parse(msg, "PW");
-
             string qn = Value.Parse(msg, "QN");
             this.SendReplyPacket(qn);
+            // Change password
+            string newPasswd = Value.ParseInContent(msg, "PW");
+            
+            Settings.Instance.Password = newPasswd;
             this.SendResultPacket(qn);
         }
 
@@ -643,7 +811,10 @@ namespace Scada.Data.Client.Tcp
             this.agent.StopConnectCountryCenter();
         }
 
-
+        private void OnKeepAlive(string msg)
+        {
+            // TODO: Handle Timeout, but NO doc details talk about this.
+        }
 
         internal void Quit()
         {

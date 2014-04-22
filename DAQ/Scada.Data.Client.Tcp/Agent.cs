@@ -239,7 +239,7 @@ namespace Scada.Data.Client.Tcp
             return lastDetectResult;
         }
 
-        private void DoLog(string deviceKey, string msg)
+        internal void DoLog(string deviceKey, string msg)
         {
             if (this.UIThreadMashaller == null)
                 return;
@@ -506,7 +506,7 @@ namespace Scada.Data.Client.Tcp
             }
         }
 
-        private void DoReceivedMessages(string messages)
+        internal void DoReceivedMessages(string messages)
         {
             if (this.handler == null || string.IsNullOrEmpty(messages))
             {
@@ -535,7 +535,7 @@ namespace Scada.Data.Client.Tcp
                 // Not not record KeepAlive.
                 return;
             }
-            this.DoLog(ScadaDataClient, msg);
+            this.DoLog(ScadaDataClient, string.Format("<--: {0}", msg));
             this.NotifyEvent(this, NotifyEvents.Received, msg, null);
         }
 
@@ -604,6 +604,8 @@ namespace Scada.Data.Client.Tcp
         internal bool SendPacket(DataPacket p, DateTime time)
         {
             string s = p.ToString();
+            // TODO:!
+            this.DoLog(Agent.ScadaDataClient, string.Format("-->: {0}", s));
             return this.Send(Encoding.ASCII.GetBytes(s));
         }
 
@@ -638,6 +640,11 @@ namespace Scada.Data.Client.Tcp
                 this.NotifyEvent(this, NotifyEvents.HistoryDataSent, p.DeviceKey, p.ToString());
             }
             return result;
+        }
+
+        internal void SendExceptionNotify(DataPacket packet)
+        {
+            this.SendPacket(packet);
         }
 
         internal bool SendReplyPacket(DataPacket p, DateTime time)

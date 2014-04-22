@@ -315,6 +315,7 @@ namespace Scada.Data.Client.Tcp
 
         private void UpdatePassword(string password)
         {
+            File.Delete(GetPasswordFile());
             using (StreamWriter sw = new StreamWriter(GetPasswordFile()))
             {
                 sw.WriteLine(password);
@@ -365,7 +366,6 @@ namespace Scada.Data.Client.Tcp
             return string.Empty;
         }
 
-
         public static DeviceEntry LoadFromConfig(string deviceName, string configFile)
         {
             if (!File.Exists(configFile))
@@ -413,7 +413,8 @@ namespace Scada.Data.Client.Tcp
         // to test;
         internal void AddNewIpAddress(string wireIp, string wirePort, string wirelessIp, string wirelessPort, bool country)
         {
-            string settingFileName = string.Format("{0}\\..\\{1}", Application.ExecutablePath, "agent.settings");
+            string settingFileName = ConfigPath.GetConfigFilePath("agent.settings");
+            // string settingFileName = string.Format("{0}\\..\\{1}", Application.ExecutablePath, "agent.settings");
             if (File.Exists(settingFileName))
             {
                 doc.Load(settingFileName);
@@ -438,6 +439,80 @@ namespace Scada.Data.Client.Tcp
             XmlAttribute attrGender = doc.CreateAttribute(key);
             attrGender.Value = value;
             node.Attributes.Append(attrGender);
+        }
+
+        internal void SetThreshold(string polId, string th1, string th2)
+        {
+            string settingFileName = ConfigPath.GetConfigFilePath("agent.settings");
+            if (File.Exists(settingFileName))
+            {
+                doc.Load(settingFileName);
+            }
+
+            // Data Center
+            var polNotes = doc.SelectNodes("//polId");
+            XmlNode thePolIdNode = null;
+            foreach (XmlNode polIdNode in polNotes)
+            {
+                var nameAttr = polIdNode.Attributes.GetNamedItem("name");
+                if (nameAttr != null)
+                {
+                    string name = nameAttr.Value;
+                    if (name == polId)
+                    {
+                        thePolIdNode = polIdNode;
+
+                        XmlAttribute v1Attr = (XmlAttribute)thePolIdNode.Attributes.GetNamedItem("v1");
+                        v1Attr.Value = th1;
+                        XmlAttribute v2Attr = (XmlAttribute)thePolIdNode.Attributes.GetNamedItem("v2");
+                        v2Attr.Value = th2;
+                        doc.Save(settingFileName);
+                        return;
+                    }
+                }
+            }
+
+            if (thePolIdNode == null)
+            {
+                var thresholdNode = polNotes[0].ParentNode;
+
+                thePolIdNode  = doc.CreateElement("polId");
+                thresholdNode.AppendChild(thePolIdNode);
+
+                this.AddAttribute(doc, thePolIdNode, "name", polId);
+                this.AddAttribute(doc, thePolIdNode, "v1", th1);
+                this.AddAttribute(doc, thePolIdNode, "v2", th2);
+                doc.Save(settingFileName);
+            }  
+        }
+
+        internal bool GetThreshold(string polId, out string th1, out string th2)
+        {
+            th1 = "";
+            th2 = "";
+            string settingFileName = string.Format("{0}\\..\\{1}", Application.ExecutablePath, "agent.settings");
+            if (File.Exists(settingFileName))
+            {
+                doc.Load(settingFileName);
+            }
+
+            // Data Center
+            var polNotes = doc.SelectNodes("//polId");
+            foreach (XmlNode polIdNode in polNotes)
+            {
+                var nameAttr = polIdNode.Attributes.GetNamedItem("name");
+                if (nameAttr != null)
+                {
+                    string name = nameAttr.Value;
+                    if (name == polId)
+                    {
+                        th1 = polIdNode.Attributes.GetNamedItem("v1").Value;
+                        th2 = polIdNode.Attributes.GetNamedItem("v2").Value;
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

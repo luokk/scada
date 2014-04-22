@@ -21,8 +21,15 @@ namespace Scada.Data.Client.Tcp
             int p = msg.IndexOf(tof);
             if (p > 0)
             {
-                int e = msg.IndexOf(";", p);
-                if (e < 0)
+                int p1 = msg.IndexOf(";", p);
+                if (p1 < 0)
+                    p1 = int.MaxValue;
+                int p2 = msg.IndexOf(",", p);
+                if (p2 < 0)
+                    p2 = int.MaxValue;
+                int e = Math.Min(p1, p2);
+
+                if (e == int.MaxValue)
                 {
                     e = msg.IndexOf("&&", p);
                     if (e < 0)
@@ -37,6 +44,13 @@ namespace Scada.Data.Client.Tcp
             }
             return string.Empty;
         }
+
+        internal static string ParseInContent(string msg, string key)
+        {
+            msg = msg.Substring(msg.IndexOf("CP=&&"));
+            return Parse(msg, key);
+        }
+            
     }
 
     /// <summary>

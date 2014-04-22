@@ -7,23 +7,9 @@ namespace Scada.Data.Client.Tcp
 {
     class DataPacketBuilder
     {
-        // public const int SysSend = 38;
-
-        // public const int SysReply = 91;
-
         public DataPacketBuilder()
         {
         }
-
-        /*
-        private string GetDataTimeString(DateTime time)
-        {
-            DateTime n = time;
-            string value = string.Format("{0}{1:d2}{2:d2}{3:d2}{4:d2}{5:d2}", n.Year, n.Month, n.Day, n.Hour, n.Minute, n.Second);
-
-            return value;
-        }
-        */
 
         public DataPacket GetDataPacket(string deviceKey, Dictionary<string, object> data, bool realTime = false)
         {
@@ -47,6 +33,29 @@ namespace Scada.Data.Client.Tcp
             return dp;
         }
 
+        public DataPacket GetShelterPacket(string deviceKey, Dictionary<string, object> data, bool realTime = false)
+        {
+            if (data.Count == 0)
+            {
+                return null;
+            }
+            DataPacket dp = new DataPacket(deviceKey, realTime);
+            dp.Cn = string.Format("{0}", (int)SentCommand.DoorState);
+            dp.Settings = Settings.Instance;
+            dp.St = Value.SysSend;
+            string sno = Settings.Instance.Sno;
+            string eno = Settings.Instance.GetEquipNumber(deviceKey);
+            string timeStr = string.Empty;
+            if (data.ContainsKey("time"))
+            {
+                timeStr = (string)data["time"];
+            }
+            string dataTime = DeviceTime.Convert(DateTime.Parse(timeStr));
+            dp.SetContent(sno, eno, dataTime, data);
+            dp.Build();
+            return dp;
+        }
+
         public DataPacket GetFlowDataPacket(string deviceKey, Dictionary<string, object> data, bool realTime = false)
         {
             if (data.Count == 0)
@@ -54,6 +63,16 @@ namespace Scada.Data.Client.Tcp
                 return null;
             }
             DataPacket dp = new DataPacket(deviceKey, realTime, true);
+            // Adjust 'CN' !!
+            if (realTime)
+            {
+                dp.Cn = string.Format("{0}", (int)SentCommand.FlowData);
+            }
+            else
+            {
+                dp.Cn = string.Format("{0}", (int)ReceivedCommand.GetFlowData);
+            }
+
             dp.Settings = Settings.Instance;
             dp.St = Value.SysSend;
             string sno = Settings.Instance.Sno;
@@ -61,6 +80,19 @@ namespace Scada.Data.Client.Tcp
             string timeStr = (string)data["time"];
             string dataTime = DeviceTime.Convert(DateTime.Parse(timeStr));
             dp.SetContent(sno, eno, dataTime, data);
+            dp.Build();
+            return dp;
+        }
+
+        public DataPacket GetRunStatusPacket(string qn, string[] devices, string[] status)
+        {
+            DataPacket dp = new DataPacket(SentCommand.RunStatus);
+            dp.QN = qn;
+            dp.Settings = Settings.Instance;
+            dp.St = Value.SysSend;
+            string sno = Settings.Instance.Sno;
+            string dateTime = DeviceTime.Convert(DateTime.Now);
+            dp.SetRunStatusContent(sno, dateTime, devices, status);
             dp.Build();
             return dp;
         }
@@ -82,7 +114,6 @@ namespace Scada.Data.Client.Tcp
             dp.Build();
             return dp;
         }
-
 
         internal DataPacket GetReplyPacket(string qn)
         {
@@ -182,6 +213,45 @@ namespace Scada.Data.Client.Tcp
             dp.QN = qn;
             dp.St = Value.SysSend;
             dp.BuildGetTime(DeviceTime.Convert(DateTime.Now));
+            return dp;
+        }
+
+        internal DataPacket GetExceptionNotifyPacket(string deviceKey, bool p)
+        {
+            DataPacket dp = new DataPacket(p ? SentCommand.WentException : SentCommand.AfterException);
+            dp.Settings = Settings.Instance;
+            
+            string sno = Settings.Instance.Sno;
+            string dateTime = DeviceTime.Convert(DateTime.Now);
+            dp.St = Value.SysSend;
+            dp.SetExceptionNotifyContent(sno, dateTime, deviceKey, (p ? "0" : "1"));
+            dp.Build();
+            return dp;
+        }
+
+        internal DataPacket GetThresholdPacket(string polId, string eno, string v1, string v2)
+        {
+            DataPacket dp = new DataPacket(SentCommand.GetAlertThreshold);
+            dp.Settings = Settings.Instance;
+
+            string sno = Settings.Instance.Sno;
+            string dateTime = DeviceTime.Convert(DateTime.Now);
+            dp.St = Value.SysSend;
+            dp.SetThresholdContent(sno, eno, polId, v1, v2);
+            dp.Build();
+            return dp;
+        }
+
+        internal DataPacket GetDoorStatePacket(string state)
+        {
+            DataPacket dp = new DataPacket(SentCommand.DoorState);
+            dp.Settings = Settings.Instance;
+
+            string sno = Settings.Instance.Sno;
+            string dateTime = DeviceTime.Convert(DateTime.Now);
+            dp.St = Value.SysSend;
+            dp.SetDoorStateContent(sno, dateTime, state);
+            dp.Build();
             return dp;
         }
     }

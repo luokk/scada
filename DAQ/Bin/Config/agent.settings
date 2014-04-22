@@ -1,90 +1,74 @@
 <?xml version="1.0"?>
 <settings>
-	<!-- Default Port is 6000 and 7000 -->
-	<datacenters>
-		<datacenter ip="122.224.74.82" port="14213" wirelessip="" wirelessport="7000" type="1"/>
-		<!--
-		<datacenter ip="122.224.74.82" port="6700" wirelessip="" wirelessport="7000" type="1"/>
-		<datacenter ip="127.0.0.1" port="6000" wirelessip="" wirelessport="7000"/>
-		<datacenter ip="" port="6000" wirelessip="" wirelessport="7000"/>
-		<datacenter ip="" port="6000" wirelessip="" wirelessport="7000"/>
-		-->
-
-		<datacenter2 BaseUrl="http://127.0.0.1"/>
-		<!--
-		<datacenter2 BaseUrl="http://192.168.1.203"/>
-		-->
-	</datacenters>
-
-
-	<!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
-	<site 	sysname="" sysst="213213123213123213" adapter="" name="" station="128" 
-			sno="0313A08" mn="0313A080000000" >
-	</site>
-
-	<devices>
-		<!-- NOTICE ENO -->
-		<device id="scada.hpic" table="HPIC_rec" eno="001001">
-			<code field="doserate">0102060301</code>
-			<code field="battery">0102069901</code>
-			<code field="highvoltage">0102069902</code>
-			<code field="temperature">0102069903</code>
-		</device>
-
-		<device id="scada.weather" table="weather_rec" eno="002000">
-			<code field="Temperature">0901040101</code>
-			<code field="Humidity">0901040102</code>
-			<code field="Pressure">0901040103</code>
-			<code field="Windspeed">0901040106</code>
-			<code field="Direction">0901040105</code>
-			<code field="Raingauge">0901040104</code>
-			<code field="IfRain">0901040107</code>
-			<!--
+  <!-- Default Port is 6000 and 7000 -->
+  <datacenters>
+    <datacenter ip="122.224.74.82" port="14213" wirelessip="" wirelessport="7000" type="1" />
+    <datacenter2 BaseUrl="http://127.0.0.1" />
+  </datacenters>
+  <!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
+  <site sysname="" sysst="213213123213123213" adapter="" name="" station="128" sno="0313A08" mn="0313A080000000">
+  </site>
+  <threshold>
+    <polId name="__PLACEHOLDER__" v1="" v2="" />
+    <polId v1="" v2="" />
+    <polId v1="0" v2="300" />
+  </threshold>
+  <devices>
+    <!-- NOTICE ENO -->
+    <device id="scada.hpic" table="HPIC_rec" eno="001001">
+      <code field="doserate">0102060301</code>
+      <code field="battery">0102069901</code>
+      <code field="highvoltage">0102069902</code>
+      <code field="temperature">0102069903</code>
+    </device>
+    <device id="scada.weather" table="weather_rec" eno="002000">
+      <code field="Temperature">0901040101</code>
+      <code field="Humidity">0901040102</code>
+      <code field="Pressure">0901040103</code>
+      <code field="Windspeed">0901040106</code>
+      <code field="Direction">0901040105</code>
+      <code field="Raingauge">0901040104</code>
+      <code field="IfRain">0901040107</code>
+      <!--
 			<code field="Dewpoint">?</code> 
 			-->
-		</device>
-
-		<device id="Scada.HVSampler" table="HVSampler_rec" eno="003001">
-			<code field="Sid">WorkID</code>
-			<code field="BeginTime">BeginTime</code>
-			<code field="EndTime">EndTime</code>
-			<code field="Time">DataTime</code>
-			<code field="Flow">0102069904</code>
-			<code field="Volume">0102069905</code>
-		</device>
-
-		<device id="Scada.ISampler" table="ISampler_rec" eno="004000">
-			<code field="Sid">WorkID</code>
-			<code field="BeginTime">BeginTime</code>
-			<code field="EndTime">EndTime</code>
-			<code field="Time">DataTime</code>
-			<code field="Flow">0102069904</code>
-			<code field="Volume">0102069905</code>		
-		</device>
-
-		<device id="Scada.DWD" table="rdsampler_rec" eno="005000">
-			<!--
+    </device>
+    <device id="Scada.HVSampler" table="HVSampler_rec" eno="003001">
+      <code field="Sid">WorkID</code>
+      <code field="BeginTime">BeginTime</code>
+      <code field="EndTime">EndTime</code>
+      <code field="Time">DataTime</code>
+      <code field="Flow">0102069904</code>
+      <code field="Volume">0102069905</code>
+    </device>
+    <device id="Scada.ISampler" table="ISampler_rec" eno="004000">
+      <code field="Sid">WorkID</code>
+      <code field="BeginTime">BeginTime</code>
+      <code field="EndTime">EndTime</code>
+      <code field="Time">DataTime</code>
+      <code field="Flow">0102069904</code>
+      <code field="Volume">0102069905</code>
+    </device>
+    <device id="Scada.DWD" table="rdsampler_rec" eno="005000">
+      <!--
 			<code></code>
 			<code></code>
 			<code></code>
-			-->		
-		</device>
-
-		<!-- ??? -->
-		<device id="Scada.NaIDevice" table="NaI_Rec" eno="010002">
-			<code field="file-content">0102060332</code>		
-		</device>
-
-		<!-- ??? -->
-		<device id="Scada.Shelter" table="environment_rec" eno="999000">
-			<code field="IfMainPowerOff" type="bit">0102069909</code>
-			<code field="BatteryHours">0102069910</code>
-			<code field="IfDoorOpen" type="bit">0102069906</code>		
-			<code field="Temperature">0102069907</code>
-			<code field="Humidity">0102069911</code>	
-			<code field="IfSmoke" type="bit">0102069912</code>
-			<code field="IfWater" type="bit">0102069913</code>		
-		</device>
-
-	</devices>
+			-->
+    </device>
+    <!-- ??? -->
+    <device id="Scada.NaIDevice" table="NaI_Rec" eno="010002">
+      <code field="file-content">0102060332</code>
+    </device>
+    <!-- ??? -->
+    <device id="Scada.Shelter" table="environment_rec" eno="999000">
+      <code field="IfMainPowerOff" type="bit">0102069909</code>
+      <code field="BatteryHours">0102069910</code>
+      <code field="IfDoorOpen" type="bit">0102069906</code>
+      <code field="Temperature">0102069907</code>
+      <code field="Humidity">0102069911</code>
+      <code field="IfSmoke" type="bit">0102069912</code>
+      <code field="IfWater" type="bit">0102069913</code>
+    </device>
+  </devices>
 </settings>
