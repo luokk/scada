@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Scada.Data.Client
 {
@@ -24,6 +25,12 @@ namespace Scada.Data.Client
         private bool hasResult = false;
 
         private bool filePacket = false;
+
+        public string Options
+        {
+            get;
+            set;
+        }
 
         public Packet()
         {
@@ -125,22 +132,14 @@ namespace Scada.Data.Client
 
         private static string GetDataCenterDeviceId(string deviceKey)
         {
-            if (deviceKey == Settings.DeviceKey_Hpic)
+            // TODO:
+            if (deviceKey == Devices.Hpic)
                 return "hpic";
-            else if (deviceKey == Settings.DeviceKey_NaI)
-                return "NaIdevice";
-            else if (deviceKey == Settings.DeviceKey_Dwd)
-                return "rdsampler";
-            else if (deviceKey == Settings.DeviceKey_HvSampler)
-                return "hvsampler";
-            else if (deviceKey == Settings.DeviceKey_ISampler)
-                return "isampler";
-            else if (deviceKey == Settings.DeviceKey_Shelter)
+            else if (deviceKey == Devices.Shelter)
                 return "environment";
-            else if (deviceKey == Settings.DeviceKey_Weather)
+            else if (deviceKey == Devices.Weather)
                 return "weather";
             return "";
-
         }
 
         private JObject GetObject(string deviceKey, Dictionary<string, object> data)
@@ -227,7 +226,11 @@ namespace Scada.Data.Client
                         if (p != null)
                         {
                             string result = Encoding.ASCII.GetString(e.Result);
-                            // TODO: with result
+                            result = result.Trim();
+                            if (!string.IsNullOrEmpty(result))
+                            {
+                                
+                            }
                         }
 
                     };

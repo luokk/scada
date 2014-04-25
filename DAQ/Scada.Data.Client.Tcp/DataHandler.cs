@@ -190,9 +190,9 @@ namespace Scada.Data.Client.Tcp
             this.agent.SendPacket(p, default(DateTime));
         }
 
-        private void SendResultPacket(string qn)
+        private void SendResultPacket(string qn, int result = 1)
         {
-            var p = this.builder.GetResultPacket(qn);
+            var p = this.builder.GetResultPacket(qn, result);
 
             this.agent.SendPacket(p, default(DateTime));
         }
@@ -378,16 +378,15 @@ namespace Scada.Data.Client.Tcp
             string v1, v2;
             if (Settings.Instance.GetThreshold(polId, out v1, out v2))
             {
-                this.builder.GetThresholdPacket(polId, eno, v1, v2);
+                DataPacket p = this.builder.GetThresholdPacket(polId, eno, v1, v2);
+                this.agent.SendPacket(p);
                 this.SendResultPacket(qn);
             }
             else
             {
-                this.SendResultPacket(qn);
+                this.SendResultPacket(qn, 0);
             }
         }
-
-
 
         // TODO: 采样周期(无实现)
         private void SetFrequence(string msg)
@@ -789,11 +788,10 @@ namespace Scada.Data.Client.Tcp
         {
             string qn = Value.Parse(msg, "QN");
             this.SendReplyPacket(qn);
+            this.SendResultPacket(qn);
             // Change password
             string newPasswd = Value.ParseInContent(msg, "PW");
-            
             Settings.Instance.Password = newPasswd;
-            this.SendResultPacket(qn);
         }
 
         // ?

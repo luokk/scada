@@ -253,7 +253,7 @@ namespace Scada.Declare
                                         // TODO: Refactor
                 if (this.isDoorStatusChanged)
                 {
-                    Command.Send(3002, string.Format("DOOR={0}", ifOpen ? "1" : "0"));
+                    Command.Send(Ports.DataClient, string.Format("DOOR={0}", ifOpen ? "1" : "0"));
                 }
             }
 

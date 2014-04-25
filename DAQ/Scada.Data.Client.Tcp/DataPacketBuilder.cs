@@ -224,6 +224,7 @@ namespace Scada.Data.Client.Tcp
             string sno = Settings.Instance.Sno;
             string dateTime = DeviceTime.Convert(DateTime.Now);
             dp.St = Value.SysSend;
+            dp.Flag = "1";
             dp.SetExceptionNotifyContent(sno, dateTime, deviceKey, (p ? "0" : "1"));
             dp.Build();
             return dp;

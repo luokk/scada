@@ -49,7 +49,7 @@ namespace Scada.Declare
 
 		private byte[] actionSend = null;
 
-		private int actionDelay = 0;
+		// private int actionDelay = 0;
 
         private int actionInterval = 0;
 
@@ -89,7 +89,7 @@ namespace Scada.Declare
 
         private DateTime currentActionTime = default(DateTime);
 
-
+        private DateTime currentRecordTime = default(DateTime);
 
         private byte[] lastLine;
 
@@ -152,7 +152,7 @@ namespace Scada.Declare
 				this.actionSend = DeviceEntry.ParseHex(hexes);
 			}
 
-			this.actionDelay = (StringValue)entry[DeviceEntry.ActionDelay];
+			// this.actionDelay = (StringValue)entry[DeviceEntry.ActionDelay];
 
             const int DefaultRecordInterval = 30;
             this.actionInterval = this.GetValue(entry, DeviceEntry.ActionInterval, DefaultRecordInterval);
@@ -438,20 +438,19 @@ namespace Scada.Declare
 
         internal void RecordData(byte[] line)
         {
-
             // Defect: HPIC need check the right time here.
             // if ActionInterval == 0, the time trigger not depends send-time.
             DateTime rightTime = default(DateTime);
             if (!this.recordTimePolicy.NowAtRightTime(out rightTime) ||
-                this.currentActionTime == rightTime)
+                this.currentRecordTime == rightTime)
             {
                 return;
             }
 
-            this.currentActionTime = rightTime;
+            this.currentRecordTime = rightTime;
 
             DeviceData dd;
-            if (!this.GetDeviceData(line, this.currentActionTime, out dd))
+            if (!this.GetDeviceData(line, this.currentRecordTime, out dd))
             {
                 dd = new DeviceData(this, null);
                 dd.OriginData = DeviceData.ErrorFlag;

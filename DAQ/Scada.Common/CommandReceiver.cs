@@ -93,4 +93,15 @@ namespace Scada.Common
             return r;
         }
     }
+
+    public class Ports
+    {
+        public const int Main = 3100;
+
+        public const int DataClient = 3101;
+
+        public const int DataClientV2 = 3102;
+
+        public const int MainVision = 3103;
+    }
 }

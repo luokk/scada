@@ -17,47 +17,28 @@ namespace Scada.Data.Client
     /// </summary>
     public class Settings
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// !
-        /// 
-        public const string DeviceKey_Hpic = "scada.hpic";
 
-        public const string DeviceKey_Weather = "scada.weather";
-
-        public const string DeviceKey_HvSampler = "scada.hvsampler";
-
-        public const string DeviceKey_ISampler = "scada.isampler";
-
-        public const string DeviceKey_Shelter = "scada.shelter";
-
-        public const string DeviceKey_Dwd = "scada.dwd";
-
-        public const string DeviceKey_NaI = "scada.naidevice";
-
+        public const string AgentXml = "agent.http.xml";
 
         public string[] DeviceKeys = {
-                                DeviceKey_Hpic, 
-                                DeviceKey_Weather, 
-                                DeviceKey_HvSampler, 
-                                DeviceKey_ISampler, 
-                                DeviceKey_Shelter,
-                                DeviceKey_Dwd,  
-                                DeviceKey_NaI
+                                Devices.Hpic, 
+                                Devices.Weather, 
+                                Devices.Cinderella,
+                                Devices.Shelter,
+                                Devices.HPGe,
+                                Devices.Labr
                                      };
 
         public string[] DataDeviceKeys = {
-                                DeviceKey_Hpic, 
-                                DeviceKey_Weather, 
-                                DeviceKey_HvSampler, 
-                                DeviceKey_ISampler, 
-                                DeviceKey_Shelter,
-                                DeviceKey_Dwd,  
+                                Devices.Hpic, 
+                                Devices.Weather, 
+                                Devices.Cinderella,
+                                Devices.Shelter,
                                      };
 
         public string[] FileDeviceKeys = {
-                                DeviceKey_NaI  
+                                Devices.HPGe,
+                                Devices.Labr 
                                      };
 
 
@@ -155,7 +136,7 @@ namespace Scada.Data.Client
 
         public void LoadSettings()
         {
-            string settingFileName = ConfigPath.GetConfigFilePath("agent.settings");
+            string settingFileName = ConfigPath.GetConfigFilePath(AgentXml);
             if (File.Exists(settingFileName))
             {
                 doc.Load(settingFileName);
@@ -180,10 +161,11 @@ namespace Scada.Data.Client
             this.Station = this.GetAttribute(siteNode, "station");
 
             // debug-data-time
-            string debugDataTime = this.GetAttribute(siteNode, "debug-data-time");
+            var devicesNode = doc.SelectNodes("//devices")[0];
+            string debugDataTime = this.GetAttribute(devicesNode, "use-debug-data-time");
             if (!string.IsNullOrEmpty(debugDataTime))
             {
-                this.DebugDataTime = DateTime.Parse(debugDataTime);
+                this.UseDebugDataTime = debugDataTime == "true";
             }
             // Load Password
             this.LoadPassword();
@@ -463,7 +445,7 @@ namespace Scada.Data.Client
         // to test;
         internal void AddNewIpAddress(string wireIp, string wirePort, string wirelessIp, string wirelessPort, bool country)
         {
-            string settingFileName = string.Format("{0}\\..\\{1}", Application.ExecutablePath, "agent.settings");
+            string settingFileName = ConfigPath.GetConfigFilePath(AgentXml);
             if (File.Exists(settingFileName))
             {
                 doc.Load(settingFileName);
@@ -497,6 +479,12 @@ namespace Scada.Data.Client
         }
 
         public DateTime DebugDataTime
+        {
+            get;
+            set;
+        }
+
+        public bool UseDebugDataTime
         {
             get;
             set;

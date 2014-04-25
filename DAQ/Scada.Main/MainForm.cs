@@ -593,5 +593,13 @@ namespace Scada.Main
                 selectAllToolStripMenuItem.Checked = false;
             }
         }
+
+        private bool doorOpen = false;
+
+        private void doorSimuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Command.Send(Ports.DataClient, string.Format("DOOR={0}", doorOpen ? "1" : "0"));
+            doorOpen = !doorOpen;
+        }
     }
 }

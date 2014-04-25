@@ -249,32 +249,39 @@ namespace Scada.Data.Client
             this.agent.FetchCommands();
         }
 
+        // 当归一化时间到来时上传数据
         private void HttpSendDataTick(object sender, EventArgs e)
         {
+            if (!this.canUploadData)
+                return;
             DateTime now = DateTime.Now;
-            // For NaI Device.
-            if (!IsNaISendFileTimeOK(now))
+            // For Upload File Devices.
+            if (!IsSendFileTimeOK(now))
             {
                 SendDevicePackets(Settings.Instance.FileDeviceKeys, now);
             }
 
-            // For other Devices.
-            if (IsSendTimeOK(now))
+            // For Upload Data Devices.
+            if (IsSendDataTimeOK(now))
             {
                 SendDevicePackets(Settings.Instance.DataDeviceKeys, now);
             }
         }
 
-        private void SendDevicePackets(string[] deviceKeys, DateTime now)
+        // 上传所有设备的(实时)数据
+        private void SendDevicePackets(string[] deviceKeys, DateTime now, bool useDebugDataTime = false)
         {
             List<Packet> packets = new List<Packet>();
             foreach (var deviceKey in deviceKeys)
             {
                 DateTime sendTime = GetDeviceSendTime(now, deviceKey);
 #if DEBUG
-                if (Settings.Instance.DebugDataTime != default(DateTime))
+                if (useDebugDataTime)
                 {
-                    sendTime = Settings.Instance.DebugDataTime;
+                    if (Settings.Instance.DebugDataTime != default(DateTime))
+                    {
+                        sendTime = Settings.Instance.DebugDataTime;
+                    }
                 }
 #endif
 
@@ -356,12 +363,12 @@ namespace Scada.Data.Client
             }
         }
 
-        private bool IsNaISendFileTimeOK(DateTime dt)
+        private bool IsSendFileTimeOK(DateTime dt)
         {
             return (dt.Minute - 1) % 5 == 0;
         }
 
-        private static bool IsSendTimeOK(DateTime dt)
+        private static bool IsSendDataTimeOK(DateTime dt)
         {
             // 5 < current.second < 15 OR
             // 35 < current.second < 45
@@ -504,6 +511,35 @@ namespace Scada.Data.Client
             {
 
             }
+        }
+
+        private void SendDevicePacket(string deviceKey, DateTime now = default(DateTime))
+        {
+            foreach (var eachDeviceKey in Settings.Instance.DeviceKeys)
+            {
+                if (eachDeviceKey == deviceKey)
+                {
+                    bool useDebugDataTime = Settings.Instance.UseDebugDataTime;
+                    this.SendDevicePackets(new string[] { deviceKey }, now, useDebugDataTime);
+                }
+            }
+        }
+
+        private void SendDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem mi = sender as ToolStripMenuItem;
+            if (mi != null)
+            {
+                string tag = (string)mi.Tag;
+                SendDevicePacket(tag, DateTime.Now);
+            }
+        }
+
+        private bool canUploadData = true;
+
+        private void dataUploadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.canUploadData = !this.canUploadData;
         }
 
     }

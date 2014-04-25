@@ -188,7 +188,7 @@ namespace Scada.Data.Client.Tcp
             sb.Append(string.Format("SNO={0};BeginTime={1};", sno, dataTime));
 
             string eno = this.Settings.GetEquipNumber(device);
-            string p = string.Format("ENO={0},State={1}", eno, status);
+            string p = string.Format("ENO={0};State={1}", eno, status);
             sb.Append(p);
 
             string content = sb.ToString();
@@ -312,6 +312,13 @@ namespace Scada.Data.Client.Tcp
             if (this.Splitted)
             {
                 sb.Append("Flag=3;");
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(this.Flag))
+                {
+                    sb.Append(string.Format("Flag={0};", this.Flag));
+                }
             }
 
             if (this.Cp == null)

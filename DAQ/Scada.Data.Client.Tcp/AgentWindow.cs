@@ -147,7 +147,7 @@ namespace Scada.Data.Client.Tcp
             this.statusStrip.Items.Add(new ToolStripSeparator());
             // this.statusStrip.Items.Add("数据中心IP:");
 
-            this.cmdReceiver = new CommandReceiver(3001);
+            this.cmdReceiver = new CommandReceiver(Ports.DataClient);
             cmdReceiver.Start(this.OnLocalCommand);
 
             this.InitDetailsListView();
@@ -475,9 +475,12 @@ namespace Scada.Data.Client.Tcp
                     // 发送异常通知
                     if (r == ReadResult.NoDataFound && deviceKey == "scada.hpic")
                     {
-                        this.InHpicException = true;
-                        DataPacket packet = this.builder.GetExceptionNotifyPacket(deviceKey, true);
-                        this.agent.SendExceptionNotify(packet);
+                        if (!this.InHpicException)
+                        {
+                            this.InHpicException = true;
+                            DataPacket packet = this.builder.GetExceptionNotifyPacket(deviceKey, true);
+                            this.agent.SendExceptionNotify(packet);
+                        }
                     }
 
                     string line = string.Format("RD Error: {0} - {1} [{2}: {3}]", r.ToString(), errorMessage, deviceKey, time);

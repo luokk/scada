@@ -490,7 +490,7 @@ namespace Scada.Data.Client.Tcp
         {
             th1 = "";
             th2 = "";
-            string settingFileName = string.Format("{0}\\..\\{1}", Application.ExecutablePath, "agent.settings");
+            string settingFileName = ConfigPath.GetConfigFilePath("agent.settings");
             if (File.Exists(settingFileName))
             {
                 doc.Load(settingFileName);
