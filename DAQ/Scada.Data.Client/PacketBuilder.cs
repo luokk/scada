@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -37,11 +38,27 @@ namespace Scada.Data.Client
             return packet;
         }
 
+        private string RenameFileNameForUpload(string fileName)
+        {
+            string basePath = Path.GetDirectoryName(fileName);
+            int fus = fileName.IndexOf('_');
+            string partFileName = fileName.Substring(fus + 1);
+            string filePath = string.Format("{0}\\S{1}_{2}", basePath, Settings.Instance.Station, partFileName);
+
+            File.Move(fileName, filePath);
+            return filePath;
+        }
+
         internal Packet GetFilePacket(string fileName)
         {
-            Packet packet = new Packet(this.Token);
-            packet.Path = fileName;
-            return packet;
+            if (!string.IsNullOrEmpty(fileName) && File.Exists(fileName))
+            {
+                Packet packet = new Packet(this.Token);
+                packet.Path = RenameFileNameForUpload(fileName);
+                packet.IsFilePacket = true;
+                return packet;
+            }
+            return null;
         }
 
         internal Packet CombinePacket(Packet packet1, Packet packet2)

@@ -216,7 +216,7 @@ namespace Scada.Data.Client
             string deviceKey = string.Empty;
             if (idNode != null)
             {
-                deviceKey = idNode.Value;
+                deviceKey = idNode.Value.ToLower();
             }
 
             var equipNode = deviceNode.Attributes.GetNamedItem("eno");
@@ -224,6 +224,15 @@ namespace Scada.Data.Client
             if (equipNode != null)
             {
                 equipNumber = equipNode.Value;
+            }
+
+            var debugDataTimeNode = deviceNode.Attributes.GetNamedItem("debug-data-time");
+            if (debugDataTimeNode != null)
+            {
+                if (!string.IsNullOrEmpty(debugDataTimeNode.Value))
+                {
+                    this.debugDataTimes.Add(deviceKey, debugDataTimeNode.Value);
+                }
             }
 
             Device device = new Device();
@@ -488,6 +497,21 @@ namespace Scada.Data.Client
         {
             get;
             set;
+        }
+
+        private Dictionary<string, string> debugDataTimes = new Dictionary<string, string>(10);
+
+        internal DateTime GetDebugDataTime(string deviceKey)
+        {
+            DateTime result;
+            if (this.debugDataTimes.ContainsKey(deviceKey))
+            {
+                if (DateTime.TryParse(this.debugDataTimes[deviceKey], out result))
+                {
+                    return result;
+                }
+            }
+            return default(DateTime);
         }
     }
 }

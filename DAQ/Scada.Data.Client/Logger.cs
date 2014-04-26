@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Scada.Data.Client
 {
-    class Logger
+    internal class Logger
     {
         private StreamWriter writer;
 
@@ -35,10 +35,9 @@ namespace Scada.Data.Client
         }
     }
 
-    class Log
+    internal class Log
     {
-        public static Dictionary<string, Logger> dict = new Dictionary<string, Logger>();
-
+        private static Dictionary<string, Logger> dict = new Dictionary<string, Logger>();
 
         public static string GetLogFileName(string deviceKey, DateTime t)
         {
@@ -111,7 +110,6 @@ namespace Scada.Data.Client
 
                 dict.Remove(key);
             }
-
         }
     }
 }

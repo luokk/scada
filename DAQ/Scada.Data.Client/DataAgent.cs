@@ -15,9 +15,10 @@ namespace Scada.Data.Client
     /// </summary>
     public enum NotifyEvents
     {
+        LocalMessage
     }
 
-    public delegate void OnNotifyEvent(DataAgent agent, NotifyEvents ne, string msg);
+    public delegate void OnNotifyEvent(DataAgent agent, NotifyEvents notifyEvent, PacketBase p);
 
     /// <summary>
     /// 
@@ -27,6 +28,8 @@ namespace Scada.Data.Client
         private const string Post = @"POST";
 
         private const int Timeout = 5000;
+
+        public event OnNotifyEvent NotifyEvent;
         
         internal bool SendDataStarted
         {
@@ -45,24 +48,19 @@ namespace Scada.Data.Client
             set;
         }
 
-        public int ServerPort
-        {
-            set;
-            get;
-        }
-
-        public override string ToString()
-        {
-            return "";
-           
-        }
-
-
+        /// <summary>
+        /// Upload Data Entry
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <param name="time"></param>
         internal void SendDataPacket(Packet packet, DateTime time)
         {
-            Packet.Send(this.DataCenter.GetUrl("data/commit"), packet, time);
+            this.Send(this.DataCenter.GetUrl("data/commit"), packet, time);
         }
 
+        /// <summary>
+        /// Commands
+        /// </summary>
         internal void FetchCommands()
         {
             Uri uri = new Uri(this.DataCenter.GetUrl("cmd/query"));
@@ -73,7 +71,12 @@ namespace Scada.Data.Client
                     {
                         if (e.Error == null)
                         {
+                            this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = e.Result });
                             this.ParseCommand(e.Result);
+                        }
+                        else
+                        {
+                            this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = e.Error.Message });
                         }
 
                     };
@@ -91,18 +94,85 @@ namespace Scada.Data.Client
                 JObject json = JObject.Parse(cmd);
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = e.Message });
             }
         }
 
+        /// <summary>
+        /// Send Dispatcher
+        /// </summary>
+        /// <param name="p"></param>
         internal void SendPacket(Packet p)
         {
-            this.SendDataPacket(p, default(DateTime));
+            if (!p.IsFilePacket)
+            {
+                this.SendDataPacket(p, default(DateTime));
+            }
+            else
+            {
+                this.SendFilePacket(p);
+            }
         }
 
+        /// <summary>
+        /// Upload Data Implements
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="packet"></param>
+        /// <param name="time"></param>
+        private void Send(string api, Packet packet, DateTime time)
+        {
+            try
+            {
+                Uri uri = new Uri(api);
+                byte[] data = Encoding.ASCII.GetBytes(packet.ToString());
+                using (WebClient wc = new WebClient())
+                {
+                    wc.UploadDataCompleted += (object sender, UploadDataCompletedEventArgs e) =>
+                    {
+                        if (e.Error != null)
+                        {
+                            this.HandleWebException(e.Error);
+                            return;
+                        }
+
+                        Packet p = (Packet)e.UserState;
+                        if (p != null)
+                        {
+                            string result = Encoding.ASCII.GetString(e.Result);
+                            result = result.Trim();
+                            if (!string.IsNullOrEmpty(result))
+                            {
+
+                            }
+                        }
+                    };
+
+                    wc.UploadDataAsync(uri, "POST", data, packet);
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+        }
+
+        /// <summary>
+        /// Upload File
+        /// </summary>
+        /// <param name="packet"></param>
         internal void SendFilePacket(Packet packet)
         {
+            if (string.IsNullOrEmpty(packet.Path) || !File.Exists(packet.Path))
+            {
+                PacketBase msg = new PacketBase();
+                msg.Message = "No File Found";
+                this.NotifyEvent(this, NotifyEvents.LocalMessage, msg);
+                return;
+            }
+
             Uri uri = new Uri(this.DataCenter.GetUrl("data/upload"));
             try
             {
@@ -110,14 +180,19 @@ namespace Scada.Data.Client
                 {
                     wc.UploadFileCompleted += (object sender, UploadFileCompletedEventArgs e) =>
                         {
-                            if (e.Error != null)
-                            {
-                                return;
-                            }
+
                             Packet p = (Packet)e.UserState;
                             if (p != null)
                             {
-                                // TODO: with p.Path
+                                if (e.Error == null)
+                                {
+                                    string result = Encoding.UTF8.GetString(e.Result);
+                                    this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = result });
+                                }
+                                else
+                                {
+                                    this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = e.Error.Message });
+                                }
                             }
                         };
                     wc.UploadFileAsync(uri, Post, packet.Path, packet);
@@ -128,11 +203,37 @@ namespace Scada.Data.Client
              
             }
         }
+
+        private void HandleWebException(Exception e)
+        {
+            WebException we = e as WebException;
+
+            if (we == null)
+            {
+                return;
+            }
+
+            HttpWebResponse hwr = we.Response as HttpWebResponse;
+            if (hwr != null)
+            {
+                switch (hwr.StatusCode)
+                {
+                    case HttpStatusCode.InternalServerError:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                // TODO: No response!
+            }
+        }
       
         // Connect means first HTTP packet to the data Center.
         internal void DoAuth()
         {
-            // TODO: Send Packet of init.
+            
 
         }
 

@@ -197,3 +197,28 @@ PARTITION y2014 VALUES LESS THAN (TO_DAYS('2015-01-01')),
 PARTITION y2015 VALUES LESS THAN (TO_DAYS('2016-01-01')),
 PARTITION y2016 VALUES LESS THAN (TO_DAYS('2017-01-01')),
 PARTITION yend VALUES LESS THAN MAXVALUE );
+
+#
+#
+DROP TABLE IF EXISTS `CinderellaData_Rec`;
+CREATE TABLE `CinderellaData_Rec` (
+`Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+`DeviceTime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+`Sid` char(32),
+`barcode` varchar(128),
+`BeginTime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+`WorkTime` varchar(16),
+`Flow` varchar(16),
+`FlowPerHour` varchar(16), 
+`Pressure` varchar(8) DEFAULT NULL,
+`PressureDiff` varchar(8) DEFAULT NULL,
+`Temperature` tinyint DEFAULT NULL
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+#
+#
+DROP TABLE IF EXISTS `CinderellaStatus_Rec`;
+CREATE TABLE `CinderellaStatus_Rec` (
+`Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+`StateBits` char(50)
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;

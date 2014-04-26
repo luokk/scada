@@ -148,8 +148,11 @@ namespace Scada.Declare
 			{
 				this.actionSendInHex = true;
 				string hexes = (StringValue)entry[DeviceEntry.ActionSend];
-                hexes = hexes.Trim();
-				this.actionSend = DeviceEntry.ParseHex(hexes);
+                if (!string.IsNullOrEmpty(hexes))
+                {
+                    hexes = hexes.Trim();
+                    this.actionSend = DeviceEntry.ParseHex(hexes);
+                }
 			}
 
 			// this.actionDelay = (StringValue)entry[DeviceEntry.ActionDelay];
@@ -509,7 +512,7 @@ namespace Scada.Declare
             string[] data = null;
             try
             {
-                data = this.dataParser.Search(line, lastLine);
+                data = this.dataParser.Search(line, this.lastLine);
 
                 this.lastLine = line;
             }

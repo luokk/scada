@@ -92,7 +92,7 @@ namespace Scada.Data.Client
             string deviceKey = "scada.shelter";
             DateTime sendTime = DateTime.Parse("2013-11-30 20:33:00");
             
-            Packet packet = this.GetPacket(sendTime, deviceKey);
+            Packet packet = this.GetPacket(sendTime, deviceKey, "");
             if (packet != null)
             {
                 string msg = packet.ToString();
@@ -104,7 +104,7 @@ namespace Scada.Data.Client
             // TODO: FIND A n42 file
             string deviceKey = "scada.naidevice";
             DateTime sendTime = DateTime.Parse("2012-09-01 11:50:00");
-            Packet packet = this.GetPacket(sendTime, deviceKey);
+            Packet packet = this.GetPacket(sendTime, deviceKey, "");
             if (packet != null)
             {
                 string msg = packet.ToString();
@@ -216,6 +216,7 @@ namespace Scada.Data.Client
 
             Settings.DataCenter2 dc = s.DataCenters[0];
             this.agent = new DataAgent(dc);
+            this.agent.NotifyEvent += this.OnNotify;
             this.agent.DoAuth();
 
             this.statusLabel.Text = string.Format("开始:[{0}]", DateTime.Now);
@@ -246,58 +247,57 @@ namespace Scada.Data.Client
 
         private void HttpRecvDataTick(object sender, EventArgs e)
         {
-            this.agent.FetchCommands();
+            if (this.isAutoData)
+            {
+                this.agent.FetchCommands();
+            }
         }
 
         // 当归一化时间到来时上传数据
         private void HttpSendDataTick(object sender, EventArgs e)
         {
-            if (!this.canUploadData)
+            if (!this.isAutoData)
                 return;
             DateTime now = DateTime.Now;
             // For Upload File Devices.
             if (!IsSendFileTimeOK(now))
             {
-                SendDevicePackets(Settings.Instance.FileDeviceKeys, now);
+                Guid guid = Guid.NewGuid();
+                SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
             }
 
             // For Upload Data Devices.
             if (IsSendDataTimeOK(now))
             {
-                SendDevicePackets(Settings.Instance.DataDeviceKeys, now);
+                Guid guid = Guid.NewGuid();
+                SendDevicePackets(Settings.Instance.DataDeviceKeys, now, guid.ToString());
             }
         }
 
         // 上传所有设备的(实时)数据
-        private void SendDevicePackets(string[] deviceKeys, DateTime now, bool useDebugDataTime = false)
+        private void SendDevicePackets(string[] deviceKeys, DateTime now, string packetId)
         {
             List<Packet> packets = new List<Packet>();
             foreach (var deviceKey in deviceKeys)
             {
                 DateTime sendTime = GetDeviceSendTime(now, deviceKey);
-#if DEBUG
-                if (useDebugDataTime)
+
+                if (this.CheckLastSendTime)
                 {
-                    if (Settings.Instance.DebugDataTime != default(DateTime))
+                    if (!this.lastDeviceSendData.ContainsKey(deviceKey))
                     {
-                        sendTime = Settings.Instance.DebugDataTime;
+                        this.lastDeviceSendData[deviceKey] = default(DateTime);
                     }
-                }
-#endif
 
-                if (!this.lastDeviceSendData.ContainsKey(deviceKey))
-                {
-                    this.lastDeviceSendData[deviceKey] = default(DateTime);
-                }
+                    if (sendTime == this.lastDeviceSendData[deviceKey])
+                    {
+                        continue;
+                    }
 
-                if (sendTime == this.lastDeviceSendData[deviceKey])
-                {
-                    continue;
+                    this.lastDeviceSendData[deviceKey] = sendTime;
                 }
 
-                this.lastDeviceSendData[deviceKey] = sendTime;
-
-                Packet packet = this.GetPacket(sendTime, deviceKey);
+                Packet packet = this.GetPacket(sendTime, deviceKey, packetId);
                 if (packet != null)
                 {
                     packets.Add(packet);
@@ -319,32 +319,53 @@ namespace Scada.Data.Client
 
         private List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
 
-        private Packet GetPacket(DateTime time, string deviceKey)
+        private Packet GetPacket(DateTime time, string deviceKey, string packetId)
         {
-            if (this.MySqlCmd == null)
+            if (Settings.Instance.FileDeviceKeys.Contains(deviceKey))
             {
-                this.ConnectToMySQL();
-            }
-
-            string errorMsg;
-            ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, time, default(DateTime), this.data, out errorMsg);
-            if (d == ReadResult.ReadDataOK)
-            {
-                if (this.data.Count > 0)
+                if (deviceKey.IndexOf("labr") >= 0)
                 {
-                    Packet p = builder.GetPacket(deviceKey, this.data[0], true);
+                    Packet p = builder.GetFilePacket(DataSource.Instance.GetLabrDeviceFile(time));
+                    p.Id = packetId;
                     return p;
                 }
-                else
+                else if (deviceKey.IndexOf("hpge") >= 0)
                 {
-                    return null;
+                    Packet p = builder.GetFilePacket(DataSource.Instance.GetHPGeDeviceFile(time));
+                    p.Id = packetId;
+                    return p;
                 }
+                return null;
             }
             else
             {
-                // TODO: errorMsg
-                return null;
+                if (this.MySqlCmd == null)
+                {
+                    this.ConnectToMySQL();
+                }
+
+                string errorMsg;
+                ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, time, default(DateTime), this.data, out errorMsg);
+                if (d == ReadResult.ReadDataOK)
+                {
+                    if (this.data.Count > 0)
+                    {
+                        Packet p = builder.GetPacket(deviceKey, this.data[0], true);
+                        p.Id = packetId;
+                        return p;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    // TODO: errorMsg
+                    return null;
+                }
             }
+
         }
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
@@ -446,7 +467,11 @@ namespace Scada.Data.Client
             }
         }
 
-
+        public bool CheckLastSendTime
+        {
+            get;
+            set;
+        }
 
         private Dictionary<string, DeviceDataDetails> detailsDict = new Dictionary<string, DeviceDataDetails>();
 
@@ -513,14 +538,13 @@ namespace Scada.Data.Client
             }
         }
 
-        private void SendDevicePacket(string deviceKey, DateTime now = default(DateTime))
+        private void SendDevicePacket(string deviceKey, DateTime now, string packetId)
         {
             foreach (var eachDeviceKey in Settings.Instance.DeviceKeys)
             {
                 if (eachDeviceKey == deviceKey)
                 {
-                    bool useDebugDataTime = Settings.Instance.UseDebugDataTime;
-                    this.SendDevicePackets(new string[] { deviceKey }, now, useDebugDataTime);
+                    this.SendDevicePackets(new string[] { deviceKey }, now, packetId);
                 }
             }
         }
@@ -530,17 +554,58 @@ namespace Scada.Data.Client
             ToolStripMenuItem mi = sender as ToolStripMenuItem;
             if (mi != null)
             {
-                string tag = (string)mi.Tag;
-                SendDevicePacket(tag, DateTime.Now);
+                // Starts DEBUG
+                this.debugConsole.Text = "";
+                string debugGuid = Guid.NewGuid().ToString();
+                string deviceKey = (string)mi.Tag;
+                DateTime sendTime = DateTime.Now;
+                if (Settings.Instance.UseDebugDataTime)
+                {
+                    sendTime = Settings.Instance.GetDebugDataTime(deviceKey);
+                }
+                this.CheckLastSendTime = false;
+                SendDevicePacket(deviceKey, sendTime, debugGuid);
+                this.CheckLastSendTime = true;
             }
         }
 
-        private bool canUploadData = true;
+        private bool isAutoData = true;
 
-        private void dataUploadToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AutoDataToolStripMenuItemClick(object sender, EventArgs e)
         {
-            this.canUploadData = !this.canUploadData;
+            this.isAutoData = !this.isAutoData;
+            this.autoDataToolStripMenuItem.Checked = this.isAutoData;
         }
 
+        private void FetchCmdToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.debugConsole.Text = "";
+
+            this.agent.FetchCommands();
+        }
+
+        private void OnNotify(DataAgent agent, NotifyEvents notifyEvent, PacketBase p)
+        {
+            this.SafeInvoke(() =>
+                {
+                    this.OnNotifyAtUIThread(agent, notifyEvent, p);
+                });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="agent"></param>
+        /// <param name="notifyEvent"></param>
+        /// <param name="msg"></param>
+        private void OnNotifyAtUIThread(DataAgent agent, NotifyEvents notifyEvent, PacketBase p)
+        {
+            this.debugConsole.Text += string.Format("{0}\n", p.Message);
+        }
+
+        private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.PerformQuitByUser();
+        }
     }
 }

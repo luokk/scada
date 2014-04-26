@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace Scada.Data.Client
 {
-    public class Packet
+    public class Packet : PacketBase
     {
         // Const keys.
         public const string EntryKey = "entry";
@@ -24,7 +24,11 @@ namespace Scada.Data.Client
 
         private bool hasResult = false;
 
-        private bool filePacket = false;
+        public bool IsFilePacket
+        {
+            get;
+            set;
+        }
 
         public string Options
         {
@@ -191,83 +195,10 @@ namespace Scada.Data.Client
         }
         */
 
-        private string path;
-
         public string Path
         {
-            get
-            {
-                return this.path;
-            }
-            set
-            {
-                this.path = value;
-                this.filePacket = true;
-            }
+            get;
+            set;
         }
-
-        public static void Send(string api, Packet packet, DateTime time)
-        {
-            try
-            {
-                Uri uri = new Uri(api);
-                byte[] data = Encoding.ASCII.GetBytes(packet.ToString());
-                using (WebClient wc = new WebClient())
-                {
-                    wc.UploadDataCompleted += (object sender, UploadDataCompletedEventArgs e) =>
-                    {
-                        if (e.Error != null)
-                        {
-                            Packet.HandleWebException(e.Error);
-                            return;
-                        }
-
-                        Packet p = (Packet)e.UserState;
-                        if (p != null)
-                        {
-                            string result = Encoding.ASCII.GetString(e.Result);
-                            result = result.Trim();
-                            if (!string.IsNullOrEmpty(result))
-                            {
-                                
-                            }
-                        }
-
-                    };
-                    wc.UploadDataAsync(uri, "POST", data, packet);
-                }
-            }
-            catch (Exception e)
-            {
-
-            }
-        }
-
-        private static void HandleWebException(Exception e)
-        {
-            WebException we = e as WebException;
-
-            if (we == null)
-            {
-                return;
-            }
-
-            HttpWebResponse hwr = we.Response as HttpWebResponse;
-            if (hwr != null)
-            {
-                switch (hwr.StatusCode)
-                {
-                    case HttpStatusCode.InternalServerError:
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else
-            {
-                // TODO: No response!
-            }
-        }
-
     }
 }

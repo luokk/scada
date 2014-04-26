@@ -7,6 +7,9 @@ namespace Scada.Config
 {
     public class TimePolicy
     {
+
+        public const int EveryTime = 0;
+
         public const int Every30Sec = 30;
 
         public const int Every1Min = 60;
@@ -29,6 +32,9 @@ namespace Scada.Config
             DateTime now = DateTime.Now;
             switch (this.Interval)
             {
+                case TimePolicy.EveryTime:
+                    rightTime = DateTime.Now;
+                    return true;
                 case TimePolicy.Every1Min:
                     return TimePolicy.AtVery1Min(now, out rightTime);
                 case TimePolicy.Every5Min:

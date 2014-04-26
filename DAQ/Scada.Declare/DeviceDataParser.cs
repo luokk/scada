@@ -1,6 +1,7 @@
 ﻿using Scada.Common;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -313,9 +314,54 @@ namespace Scada.Declare
 
         public override string[] Search(byte[] data, byte[] lastData)
         {
-            string[] ret = new string[1] { "A" };
+            bool start = false;
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < data.Length; ++i)
+            {
+                byte b = data[i];
+                if (!start && b == (byte)0x09)
+                {
+                    start = true;
+                    continue;
+                }
+                else if (b == (byte)0x2f)
+                {
+                    break;
+                }
 
+                if (start)
+                {
+                    if (b == (byte)0x09)
+                    {
+                        sb.Append(',');
+                    }
+                    else
+                    {
+                        sb.Append((char)b);
+                    }
+                }
+            }
+            string content = sb.ToString();
+            content = content.Trim(',');
+            
+            string[] ret = content.Split(',');
+            ret[2] = ParseTime(ret[2]);
+            ret[3] = ParseTime(ret[3]);
             return ret;
+        }
+
+        private string ParseTime(string time)
+        {
+            try
+            {
+                DateTime d = DateTime.ParseExact(time, "dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                return d.ToString();
+            }
+            catch(Exception)
+            {
+                
+            }
+            return time;
         }
     }
 
@@ -333,9 +379,22 @@ namespace Scada.Declare
 
         public override string[] Search(byte[] data, byte[] lastData)
         {
-            string[] ret = new string[0];
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in data)
+            {
+                if (b == 0)
+                {
+                    sb.Append("0,");
+                }
+                else
+                {
+                    sb.Append("1,");
+                }
+            }
 
-            return ret;
+            string record = sb.ToString();
+            record = record.Trim(',');
+            return new string[] { record };
         }
     }
 }

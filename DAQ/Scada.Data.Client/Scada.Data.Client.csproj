@@ -61,6 +61,7 @@
     <Compile Include="DataSource.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Packet.cs" />
+    <Compile Include="PacketBase.cs" />
     <Compile Include="PacketBuilder.cs" />
     <Compile Include="PacketHandler.cs" />
     <Compile Include="Program.cs" />

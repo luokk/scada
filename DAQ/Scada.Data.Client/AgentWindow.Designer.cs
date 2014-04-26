@@ -44,6 +44,8 @@
             this.percentHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.historyHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.historyLatestHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.debugPage = new System.Windows.Forms.TabPage();
+            this.debugConsole = new System.Windows.Forms.TextBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -60,8 +62,10 @@
             this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.QuitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.操作ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dataUploadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FetchCmdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -70,6 +74,7 @@
             this.mainTabControl.SuspendLayout();
             this.eventTabPage.SuspendLayout();
             this.packTabPage.SuspendLayout();
+            this.debugPage.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -132,6 +137,7 @@
             // 
             this.mainTabControl.Controls.Add(this.eventTabPage);
             this.mainTabControl.Controls.Add(this.packTabPage);
+            this.mainTabControl.Controls.Add(this.debugPage);
             this.mainTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainTabControl.Location = new System.Drawing.Point(0, 0);
             this.mainTabControl.Name = "mainTabControl";
@@ -169,7 +175,7 @@
             this.packTabPage.Location = new System.Drawing.Point(4, 22);
             this.packTabPage.Name = "packTabPage";
             this.packTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.packTabPage.Size = new System.Drawing.Size(836, 349);
+            this.packTabPage.Size = new System.Drawing.Size(836, 324);
             this.packTabPage.TabIndex = 1;
             this.packTabPage.Text = "数据统计";
             this.packTabPage.UseVisualStyleBackColor = true;
@@ -188,7 +194,7 @@
             this.detailsListView.Location = new System.Drawing.Point(3, 3);
             this.detailsListView.MultiSelect = false;
             this.detailsListView.Name = "detailsListView";
-            this.detailsListView.Size = new System.Drawing.Size(830, 343);
+            this.detailsListView.Size = new System.Drawing.Size(830, 318);
             this.detailsListView.TabIndex = 0;
             this.detailsListView.UseCompatibleStateImageBehavior = false;
             this.detailsListView.View = System.Windows.Forms.View.Details;
@@ -217,6 +223,26 @@
             // 
             this.historyLatestHeader.Text = "历史数据最后上传时间";
             this.historyLatestHeader.Width = 207;
+            // 
+            // debugPage
+            // 
+            this.debugPage.Controls.Add(this.debugConsole);
+            this.debugPage.Location = new System.Drawing.Point(4, 22);
+            this.debugPage.Name = "debugPage";
+            this.debugPage.Padding = new System.Windows.Forms.Padding(3);
+            this.debugPage.Size = new System.Drawing.Size(836, 324);
+            this.debugPage.TabIndex = 2;
+            this.debugPage.Text = "调试";
+            this.debugPage.UseVisualStyleBackColor = true;
+            // 
+            // debugConsole
+            // 
+            this.debugConsole.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.debugConsole.Location = new System.Drawing.Point(3, 3);
+            this.debugConsole.Multiline = true;
+            this.debugConsole.Name = "debugConsole";
+            this.debugConsole.Size = new System.Drawing.Size(830, 318);
+            this.debugConsole.TabIndex = 0;
             // 
             // toolStrip1
             // 
@@ -350,26 +376,43 @@
             // 
             // 文件ToolStripMenuItem
             // 
+            this.文件ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.QuitToolStripMenuItem});
             this.文件ToolStripMenuItem.Name = "文件ToolStripMenuItem";
             this.文件ToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.文件ToolStripMenuItem.Text = "文件";
             // 
+            // QuitToolStripMenuItem
+            // 
+            this.QuitToolStripMenuItem.Name = "QuitToolStripMenuItem";
+            this.QuitToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.QuitToolStripMenuItem.Text = "退出";
+            this.QuitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
+            // 
             // 操作ToolStripMenuItem
             // 
             this.操作ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dataUploadToolStripMenuItem});
+            this.autoDataToolStripMenuItem,
+            this.FetchCmdToolStripMenuItem});
             this.操作ToolStripMenuItem.Name = "操作ToolStripMenuItem";
             this.操作ToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.操作ToolStripMenuItem.Text = "操作";
             // 
-            // dataUploadToolStripMenuItem
+            // autoDataToolStripMenuItem
             // 
-            this.dataUploadToolStripMenuItem.Checked = true;
-            this.dataUploadToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.dataUploadToolStripMenuItem.Name = "dataUploadToolStripMenuItem";
-            this.dataUploadToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.dataUploadToolStripMenuItem.Text = "数据上传";
-            this.dataUploadToolStripMenuItem.Click += new System.EventHandler(this.dataUploadToolStripMenuItem_Click);
+            this.autoDataToolStripMenuItem.Checked = true;
+            this.autoDataToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.autoDataToolStripMenuItem.Name = "autoDataToolStripMenuItem";
+            this.autoDataToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.autoDataToolStripMenuItem.Text = "自动通信";
+            this.autoDataToolStripMenuItem.Click += new System.EventHandler(this.AutoDataToolStripMenuItemClick);
+            // 
+            // FetchCmdToolStripMenuItem
+            // 
+            this.FetchCmdToolStripMenuItem.Name = "FetchCmdToolStripMenuItem";
+            this.FetchCmdToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FetchCmdToolStripMenuItem.Text = "获取最新命令";
+            this.FetchCmdToolStripMenuItem.Click += new System.EventHandler(this.FetchCmdToolStripMenuItem_Click);
             // 
             // MainDataAgentWindow
             // 
@@ -380,7 +423,6 @@
             this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.MaximizeBox = false;
             this.Name = "MainDataAgentWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "数据上传 v2.0";
@@ -397,6 +439,8 @@
             this.mainTabControl.ResumeLayout(false);
             this.eventTabPage.ResumeLayout(false);
             this.packTabPage.ResumeLayout(false);
+            this.debugPage.ResumeLayout(false);
+            this.debugPage.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
@@ -439,7 +483,11 @@
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem 文件ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 操作ToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem dataUploadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem autoDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem FetchCmdToolStripMenuItem;
+        private System.Windows.Forms.TabPage debugPage;
+        private System.Windows.Forms.TextBox debugConsole;
+        private System.Windows.Forms.ToolStripMenuItem QuitToolStripMenuItem;
 
     }
 }
