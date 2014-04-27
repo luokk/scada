@@ -1,6 +1,12 @@
 
 
 import MySQLdb
+from datetime import *
+import time
+import calendar
+import os
+
+t1 = time.time()
 
 conn=MySQLdb.connect(host='127.0.0.1',user='root', passwd='root', db='scada', port=3306)
 
@@ -16,3 +22,7 @@ except MySQLdb.Error,e:
      print "Mysql Error %d: %s" % (e.args[0], e.args[1])
 
 conn.close()
+
+t2 = time.time()
+print t2 - t1
+os.system("pause")

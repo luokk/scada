@@ -174,9 +174,13 @@ namespace Scada.Data.Client
                             json[kv.Key] = v;
                         }
                     }
+                    else if (code.DataType == "str")
+                    {
+                        json[kv.Key] = (string)kv.Value;
+                    }
                     else if (code.DataType == "bit")
                     {
-                        json[kv.Key] = 1;
+                        json[kv.Key] = (kv.Value == "1");
                     }
                 }
             }

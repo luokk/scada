@@ -23,7 +23,8 @@ namespace Scada.Data.Client
         public string[] DeviceKeys = {
                                 Devices.Hpic, 
                                 Devices.Weather, 
-                                Devices.Cinderella,
+                                Devices.CinderellaData,
+                                Devices.CinderellaStatus,
                                 Devices.Shelter,
                                 Devices.HPGe,
                                 Devices.Labr
@@ -32,7 +33,8 @@ namespace Scada.Data.Client
         public string[] DataDeviceKeys = {
                                 Devices.Hpic, 
                                 Devices.Weather, 
-                                Devices.Cinderella,
+                                Devices.CinderellaData,
+                                Devices.CinderellaStatus,
                                 Devices.Shelter,
                                      };
 

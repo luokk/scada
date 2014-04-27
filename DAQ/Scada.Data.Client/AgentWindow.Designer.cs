@@ -37,16 +37,17 @@
             this.mainTabControl = new System.Windows.Forms.TabControl();
             this.eventTabPage = new System.Windows.Forms.TabPage();
             this.mainListBox = new System.Windows.Forms.ListBox();
-            this.packTabPage = new System.Windows.Forms.TabPage();
+            this.dataUploadTabPage = new System.Windows.Forms.TabPage();
             this.detailsListView = new System.Windows.Forms.ListView();
             this.deviceHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.countHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.percentHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.historyHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.historyLatestHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.fileUploadTabPage = new System.Windows.Forms.TabPage();
             this.debugPage = new System.Windows.Forms.TabPage();
             this.debugConsole = new System.Windows.Forms.TextBox();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.mainToolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.detailsButton = new System.Windows.Forms.ToolStripButton();
@@ -56,11 +57,11 @@
             this.SendWeatherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SendLabrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SendHPGeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SendCinderellaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SendTTLModuleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SendCinderellaDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SendCinderellaStatusModuleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SendShelterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.QuitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.操作ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -73,10 +74,10 @@
             this.panel1.SuspendLayout();
             this.mainTabControl.SuspendLayout();
             this.eventTabPage.SuspendLayout();
-            this.packTabPage.SuspendLayout();
+            this.dataUploadTabPage.SuspendLayout();
             this.debugPage.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
+            this.mainToolStrip.SuspendLayout();
+            this.mainMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripContainer1
@@ -104,7 +105,7 @@
             // 
             // toolStripContainer1.TopToolStripPanel
             // 
-            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.toolStrip1);
+            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.mainToolStrip);
             // 
             // statusStrip
             // 
@@ -136,7 +137,8 @@
             // mainTabControl
             // 
             this.mainTabControl.Controls.Add(this.eventTabPage);
-            this.mainTabControl.Controls.Add(this.packTabPage);
+            this.mainTabControl.Controls.Add(this.dataUploadTabPage);
+            this.mainTabControl.Controls.Add(this.fileUploadTabPage);
             this.mainTabControl.Controls.Add(this.debugPage);
             this.mainTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainTabControl.Location = new System.Drawing.Point(0, 0);
@@ -169,16 +171,16 @@
             this.mainListBox.Size = new System.Drawing.Size(830, 318);
             this.mainListBox.TabIndex = 1;
             // 
-            // packTabPage
+            // dataUploadTabPage
             // 
-            this.packTabPage.Controls.Add(this.detailsListView);
-            this.packTabPage.Location = new System.Drawing.Point(4, 22);
-            this.packTabPage.Name = "packTabPage";
-            this.packTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.packTabPage.Size = new System.Drawing.Size(836, 324);
-            this.packTabPage.TabIndex = 1;
-            this.packTabPage.Text = "数据统计";
-            this.packTabPage.UseVisualStyleBackColor = true;
+            this.dataUploadTabPage.Controls.Add(this.detailsListView);
+            this.dataUploadTabPage.Location = new System.Drawing.Point(4, 22);
+            this.dataUploadTabPage.Name = "dataUploadTabPage";
+            this.dataUploadTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.dataUploadTabPage.Size = new System.Drawing.Size(836, 324);
+            this.dataUploadTabPage.TabIndex = 1;
+            this.dataUploadTabPage.Text = "数据上传统计";
+            this.dataUploadTabPage.UseVisualStyleBackColor = true;
             // 
             // detailsListView
             // 
@@ -224,6 +226,16 @@
             this.historyLatestHeader.Text = "历史数据最后上传时间";
             this.historyLatestHeader.Width = 207;
             // 
+            // fileUploadTabPage
+            // 
+            this.fileUploadTabPage.Location = new System.Drawing.Point(4, 22);
+            this.fileUploadTabPage.Name = "fileUploadTabPage";
+            this.fileUploadTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.fileUploadTabPage.Size = new System.Drawing.Size(836, 324);
+            this.fileUploadTabPage.TabIndex = 3;
+            this.fileUploadTabPage.Text = "文件上传统计";
+            this.fileUploadTabPage.UseVisualStyleBackColor = true;
+            // 
             // debugPage
             // 
             this.debugPage.Controls.Add(this.debugConsole);
@@ -244,19 +256,19 @@
             this.debugConsole.Size = new System.Drawing.Size(830, 318);
             this.debugConsole.TabIndex = 0;
             // 
-            // toolStrip1
+            // mainToolStrip
             // 
-            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mainToolStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.mainToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
             this.toolStripSeparator1,
             this.detailsButton,
             this.testToolStripButton,
             this.toolStripDropDownButton1});
-            this.toolStrip1.Location = new System.Drawing.Point(3, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(231, 25);
-            this.toolStrip1.TabIndex = 0;
+            this.mainToolStrip.Location = new System.Drawing.Point(3, 0);
+            this.mainToolStrip.Name = "mainToolStrip";
+            this.mainToolStrip.Size = new System.Drawing.Size(262, 25);
+            this.mainToolStrip.TabIndex = 0;
             // 
             // toolStripLabel1
             // 
@@ -293,8 +305,8 @@
             this.SendWeatherToolStripMenuItem,
             this.SendLabrToolStripMenuItem,
             this.SendHPGeToolStripMenuItem,
-            this.SendCinderellaToolStripMenuItem,
-            this.SendTTLModuleToolStripMenuItem,
+            this.SendCinderellaDataToolStripMenuItem,
+            this.SendCinderellaStatusModuleToolStripMenuItem,
             this.SendShelterToolStripMenuItem});
             this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -334,21 +346,21 @@
             this.SendHPGeToolStripMenuItem.Text = "高纯锗";
             this.SendHPGeToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
-            // SendCinderellaToolStripMenuItem
+            // SendCinderellaDataToolStripMenuItem
             // 
-            this.SendCinderellaToolStripMenuItem.Name = "SendCinderellaToolStripMenuItem";
-            this.SendCinderellaToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.SendCinderellaToolStripMenuItem.Tag = "scada.cinderella";
-            this.SendCinderellaToolStripMenuItem.Text = "Cinderella";
-            this.SendCinderellaToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
+            this.SendCinderellaDataToolStripMenuItem.Name = "SendCinderellaDataToolStripMenuItem";
+            this.SendCinderellaDataToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.SendCinderellaDataToolStripMenuItem.Tag = "scada.cinderella.data";
+            this.SendCinderellaDataToolStripMenuItem.Text = "Cinderella数据";
+            this.SendCinderellaDataToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
-            // SendTTLModuleToolStripMenuItem
+            // SendCinderellaStatusModuleToolStripMenuItem
             // 
-            this.SendTTLModuleToolStripMenuItem.Name = "SendTTLModuleToolStripMenuItem";
-            this.SendTTLModuleToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.SendTTLModuleToolStripMenuItem.Tag = "scada.ttlm";
-            this.SendTTLModuleToolStripMenuItem.Text = "TTL模块";
-            this.SendTTLModuleToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
+            this.SendCinderellaStatusModuleToolStripMenuItem.Name = "SendCinderellaStatusModuleToolStripMenuItem";
+            this.SendCinderellaStatusModuleToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.SendCinderellaStatusModuleToolStripMenuItem.Tag = "scada.cinderella.status";
+            this.SendCinderellaStatusModuleToolStripMenuItem.Text = "Cinderella状态";
+            this.SendCinderellaStatusModuleToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
             // SendShelterToolStripMenuItem
             // 
@@ -363,16 +375,16 @@
             this.sysNotifyIcon.Text = "数据上传";
             this.sysNotifyIcon.Visible = true;
             // 
-            // menuStrip1
+            // mainMenuStrip
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.文件ToolStripMenuItem,
             this.操作ToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(844, 25);
-            this.menuStrip1.TabIndex = 1;
-            this.menuStrip1.Text = "menuStrip1";
+            this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
+            this.mainMenuStrip.Name = "mainMenuStrip";
+            this.mainMenuStrip.Size = new System.Drawing.Size(844, 25);
+            this.mainMenuStrip.TabIndex = 1;
+            this.mainMenuStrip.Text = "menuStrip1";
             // 
             // 文件ToolStripMenuItem
             // 
@@ -403,14 +415,14 @@
             this.autoDataToolStripMenuItem.Checked = true;
             this.autoDataToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.autoDataToolStripMenuItem.Name = "autoDataToolStripMenuItem";
-            this.autoDataToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.autoDataToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.autoDataToolStripMenuItem.Text = "自动通信";
             this.autoDataToolStripMenuItem.Click += new System.EventHandler(this.AutoDataToolStripMenuItemClick);
             // 
             // FetchCmdToolStripMenuItem
             // 
             this.FetchCmdToolStripMenuItem.Name = "FetchCmdToolStripMenuItem";
-            this.FetchCmdToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.FetchCmdToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
             this.FetchCmdToolStripMenuItem.Text = "获取最新命令";
             this.FetchCmdToolStripMenuItem.Click += new System.EventHandler(this.FetchCmdToolStripMenuItem_Click);
             // 
@@ -421,8 +433,8 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.ClientSize = new System.Drawing.Size(844, 422);
             this.Controls.Add(this.toolStripContainer1);
-            this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
+            this.Controls.Add(this.mainMenuStrip);
+            this.MainMenuStrip = this.mainMenuStrip;
             this.Name = "MainDataAgentWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "数据上传 v2.0";
@@ -438,13 +450,13 @@
             this.panel1.ResumeLayout(false);
             this.mainTabControl.ResumeLayout(false);
             this.eventTabPage.ResumeLayout(false);
-            this.packTabPage.ResumeLayout(false);
+            this.dataUploadTabPage.ResumeLayout(false);
             this.debugPage.ResumeLayout(false);
             this.debugPage.PerformLayout();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.mainToolStrip.ResumeLayout(false);
+            this.mainToolStrip.PerformLayout();
+            this.mainMenuStrip.ResumeLayout(false);
+            this.mainMenuStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -454,7 +466,7 @@
 
         private System.Windows.Forms.ToolStripContainer toolStripContainer1;
         private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStrip mainToolStrip;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.Panel panel1;
@@ -464,7 +476,7 @@
         private System.Windows.Forms.NotifyIcon sysNotifyIcon;
         private System.Windows.Forms.TabControl mainTabControl;
         private System.Windows.Forms.TabPage eventTabPage;
-        private System.Windows.Forms.TabPage packTabPage;
+        private System.Windows.Forms.TabPage dataUploadTabPage;
         private System.Windows.Forms.ListView detailsListView;
         private System.Windows.Forms.ColumnHeader deviceHeader;
         private System.Windows.Forms.ColumnHeader historyHeader;
@@ -477,10 +489,10 @@
         private System.Windows.Forms.ToolStripMenuItem SendWeatherToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SendLabrToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SendHPGeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SendCinderellaToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem SendTTLModuleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SendCinderellaDataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SendCinderellaStatusModuleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SendShelterToolStripMenuItem;
-        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.MenuStrip mainMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem 文件ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 操作ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem autoDataToolStripMenuItem;
@@ -488,6 +500,7 @@
         private System.Windows.Forms.TabPage debugPage;
         private System.Windows.Forms.TextBox debugConsole;
         private System.Windows.Forms.ToolStripMenuItem QuitToolStripMenuItem;
+        private System.Windows.Forms.TabPage fileUploadTabPage;
 
     }
 }

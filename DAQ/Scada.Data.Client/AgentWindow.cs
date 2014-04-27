@@ -376,6 +376,10 @@ namespace Scada.Data.Client
                 DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
                 return ret;
             }
+            else if (deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase))
+            {
+                return dt;
+            }
             else
             {
                 int second = dt.Second / 30 * 30;

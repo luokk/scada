@@ -17,7 +17,9 @@ namespace Scada.Data.Client
 
         public const string HPGe = Prefix + "hpge";
 
-        public const string Cinderella = Prefix + "cinderella";
+        public const string CinderellaData = Prefix + "cinderella.data";
+
+        public const string CinderellaStatus = Prefix + "cinderella.status";
 
         public const string Shelter = Prefix + "shelter";
     }
