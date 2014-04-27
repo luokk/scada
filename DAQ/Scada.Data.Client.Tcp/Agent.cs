@@ -158,7 +158,6 @@ namespace Scada.Data.Client.Tcp
             this.ServerAddress = serverAddress;
             this.ServerPort = serverPort;
             this.handler = new MessageDataHandler(this);
-
             this.IsRetryConnection = true;
             this.ConnectRetryRoutine();
         }
@@ -655,12 +654,14 @@ namespace Scada.Data.Client.Tcp
 
         internal void StartConnectCountryCenter()
         {
+            this.SendDataDirectlyStarted = true;
             string msg = string.Format("启动到国家数据中心的连接!");
             this.NotifyEvent(this, NotifyEvents.ConnectToCountryCenter, msg, null);
         }
 
         internal void StopConnectCountryCenter()
         {
+            this.SendDataDirectlyStarted = false;
             string msg = string.Format("国家数据中心连接已断开");
             this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg, null);
         }

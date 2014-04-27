@@ -279,14 +279,20 @@ namespace Scada.Data.Client.Tcp
                 case ReceivedCommand.StartSendDataDirectly:
                     {
                         Debug.Assert(this.agent.Type != Type.Country);
-                        this.OnStartSendDataDirectly(msg);
+                        if (this.agent.Type != Type.Country)
+                        {
+                           this.OnStartSendDataDirectly(msg);
+                        }
                     }
                     break;
                 // 停止直接数据
                 case ReceivedCommand.StopSendDataDirectly:
                     {
                         Debug.Assert(this.agent.Type != Type.Country);
-                        this.OnStopSendDataDirectly(msg);
+                        if (this.agent.Type != Type.Country)
+                        {
+                            this.OnStopSendDataDirectly(msg);
+                        }
                     }
                     break;
                 // 初始化
@@ -762,8 +768,7 @@ namespace Scada.Data.Client.Tcp
             string qn = Value.Parse(msg, "QN");
             this.SendReplyPacket(qn);
             this.SendResultPacket(qn);
-            this.StartConnectCountryCenter();
-            this.agent.SendDataDirectlyStarted = true;
+            this.agent.StartConnectCountryCenter();
         }
 
         private void OnStopSendDataDirectly(string msg)
@@ -771,7 +776,7 @@ namespace Scada.Data.Client.Tcp
             string qn = Value.Parse(msg, "QN");
             this.SendReplyPacket(qn);
             this.SendResultPacket(qn);
-            this.StopConnectCountryCenter();
+            this.agent.StopConnectCountryCenter();
         }
 
         private static int ParseCommandCode(string msg)
@@ -792,21 +797,6 @@ namespace Scada.Data.Client.Tcp
             // Change password
             string newPasswd = Value.ParseInContent(msg, "PW");
             Settings.Instance.Password = newPasswd;
-        }
-
-        // ?
-        // 开始向国家数据中心发送数据
-        private void StartConnectCountryCenter()
-        {
-            this.agent.StartConnectCountryCenter();
-            this.agent.SendDataDirectlyStarted = true;
-        }
-
-        // 停止向国家数据中心发送数据
-        private void StopConnectCountryCenter()
-        {
-            this.agent.SendDataDirectlyStarted = false;
-            this.agent.StopConnectCountryCenter();
         }
 
         private void OnKeepAlive(string msg)

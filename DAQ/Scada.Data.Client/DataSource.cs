@@ -173,7 +173,7 @@ namespace Scada.Data.Client
         public string GetNaIDeviceData(DateTime time)
         {
             throw new NotSupportedException();
-            string fileName = this.GetFileName(time);
+            string fileName = this.GetLabrFileName(time);
             string datePath = this.GetDatePath(time);
             string filePath = LogPath.GetDeviceLogFilePath("scada.naidevice", time) + "\\" + fileName;
             string content = string.Empty;
@@ -192,7 +192,7 @@ namespace Scada.Data.Client
 
         public string GetLabrDeviceFile(DateTime time)
         {
-            string fileName = this.GetFileName(time);
+            string fileName = this.GetLabrFileName(time);
             string datePath = this.GetDatePath(time);
             string filePath = LogPath.GetDeviceLogFilePath("scada.labr", time) + "\\" + fileName;
             string content = string.Empty;
@@ -205,12 +205,12 @@ namespace Scada.Data.Client
 
         public string GetHPGeDeviceFile(DateTime time)
         {
-            throw new NotImplementedException();
+            return "";   
         }
 
-        private string GetFileName(DateTime time)
+        private string GetLabrFileName(DateTime time)
         {
-            int minuteAdjust = Settings.Instance.MinuteAdjust;
+            // int minuteAdjust = Settings.Instance.MinuteAdjust;
             string deviceSn = Settings.Instance.NaIDeviceSn;
             string fileName;
             DateTime t = time;

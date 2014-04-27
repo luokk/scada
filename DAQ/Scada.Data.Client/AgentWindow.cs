@@ -65,7 +65,7 @@ namespace Scada.Data.Client
 
         private RealTimeForm detailForm;
 
-        private const int TimerInterval = 4000;
+        private const int TimerInterval = 3500;
 
         private ToolStripLabel statusLabel = new ToolStripLabel();
 
@@ -82,36 +82,6 @@ namespace Scada.Data.Client
         public MySqlConnection MySqlConnection { get; set; }
 
         public MySqlCommand MySqlCmd { get; set; }
-
-        /// <summary>
-        /// Test code goes here
-        /// </summary>
-#if DEBUG
-        private void TestSendPacket()
-        {
-            string deviceKey = "scada.shelter";
-            DateTime sendTime = DateTime.Parse("2013-11-30 20:33:00");
-            
-            Packet packet = this.GetPacket(sendTime, deviceKey, "");
-            if (packet != null)
-            {
-                string msg = packet.ToString();
-                this.agent.SendPacket(packet);
-            }
-        }
-        private void TestSendFilePacket()
-        {
-            // TODO: FIND A n42 file
-            string deviceKey = "scada.naidevice";
-            DateTime sendTime = DateTime.Parse("2012-09-01 11:50:00");
-            Packet packet = this.GetPacket(sendTime, deviceKey, "");
-            if (packet != null)
-            {
-                string msg = packet.ToString();
-                this.agent.SendFilePacket(packet);
-            }
-        }
-#endif
 
         public MainDataAgentWindow()
         {
@@ -140,7 +110,7 @@ namespace Scada.Data.Client
         private void InitSysNotifyIcon()
         {
             // Notify Icon
-            sysNotifyIcon.Text = "数据上传 v2.0";
+            sysNotifyIcon.Text = "数据上传（HTTP）";
             sysNotifyIcon.Icon = new Icon(Resources.AppIcon, new Size(16, 16));
             sysNotifyIcon.Visible = true;
             sysNotifyIcon.DoubleClick += new EventHandler(OnSysNotifyIcon);
@@ -365,7 +335,6 @@ namespace Scada.Data.Client
                     return null;
                 }
             }
-
         }
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
@@ -482,12 +451,10 @@ namespace Scada.Data.Client
         private void InitDetailsListView()
         {
             this.InitDeviceColumn("scada.hpic", "高压电离室");
-            this.InitDeviceColumn("scada.naidevice", "NaI谱仪");
+            this.InitDeviceColumn("scada.cinderella.data", "Cinderella数据");
+            this.InitDeviceColumn("scada.cinderella.status", "Cinderella状态");
             this.InitDeviceColumn("scada.weather", "气象站");
-            this.InitDeviceColumn("scada.hvsampler", "超大流量气溶胶采样器");
-            this.InitDeviceColumn("scada.isampler", "碘采样器");
             this.InitDeviceColumn("scada.shelter", "环境与安防监控");
-            this.InitDeviceColumn("scada.dwd", "干湿沉降采样器");
         }
 
         private static string FormatTime(DateTime time)

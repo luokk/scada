@@ -249,7 +249,6 @@ namespace Scada.Data.Client.Tcp
                     // 国家中心
                     this.countryCenterAgent = CreateCountryCenterAgent(dc.Ip, dc.Port);
                     this.countryCenterAgent.AddWirelessInfo(dc.WirelessIp, dc.WirelessPort);
-                    
                 }
                 else
                 {
@@ -352,6 +351,181 @@ namespace Scada.Data.Client.Tcp
             }
         }
 
+        private void RequireMySQLConnection()
+        {
+            // This part of data need MySQL
+            if (this.MySqlConnection != null && this.MySqlConnection.State != ConnectionState.Open)
+            {
+                try
+                {
+                    this.MySqlConnection.Close();
+
+                    this.MySqlConnection = DBDataSource.Instance.CreateMySqlConnection();
+                    this.MySqlConnection.Open();
+                    this.MySqlCommand = this.MySqlConnection.CreateCommand();
+                }
+                catch (Exception e)
+                {
+                    string line = string.Format("RD: MySQL Connection Reset - {0}", e.Message);
+                    this.DoLog(ScadaDataClient, line);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="time"></param>
+        /// <param name="deviceKey"></param>
+        private void SendNaIDataPackets(DateTime time, string deviceKey)
+        {
+            // NaI device packet;
+            string content = DBDataSource.Instance.GetNaIDeviceData(time);
+            if (!string.IsNullOrEmpty(content))
+            {
+                List<DataPacket> pks = builder.GetDataPackets(deviceKey, time, content);
+                foreach (var p in pks)
+                {
+                    this.agent.SendDataPacket(p);
+
+                    if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+                    {
+                        this.countryCenterAgent.SendDataPacket(p);
+                    }
+                }
+
+                if (pks.Count > 0)
+                {
+                    Logger logger = Log.GetLogFile(deviceKey);
+                    logger.Log("---- BEGIN ----");
+                    foreach (var p in pks)
+                    {
+                        string msg = p.ToString();
+                        logger.Log(msg);
+                    }
+                    logger.Log("---- END ---- ");
+
+                    this.UpdateSendDataRecord(deviceKey, false);
+                }
+            }
+            else
+            {
+                Log.GetLogFile(deviceKey).Log("RD Error: Empty NaI-file");
+            }
+        }
+
+        // '大流量' 数据
+        private void SendFlowDataPackets(string deviceKey, Dictionary<string, object> data)
+        {
+            DataPacket p = builder.GetFlowDataPacket(deviceKey, data, true);
+            if (this.agent.SendDataPacket(p))
+            {
+                string msg = string.Format("RD: {0}", p.ToString());
+                Log.GetLogFile(deviceKey).Log(msg);
+                this.UpdateSendDataRecord(deviceKey, false);
+            }
+
+            if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+            {
+                this.countryCenterAgent.SendDataPacket(p);
+            }
+        }
+
+        private void SendShelterDataPackets(string deviceKey)
+        {
+            // 门禁数据
+            var p = builder.GetShelterPacket(deviceKey, this.data[0], true);
+            if (this.agent.SendDataPacket(p))
+            {
+                string msg = string.Format("RD: {0}", p.ToString());
+                Log.GetLogFile(deviceKey).Log(msg);
+                this.UpdateSendDataRecord(deviceKey, false);
+            }
+
+            if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+            {
+                this.countryCenterAgent.SendDataPacket(p);
+            }
+        }
+
+        private static bool Case(string a, string b)
+        {
+            return a.Equals(b, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="time"></param>
+        /// <param name="deviceKey"></param>
+        private void SendNonFileDataPackets(DateTime time, string deviceKey)
+        {
+            this.data.Clear();
+            string errorMessage = string.Empty;
+            var r = DBDataSource.GetData(this.MySqlCommand, deviceKey, time, default(DateTime), null, null, this.data, out errorMessage);
+
+            if (r == ReadResult.ReadOK)
+            {
+                if (this.data.Count > 0)
+                {
+                    DataPacket p = null;
+
+                    if (Case(deviceKey, "Scada.HVSampler") || Case(deviceKey, "Scada.ISampler"))
+                    {
+                        this.SendFlowDataPackets(deviceKey, this.data[0]);
+                    }
+                    else if (deviceKey.ToLower() == "scada.shelter")
+                    {
+                        this.SendShelterDataPackets(deviceKey);
+                    }
+                    else
+                    {
+                        // 其他数据
+                        if (deviceKey == "scada.hpic" && this.InHpicException)
+                        {
+                            this.InHpicException = false;
+                            DataPacket packet = this.builder.GetExceptionNotifyPacket(deviceKey, false);
+                            this.agent.SendExceptionNotify(packet);
+                        }
+
+                        p = builder.GetDataPacket(deviceKey, this.data[0], true);
+                        if (this.agent.SendDataPacket(p))
+                        {
+                            string msg = string.Format("RD: {0}", p.ToString());
+                            Log.GetLogFile(deviceKey).Log(msg);
+                            this.UpdateSendDataRecord(deviceKey, false);
+                        }
+
+                        if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+                        {
+                            this.countryCenterAgent.SendDataPacket(p);
+                        }
+                    }
+                }
+                else
+                {
+                    string line = string.Format("RD Error: count={0} [{1}: {2}]", this.data.Count, deviceKey, time);
+                    Log.GetLogFile(deviceKey).Log(line);
+                }
+            }
+            else
+            {
+                // 发送异常通知
+                if (r == ReadResult.NoDataFound && deviceKey == "scada.hpic")
+                {
+                    if (!this.InHpicException)
+                    {
+                        this.InHpicException = true;
+                        DataPacket packet = this.builder.GetExceptionNotifyPacket(deviceKey, true);
+                        this.agent.SendExceptionNotify(packet);
+                    }
+                }
+
+                string line = string.Format("RD Error: {0} - {1} [{2}: {3}]", r.ToString(), errorMessage, deviceKey, time);
+                Log.GetLogFile(deviceKey).Log(line);
+            }
+        }
+
         public void SendDataPackets(DateTime time, string deviceKey)
         {
             if (this.agent == null || !this.agent.SendDataStarted)
@@ -361,132 +535,14 @@ namespace Scada.Data.Client.Tcp
 
             if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
             {
-
-                // NaI device packet;
-                string content = DBDataSource.Instance.GetNaIDeviceData(time);
-                if (!string.IsNullOrEmpty(content))
-                {
-                    List<DataPacket> pks = builder.GetDataPackets(deviceKey, time, content);
-                    foreach (var p in pks)
-                    {
-                        agent.SendDataPacket(p);                        
-                    }
-
-                    if (pks.Count > 0)
-                    {
-                        Logger logger = Log.GetLogFile(deviceKey);
-                        logger.Log("---- BEGIN ----");
-                        foreach (var p in pks)
-                        {
-                            string msg = p.ToString();
-                            logger.Log(msg);
-                        }
-                        logger.Log("---- END ---- ");
-
-                        this.UpdateSendDataRecord(deviceKey, false);
-                    }
-                }
-                else
-                {
-                    Log.GetLogFile(deviceKey).Log("RD Error: Empty NaI-file");
-                }
+                // For file data packets branch.
+                this.SendNaIDataPackets(time, "scada.naidevice");
             }
             else
             {
-                // This part of data need MySQL
-                if (this.MySqlConnection != null && this.MySqlConnection.State != ConnectionState.Open)
-                {
-                    try
-                    {
-                        this.MySqlConnection.Close();
-
-                        this.MySqlConnection = DBDataSource.Instance.CreateMySqlConnection();
-                        this.MySqlConnection.Open();
-                        this.MySqlCommand = this.MySqlConnection.CreateCommand();
-                    }
-                    catch (Exception e)
-                    {
-                        string line = string.Format("RD: MySQL Connection Reset - {0}", e.Message);
-                        this.DoLog(ScadaDataClient, line);
-                    }
-                }
-
-                // TO get data
-                this.data.Clear();
-                string errorMessage = string.Empty;
-                var r = DBDataSource.GetData(this.MySqlCommand, deviceKey, time, default(DateTime), null, null, this.data, out errorMessage);
-                if (r == ReadResult.ReadOK)
-                {
-                    if (this.data.Count > 0)
-                    {
-                        DataPacket p = null;
-
-                        if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
-                            deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
-                        {
-                            // '大流量' 数据
-                            p = builder.GetFlowDataPacket(deviceKey, this.data[0], true);
-                            if (agent.SendDataPacket(p))
-                            {
-                                string msg = string.Format("RD: {0}", p.ToString());
-                                Log.GetLogFile(deviceKey).Log(msg);
-                                this.UpdateSendDataRecord(deviceKey, false);
-                            }
-                        }
-                        else if (deviceKey.ToLower() == "scada.shelter")
-                        {
-                            // 门禁数据
-                            p = builder.GetShelterPacket(deviceKey, this.data[0], true);
-                            if (agent.SendDataPacket(p))
-                            {
-                                string msg = string.Format("RD: {0}", p.ToString());
-                                Log.GetLogFile(deviceKey).Log(msg);
-                                this.UpdateSendDataRecord(deviceKey, false);
-                            }
-                        }
-                        else
-                        {
-                            // 其他数据
-                            if (deviceKey == "scada.hpic" && this.InHpicException)
-                            {
-                                this.InHpicException = false;
-                                DataPacket packet = this.builder.GetExceptionNotifyPacket(deviceKey, false);
-                                this.agent.SendExceptionNotify(packet);
-                            }
-
-                            p = builder.GetDataPacket(deviceKey, this.data[0], true);
-                            if (agent.SendDataPacket(p))
-                            {
-                                string msg = string.Format("RD: {0}", p.ToString());
-                                Log.GetLogFile(deviceKey).Log(msg);
-                                this.UpdateSendDataRecord(deviceKey, false);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        string line = string.Format("RD Error: count={0} [{1}: {2}]", this.data.Count, deviceKey, time);
-                        Log.GetLogFile(deviceKey).Log(line);
-                    }
-
-                }
-                else
-                {
-                    // 发送异常通知
-                    if (r == ReadResult.NoDataFound && deviceKey == "scada.hpic")
-                    {
-                        if (!this.InHpicException)
-                        {
-                            this.InHpicException = true;
-                            DataPacket packet = this.builder.GetExceptionNotifyPacket(deviceKey, true);
-                            this.agent.SendExceptionNotify(packet);
-                        }
-                    }
-
-                    string line = string.Format("RD Error: {0} - {1} [{2}: {3}]", r.ToString(), errorMessage, deviceKey, time);
-                    Log.GetLogFile(deviceKey).Log(line);
-                }
-            } // Non File transfer
+                this.RequireMySQLConnection();
+                this.SendNonFileDataPackets(time, deviceKey);
+            }
         }
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
@@ -571,11 +627,13 @@ namespace Scada.Data.Client.Tcp
                 /// 国家数据中心相关
                 else if (NotifyEvents.ConnectToCountryCenter == notify)
                 {
+                    /// 国家数据中心相关
                     this.StartConnectCountryCenter();
                     this.mainListBox.Items.Add(msg1);
                 }
                 else if (NotifyEvents.DisconnectToCountryCenter == notify)
                 {
+                    /// 国家数据中心相关
                     this.StopConnectCountryCenter();
                     this.mainListBox.Items.Add(msg1);
                 }
@@ -588,7 +646,6 @@ namespace Scada.Data.Client.Tcp
             if (this.countryCenterAgent != null)
             {
                 this.countryCenterAgent.Connect();
-                //this.agents.Add(this.countryCenterAgent);
             }
             else
             {
@@ -607,7 +664,6 @@ namespace Scada.Data.Client.Tcp
             if (this.countryCenterAgent != null)
             {
                 this.countryCenterAgent.Disconnect();
-                // this.agents.Remove(this.countryCenterAgent);
             }
         }
 

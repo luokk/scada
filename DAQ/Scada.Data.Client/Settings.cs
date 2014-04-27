@@ -449,7 +449,8 @@ namespace Scada.Data.Client
 
         public string NaIDeviceSn { get; set; }
 
-        public int MinuteAdjust { get; set; }
+        // Deprecated
+        private int MinuteAdjust { get; set; }
 
         public string NaIFilePath { get; set; }
 
