@@ -382,19 +382,22 @@ namespace Scada.Declare
             StringBuilder sb = new StringBuilder();
             foreach (byte b in data)
             {
-                if (b == 0)
+                if (b >= 0x30 && b <= 0x39)
                 {
-                    sb.Append("0,");
-                }
-                else
-                {
-                    sb.Append("1,");
+                    sb.Append((char)b);
                 }
             }
 
             string record = sb.ToString();
-            record = record.Trim(',');
-            return new string[] { record };
+            int status = 0;
+            if (int.TryParse(record, out status))
+            {
+                string statusBin = "00000000" + Convert.ToString(status, 2);
+                statusBin = statusBin.Substring(statusBin.Length - 24);
+                return new string[] { statusBin };
+            }
+
+            return new string[] { "000000000000000000000000" };
         }
     }
 }

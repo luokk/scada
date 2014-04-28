@@ -220,5 +220,5 @@ CREATE TABLE `CinderellaData_Rec` (
 DROP TABLE IF EXISTS `CinderellaStatus_Rec`;
 CREATE TABLE `CinderellaStatus_Rec` (
 `Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-`StateBits` char(50)
+`StateBits` char(30)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
