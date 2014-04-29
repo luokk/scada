@@ -424,7 +424,8 @@ namespace Scada.Main
             foreach (string deviceKey in this.lastUpdateDict.Keys)
             {
                 if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
-                    deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
+                    deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase) ||
+                    deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
