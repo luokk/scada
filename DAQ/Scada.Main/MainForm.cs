@@ -57,13 +57,39 @@ namespace Scada.Main
                 }
             }
 
-			////////////////////////////////////////////////////////////////
-			// Device List in Group.
-            deviceListView.Columns.Add("设备", 280);
-			deviceListView.Columns.Add("版本", 80);
-			deviceListView.Columns.Add("状态", 100);
-
             deviceListView.ShowGroups = true;
+
+            this.SetDeviceList();
+
+            // Auto start
+            // runAll = true;
+            if (runAll)
+            {
+                this.StartDevices(true);
+            }
+            else if (recover)
+            {
+                if (this.RecoverCheck())
+                {
+                    this.StartDevices(false);
+                }
+                else
+                {
+                    this.StartDevices(true);
+                }
+            }
+
+            // this.OpenLocalCommandReceiver();
+        }
+
+        private void SetDeviceList()
+        {
+            Program.DeviceManager.Initialize();
+
+            deviceListView.Clear();
+            deviceListView.Columns.Add("设备", 280);
+            deviceListView.Columns.Add("版本", 80);
+            deviceListView.Columns.Add("状态", 100);
 
             Dictionary<string, ListViewGroup> groups = new Dictionary<string, ListViewGroup>();
 
@@ -90,26 +116,6 @@ namespace Scada.Main
                     g.Items.Add(lvi);
                 }
             }
-
-            // Auto start
-            // runAll = true;
-            if (runAll)
-            {
-                this.StartDevices(true);
-            }
-            else if (recover)
-            {
-                if (this.RecoverCheck())
-                {
-                    this.StartDevices(false);
-                }
-                else
-                {
-                    this.StartDevices(true);
-                }
-            }
-
-            // this.OpenLocalCommandReceiver();
         }
 
         private void OpenLocalCommandReceiver()
@@ -356,7 +362,9 @@ namespace Scada.Main
 		}
 
 		private void stopMenuItem_Click(object sender, EventArgs e)
-		{
+        {
+            this.quitByUser = true;
+
             this.deviceRunning = false;
             this.startToolBarButton.Enabled = true;
             // deviceListView.Enabled = true;
@@ -600,6 +608,52 @@ namespace Scada.Main
         {
             Command.Send(Ports.DataClient, string.Format("DOOR={0}", doorOpen ? "1" : "0"));
             doorOpen = !doorOpen;
+        }
+
+        private void SwitchASToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void S2ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeviceManager.SetDeviceConfigPath("scada.cinderella.data", false);
+            DeviceManager.SetDeviceConfigPath("scada.cinderella.status", false);
+            DeviceManager.SetDeviceConfigPath("scada.labr", false);
+            DeviceManager.SetDeviceConfigPath("Scada.HPGE", false);
+
+            DeviceManager.SetDeviceConfigPath("Scada.HVSampler", true);
+            DeviceManager.SetDeviceConfigPath("Scada.ISampler", true);
+            DeviceManager.SetDeviceConfigPath("Scada.dwd", true);
+            DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", true);
+            this.SetDeviceList();
+        }
+
+        private void S1ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeviceManager.SetDeviceConfigPath("scada.cinderella.data", true);
+            DeviceManager.SetDeviceConfigPath("scada.cinderella.status", true);
+            DeviceManager.SetDeviceConfigPath("scada.labr", true);
+            DeviceManager.SetDeviceConfigPath("Scada.HPGE", true);
+
+            DeviceManager.SetDeviceConfigPath("Scada.HVSampler", false);
+            DeviceManager.SetDeviceConfigPath("Scada.ISampler", false);
+            DeviceManager.SetDeviceConfigPath("Scada.dwd", false);
+            DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", false);
+            this.SetDeviceList();
+        }
+
+        private void S3ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeviceManager.SetDeviceConfigPath("scada.cinderella.data", false);
+            DeviceManager.SetDeviceConfigPath("scada.cinderella.status", false);
+            DeviceManager.SetDeviceConfigPath("scada.labr", false);
+            DeviceManager.SetDeviceConfigPath("Scada.HPGE", false);
+
+            DeviceManager.SetDeviceConfigPath("Scada.HVSampler", false);
+            DeviceManager.SetDeviceConfigPath("Scada.ISampler", false);
+            DeviceManager.SetDeviceConfigPath("Scada.dwd", false);
+            DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", false);
+            this.SetDeviceList();
         }
     }
 }

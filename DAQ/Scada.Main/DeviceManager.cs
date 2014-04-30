@@ -157,6 +157,7 @@ namespace Scada.Main
 		
         private void LoadDevicesInfo(string installPath)
         {
+            this.dict.Clear();
             string[] deviceConfigPaths = Directory.GetDirectories(ConfigPath.GetConfigFilePath(DevicePath));
             foreach (string devicePath in deviceConfigPaths)
             {
@@ -217,6 +218,23 @@ namespace Scada.Main
         {
             string deviceConfigPath = ConfigPath.GetConfigFilePath(DevicePath);
             return string.Format("{0}\\{1}\\{2}", deviceConfigPath, deviceName, version);
+        }
+
+        public static void SetDeviceConfigPath(string deviceName, bool hide)
+        {
+            string deviceConfigPath = ConfigPath.GetConfigFilePath(DevicePath);
+            string devicePath1 = string.Format("{0}\\{1}", deviceConfigPath, deviceName);
+            string devicePath2 = string.Format("{0}\\!{1}", deviceConfigPath, deviceName);
+
+            if (hide && Directory.Exists(devicePath1))
+            {
+                Directory.Move(devicePath1, devicePath2);
+                // Rename(devicePath1, devicePath2);
+            }
+            else if (!hide && Directory.Exists(devicePath2))
+            {
+                Directory.Move(devicePath2, devicePath1);
+            }
         }
 
 		public bool RegisterRecordModule(string module, FileRecord fileRecord)

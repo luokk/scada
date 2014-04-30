@@ -14,14 +14,13 @@ using Scada.Config;
 
 namespace Scada.Main
 {
-
-    
 	/// <summary>
 	/// 
 	/// </summary>
     static class Program
     {
 		private const int WM_KEEPALIVE = 0x006A;
+
 		/// <summary>
 		/// 
 		/// </summary>
@@ -106,8 +105,7 @@ namespace Scada.Main
 
                 MainApplication.TimerCreator = new WinFormTimerCreator();
 
-
-                deviceManager.Initialize();
+                // deviceManager.Initialize();
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
