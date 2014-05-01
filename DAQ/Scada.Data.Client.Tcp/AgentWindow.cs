@@ -167,6 +167,21 @@ namespace Scada.Data.Client.Tcp
                     var packet = this.builder.GetDoorStatePacket(state);
                     this.agent.SendPacket(packet);
                 }
+                else if (msg.IndexOf("ACTIVE=") == 0)
+                {
+                    string state = msg.Substring(6);
+                    if (state == "1")
+                    {
+                        this.WindowState = FormWindowState.Normal;
+                        this.MakeWindowShownFront();
+                        this.ShowAtTaskBar(true);
+                    }
+                    else
+                    {
+                        this.WindowState = FormWindowState.Minimized;
+                        this.ShowAtTaskBar(false);
+                    }
+                }
             });
         }
 
@@ -228,10 +243,7 @@ namespace Scada.Data.Client.Tcp
                 this.DoLog(ScadaDataClient, "Connected to MySQL");
                 this.InitializeAgents();
                 this.InitializeTimer();
-#if DEBUG
-                this.agent.SendDataStarted = true;
-                SendDataPackets(DateTime.Parse("2014-03-23 12:00:30"), "Scada.Shelter");
-#endif
+
                 this.started = true;
             }
             catch (Exception)

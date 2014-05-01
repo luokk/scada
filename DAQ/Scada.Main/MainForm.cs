@@ -307,7 +307,17 @@ namespace Scada.Main
 
         private void BringDataUploadUI()
         {
-            MessageBox.Show("等待功能实现");
+            string dataUploadExe = "Scada.Data.Client.exe";
+            if (File.Exists(ConfigPath.GetConfigFilePath("as1.type")))
+            {
+                dataUploadExe = "Scada.DataCenterAgent.exe";
+            }
+
+            Process[] ps = Process.GetProcessesByName(dataUploadExe);
+            if (ps == null || ps.Length == 0)
+            {
+                this.OpenProcessByName(dataUploadExe);
+            }
         }
 
         private void ShowMainUI()
@@ -492,7 +502,6 @@ namespace Scada.Main
                     // TODO: If there are multi-items, only one can be selected.    
                 }
             }
-
         }
 
         private void settingClick(object sender, EventArgs e)

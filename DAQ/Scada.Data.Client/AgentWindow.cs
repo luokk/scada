@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using Scada.Common;
 using Scada.Data.Client;
 using Scada.Data.Client.Properties;
 using System;
@@ -83,6 +84,8 @@ namespace Scada.Data.Client
 
         public MySqlCommand MySqlCmd { get; set; }
 
+        private CommandReceiver cmdReceiver;
+
         public MainDataAgentWindow()
         {
             InitializeComponent();
@@ -103,8 +106,38 @@ namespace Scada.Data.Client
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add(this.pingLabel);
 
+            this.cmdReceiver = new CommandReceiver(Ports.DataClient);
+            cmdReceiver.Start(this.OnLocalCommand);
+
             this.InitDetailsListView();
             this.Start();
+        }
+
+        private void OnLocalCommand(string msg)
+        {
+            this.SafeInvoke(() =>
+            {
+                if (msg.IndexOf("DOOR=") == 0)
+                {
+                    string state = msg.Substring(5);
+                    // var packet = this.builder.GetDoorStatePacket(state);
+                    // this.agent.SendPacket(packet);
+                }
+                else if (msg.IndexOf("ACTIVE=") == 0)
+                {
+                    string state = msg.Substring(6);
+                    if (state == "1")
+                    {
+                        this.WindowState = FormWindowState.Normal;
+
+                    }
+                    else
+                    {
+                        this.WindowState = FormWindowState.Minimized;
+                        // this.ShowAtTaskBar(false);
+                    }
+                }
+            });
         }
 
         private void InitSysNotifyIcon()
@@ -147,6 +180,7 @@ namespace Scada.Data.Client
                 }
                 catch (Exception) { }
             }
+            this.cmdReceiver.Close();
             Application.Exit();
         }
 

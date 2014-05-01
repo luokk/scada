@@ -1,7 +1,9 @@
-﻿using Scada.Controls;
+﻿using Scada.Config;
+using Scada.Controls;
 using Scada.Controls.Data;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -297,7 +299,14 @@ namespace Scada.MainVision
             }
             else if (name == PanelManager.DevicesRunStatus)
             {
-                return new AllDevicesPage();
+                if (File.Exists(ConfigPath.GetConfigFilePath("as1.type")))
+                {
+                    return new AllDevicesPage();
+                }
+                else
+                {
+                    return new AllDevicesPage2();
+                }
             }
             return null;
         }

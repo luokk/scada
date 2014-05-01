@@ -145,7 +145,7 @@ namespace Scada.Data.Client
                             result = result.Trim();
                             if (!string.IsNullOrEmpty(result))
                             {
-
+                                this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = result });
                             }
                         }
                     };

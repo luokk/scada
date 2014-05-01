@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="Scada.MainVision.AllDevicesPage2"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:m="clr-namespace:Scada.MainVision"
+      mc:Ignorable="d" Background="White"
+      d:DesignHeight="800" d:DesignWidth="1000" Loaded="UserControl_Loaded">
+
+    <m:CanvasEx AllowDragging="True">
+        <m:CanvasEx.Background>
+            <ImageBrush ImageSource="Images/background.png" Stretch="UniformToFill"></ImageBrush>
+        </m:CanvasEx.Background>
+        <!--
+        <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold">高压电离室</Label>
+        <Label Canvas.Left="220" Canvas.Top="25" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
+
+        <Label Canvas.Left="24" Canvas.Top="65" FontSize="16" FontWeight="Bold">NaI谱仪</Label>
+        <Label Canvas.Left="220" Canvas.Top="65" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
+
+        <Label Canvas.Left="24" Canvas.Top="105" FontSize="16" FontWeight="Bold">气象站</Label>
+        <Label Canvas.Left="220" Canvas.Top="105" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
+
+        <Label Canvas.Left="24" Canvas.Top="145" FontSize="16" FontWeight="Bold">超大流量气溶胶采样器</Label>
+        <Label Canvas.Left="220" Canvas.Top="145" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
+
+        <Label Canvas.Left="24" Canvas.Top="185" FontSize="16" FontWeight="Bold">碘采样器</Label>
+        <Label Canvas.Left="220" Canvas.Top="185" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
+
+        <Label Canvas.Left="24" Canvas.Top="225" FontSize="16" FontWeight="Bold">安防与环境监控</Label>
+        <Label Canvas.Left="220" Canvas.Top="225" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
+        -->
+
+        <m:SmartDataPane x:Name="hpicPane" Title="高压电离室" Canvas.Left="44" Canvas.Top="35">
+        </m:SmartDataPane>
+
+        <m:SmartDataPane x:Name="weatherPane" Title="气象站" Canvas.Left="220" Canvas.Top="178">
+        </m:SmartDataPane>
+
+        <m:SmartDataPane x:Name="naiPane" Title="NaI谱仪" Canvas.Left="273" Canvas.Top="49">
+        </m:SmartDataPane>
+
+        <m:SmartDataPane x:Name="mdsPane" Title="超大流量气溶胶采样器" Canvas.Left="752" Canvas.Top="35">
+        </m:SmartDataPane>
+
+        <m:SmartDataPane x:Name="aisPane" Title="碘采样器" Canvas.Left="752" Canvas.Top="146">
+        </m:SmartDataPane>
+
+        <m:SmartDataPane x:Name="shelterPane" Title="环境与安防" Canvas.Left="44" Canvas.Top="164">
+        </m:SmartDataPane>
+
+
+        <m:SmartDataPane x:Name="dwdPane" Title="干湿沉降采样器" Canvas.Left="904" Canvas.Top="268">
+        </m:SmartDataPane>
+    </m:CanvasEx>
+</UserControl>

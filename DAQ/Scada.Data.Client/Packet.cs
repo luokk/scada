@@ -143,7 +143,12 @@ namespace Scada.Data.Client
                 return "environment";
             else if (deviceKey == Devices.Weather)
                 return "weather";
-            return "";
+            else if (deviceKey == Devices.CinderellaData)
+                return "cinderelladata";
+            else if (deviceKey == Devices.CinderellaStatus)
+                return "cinderellastatus";
+            else   
+                return "";
         }
 
         private JObject GetObject(string deviceKey, Dictionary<string, object> data)
