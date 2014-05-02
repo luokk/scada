@@ -194,15 +194,16 @@ namespace Scada.Data.Client
                 }
             }
 
-
             // Load NaI device config.
             // TODO: 
             string configNaIPath = ConfigPath.GetDeviceConfigFilePath("scada.naidevice", "0.9");
+            if (Directory.Exists(configNaIPath))
+            {
+                DeviceEntry entry = LoadFromConfig("Scada.NaIDevice", configNaIPath);
 
-            DeviceEntry entry = LoadFromConfig("Scada.NaIDevice", configNaIPath);
-
-            this.NaIDeviceSn = (StringValue)entry["DeviceSn"];
-            this.MinuteAdjust = (StringValue)entry["MinuteAdjust"];
+                this.NaIDeviceSn = (StringValue)entry["DeviceSn"];
+                this.MinuteAdjust = (StringValue)entry["MinuteAdjust"];
+            }
         }
 
         private Device ParseDeviceNode(XmlNode deviceNode)
@@ -339,7 +340,6 @@ namespace Scada.Data.Client
                     this.UpdatePassword(value);
                 }
             }
-
         }
 
         private string GetPasswordFile()

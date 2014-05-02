@@ -190,7 +190,8 @@ CREATE TABLE `NaINuclide_Rec` (
 `Indication` varchar(16),
 `DoseRate` varchar(16),
 `Channel` varchar(16), 
-`Energy` varchar(16)
+`Energy` varchar(16),
+PRIMARY KEY (`Time`)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8 PARTITION BY RANGE (TO_DAYS(Time)) 
 (
 PARTITION y2014 VALUES LESS THAN (TO_DAYS('2015-01-01')),
@@ -212,7 +213,8 @@ CREATE TABLE `CinderellaData_Rec` (
 `FlowPerHour` varchar(16), 
 `Pressure` varchar(8) DEFAULT NULL,
 `PressureDiff` varchar(8) DEFAULT NULL,
-`Temperature` tinyint DEFAULT NULL
+`Temperature` tinyint DEFAULT NULL,
+PRIMARY KEY (`Time`)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 #

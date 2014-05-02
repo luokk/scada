@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><features build="69" build-date="2014-05-01">
+<?xml version="1.0" encoding="utf-8"?><features build="70" build-date="2014-05-02">
   <feature plan-date="2014-1-12" progress="50" released-date="2014-1-15" type="feature">
     进程监控功能
   </feature>
@@ -27,5 +27,11 @@
     安防与监控门禁敏感数据记录
   </feature>
 
+  <feature plan-date="2014-4-22" progress="100" released-date="2014-4-22" type="feature">
+    增加对数据中心的协议实现
+  </feature>
 
+  <feature plan-date="2014-5-1" progress="100" released-date="2014-5-2" type="feature">
+    增加对Cinderella的支持
+  </feature>
 </features>

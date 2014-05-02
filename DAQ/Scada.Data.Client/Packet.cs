@@ -49,7 +49,7 @@ namespace Scada.Data.Client
 
         private int Result
         {
-            get
+            get 
             {
                 return this.result;
             }
@@ -136,19 +136,22 @@ namespace Scada.Data.Client
 
         private static string GetDataCenterDeviceId(string deviceKey)
         {
-            // TODO:
             if (deviceKey == Devices.Hpic)
                 return "hpic";
             else if (deviceKey == Devices.Shelter)
                 return "environment";
             else if (deviceKey == Devices.Weather)
                 return "weather";
+            else if (deviceKey == Devices.Labr)
+                return "labr";
+            else if (deviceKey == Devices.HPGe)
+                return "hpge";
             else if (deviceKey == Devices.CinderellaData)
                 return "cinderelladata";
             else if (deviceKey == Devices.CinderellaStatus)
                 return "cinderellastatus";
-            else   
-                return "";
+            else
+                return string.Empty;
         }
 
         private JObject GetObject(string deviceKey, Dictionary<string, object> data)

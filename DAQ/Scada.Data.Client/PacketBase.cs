@@ -7,6 +7,9 @@ namespace Scada.Data.Client
 {
     public class PacketBase
     {
+        /// <summary>
+        /// Guid or ...
+        /// </summary>
         public string Id
         {
             get;

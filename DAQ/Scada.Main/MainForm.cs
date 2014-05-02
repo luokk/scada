@@ -619,10 +619,6 @@ namespace Scada.Main
             doorOpen = !doorOpen;
         }
 
-        private void SwitchASToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-        }
-
         private void S2ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DeviceManager.SetDeviceConfigPath("scada.cinderella.data", false);
@@ -664,5 +660,6 @@ namespace Scada.Main
             DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", false);
             this.SetDeviceList();
         }
+
     }
 }
