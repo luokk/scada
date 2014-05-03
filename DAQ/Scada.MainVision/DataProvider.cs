@@ -39,7 +39,7 @@ namespace Scada.MainVision
 
         public string CurrentDeviceKey { set; get; }
 
-        public abstract Dictionary<string, object> GetLatestData(string deviceKey);
+        public abstract Dictionary<string, object> GetLatestEntry(string deviceKey);
 
         public abstract void RemoveFilters();
 
@@ -59,7 +59,6 @@ namespace Scada.MainVision
         /// <returns></returns>
         public abstract void RemoveDataListener(string tableName);
 
-
-
+        public bool Quit { get; set; }
     }
 }

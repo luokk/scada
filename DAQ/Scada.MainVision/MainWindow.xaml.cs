@@ -72,7 +72,7 @@ namespace Scada.MainVision
 		private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             MainWindow.statusBar = this.StatusBar;
-            this.Title = "Nuclover-SCADA";
+            this.Title = Settings.Instance.ApplicationName;
 
 
 			// TODO: Window Loaded.
@@ -120,19 +120,6 @@ namespace Scada.MainVision
             string fileName = ConfigPath.GetConfigFilePath("dsm.cfg");
             Config.Instance().Load(fileName);
 		}
-
-
-        /*
-		void RefreshDataTimerTick(object sender, EventArgs e)
-		{
-			if (this.dataProvider != null)
-			{
-				this.dataProvider.Refresh();
-
-                // this.refreshDataTimer.Stop();
-			}
-		}
-        */
 
         private string HeaderContent
         {
@@ -517,7 +504,7 @@ namespace Scada.MainVision
             System.Windows.Controls.UserControl page = this.panelManager.GetPage(name);
             if (page == null)
             {
-                page = this.panelManager.CreatePage(name);
+                page = this.panelManager.CreatePage(name, this.dataProvider);
             }
             this.panelManager.SetPage(name, page);
         }
@@ -538,7 +525,7 @@ namespace Scada.MainVision
                 System.Windows.Controls.UserControl page = this.panelManager.GetPage(name);
                 if (page == null)
                 {
-                    page = this.panelManager.CreatePage(name);
+                    page = this.panelManager.CreatePage(name, this.dataProvider);
                 }
                 this.panelManager.SetPage(name, page);
             }
@@ -603,6 +590,7 @@ namespace Scada.MainVision
         /// Close the Window.
         private void OnCloseButton(object sender, RoutedEventArgs e)
         {
+            this.dataProvider.Quit = true;
             this.Close();
         }
 
@@ -673,7 +661,7 @@ namespace Scada.MainVision
             System.Windows.Controls.UserControl page = this.panelManager.GetPage(name);
             if (page == null)
             {
-                page = this.panelManager.CreatePage(name);
+                page = this.panelManager.CreatePage(name, this.dataProvider);
             }
             this.panelManager.SetPage(name, page);
 

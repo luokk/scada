@@ -17,6 +17,7 @@ namespace Scada.Controls
     using System.Diagnostics;
     using System.Windows.Media.Imaging;
     using System.Windows.Input;
+    using System.Threading;
 
 	/// <summary>
 	/// Interaction logic for ListViewPanel.xaml
@@ -65,6 +66,15 @@ namespace Scada.Controls
         // Must Use the <Full Name>
         private System.Windows.Forms.Timer refreshDataTimer;
 
+        private Thread fetchDataThread;
+
+        private SynchronizationContext SynchronizationContext
+        {
+            get;
+            set;
+        }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -77,16 +87,28 @@ namespace Scada.Controls
             this.DisplayName = entry.DisplayName;
             this.dataProvider = dataProvider;
 
-            this.refreshDataTimer = new System.Windows.Forms.Timer();
-            this.refreshDataTimer.Interval = (entry.Interval * 1000);
-            // this.refreshDataTimer.Tick += RefreshDataTimerTick;
-            this.refreshDataTimer.Start();
+            this.SynchronizationContext = SynchronizationContext.Current;
+            this.fetchDataThread = new Thread(new ParameterizedThreadStart((o) => 
+            {
+                while (true)
+                {
+                    if (dataProvider.Quit)
+                    {
+                        break;
+                    }
+                    this.ListRecentData();
+                    Thread.Sleep(10 * 1000);
+                }
+            }));
+            this.fetchDataThread.Start(null);
 		}
-
 
         internal void ListRecentData()
         {
-            this.dataProvider.RefreshTimeline(this.deviceKey);
+            lock (this.dataProvider)
+            {
+                this.dataProvider.RefreshTimeline(this.deviceKey);
+            }
         }
 
         public Control ListView
@@ -330,114 +352,125 @@ namespace Scada.Controls
         // BEGIN
         private void OnDataArrivalBegin(DataArrivalConfig config)
 		{
-            if (config == DataArrivalConfig.TimeNew)
+            this.SynchronizationContext.Post(new SendOrPostCallback((o) =>
             {
-                // DO nothing for the realtime data-source
-            }
-            else if (config == DataArrivalConfig.TimeRange)
-            {
-                // For show new data source, so clear the old data source.
-                this.searchDataSource.Clear();
-            }
-            else if (config == DataArrivalConfig.TimeRecent)
-            {
+                if (config == DataArrivalConfig.TimeNew)
+                {
+                    // DO nothing for the realtime data-source
+                }
+                else if (config == DataArrivalConfig.TimeRange)
+                {
+                    // For show new data source, so clear the old data source.
+                    this.searchDataSource.Clear();
+                }
+                else if (config == DataArrivalConfig.TimeRecent)
+                {
 
-            }
+                }
+ 
+            }), config);
 		}
 
 
         // ARRIVAL
 		private void OnDataArrival(DataArrivalConfig config, Dictionary<string, object> entry)
 		{
-            if (config == DataArrivalConfig.TimeRecent)
+            this.SynchronizationContext.Post(new SendOrPostCallback((o) =>
             {
-                // Debug.Assert(false, "Time Recent should not be here.");
-                this.dataSource.Add(entry); 
-            }
-            else if (config == DataArrivalConfig.TimeRange)
-            {
-                this.searchDataSource.Add(entry);
-            }
-            else if (config == DataArrivalConfig.TimeNew)
-            {
-                const string Time = "time";
-                if (!entry.ContainsKey(Time))
+                if (config == DataArrivalConfig.TimeRecent)
                 {
-                    return;
+                    // Debug.Assert(false, "Time Recent should not be here.");
+                    this.dataSource.Add(entry);
                 }
-                
-                if (this.dataSource.Count > 0)
+                else if (config == DataArrivalConfig.TimeRange)
                 {
-                    Dictionary<string, object> latest = this.dataSource[0];
-                    DateTime latestDateTime = DateTime.Parse((string)latest[Time]);
-
-                    DateTime dt = DateTime.Parse((string)entry[Time]);
-                    if (dt > latestDateTime)
-                    {
-                        this.dataSource.Insert(0, entry);
-                    }
-                    else
+                    this.searchDataSource.Add(entry);
+                }
+                else if (config == DataArrivalConfig.TimeNew)
+                {
+                    const string Time = "time";
+                    if (!entry.ContainsKey(Time))
                     {
                         return;
                     }
-                }
-                else
-                {
-                    this.dataSource.Add(entry);
-                }
 
-                ListView listView = (ListView)this.ListView;
-                int selected = listView.SelectedIndex;
-                listView.ItemsSource = null;
-                listView.ItemsSource = this.dataSource;
-                listView.SelectedIndex = selected;
+                    if (this.dataSource.Count > 0)
+                    {
+                        Dictionary<string, object> latest = this.dataSource[0];
+                        DateTime latestDateTime = DateTime.Parse((string)latest[Time]);
 
-                if (this.dataSource.Count > MaxListCount)
-                {
-                    int p = MaxListCount;
-                    int l = this.dataSource.Count - p;
-                    this.dataSource.RemoveRange(p, l);
+                        DateTime dt = DateTime.Parse((string)entry[Time]);
+                        if (dt > latestDateTime)
+                        {
+                            this.dataSource.Insert(0, entry);
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        this.dataSource.Add(entry);
+                    }
+
+                    ListView listView = (ListView)this.ListView;
+                    int selected = listView.SelectedIndex;
+                    listView.ItemsSource = null;
+                    listView.ItemsSource = this.dataSource;
+                    listView.SelectedIndex = selected;
+
+                    if (this.dataSource.Count > MaxListCount)
+                    {
+                        int p = MaxListCount;
+                        int l = this.dataSource.Count - p;
+                        this.dataSource.RemoveRange(p, l);
+                    }
                 }
-            }
+            }), null);
 		}
 
         // END
         private void OnDataArrivalEnd(DataArrivalConfig config)
 		{
-            if (config == DataArrivalConfig.TimeRecent)
+            this.SynchronizationContext.Post(new SendOrPostCallback((o) =>
             {
-
-                if (this.ListView == null || !(this.ListView is ListView))
-                    return;
-
-                this.dataSource.Sort(DBDataProvider.DateTimeCompare);
-
-                ListView listView = (ListView)this.ListView;
-                // Remember the Selected item.
-                int selected = listView.SelectedIndex;
-                listView.ItemsSource = null;
-                // List can only hold 100 items.
-                if (this.dataSource.Count > MaxListCount)
+                if (config == DataArrivalConfig.TimeRecent)
                 {
-                    int p = 100;
-                    int l = this.dataSource.Count - p;
-                    this.dataSource.RemoveRange(p, l);
+
+                    if (this.ListView == null || !(this.ListView is ListView))
+                        return;
+
+                    this.dataSource.Sort(DBDataProvider.DateTimeCompare);
+
+                    ListView listView = (ListView)this.ListView;
+                    // Remember the Selected item.
+                    int selected = listView.SelectedIndex;
+                    listView.ItemsSource = null;
+                    // List can only hold 100 items.
+                    if (this.dataSource.Count > MaxListCount)
+                    {
+                        int p = MaxListCount;
+                        int l = this.dataSource.Count - p;
+                        this.dataSource.RemoveRange(p, l);
+                    }
+                    listView.ItemsSource = this.dataSource;
+                    listView.SelectedIndex = selected;
+
                 }
-                listView.ItemsSource = this.dataSource;
-                listView.SelectedIndex = selected;
+                else if (config == DataArrivalConfig.TimeRange)
+                {
+                    if (this.SearchView == null || !(this.SearchView is ListView))
+                        return;
 
-            }
-            else if (config == DataArrivalConfig.TimeRange)
-            {
-                if (this.SearchView == null || !(this.SearchView is ListView))
-                    return;
+                    this.searchDataSource.Sort(DBDataProvider.DateTimeCompare);
 
-                this.searchDataSource.Sort(DBDataProvider.DateTimeCompare);
+                    ListView searchListView = (ListView)this.SearchView;
+                    searchListView.ItemsSource = null;
+                    searchListView.ItemsSource = this.searchDataSource;
+                }
+            }), null);
 
-                ListView searchListView = (ListView)this.SearchView;
-                searchListView.ItemsSource = null;
-                searchListView.ItemsSource = this.searchDataSource;
-            }
 		}
         
         ////////////////////////////////////////////////////////////////////////////

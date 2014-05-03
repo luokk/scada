@@ -279,7 +279,7 @@ namespace Scada.MainVision
 			listViewPanel.Visibility = Visibility.Hidden;
 		}
 
-        internal UserControl CreatePage(string name)
+        internal UserControl CreatePage(string name, DataProvider dataProvider)
         {
             if (name == PanelManager.StationIntroduction)
             {
@@ -301,11 +301,15 @@ namespace Scada.MainVision
             {
                 if (File.Exists(ConfigPath.GetConfigFilePath("as1.type")))
                 {
-                    return new AllDevicesPage();
+                    AllDevicesPage page = new AllDevicesPage();
+                    page.SetDataProvider(dataProvider);
+                    return page;
                 }
                 else
                 {
-                    return new AllDevicesPage2();
+                    AllDevicesPage2 page = new AllDevicesPage2();
+                    // page.SetDataProvider(dataProvider);
+                    return page;
                 }
             }
             return null;

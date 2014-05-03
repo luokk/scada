@@ -242,6 +242,7 @@
     <Compile Include="SearchGraphView.xaml.cs">
       <DependentUpon>SearchGraphView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="SmartDataPane.xaml.cs">
       <DependentUpon>SmartDataPane.xaml</DependentUpon>
     </Compile>

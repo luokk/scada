@@ -167,7 +167,7 @@ namespace Scada.MainVision
             throw new NotImplementedException();
         }
 
-        public override Dictionary<string, object> GetLatestData(string deviceKey)
+        public override Dictionary<string, object> GetLatestEntry(string deviceKey)
         {
             throw new NotImplementedException();
         }

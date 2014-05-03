@@ -317,6 +317,7 @@ namespace Scada.MainVision
             {
                 this.cmd = this.GetMySqlCommand();
             }
+
             // Return values
             var ret = new List<Dictionary<string, object>>();
 
@@ -395,7 +396,7 @@ namespace Scada.MainVision
             return this.dataListeners[tableName];
         }
 
-        public override Dictionary<string, object> GetLatestData(string deviceKey)
+        public override Dictionary<string, object> GetLatestEntry(string deviceKey)
         {
             if (this.latestData.ContainsKey(deviceKey))
             {
