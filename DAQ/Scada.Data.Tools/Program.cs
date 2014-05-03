@@ -43,13 +43,9 @@ namespace Scada.Data.Tools
                 // Debug.Assert(false);
                 InitDataBaseSilent(args);
             }
-            else if (fa == "--init-dirs")
+            else if (fa == "--import-hpic")
             {
-                InitDirectories(args);
-            }
-            else if (fa == "--repair-system")
-            {
-                RepairSystem(args);
+                ImportData(args);
             }
             else if (fa == "--m-hpic")
             {
@@ -114,14 +110,11 @@ namespace Scada.Data.Tools
             creator.Execute();
         }
 
-        static void InitDirectories(string[] args)
+        static void ImportData(string[] args)
         {
-
-        }
-
-        static void RepairSystem(string[] args)
-        {
-
+            string csvFile = args[1];
+            DataBaseImporter creator = new DataBaseImporter(csvFile);
+            creator.Import();
         }
 
         static void MockInsertData(string device, int interval)

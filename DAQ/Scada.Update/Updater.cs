@@ -80,8 +80,7 @@ namespace Scada.Update
                 fileName.EndsWith("local.ip") ||
                 fileName.EndsWith("password") ||
                 fileName.EndsWith(".bat") ||
-                fileName.EndsWith(".settings") ||
-                fileName.EndsWith(".sql"))
+                fileName.EndsWith(".settings"))
             {
                 if (this.NeedUpdateConfigFiles)
                 {

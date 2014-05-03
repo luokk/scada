@@ -18,7 +18,7 @@ namespace Scada.Data.Client
     public class Settings
     {
 
-        public const string AgentXml = "agent.http.xml";
+        public const string AgentXml = "agent.http.settings";
 
         public string[] DeviceKeys = {
                                 Devices.Hpic, 

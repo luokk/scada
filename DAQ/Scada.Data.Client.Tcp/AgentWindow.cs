@@ -696,6 +696,8 @@ namespace Scada.Data.Client.Tcp
         // Realtime data sending...details
         private void UpdateSendDataRecord(string deviceKey, bool history)
         {
+            if (!this.detailsDict.ContainsKey(deviceKey))
+                return;
             var details = this.detailsDict[deviceKey];
             if (history)
             {
