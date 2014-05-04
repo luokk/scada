@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,63 +20,56 @@ namespace Scada.MainVision
     /// </summary>
     public partial class AllDevicesPage : UserControl
     {
-        private DataProvider dataProvider;
+        private DBDataProvider dataProvider;
 
         public AllDevicesPage()
         {
             InitializeComponent();
         }
 
-        public void SetDataProvider(DataProvider dataProvider)
+        public void SetDataProvider(DBDataProvider dataProvider)
         {
             this.dataProvider = dataProvider;
         }
 
+        private MySqlConnection dbConn = null;
+
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             this.hpicPane.Initialize(new string[] { "剂量率"});
-            this.weatherPane.Initialize(new string[] { "温度", "湿度", "雨量", "风速", "风向" });
+            this.weatherPane.Initialize(new string[] { "温度", "湿度", "雨量", "风速", "风向", "气压" });
             this.naiPane.Initialize(new string[] { "总剂量率" });
-            this.mdsPane.Initialize(new string[] { "瞬时采样流量", "累计采样流量" });
-            this.aisPane.Initialize(new string[] { "瞬时采样流量", "累计采样流量" });
+            this.mdsPane.Initialize(new string[] { "瞬时采样流量", "累计采样流量", "累积采样时间" });
+            this.aisPane.Initialize(new string[] { "瞬时采样流量", "累计采样流量", "累积采样时间" });
             this.dwdPane.Initialize(new string[] { "采样状态" });
             this.shelterPane.Initialize(new string[] { "市电状态", "备电时间", "舱内温度" });
 
+            this.dbConn = this.dataProvider.GetMySqlConnection();
+
+            MySqlCommand cmd = this.dbConn.CreateCommand();
             var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             dispatcherTimer.Tick += (s, evt) => 
             {
-                //string v1 = string.Format("{0} nGy/h", ra.Next(80, 90));
-                //this.hpicPane.SetData(new string[] { v1 });
-                this.UpdatePanel_HPIC(this.hpicPane);
-
-                //string v2 = string.Format("{0} ℃", ra.Next(16, 17));
-                //string v3 = string.Format("{0} %", ra.Next(23, 25));
-                //this.weatherPane.SetData(new string[] { v2, v3, "24 mm", "1-3级微风", "东南风" });
-                UpdatePanel_Weather(this.weatherPane);
-
-                //string v4 = string.Format("{0} nSv/h", ra.Next(52, 60));
-                //this.naiPane.SetData(new string[] { v4 });
-                UpdatePanel_NaI(this.naiPane);
-
-                //string v5 = string.Format("{0} m³/h", ra.Next(800, 810));
-                //string v6 = string.Format("{0} m³", _v6 += 10);
-                //this.mdsPane.SetData(new string[] { v5, v6 });
-                //UpdatePanel_HV(this.mdsPane);
-
-                //string v7 = string.Format("{0} m³/h", ra.Next(11, 13));
-                //string v8 = string.Format("{0} m³", _v8 += 2);
-                UpdatePanel_I(this.aisPane);
-
-                //this.dwdPane.SetData(new string[] { "<盖子打开>" });
-                //this.shelterPane.SetData(new string[] { "市电", "5 H", "25 ℃" });
-                UpdatePanel_Shelter(this.shelterPane);
-
+                this.RefreshTick(cmd);
             };
             dispatcherTimer.Interval = new TimeSpan(0, 0, 15);
             dispatcherTimer.Start();
-
+            this.RefreshTick(cmd);
+            
         }
 
+        private void RefreshTick(MySqlCommand cmd)
+        {
+            this.dataProvider.RefreshTimeNow(cmd);
+
+            UpdatePanel_HPIC(this.hpicPane);
+            UpdatePanel_Weather(this.weatherPane);
+            UpdatePanel_NaI(this.naiPane);
+            UpdatePanel_HV(this.mdsPane);
+            UpdatePanel_I(this.aisPane);
+            UpdatePanel_Shelter(this.shelterPane);
+            UpdatePanel_DWD(this.dwdPane);
+        }
 
         private void UpdatePanel_HPIC(SmartDataPane panel)
         {
@@ -85,18 +79,7 @@ namespace Scada.MainVision
                 return;
             }
             const string Doserate = "doserate";
-            if (d.ContainsKey(Doserate))
-            {
-                string doserate = d[Doserate] as string;
-                double v;
-                if (ConvertDouble(doserate, out v))
-                {
-                    //this.CheckAlarm(panel, DBDataProvider.DeviceKey_Hpic, Doserate, 0, v); 
-                    string doserateMsg = v + "nGy/h";
-                    // this.DisplayPanelData(panel, doserateMsg);
-                    panel.SetData(new string[] { doserateMsg });
-                }
-            }
+            panel.SetData(Get(d, Doserate, "nGy/h"));
         }
         
         
@@ -116,7 +99,6 @@ namespace Scada.MainVision
             Ru-103 = Ru-103; (0, 100, 100)
             Te-129 = Te-129;(0, 100, 100)
          */
-        
         private void UpdatePanel_NaI(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_NaI);
@@ -152,21 +134,13 @@ namespace Scada.MainVision
 
             }
 
-            string doserateMsg = "总剂量率: " + doserate + "nSv/h";
-            double v;
-            if (ConvertDouble(doserate, out v))
-            {
-                //this.CheckAlarm(panel, DBDataProvider.DeviceKey_NaI, Doserate, 0, v);
-            }
-
             for (int k = 0; k < 3; ++k)
             {
                 nuclideMsgs[k] = nuclideMsgs[k].TrimEnd(' ', ',');
             }
-            panel.SetData(new string[] { doserateMsg });
-            // this.DisplayPanelData(panel, doserateMsg, nuclideMsgs[0], nuclideMsgs[1], nuclideMsgs[2]);
+            panel.SetData(Get(d, Doserate, "nSv/h"));
         }
-        // 3 // 风速、风向、雨量
+
         private void UpdatePanel_Weather(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Weather);
@@ -174,25 +148,17 @@ namespace Scada.MainVision
             {
                 return;
             }
-            if (!d.ContainsKey("windspeed"))
-            {
-                return;
-            }
-            string windspeed = (string)d["windspeed"];
-            string direction = (string)d["direction"];
-            string rainspeed = (string)d["rainspeed"];
-
-            string windspeedMsg = string.Format("风速: {0}m/s", windspeed);
-            string directionMsg = string.Format("风向: {0}°", direction);
-            string rainspeedMsg = string.Format("雨量: {0}mm/min", rainspeed);
-
-            //this.CheckAlarm(panel, DBDataProvider.DeviceKey_Weather, "windspeed", 0, windspeed);
-            //this.CheckAlarm(panel, DBDataProvider.DeviceKey_Weather, "direction", 1, direction);
-            //this.CheckAlarm(panel, DBDataProvider.DeviceKey_Weather, "rainspeed", 2, rainspeed);
-
-            //this.DisplayPanelData(panel, windspeedMsg, directionMsg, rainspeedMsg);
-   
+            
+            // "温度", "湿度", "雨量", "风速", "风向" "气压"
+            panel.SetData(
+                Get(d, "Temperature", "℃"),
+                Get(d, "Humidity", "%"),
+                Get(d, "Raingauge", "mm"),
+                Get(d, "windspeed", "m/s"),
+                Get(d, "direction", ""),
+                Get(d, "pressure", "P"));
         }
+
         // 4 采样状态（可用颜色表示）、累计采样体积（重要）、累计采样时间、瞬时采样流量、三种故障报警
         private void UpdatePanel_HV(SmartDataPane panel)
         {
@@ -202,27 +168,11 @@ namespace Scada.MainVision
                 return;
             }
 
-            string status = this.GetDisplayString(d, "status");
-            string volume = this.GetDisplayString(d, "volume");
-            string hours = this.GetDisplayString(d, "hours");
-            string flow = this.GetDisplayString(d, "flow");
-
-            string statusMsg;
-            if (status == "1")
-            {
-                statusMsg = string.Format("采样状态: 运行"); 
-            }
-            else
-            {
-                statusMsg = string.Format("采样状态: 停止"); 
-            }
-
-            string volumeMsg = string.Format("累计采样体积: {0}m³", volume);
-            string hoursMsg = string.Format("累计采样时间: {0}h", hours);
-            string flowMsg = string.Format("瞬时采样流量: {0}m³/h", flow);
-
-            //this.DisplayPanelData(panel, statusMsg, volumeMsg, hoursMsg, flowMsg);
-
+            //"瞬时采样流量", "累计采样流量", "累积采样时间"
+            panel.SetData(
+                Get(d, "flow", "m³/h"),
+                Get(d, "volume", "m³"),
+                Get(d, "hours", "h"));
         }
         // 5 采样状态（可用颜色表示）、累计采样体积（重要）、累计采样时间、瞬时采样流量、三种故障报警
         private void UpdatePanel_I(SmartDataPane panel)
@@ -231,27 +181,12 @@ namespace Scada.MainVision
             if (d == null)
             {
                 return;
-            }
-            string status = this.GetDisplayString(d, "status");
-            string volume = this.GetDisplayString(d, "volume");
-            string hours = this.GetDisplayString(d, "hours");
-            string flow = this.GetDisplayString(d, "flow");
-
-            string statusMsg;
-            if (status == "1")
-            {
-                statusMsg = string.Format("采样状态: 运行");
-            }
-            else
-            {
-                statusMsg = string.Format("采样状态: 停止");
-            }
-
-            string volumeMsg = string.Format("累计采样体积: {0}L", volume);
-            string hoursMsg = string.Format("累计采样时间: {0}h", hours);
-            string flowMsg = string.Format("瞬时采样流量: {0}L/h", flow);
-
-            //this.DisplayPanelData(panel, statusMsg, volumeMsg, hoursMsg, flowMsg);
+            }            
+            //"瞬时采样流量", "累计采样流量", "累积采样时间"
+            panel.SetData(
+                Get(d, "flow", "m³/h"),
+                Get(d, "volume", "m³"),
+                Get(d, "hours", "h"));
         }
         // 6 市电状态、备电时间、舱内温度、门禁报警、烟感报警、浸水报警
         private void UpdatePanel_Shelter(SmartDataPane panel)
@@ -300,7 +235,7 @@ namespace Scada.MainVision
             string batteryHoursMsg = string.Format("{0}h", batteryHours);
             string tempMsg = string.Format("{0}℃", temperature);
 
-            panel.SetData(new string[] { mainPowMsg, batteryHoursMsg, tempMsg });
+            panel.SetData(mainPowMsg, batteryHoursMsg, tempMsg);
 
         }
         // 7 仅工作状态
@@ -317,7 +252,7 @@ namespace Scada.MainVision
             }
             string isLidOpen = (string)d["islidopen"];
             string LidOpenMsg = (isLidOpen == "1") ? "雨水采集" : "沉降灰采集";
-            panel.SetData(new string[] { LidOpenMsg });
+            panel.SetData(LidOpenMsg);
         }
 
         private static double ConvertDouble(double d, int n)
@@ -355,6 +290,11 @@ namespace Scada.MainVision
                 return (string)d[key];
             }
             return string.Empty;
+        }
+
+        private string Get(Dictionary<string, object> d, string key, string s)
+        {
+            return this.GetDisplayString(d, key.ToLower()) + " " + s; 
         }
     }
 }

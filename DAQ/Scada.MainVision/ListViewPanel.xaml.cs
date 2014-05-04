@@ -18,6 +18,7 @@ namespace Scada.Controls
     using System.Windows.Media.Imaging;
     using System.Windows.Input;
     using System.Threading;
+using MySql.Data.MySqlClient;
 
 	/// <summary>
 	/// Interaction logic for ListViewPanel.xaml
@@ -38,7 +39,7 @@ namespace Scada.Controls
 
 		private DataListener dataListener;
 
-        private DataProvider dataProvider;
+        private DBDataProvider dataProvider;
 
         private string deviceKey;
 
@@ -68,6 +69,8 @@ namespace Scada.Controls
 
         private Thread fetchDataThread;
 
+        private MySqlConnection dbConn;
+
         private SynchronizationContext SynchronizationContext
         {
             get;
@@ -80,34 +83,37 @@ namespace Scada.Controls
         /// </summary>
         /// <param name="displayName">Display Name</param>
         /// <param name="interval">In Seconds</param>
-        public ListViewPanel(DataProvider dataProvider, ConfigEntry entry)
+        public ListViewPanel(DBDataProvider dataProvider, ConfigEntry entry)
 		{
 			InitializeComponent();
             this.deviceKey = entry.DeviceKey;
             this.DisplayName = entry.DisplayName;
             this.dataProvider = dataProvider;
 
+            this.dbConn = this.dataProvider.GetMySqlConnection();
+            
             this.SynchronizationContext = SynchronizationContext.Current;
             this.fetchDataThread = new Thread(new ParameterizedThreadStart((o) => 
             {
+                var dbCmd = this.dbConn.CreateCommand();
                 while (true)
                 {
                     if (dataProvider.Quit)
                     {
                         break;
                     }
-                    this.ListRecentData();
+                    this.ListRecentData(dbCmd);
                     Thread.Sleep(10 * 1000);
                 }
             }));
             this.fetchDataThread.Start(null);
 		}
 
-        internal void ListRecentData()
+        internal void ListRecentData(MySqlCommand dbCmd)
         {
             lock (this.dataProvider)
             {
-                this.dataProvider.RefreshTimeline(this.deviceKey);
+                this.dataProvider.RefreshTimeline(this.deviceKey, dbCmd);
             }
         }
 
@@ -489,7 +495,10 @@ namespace Scada.Controls
             var dt1 = DateTime.Parse(this.FromDateText.Text);
             var dt2 = DateTime.Parse(this.ToDateText.Text);
 
-            this.searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2);
+            using (var cmd = this.dbConn.CreateCommand())
+            {
+                this.searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, cmd);
+            }
             // int interval = this.currentInterval;
             this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
 
@@ -674,7 +683,11 @@ namespace Scada.Controls
             this.EnergyPanelTabItem.Visibility = Visibility.Visible;
             this.TabCtrl.SelectedItem = this.EnergyPanelTabItem;
             EnergyPanel energyPanel = (EnergyPanel)this.EnergyPanel;
-            energyPanel.UpdateEnergyGraphByTime(time);
+
+            using (var cmd = this.dbConn.CreateCommand())
+            {
+                energyPanel.UpdateEnergyGraphByTime(time, cmd);
+            }
 
         }
 

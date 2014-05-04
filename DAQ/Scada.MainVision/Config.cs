@@ -411,13 +411,13 @@ namespace Scada.MainVision
 
         private void BuildIconMapping()
         {
-            this[DBDataProvider.DeviceKey_Hpic].Icon = "Images/1.png";
-            this[DBDataProvider.DeviceKey_NaI].Icon = "Images/2.png";
-            this[DBDataProvider.DeviceKey_Weather].Icon = "Images/3.png";
-            this[DBDataProvider.DeviceKey_HvSampler].Icon = "Images/4.png";
-            this[DBDataProvider.DeviceKey_ISampler].Icon = "Images/5.png";
-            this[DBDataProvider.DeviceKey_Shelter].Icon = "Images/6.png";
-            this[DBDataProvider.DeviceKey_Dwd].Icon = "Images/7.png";
+            this[DataProvider.DeviceKey_Hpic].Icon = "Images/1.png";
+            this[DataProvider.DeviceKey_NaI].Icon = "Images/2.png";
+            this[DataProvider.DeviceKey_Weather].Icon = "Images/3.png";
+            this[DataProvider.DeviceKey_HvSampler].Icon = "Images/4.png";
+            this[DataProvider.DeviceKey_ISampler].Icon = "Images/5.png";
+            this[DataProvider.DeviceKey_Shelter].Icon = "Images/6.png";
+            this[DataProvider.DeviceKey_Dwd].Icon = "Images/7.png";
         }
 	}
 }

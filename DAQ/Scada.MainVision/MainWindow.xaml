@@ -128,7 +128,7 @@
                 </TreeView>
             </Border>
 
-
+            
             <m:NaviLabel x:Name="DataCounterLabel" Margin="0,0,4,0" Value="DataCounter"></m:NaviLabel>
             <Border BorderBrush="#404040" BorderThickness="1" Margin="0,0,4,2">
                 <TreeView x:Name="CounterTree" Grid.Row="1" Grid.Column="0"

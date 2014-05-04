@@ -1,4 +1,5 @@
-﻿using Scada.Chart;
+﻿using MySql.Data.MySqlClient;
+using Scada.Chart;
 using Scada.Config;
 using System;
 using System.Collections.Generic;
@@ -71,9 +72,9 @@ namespace Scada.MainVision
         }
         */
         
-        public int[] GetNaICannelData(DateTime time)
+        public int[] GetNaICannelData(DateTime time, MySqlCommand cmd)
         {
-            string cdLine = DBDataProvider.Instance.GetNaIDeviceChannelData(time);
+            string cdLine = DBDataProvider.Instance.GetNaIDeviceChannelData(time, cmd);
             cdLine = cdLine.Trim();
             if (cdLine.Length > 0)
             {
@@ -99,9 +100,9 @@ namespace Scada.MainVision
 
 
         //private
-        internal void UpdateEnergyGraphByTime(DateTime time)
+        internal void UpdateEnergyGraphByTime(DateTime time, MySqlCommand cmd)
         {
-            int[] data = this.GetNaICannelData(time);
+            int[] data = this.GetNaICannelData(time, cmd);
             if (data.Length > 0)
             {
                 this.EnergyView.SetDataPoints(data);

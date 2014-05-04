@@ -44,7 +44,7 @@ namespace Scada.MainVision
             this.theGrid = theGrid;
 		}
 
-        public ListViewPanel CreateDataViewPanel(DataProvider dataProvider, ConfigEntry entry, bool showList = true)
+        public ListViewPanel CreateDataViewPanel(DBDataProvider dataProvider, ConfigEntry entry, bool showList = true)
 		{
             string deviceKey = entry.DeviceKey;
             string displayName = entry.DisplayName;
@@ -279,7 +279,7 @@ namespace Scada.MainVision
 			listViewPanel.Visibility = Visibility.Hidden;
 		}
 
-        internal UserControl CreatePage(string name, DataProvider dataProvider)
+        internal UserControl CreatePage(string name, DBDataProvider dataProvider)
         {
             if (name == PanelManager.StationIntroduction)
             {

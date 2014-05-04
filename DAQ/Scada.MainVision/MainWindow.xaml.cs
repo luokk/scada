@@ -25,7 +25,7 @@ namespace Scada.MainVision
     /// </summary>
     public partial class MainWindow : Window
     {
-		private DataProvider dataProvider;
+		private DBDataProvider dataProvider;
 
 		private PanelManager panelManager;
 
@@ -62,10 +62,6 @@ namespace Scada.MainVision
 			{
                 DBDataProvider.Instance = new DBDataProvider(); ;
                 this.dataProvider = DBDataProvider.Instance;
-			}
-			else
-			{
-				this.dataProvider = new VirtualDataProvider();
 			}
 		}
 

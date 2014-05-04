@@ -61,7 +61,7 @@ namespace Scada.MainVision
             }   
         }
 
-        public void SetData(string[] values)
+        public void SetData(params string[] values)
         {
             for (int i = 0; i< values.Length; ++i)
             {

@@ -16,7 +16,7 @@ namespace Scada.MainVision
     /// <summary>
     /// Each Device has a Listener.
     /// </summary>
-    internal class DBDataProvider : DataProvider
+    public class DBDataProvider
     {
         private string ConnectionString;
 
@@ -26,9 +26,9 @@ namespace Scada.MainVision
 
         private const string Time = "time";
 
-        private MySqlConnection conn = null;
+        public bool Quit { get; set; }
 
-        private MySqlCommand cmd = null;
+        public string CurrentDeviceKey { set; get; }
 
         public static DBDataProvider Instance
         {
@@ -69,13 +69,13 @@ namespace Scada.MainVision
         /// </summary>
         public DBDataProvider()
         {
-            this.allDeviceKeys.Add(DeviceKey_Hpic);
-            this.allDeviceKeys.Add(DeviceKey_Dwd);
-            this.allDeviceKeys.Add(DeviceKey_HvSampler);
-            this.allDeviceKeys.Add(DeviceKey_ISampler);
-            this.allDeviceKeys.Add(DeviceKey_NaI);
-            this.allDeviceKeys.Add(DeviceKey_Shelter);
-            this.allDeviceKeys.Add(DeviceKey_Weather);
+            this.allDeviceKeys.Add(DataProvider.DeviceKey_Hpic);
+            this.allDeviceKeys.Add(DataProvider.DeviceKey_Dwd);
+            this.allDeviceKeys.Add(DataProvider.DeviceKey_HvSampler);
+            this.allDeviceKeys.Add(DataProvider.DeviceKey_ISampler);
+            this.allDeviceKeys.Add(DataProvider.DeviceKey_NaI);
+            this.allDeviceKeys.Add(DataProvider.DeviceKey_Shelter);
+            this.allDeviceKeys.Add(DataProvider.DeviceKey_Weather);
 
             this.FetchCount = 26;
 
@@ -85,7 +85,7 @@ namespace Scada.MainVision
             this.timelineSource = new List<Dictionary<string, object>>();
         }
 
-        public MySqlCommand GetMySqlCommand()
+        public MySqlConnection GetMySqlConnection()
         {
             string installPath = Assembly.GetExecutingAssembly().Location;
             string fileName = string.Format("{0}\\..\\local.ip", installPath);
@@ -104,15 +104,14 @@ namespace Scada.MainVision
                 }
             }
             this.ConnectionString = s.ToString();
-            this.conn = new MySqlConnection(this.ConnectionString);
+            var conn = new MySqlConnection(this.ConnectionString);
 
-            if (this.conn != null)
+            if (conn != null)
             {
                 try
                 {
-                    this.conn.Open();
-                    MySqlCommand cmd = this.conn.CreateCommand();
-                    return cmd;
+                    conn.Open();
+                    return conn;
                 }
                 catch (Exception e)
                 {
@@ -122,7 +121,7 @@ namespace Scada.MainVision
             return null;
         }
 
-        public override DataListener GetDataListener(string deviceKey)
+        public DataListener GetDataListener(string deviceKey)
         {
             deviceKey = deviceKey.ToLower();
             this.deviceKeyList.Add(deviceKey);
@@ -139,7 +138,7 @@ namespace Scada.MainVision
 
         }
 
-        public override void RemoveDataListener(string deviceKey)
+        public void RemoveDataListener(string deviceKey)
         {
             deviceKey = deviceKey.ToLower();
             if (this.deviceKeyList.Contains(deviceKey))
@@ -148,12 +147,12 @@ namespace Scada.MainVision
             }
         }
 
-        public override void RemoveFilters()
+        public void RemoveFilters()
         {
             this.filters.Clear();
         }
 
-        public override void SetFilter(string key, object value)
+        public void SetFilter(string key, object value)
         {
             if (!this.filters.ContainsKey(key))
             {
@@ -164,14 +163,14 @@ namespace Scada.MainVision
         // For Panels.
         // Get Latest data,
         // No Notify.
-        public override void RefreshTimeNow()
+        public void RefreshTimeNow(MySqlCommand cmd)
         {
             this.latestData.Clear();
             foreach (var item in this.allDeviceKeys)
             {
                 string deviceKey = item.ToLower();
                 // Would use listener to notify, panel would get the lastest data.
-                var data = this.RefreshTimeNow(deviceKey);
+                var data = this.RefreshTimeNow(deviceKey, cmd);
                 if (data != null)
                 {
                     this.latestData.Add(deviceKey, data);
@@ -196,7 +195,7 @@ namespace Scada.MainVision
 
         // Get Recent data
         // Notify the new 
-        public override void RefreshTimeline(string deviceKey)
+        public void RefreshTimeline(string deviceKey, MySqlCommand cmd)
         {
             DBDataCommonListerner listener = this.dataListeners[deviceKey];
             if (listener == null)
@@ -204,7 +203,7 @@ namespace Scada.MainVision
                 return;
             }
 
-            var result = this.Refresh(deviceKey, true, this.FetchCount, DateTime.MinValue, DateTime.MinValue);
+            var result = this.Refresh(deviceKey, true, this.FetchCount, DateTime.MinValue, DateTime.MinValue, cmd);
             if (result == null)
             {
                 return;
@@ -222,11 +221,11 @@ namespace Scada.MainVision
 
         // Get time-range data,
         // Notify with all the result.
-        public override List<Dictionary<string, object>> RefreshTimeRange(string deviceKey, DateTime fromTime, DateTime toTime)
+        public List<Dictionary<string, object>> RefreshTimeRange(string deviceKey, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
         {
             try
             {
-                var result = this.Refresh(deviceKey, false, -1, fromTime, toTime);
+                var result = this.Refresh(deviceKey, false, -1, fromTime, toTime, cmd);
                 result.Reverse();
                 return result;
             }
@@ -238,60 +237,45 @@ namespace Scada.MainVision
             return new List<Dictionary<string, object>>();
         }
 
-        private Dictionary<string, object> RefreshTimeNow(string deviceKey)
+        private Dictionary<string, object> RefreshTimeNow(string deviceKey, MySqlCommand cmd)
         {
-            if (this.cmd == null)
-            {
-                this.cmd = this.GetMySqlCommand();
-            }
+
             // Return values
             const int MaxItemCount = 20;
             var ret = new Dictionary<string, object>(MaxItemCount);
 
             Config cfg = Config.Instance();
             ConfigEntry entry = cfg[deviceKey];
-            this.cmd.CommandText = this.GetSelectStatement(entry.TableName, 1);
+            cmd.CommandText = this.GetSelectStatement(entry.TableName, 1);
 
             try
             {
-                using (MySqlDataReader reader = this.cmd.ExecuteReader())
+                using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    if (reader.Read())
+                    if (!reader.Read())
+                        return ret;
+                    foreach (var i in entry.ConfigItems)
                     {
-                        // Must Has an Id.
-                        string id = reader.GetString(Id);
-                        id = id.Trim();
-
-                        if (string.IsNullOrEmpty(id))
+                        string key = i.Key.ToLower();
+                        try
                         {
-                            return null;
+                            string v = reader.GetString(key);
+                            ret.Add(key, v);
                         }
-
-                        ret.Add(Id, id);
-
-                        foreach (var i in entry.ConfigItems)
+                        catch (SqlNullValueException)
                         {
-                            string key = i.Key.ToLower();
-                            try
-                            {
-                                string v = reader.GetString(key);
-                                ret.Add(key, v);
-                            }
-                            catch (SqlNullValueException)
-                            {
-                                // TODO: Has Null Value
-                                ret.Add(key, null);
-                            }
-                            catch (Exception)
-                            {
-                                // No this field.
-                            }
+                            // TODO: Has Null Value
+                            ret.Add(key, null);
                         }
-
-                        if (entry.DataFilter != null)
+                        catch (Exception)
                         {
-                            entry.DataFilter.Fill(ret);
+                            // No this field.
                         }
+                    }
+
+                    if (entry.DataFilter != null)
+                    {
+                        entry.DataFilter.Fill(ret);
                     }
                 }
             }
@@ -311,13 +295,8 @@ namespace Scada.MainVision
         /// <param name="count"></param>
         /// <param name="from"></param>
         /// <param name="to"></param>
-        private List<Dictionary<string, object>> Refresh(string deviceKey, bool current, int count, DateTime fromTime, DateTime toTime)
+        private List<Dictionary<string, object>> Refresh(string deviceKey, bool current, int count, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
         {
-            if (this.cmd == null)
-            {
-                this.cmd = this.GetMySqlCommand();
-            }
-
             // Return values
             var ret = new List<Dictionary<string, object>>();
 
@@ -325,13 +304,13 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
             if (current)
             {
-                this.cmd.CommandText = this.GetSelectStatement(entry.TableName, count);
+                cmd.CommandText = this.GetSelectStatement(entry.TableName, count);
             }
             else
             {
-                this.cmd.CommandText = this.GetSelectStatement(entry.TableName, fromTime, toTime);
+                cmd.CommandText = this.GetSelectStatement(entry.TableName, fromTime, toTime);
             }
-            using (MySqlDataReader reader = this.cmd.ExecuteReader())
+            using (MySqlDataReader reader = cmd.ExecuteReader())
             {
                 int index = 0;
                 while (reader.Read())
@@ -396,7 +375,7 @@ namespace Scada.MainVision
             return this.dataListeners[tableName];
         }
 
-        public override Dictionary<string, object> GetLatestEntry(string deviceKey)
+        public Dictionary<string, object> GetLatestEntry(string deviceKey)
         {
             if (this.latestData.ContainsKey(deviceKey))
             {
@@ -429,17 +408,12 @@ namespace Scada.MainVision
             return 1;
         }
 
-        public string GetNaIDeviceChannelData(DateTime time)
+        public string GetNaIDeviceChannelData(DateTime time, MySqlCommand cmd)
         {
-            if (this.cmd == null)
-            {
-                this.cmd = this.GetMySqlCommand();
-            }
-
             string sql = string.Format("select ChannelData from nai_rec where time='{0}'", time);
-            this.cmd.CommandText = sql;
+            cmd.CommandText = sql;
 
-            using (MySqlDataReader reader = this.cmd.ExecuteReader())
+            using (MySqlDataReader reader = cmd.ExecuteReader())
             {
                 if (reader.Read())
                 {
