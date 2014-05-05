@@ -29,11 +29,6 @@ namespace Scada.MainVision
 
 		private PanelManager panelManager;
 
-
-        // private Timer refreshPanelDataTimer;
-
-		private bool connectedToDataBase = true;
-
         private bool loaded = false;
 
         private static TextBlock statusBar;
@@ -58,11 +53,8 @@ namespace Scada.MainVision
         /// </summary>
 		private void LoadDataProvider()
 		{
-			if (connectedToDataBase)
-			{
-                DBDataProvider.Instance = new DBDataProvider(); ;
-                this.dataProvider = DBDataProvider.Instance;
-			}
+            DBDataProvider.Instance = new DBDataProvider();
+            this.dataProvider = DBDataProvider.Instance;
 		}
 
 		private void WindowLoaded(object sender, RoutedEventArgs e)
@@ -90,7 +82,7 @@ namespace Scada.MainVision
 				}
             }
 
-            this.AutoStationLabel.Text = "山东威海站";
+            this.AutoStationLabel.Text = Settings.Instance.StationName;
             this.CommStatusLabel.Text = "通信状态";
             this.DataCounterLabel.Text = "数据统计";
 

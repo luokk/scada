@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<settings>
+  <!-- Default Port is 6000 and 7000 -->
+  <datacenters>
+    <datacenter2 BaseUrl="http://127.0.0.1" />
+  </datacenters>
+  <!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
+  <site sysname="" sysst="213213123213123213" adapter="" name="" station="128" sno="0313A08" mn="0313A080000000">
+  </site>
+
+  <threshold>
+    <polId name="__PLACEHOLDER__" v1="" v2="" />
+    <polId v1="" v2="" />
+    <polId name="0102060301" v1="0" v2="300" />
+  </threshold>
+
+  <devices use-debug-data-time="true">
+    <!-- NOTICE -->
+    <!-- NOTICE -->
+    <device id="scada.hpic" table="HPIC_rec" eno="001001" debug-data-time="2014-04-24 23:12:30">
+      <code field="doserate">0102060301</code>
+      <code field="battery">0102069901</code>
+      <code field="highvoltage">0102069902</code>
+      <code field="temperature">0102069903</code>
+    </device>
+
+    <!-- NOTICE -->
+    <!-- NOTICE -->
+    <device id="scada.weather" table="weather_rec" eno="002000" debug-data-time="2014-04-24 23:12:30">
+      <code field="Temperature">0901040101</code>
+      <code field="Humidity">0901040102</code>
+      <code field="Pressure">0901040103</code>
+      <code field="Windspeed">0901040106</code>
+      <code field="Direction">0901040105</code>
+      <code field="Raingauge">0901040104</code>
+      <code field="IfRain">0901040107</code>
+    </device>
+
+    <!-- NOTICE -->
+    <!-- File Time -->
+    <!-- NOTICE -->
+    <device id="Scada.Labr" table="Labr_Rec" eno="010002" debug-data-time="2014-04-25 23:00:00">
+      <code field="file-content">0102060332</code>
+    </device>
+    <!-- NOTICE -->
+    <!-- NOTICE -->
+    <device id="Scada.Shelter" table="environment_rec" eno="999000" debug-data-time="2014-04-24 23:11:30">
+      <code field="IfMainPowerOff" type="bit">0102069909</code>
+      <code field="BatteryHours">0102069910</code>
+      <code field="IfDoorOpen" type="bit">0102069906</code>
+      <code field="Temperature">0102069907</code>
+      <code field="Humidity">0102069911</code>
+      <code field="IfSmoke" type="bit">0102069912</code>
+      <code field="IfWater" type="bit">0102069913</code>
+    </device>
+
+    <!-- NOTICE -->
+    <!-- NOTICE -->
+    <device id="Scada.Cinderella.Data" table="CinderellaData_Rec" 
+      eno="Scada.Cinderella.Data" debug-data-time="2014-04-27 10:19:30">
+      <code field="DeviceTime" type="str">01</code>
+      <code field="Sid" type="str">02</code>
+      <code field="barcode" type="str">03</code>
+      <code field="BeginTime" type="str">04</code>
+      <code field="WorkTime" type="str">05</code>
+      <code field="Flow">06</code>
+      <code field="FlowPerHour">07</code>
+      <code field="Pressure">08</code>
+      <code field="PressureDiff">09</code>
+      <code field="Temperature">0A</code>
+    </device>
+
+    <!-- NOTICE -->
+    <!-- NOTICE -->
+    <device id="Scada.Cinderella.Status" table="CinderellaStatus_Rec" 
+      eno="Scada.Cinderella.Data" debug-data-time="2014-04-27 10:18:33">
+      <code field="StateBits" type="str">01</code>
+    </device>
+
+  </devices>
+</settings>

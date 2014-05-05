@@ -120,17 +120,21 @@
                 </TreeView>
 
             </Border>
+
+            <!-- Device List -->
             <m:DeviceListPanel x:Name="DeviceList" Margin="0,0,4,2"/>
-            <m:NaviLabel x:Name="CommStatusLabel" Margin="0,0,4,0" Value="CommStatus"></m:NaviLabel>
-            <Border BorderBrush="#404040" BorderThickness="1" Margin="0,0,4,2">
+            
+            <!-- -->
+            <m:NaviLabel x:Name="CommStatusLabel" Margin="0,0,4,0" Value="CommStatus" Visibility="Collapsed"></m:NaviLabel>
+            <Border BorderBrush="#404040" BorderThickness="1" Margin="0,0,4,2" Visibility="Collapsed">
                 <TreeView x:Name="CommStatusTree" Grid.Row="1" Grid.Column="0"
                   Background="#F9F9F9" Margin="0" BorderBrush="Transparent" Grid.ColumnSpan="2">
                 </TreeView>
             </Border>
 
-            
-            <m:NaviLabel x:Name="DataCounterLabel" Margin="0,0,4,0" Value="DataCounter"></m:NaviLabel>
-            <Border BorderBrush="#404040" BorderThickness="1" Margin="0,0,4,2">
+            <!-- -->
+            <m:NaviLabel x:Name="DataCounterLabel" Margin="0,0,4,0" Value="DataCounter" Visibility="Collapsed"></m:NaviLabel>
+            <Border BorderBrush="#404040" BorderThickness="1" Margin="0,0,4,2" Visibility="Collapsed">
                 <TreeView x:Name="CounterTree" Grid.Row="1" Grid.Column="0"
                   Background="#F9F9F9" Margin="0" BorderBrush="Transparent" Grid.ColumnSpan="2">
                 </TreeView>
