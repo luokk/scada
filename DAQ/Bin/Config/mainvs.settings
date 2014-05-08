@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <settings>
-  <application title="自动监测站管理系统" station="自动站(测试基地)">
+  <application title="自动监测站管理系统" station="XXXX自动站" status="正式运行" stationId="0A0000000000">
     
   </application>
  </settings>

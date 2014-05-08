@@ -443,10 +443,10 @@ namespace Scada.Data.Client.Tcp
             }
         }
 
-        private void SendShelterDataPackets(string deviceKey)
+        private void SendShelterDataPackets(string deviceKey, Dictionary<string, object> data)
         {
             // 门禁数据
-            var p = builder.GetShelterPacket(deviceKey, this.data[0], true);
+            var p = builder.GetShelterPacket(deviceKey, data, true);
             if (this.agent.SendDataPacket(p))
             {
                 string msg = string.Format("RD: {0}", p.ToString());
@@ -486,9 +486,9 @@ namespace Scada.Data.Client.Tcp
                     {
                         this.SendFlowDataPackets(deviceKey, this.data[0]);
                     }
-                    else if (deviceKey.ToLower() == "scada.shelter")
+                    else if (Case(deviceKey, "scada.shelter"))
                     {
-                        this.SendShelterDataPackets(deviceKey);
+                        this.SendShelterDataPackets(deviceKey, this.data[0]);
                     }
                     else
                     {
@@ -557,11 +557,13 @@ namespace Scada.Data.Client.Tcp
             }
         }
 
+        private const int NaISendTimeOffset = 2;
+
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
         {
             if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
             {
-                int min = dt.Minute - 1;
+                int min = dt.Minute - NaISendTimeOffset;
                 if (min < 0)
                     min = 0;
                 DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
@@ -581,7 +583,7 @@ namespace Scada.Data.Client.Tcp
             {
                 // 00, 05, 10, ...55,
                 // Send data after 1 min.
-                if ((dt.Minute - 1) % 5 == 0)
+                if ((dt.Minute - NaISendTimeOffset) % 5 == 0)
                 {
                     return true;
                 }

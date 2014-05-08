@@ -638,21 +638,33 @@ namespace Scada.Data.Client.Tcp
                 // NaIDevice ... Gose here.
                 // 分包
                 DateTime dt = f;
-                Dictionary<string, object> data = new Dictionary<string, object>(20);
                 while (dt <= t)
                 {
                     string content = DBDataSource.Instance.GetNaIDeviceData(dt);
                     if (!string.IsNullOrEmpty(content))
                     {
-                        List<DataPacket> pks = builder.GetDataPackets(deviceKey, dt, content, true);
-                        foreach (var p in pks)
+                        List<DataPacket> pks = null;
+                        try
                         {
-                            Thread.Sleep(50);
-                            this.agent.SendHistoryDataPacket(p);
+                            pks = builder.GetDataPackets(deviceKey, dt, content, true);
+
+                        }
+                        catch (Exception e)
+                        {
+                            this.agent.OnHandleHistoryData(deviceKey, e.Message, true);
+                        }
+
+                        if (pks != null)
+                        {
+                            foreach (var p in pks)
+                            {
+                                this.agent.SendHistoryDataPacket(p);
+                            }
                         }
                     }
+                    
+
                     dt = dt.AddSeconds(60 * 5);
-                    Thread.Sleep(100);
                 }
             }
             else

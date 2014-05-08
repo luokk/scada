@@ -190,14 +190,24 @@ namespace Scada.Data.Client.Tcp
             string datePath = this.GetDatePath(time);
             string filePath = LogPath.GetDeviceLogFilePath("scada.naidevice", time) + "\\" + fileName;
             string content = string.Empty;
-            if (File.Exists(filePath))
+            try
             {
-                StreamReader fs = new StreamReader(filePath);
-                content = fs.ReadToEnd();
+                if (File.Exists(filePath))
+                {
+                    using (StreamReader fs = new StreamReader(filePath))
+                    {
+                        content = fs.ReadToEnd();
+                        return content;
+                    }
+                }
+                else
+                {
+                    Log.GetLogFile("scada.naidevice").Log(string.Format("{0} Not_Found", filePath));
+                }
             }
-            else
+            catch (Exception)
             {
-                Log.GetLogFile("scada.naidevice").Log(string.Format("{0} Not_Found", filePath));
+                return "";
             }
             
             return content;
@@ -205,7 +215,7 @@ namespace Scada.Data.Client.Tcp
 
         private string GetFileName(DateTime time)
         {
-            int minuteAdjust = Settings.Instance.MinuteAdjust;
+            // int minuteAdjust = Settings.Instance.MinuteAdjust;
             string deviceSn = Settings.Instance.NaIDeviceSn;
             string fileName;
             DateTime t = time;

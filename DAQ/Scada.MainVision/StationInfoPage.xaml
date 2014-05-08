@@ -3,14 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
+             mc:Ignorable="d" Loaded="UserControl_Loaded"
              d:DesignHeight="1190" d:DesignWidth="790" Background="White">
     <Canvas>
         <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold" Width="452">欢迎使用 辐射环境自动监测站管理系统</Label>
 
-        <Label Canvas.Left="24" Canvas.Top="65" FontSize="16" FontWeight="Bold">试运行</Label>
+        <Label x:Name="StationName" Canvas.Left="24" Canvas.Top="65" FontSize="16" FontWeight="Bold"></Label>
 
-        <Label Canvas.Left="24" Canvas.Top="105" FontSize="16" FontWeight="Bold">站点 ID: 00A380N2000</Label>
+        <Label x:Name="StationId" Canvas.Left="24" Canvas.Top="105" FontSize="16" FontWeight="Bold"></Label>
         
         
         <Rectangle Canvas.Left="0" Canvas.Top="150" Fill="#aaa" VerticalAlignment="Top" Width="2000" Height="1"/>
@@ -26,17 +26,17 @@
                 <Label FontSize="16" FontWeight="Bold" Foreground="Green">运行中</Label>
             </StackPanel>
 
-            <StackPanel Canvas.Left="10" Canvas.Top="60" Orientation="Horizontal">
+            <StackPanel Canvas.Left="10" Canvas.Top="60" Orientation="Horizontal" Visibility="Hidden">
                 <Label FontSize="16" >累计数据采集量:</Label>
                 <Label FontSize="16" >240601</Label>
             </StackPanel>
 
-            <StackPanel Canvas.Left="10" Canvas.Top="90" Orientation="Horizontal">
+            <StackPanel Canvas.Left="10" Canvas.Top="90" Orientation="Horizontal" Visibility="Hidden">
                 <Label FontSize="16" >累计数据上传量:</Label>
                 <Label FontSize="16" >240601</Label>
             </StackPanel>
 
-            <StackPanel Canvas.Left="10" Canvas.Top="120" Orientation="Horizontal">
+            <StackPanel Canvas.Left="10" Canvas.Top="120" Orientation="Horizontal" Visibility="Hidden">
                 <Label FontSize="16" >系统运行时间:</Label>
                 <Label FontSize="16" FontWeight="Bold">120天</Label>
                 <Label FontSize="13" VerticalContentAlignment="Bottom">9小时30分</Label>

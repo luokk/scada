@@ -102,6 +102,13 @@ using MySql.Data.MySqlClient;
                     {
                         break;
                     }
+
+                    if (!this.Shown)
+                    {
+                        Thread.Sleep(1500);
+                        continue;
+                    }
+
                     this.ListRecentData(dbCmd);
                     Thread.Sleep(10 * 1000);
                 }
@@ -371,7 +378,7 @@ using MySql.Data.MySqlClient;
                 }
                 else if (config == DataArrivalConfig.TimeRecent)
                 {
-
+                    this.dataSource.Clear();
                 }
  
             }), config);
@@ -744,5 +751,7 @@ using MySql.Data.MySqlClient;
         {
             this.Icon.Source = new BitmapImage(new Uri("pack://application:,,,/" + icon));
         }
+
+        public bool Shown { get; set; }
     }
 }

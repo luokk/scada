@@ -41,6 +41,7 @@
 
         <DockPanel Name="panel" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4">
             <Menu DockPanel.Dock="Top" Padding="10,3,0,0">
+                <!--
                 <Menu.Background>
                     <LinearGradientBrush>
                         <LinearGradientBrush.GradientStops>
@@ -49,6 +50,7 @@
                         </LinearGradientBrush.GradientStops>
                     </LinearGradientBrush>
                 </Menu.Background>
+                -->
                 <!--1-->
                 <MenuItem Header="系统管理" FontSize="14">
                     <MenuItem Header="设备管理器" FontSize="14"></MenuItem>

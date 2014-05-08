@@ -23,5 +23,15 @@ namespace Scada.MainVision
         {
             InitializeComponent();
         }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            string stationName = Settings.Instance.StationName;
+            string status = Settings.Instance.Status;
+            this.StationName.Content = string.Format("{0} ({1})", stationName, status);
+
+            var stationId = string.Format("站点 ID: {0}", Settings.Instance.StationId);
+            this.StationId.Content = stationId;
+        }
     }
 }

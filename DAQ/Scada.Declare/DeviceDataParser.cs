@@ -44,7 +44,8 @@ namespace Scada.Declare
 
             if (ret.Length >= 9)
             {
-                ret[9] = (rd * 2).ToString();
+                double speed = Math.Round((rd * 2), 1);
+                ret[9] = speed.ToString();
             }
             return ret;
 		}

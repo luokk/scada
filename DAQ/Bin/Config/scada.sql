@@ -10,8 +10,8 @@ CREATE TABLE `weather_rec` (
 `Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 `Windspeed` varchar(8) DEFAULT NULL,
 `Direction` char(5) DEFAULT NULL,
-`Temperature` tinyint DEFAULT NULL,
-`Humidity` tinyint DEFAULT NULL,
+`Temperature` char(8) DEFAULT NULL,
+`Humidity` char(8) DEFAULT NULL,
 `Pressure` varchar(8) DEFAULT NULL,
 `Raingauge` varchar(8) DEFAULT NULL,
 `Rainspeed` varchar(8) DEFAULT NULL,
@@ -190,8 +190,7 @@ CREATE TABLE `NaINuclide_Rec` (
 `Indication` varchar(16),
 `DoseRate` varchar(16),
 `Channel` varchar(16), 
-`Energy` varchar(16),
-PRIMARY KEY (`Time`)
+`Energy` varchar(16)
 )ENGINE=MyISAM DEFAULT CHARSET=utf8 PARTITION BY RANGE (TO_DAYS(Time)) 
 (
 PARTITION y2014 VALUES LESS THAN (TO_DAYS('2015-01-01')),

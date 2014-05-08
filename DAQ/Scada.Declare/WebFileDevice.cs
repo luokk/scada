@@ -234,8 +234,8 @@ namespace Scada.Declare
         private void Record(NuclideDataSet set, DateTime now)
         {
             DateTime time = DateTime.Parse(set.EndTime);
-            double minutesAdjust = this.minuteAdjust / 5 * 5 - 5;
-            time = time.AddMinutes(-minutesAdjust);
+            // double minutesAdjust = this.minuteAdjust / 5 * 5 - 5;
+            // time = time.AddMinutes(-minutesAdjust);
 
             var dd = this.ParseNaI(set, time);
             this.SynchronizationContext.Post(this.DataReceived, dd);

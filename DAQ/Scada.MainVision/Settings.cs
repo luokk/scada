@@ -67,10 +67,23 @@ namespace Scada.MainVision
             var application = doc.SelectNodes("//application");
             XmlNode appNode = application[0];
 
-            this.ApplicationName = appNode.Attributes.GetNamedItem("title").Value;
-            this.StationName = appNode.Attributes.GetNamedItem("station").Value;
+            this.ApplicationName = this.GetAttribute(appNode, "title", "MainVision");
+            this.StationName = this.GetAttribute(appNode, "station", "????自动站");
+            this.Status = this.GetAttribute(appNode, "status", "试运行");
+            this.StationId = this.GetAttribute(appNode, "stationId", "00000000001");
+        }
 
-           
+        private string GetAttribute(XmlNode node, string attr, string defaultValue = "")
+        {
+            try
+            {
+                var xmlAttr = node.Attributes.GetNamedItem(attr);
+                return xmlAttr.Value;
+            }
+            catch (Exception e)
+            {
+                return defaultValue;
+            }
         }
 
         public string ApplicationName
@@ -84,5 +97,9 @@ namespace Scada.MainVision
             set;
         }
 
+
+        public string Status { get; set; }
+        public string StationId { get; set; }
+        
     }
 }
