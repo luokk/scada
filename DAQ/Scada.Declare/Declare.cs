@@ -142,7 +142,7 @@ namespace Scada.Declare
         public const string ScadaDeclare = "Scada.Declare.";
 
         // Each device follow one time policy.
-        public TimePolicy recordTimePolicy = new TimePolicy();
+        protected TimePolicy recordTimePolicy = new TimePolicy();
 
 
         public Device()
@@ -412,7 +412,6 @@ namespace Scada.Declare
 
 	}
     // Enc of class Device
-
 
 
     public class MainVirtualDevice : Device

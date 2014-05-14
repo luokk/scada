@@ -399,7 +399,10 @@ namespace Scada.Main
                 if (context != null)
                 {
                     Device device = context.Device;
-                    device.Stop();
+                    if (device != null)
+                    {
+                        device.Stop();
+                    }
                 }
             }
 

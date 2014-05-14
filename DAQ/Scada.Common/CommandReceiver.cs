@@ -46,6 +46,7 @@ namespace Scada.Common
         public void Close()
         {
             Command.Send(this.port, "<QUIT>");
+            this.WinSocket.Close();
             this.commandThread.Abort();
         }
 

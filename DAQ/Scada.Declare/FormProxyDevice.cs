@@ -12,6 +12,9 @@ using System.Threading;
 
 namespace Scada.Declare
 {
+    //------------------------------------------------------------------------
+    // Deprecated
+    // Using Scada.Device.Siemens
 	public class FormProxyDevice : Device
 	{
         public const string ProcessName = "ProcessName";

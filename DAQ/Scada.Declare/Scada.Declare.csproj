@@ -121,10 +121,6 @@
       <Project>{4a1ace05-95de-477e-a635-b89e57cecf74}</Project>
       <Name>Scada.Config</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Scada.Device.Siemens\Scada.Device.Siemens.csproj">
-      <Project>{1870f7fb-08af-4ceb-9c33-ce0e36ec1caf}</Project>
-      <Name>Scada.Device.Siemens</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

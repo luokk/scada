@@ -148,6 +148,8 @@ namespace Scada.Data.Client.Tcp
 
         private SamplerController isc = new SamplerController("scada.isampler");
 
+        private Dictionary<string, HistoryDataBundle> taskDict = new Dictionary<string, HistoryDataBundle>();
+
         // Win32 API
         [DllImport("Kernel32.dll")]
         public static extern void GetLocalTime(SystemTime st);
@@ -518,17 +520,15 @@ namespace Scada.Data.Client.Tcp
             this.CurrentSentCommand = SentCommand.None;
         }
 
-        private Queue<HistoryDataBundle> historyDataBundleQueue = new Queue<HistoryDataBundle>();
-
-        // private Dictionary<string, HistoryDataBundle> historyDataBundleDict = new Dictionary<string, HistoryDataBundle>();
+        private Queue<string> historyDataBundleQueue = new Queue<string>();
 
         private Thread uploadHistoryDataThread;
 
         private bool fQuit = false;
 
-        private void ActiveUploadHistoryDataThread(HistoryDataBundle bundle)
+        private void ActiveUploadHistoryDataThread(string taskId)
         {
-            this.historyDataBundleQueue.Enqueue(bundle);
+            this.historyDataBundleQueue.Enqueue(taskId);
             if (this.uploadHistoryDataThread == null)
             {
                 this.uploadHistoryDataThread = new Thread(new ThreadStart(this.PrepareUploadHistoryData));
@@ -544,7 +544,13 @@ namespace Scada.Data.Client.Tcp
                     break;
                 if (this.historyDataBundleQueue.Count > 0)
                 {
-                    HistoryDataBundle hdb = this.historyDataBundleQueue.Dequeue();
+                    string taskId = this.historyDataBundleQueue.Dequeue();
+                    if (!this.taskDict.ContainsKey(taskId))
+                    {
+                        continue;
+                    }
+                    HistoryDataBundle hdb = this.taskDict[taskId];
+                    
                     if (!string.IsNullOrEmpty(hdb.QN))
                     {
                         string msg = string.Format("Uploading history data [{0} - {1}]", DeviceTime.Parse(hdb.BeginTime), DeviceTime.Parse(hdb.EndTime));
@@ -565,6 +571,8 @@ namespace Scada.Data.Client.Tcp
                     }
 
                     this.SendResultPacket(hdb.QN);
+                    // 
+                    this.taskDict.Remove(taskId);
                 }
                 else
                 {
@@ -577,33 +585,36 @@ namespace Scada.Data.Client.Tcp
         {
             string qn = Value.Parse(msg, "QN");
             string sno = Value.Parse(msg, "SNO");
-
             string eno = Value.Parse(msg, "ENO");
 
             string sid = Value.Parse(msg, "WorkID");
 
             string beginTime = Value.Parse(msg, "BeginTime");
             string endTime = Value.Parse(msg, "EndTime");
-
             string polId = Value.Parse(msg, "PolId");
 
-            string taskId = string.Format("{0}-{1}@{2}", beginTime, endTime, polId);
+            string taskId = string.Format("{0}-{1}@{2}:{3}", beginTime, endTime, polId, sid);
+
+            if (this.taskDict.ContainsKey(taskId))
+            {
+                return;
+            }
 
             this.SendReplyPacket(qn);
 
             HistoryDataBundle hdb = new HistoryDataBundle(qn, eno, polId);
+            taskDict.Add(taskId, hdb);
             hdb.Sid = sid;
             hdb.BeginTime = beginTime;
             hdb.EndTime = endTime;
 
-            this.ActiveUploadHistoryDataThread(hdb);
+            this.ActiveUploadHistoryDataThread(taskId);
         }
 
         private void HandleHistoryData(string msg)
         {
             string qn = Value.Parse(msg, "QN");
             string sno = Value.Parse(msg, "SNO");
-
             string eno = Value.Parse(msg, "ENO");
 
             string beginTime = Value.Parse(msg, "BeginTime");
@@ -613,13 +624,19 @@ namespace Scada.Data.Client.Tcp
 
             string taskId = string.Format("{0}-{1}@{2}", beginTime, endTime, polId);
 
+            if (this.taskDict.ContainsKey(taskId))
+            {
+                return;
+            }
+
             this.SendReplyPacket(qn);
 
             HistoryDataBundle hdb = new HistoryDataBundle(qn, eno, polId);
+            taskDict.Add(taskId, hdb);
             hdb.BeginTime = beginTime;
             hdb.EndTime = endTime;
 
-            this.ActiveUploadHistoryDataThread(hdb);
+            this.ActiveUploadHistoryDataThread(taskId);
         }
 
         private void UploadHistoryData(string qn, string eno, string beginTime, string endTime, string sid, string polId)
@@ -729,7 +746,6 @@ namespace Scada.Data.Client.Tcp
             string qn = Value.Parse(msg, "QN");
             this.SendReplyPacket(qn);
             this.SendResultPacket(qn);
-
         }
 
         private void OnStartSendData(string msg)

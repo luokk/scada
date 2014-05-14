@@ -636,7 +636,10 @@ namespace Scada.Data.Client.Tcp
             result = this.Send(Encoding.ASCII.GetBytes(s));
             if (result)
             {
-               // this.NotifyEvent(this, NotifyEvents.HistoryDataSent, p.DeviceKey, s);
+                if (this.NotifyEvent != null && !string.IsNullOrEmpty(p.DeviceKey))
+                {
+                    this.NotifyEvent(this, NotifyEvents.HistoryDataSent, p.DeviceKey, s);
+                }
             }
             return result;
         }

@@ -262,7 +262,7 @@ namespace Scada.Declare
 					}
 					else
                     {
-                        this.Send(this.actionSend, default(DateTime));
+                        this.Write(this.actionSend, default(DateTime));
 					}
                     // Set status of starting.
                     PostStartStatus();
@@ -309,7 +309,7 @@ namespace Scada.Declare
                     if (this.sensitive)
                     {
                         // Send every MinInterval seconds.
-                        this.Send(this.actionSend, rightTime);
+                        this.Write(this.actionSend, rightTime);
                     }
                     else
                     {
@@ -320,7 +320,7 @@ namespace Scada.Declare
                         }
                         this.currentActionTime = rightTime;
                         // Send every 30 seconds.
-                        this.Send(this.actionSend, rightTime);
+                        this.Write(this.actionSend, rightTime);
                     }
                 });
 
@@ -556,7 +556,7 @@ namespace Scada.Declare
             }
         }
 
-		public override void Send(byte[] action, DateTime time)
+		public void Write(byte[] action, DateTime time)
 		{
             if (action == null || action.Length == 0)
             {
@@ -593,6 +593,10 @@ namespace Scada.Declare
             {
                 this.serialPort.Close();
             }
+        }
+
+        public override void Send(byte[] action, DateTime time)
+        {
         }
 
         public override bool OnReceiveData(byte[] line)

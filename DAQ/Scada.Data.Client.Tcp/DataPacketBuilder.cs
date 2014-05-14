@@ -160,7 +160,7 @@ namespace Scada.Data.Client.Tcp
                 dp = new DataPacket(SentCommand.HistoryData);
             // Set settings
             dp.Settings = Settings.Instance;
-
+            dp.DeviceKey = deviceKey;
             dp.Splitted = true;
             dp.PacketCount = count;
             dp.PacketIndex = index;

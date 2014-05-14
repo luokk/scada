@@ -32,7 +32,7 @@ namespace Scada.Declare
                 }
                 else
                 {
-                    rd = r;
+                    rd = 0;
                 }
             }
             else

@@ -14,7 +14,7 @@ namespace Scada.Data.Client.Tcp
         public string DeviceKey
         {
             get { return this.deviceKey; }
-            private set { this.deviceKey = value; }
+            set { this.deviceKey = value; }
         }
 
         private bool splitted = false;
@@ -70,7 +70,6 @@ namespace Scada.Data.Client.Tcp
         {
             return null;
         }
-
 
         public new string ToString()
         {

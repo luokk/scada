@@ -83,7 +83,7 @@ namespace Scada.Watch
         {
             this.Shutdown = true;
 
-            this.KillScada(new string[]
+            this.KillScadaProcess(new string[]
                 {
                     "MDS.exe",
                     "AIS.exe",
@@ -115,7 +115,7 @@ namespace Scada.Watch
 
         private void UpdateBin(string filePath)
         {
-            this.KillScada(new string[]
+            this.KillScadaProcess(new string[]
                 {
                     "MDS.exe",
                     "AIS.exe",
@@ -127,22 +127,24 @@ namespace Scada.Watch
             this.OpenProcessByName("Scada.Update", string.Format("\"{0}\"", filePath));
         }
 
-        private void KillScada(string[] procNames)
+        private void KillScadaProcess(string[] procNames)
         {
-            Process p = new Process();
-            p.StartInfo.FileName = "cmd.exe";
-            p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardInput = true;
-            p.StartInfo.RedirectStandardOutput = true;
-            p.StartInfo.CreateNoWindow = true;
-            p.Start();
-
-            foreach (var procName in procNames)
+            using (Process p = new Process())
             {
-                string cmd = string.Format("taskkill /f /im {0}", procName);
-                p.StandardInput.WriteLine(cmd);
+                p.StartInfo.FileName = "cmd.exe";
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardInput = true;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.StartInfo.CreateNoWindow = true;
+                p.Start();
+
+                foreach (var procName in procNames)
+                {
+                    string cmd = string.Format("taskkill /f /im {0}", procName);
+                    p.StandardInput.WriteLine(cmd);
+                }
+                p.StandardInput.WriteLine("exit");
             }
-            p.StandardInput.WriteLine("exit");
         }
 
         private void Per30secTimerTick(object sender, EventArgs e)
@@ -213,7 +215,7 @@ namespace Scada.Watch
                 }
                 Process.Start(processInfo);
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
         }

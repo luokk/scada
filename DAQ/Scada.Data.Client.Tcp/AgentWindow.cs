@@ -150,11 +150,18 @@ namespace Scada.Data.Client.Tcp
             this.cmdReceiver = new CommandReceiver(Ports.DataClient);
             cmdReceiver.Start(this.OnLocalCommand);
 
+            SystemEvents.SessionEnding += SystemEvents_SessionEnding;
+
             this.InitDetailsListView();
             if (this.StartState)
             {
                 this.Start();
             }
+        }
+
+        private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            this.PerformQuitByUser();
         }
 
         private void OnLocalCommand(string msg)
@@ -629,7 +636,7 @@ namespace Scada.Data.Client.Tcp
                 else if (NotifyEvents.HandleEvent == notify)
                 {
                     string line = string.Format("{0}: {1} {2}", DateTime.Now, msg1, msg2);
-                    this.mainListBox.Items.Add(line);
+                    this.AddListItem(line);
                 }
                 else if (NotifyEvents.HistoryDataSent == notify)
                 {
@@ -643,15 +650,28 @@ namespace Scada.Data.Client.Tcp
                 {
                     /// 国家数据中心相关
                     this.StartConnectCountryCenter();
-                    this.mainListBox.Items.Add(msg1);
+                    this.AddListItem(msg1);
                 }
                 else if (NotifyEvents.DisconnectToCountryCenter == notify)
                 {
                     /// 国家数据中心相关
                     this.StopConnectCountryCenter();
-                    this.mainListBox.Items.Add(msg1);
+                    this.AddListItem(msg1);
                 }
             });
+        }
+
+        private void AddListItem(string line)
+        {
+            if (this.mainListBox.Items.Count > 200)
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    this.mainListBox.Items.RemoveAt(0);
+                }
+            }
+
+            this.mainListBox.Items.Add(line);
         }
 
 
@@ -666,8 +686,7 @@ namespace Scada.Data.Client.Tcp
                 this.SafeInvoke(() =>
                 {
                     string line = string.Format("请检查国家数据中心的配置");
-                    this.mainListBox.Items.Add(line);
-
+                    this.AddListItem(line);
                     Log.GetLogFile(Program.DataClient).Log("Error: StartConnectCountryCenter(); Check the config.");
                 });
             }

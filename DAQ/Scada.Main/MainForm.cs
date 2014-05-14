@@ -79,7 +79,14 @@ namespace Scada.Main
                 }
             }
 
-            // this.OpenLocalCommandReceiver();
+            this.OpenLocalCommandReceiver();
+
+            SystemEvents.SessionEnding += SystemEvents_SessionEnding;
+        }
+
+        private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            this.PerformQuitByUser();
         }
 
         private void SetDeviceList()
@@ -118,24 +125,28 @@ namespace Scada.Main
             }
         }
 
+        private CommandReceiver cmdReceiver;
+
         private void OpenLocalCommandReceiver()
         {
             try
             {
-                CommandReceiver cr = new CommandReceiver(3000);
-                cr.Start(OnReceivedCommandLine);
+                this.cmdReceiver = new CommandReceiver(Ports.Main);
+                SynchronizationContext sc = SynchronizationContext.Current;
+                this.cmdReceiver.Start(this.OnReceivedCommandLine);
             }
             catch(Exception e)
             {
+                MessageBox.Show("Command receiver initialized failed.");
             }
         }
 
         private void OnReceivedCommandLine(string line)
         {
-            SynchronizationContext.Current.Post(new SendOrPostCallback((cmd) => 
+            this.SafeInvoke(() => 
             {
-
-            }), line);
+ 
+            });
         }
 
         private bool RecoverCheck()
@@ -352,7 +363,7 @@ namespace Scada.Main
         private void PerformQuitByUser()
         {
             this.quitByUser = true;
-
+            this.cmdReceiver.Close();
             this.UpdateDevicesWaitStatus();
             Program.DeviceManager.CloseAllDevices();
 
@@ -379,6 +390,7 @@ namespace Scada.Main
             this.startToolBarButton.Enabled = true;
             // deviceListView.Enabled = true;
             this.UpdateDevicesWaitStatus();
+            this.cmdReceiver.Close();
             Program.DeviceManager.CloseAllDevices();
             RecordManager.DoSystemEventRecord(Device.Main, "User Stopped the devices");
             Program.Exit(); // For quit Mutex;
@@ -576,7 +588,7 @@ namespace Scada.Main
                 processInfo.FileName = fileName;
                 Process.Start(processInfo);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
             }
@@ -661,5 +673,22 @@ namespace Scada.Main
             this.SetDeviceList();
         }
 
+    }
+
+    static class ControlInvoke
+    {
+        public delegate void InvokeHandler();
+
+        public static void SafeInvoke(this Control control, InvokeHandler handler)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(handler);
+            }
+            else
+            {
+                handler();
+            }
+        }
     }
 }

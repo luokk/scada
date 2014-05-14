@@ -66,9 +66,9 @@ namespace Scada.Declare
 			// RecordManager.frameworkRecord = new FileRecord("");
 		}
 
-        public static void DoSystemEventRecord(Device device, string systemEvent, RecordType recordType = RecordType.Event)
+        public static void DoSystemEventRecord(Device device, string systemEvent, RecordType recordType = RecordType.Event, bool flush = false)
 		{
-			RecordManager.WriteDataToLog(device, systemEvent, recordType);
+			RecordManager.WriteDataToLog(device, systemEvent, recordType, flush);
 		}
 
 		public static void DoDataRecord(DeviceData deviceData)
@@ -121,7 +121,7 @@ namespace Scada.Declare
             return sb.ToString();
         }
 
-		private static void WriteDataToLog(Device device, string content, RecordType recordType)
+		private static void WriteDataToLog(Device device, string content, RecordType recordType, bool flush = false)
 		{
             // To Log File
 			DateTime now = DateTime.Now;
@@ -137,7 +137,13 @@ namespace Scada.Declare
 			// Flush Control.
 #if DEBUG
             fileWriter.Flush();
+#else
+            if (flush)
+            {
+                fileWriter.Flush();
+            }
 #endif
+
 			if (flushCtrlCount % 10 == 0)
 			{
                 fileWriter.Flush();

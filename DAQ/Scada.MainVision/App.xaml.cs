@@ -5,6 +5,8 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
 
 namespace Scada.MainVision
 {
@@ -16,6 +18,7 @@ namespace Scada.MainVision
         private Mutex mutex;
         public App()
         {
+            RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
             bool createNew;
 
             this.mutex = new Mutex(true, @"Scada.MainVision", out createNew);
