@@ -10,7 +10,6 @@ using OPC.Data;
 using System.Windows.Forms;
 using OPC.Data.Interface;
 
-
 namespace Scada.Device.Siemens
 {
     public class OpcDevice : Scada.Declare.Device
@@ -46,6 +45,16 @@ namespace Scada.Device.Siemens
 
         private string serverId;
 
+        private string insertSQL;
+
+        private DateTime beginTime;
+
+        private DateTime endTime;
+
+        private DateTime latestTime;
+
+        private string tableName;
+
         public OpcDevice(DeviceEntry entry)
         {
             this.Initialize(entry);
@@ -59,6 +68,13 @@ namespace Scada.Device.Siemens
             this.Version = entry[DeviceEntry.Version].ToString();
 
             this.ipAddr = entry["IPADDR"].ToString();
+
+            this.tableName = (StringValue)entry[DeviceEntry.TableName];
+            if (!string.IsNullOrEmpty(tableName))
+            {
+                string tableFields = (StringValue)entry[DeviceEntry.TableFields];
+                this.insertSQL = this.MakeInsertSQL(this.tableName, tableFields);
+            }
             
             IValue v = entry["TSAP"];
             if (v != null)
@@ -85,8 +101,19 @@ namespace Scada.Device.Siemens
             string cmd = Encoding.ASCII.GetString(action);
             if (this.started)
             {
-                if (cmd == "connect")
+                if (cmd.IndexOf("connect") == 0)
                 {
+                    int b = cmd.IndexOf("Sid=");
+                    if (b > 0)
+                    {
+                        int length = cmd.IndexOf(";", b) - b - 4;
+                        this.Sid = cmd.Substring(b + 4, length);
+                    }
+                    else
+                    {
+                        this.Sid = string.Format("SID-AUTO:{0}", DateTime.Now.ToString());
+                    }
+                    
                     this.Connect();
                 }
                 else if (cmd == "disconnect")
@@ -147,27 +174,50 @@ namespace Scada.Device.Siemens
 
         private void OnDataTimer(object sender, EventArgs e)
         {
-            int[] handles = this.results.Select((r) => r.HandleServer).ToArray();
-            OPCItemState[] states;
-            if (this.group.SyncRead(OPCDATASOURCE.OPC_DS_DEVICE, handles, out states))
+            DateTime time;
+            if (this.OnRightTime(out time))
             {
-                object[] values = states.Select((s) => s.DataValue).ToArray();
-                string valueLine = string.Join(", ", values);
-                RecordManager.DoSystemEventRecord(this, "Read: " + valueLine, RecordType.Event, true);
+                if (this.beginTime == default(DateTime))
+                {
+                    this.beginTime = time;
+                }
 
+                int[] handles = this.results.Select((r) => r.HandleServer).ToArray();
+                OPCItemState[] states;
+                if (this.group.SyncRead(OPCDATASOURCE.OPC_DS_DEVICE, handles, out states))
+                {
+                    object[] values = states.Select((s) => s.DataValue).ToArray();
+                    string valueLine = string.Join(", ", values);
+                    RecordManager.DoSystemEventRecord(this, "Read: " + valueLine, RecordType.Event, true);
+
+                    this.latestTime = time;
+                    object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], values[5], values[6] };
+                    DeviceData deviceData = new DeviceData(this, data);
+                    deviceData.InsertIntoCommand = this.insertSQL;
+                    RecordManager.DoDataRecord(deviceData);
+                }
+                else
+                {
+                    // 
+                    RecordManager.DoSystemEventRecord(this, "Read Faild", RecordType.Event, true);
+                }
             }
-            else
-            {
 
-                RecordManager.DoSystemEventRecord(this, "Read Faild", RecordType.Event, true);
-            }
+        }
 
+        private bool OnRightTime(out DateTime time)
+        {
+            time = default(DateTime);
+            return true;
         }
 
         private void Disconnect()
         {
             try
             {
+                this.started = false;
+                this.MarkEndTime();
+
                 this.server.Disconnect();
 
                 this.timer.Stop();
@@ -179,6 +229,13 @@ namespace Scada.Device.Siemens
             {
                 RecordManager.DoSystemEventRecord(this, string.Format("Disconnect:{0}", e.Message), RecordType.Error);
             }
+        }
+
+        private void MarkEndTime()
+        {
+            DeviceData deviceData = new DeviceData(this, new object[]{});
+            deviceData.InsertIntoCommand = string.Format("update {0} set EndTime='{1}' where time='{2}'", this.tableName, this.latestTime, this.latestTime);
+            RecordManager.DoDataRecord(deviceData);
         }
 
         public override bool OnReceiveData(byte[] line)
@@ -232,10 +289,26 @@ namespace Scada.Device.Siemens
             }
         }
 
+        private string MakeInsertSQL(string tableName, string tableFields)
+        {
+            string[] fields = tableFields.Split(',');
+            string atList = string.Empty;
+            for (int i = 0; i < fields.Length; ++i)
+            {
+                string at = string.Format("@{0}, ", i + 1);
+                atList += at;
+            }
+            atList = atList.TrimEnd(',', ' ');
+            string sql = string.Format("insert into {0}({1}) values({2})", tableName, tableFields, atList);
+            return sql;
+        }
+
         protected string Code(string code)
         {
             return string.Format("2:{0}{1}{2}", this.ipAddr, this.tsap, code);
         }
+
+        public object Sid { get; set; }
     }
 
 

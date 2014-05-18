@@ -54,23 +54,29 @@ namespace Scada.Common
         {
             this.commandThread = new Thread(new ThreadStart(() =>
             {
-                while (true)
+                try
                 {
-                    IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-                    EndPoint Remote = (EndPoint)(sender);
-
-                    byte[] buffer = new byte[1024];
-                    int size = this.WinSocket.ReceiveFrom(buffer, ref Remote);
-                    if (size > 0)
+                    while (true)
                     {
-                        string msg = Encoding.UTF8.GetString(buffer, 0, size);
-                        if (msg == Quit)
-                        {
-                            break;
-                        }
-                        callbackAction(msg);
-                    }
+                        IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
+                        EndPoint Remote = (EndPoint)(sender);
 
+                        byte[] buffer = new byte[1024];
+                        int size = this.WinSocket.ReceiveFrom(buffer, ref Remote);
+                        if (size > 0)
+                        {
+                            string msg = Encoding.UTF8.GetString(buffer, 0, size);
+                            if (msg == Quit)
+                            {
+                                break;
+                            }
+                            callbackAction(msg);
+                        }
+
+                    }
+                }
+                catch (Exception)
+                {
                 }
             }));
             this.commandThread.Start();

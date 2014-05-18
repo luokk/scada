@@ -75,6 +75,12 @@
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.deviceListView = new System.Windows.Forms.ListView();
+            this.mDSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startMDSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stopMDSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aISToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.startAISToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.stopAISToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuBar.SuspendLayout();
             this.toolBar.SuspendLayout();
             this.statusBar.SuspendLayout();
@@ -137,7 +143,9 @@
             this.stopMenuItem,
             this.toolStripMenuItem1,
             this.selectAllToolStripMenuItem,
-            this.SwitchASToolStripMenuItem});
+            this.SwitchASToolStripMenuItem,
+            this.mDSToolStripMenuItem,
+            this.aISToolStripMenuItem});
             this.operateMenuItem.Name = "operateMenuItem";
             this.operateMenuItem.Size = new System.Drawing.Size(44, 21);
             this.operateMenuItem.Text = "操作";
@@ -223,32 +231,32 @@
             // startMainVisionMenuItem
             // 
             this.startMainVisionMenuItem.Name = "startMainVisionMenuItem";
-            this.startMainVisionMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.startMainVisionMenuItem.Size = new System.Drawing.Size(152, 22);
             this.startMainVisionMenuItem.Text = "启动数据视图";
             this.startMainVisionMenuItem.Click += new System.EventHandler(this.startMainVisionMenuItem_Click);
             // 
             // dataUploadToolStripMenuItem
             // 
             this.dataUploadToolStripMenuItem.Name = "dataUploadToolStripMenuItem";
-            this.dataUploadToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.dataUploadToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.dataUploadToolStripMenuItem.Text = "数据上传";
             this.dataUploadToolStripMenuItem.Click += new System.EventHandler(this.dataUploadToolStripMenuItem_Click);
             // 
             // dataCenterSetMenuItem
             // 
             this.dataCenterSetMenuItem.Name = "dataCenterSetMenuItem";
-            this.dataCenterSetMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.dataCenterSetMenuItem.Size = new System.Drawing.Size(152, 22);
             this.dataCenterSetMenuItem.Text = "数据中心设置";
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(145, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
             // 
             // doorSimuToolStripMenuItem
             // 
             this.doorSimuToolStripMenuItem.Name = "doorSimuToolStripMenuItem";
-            this.doorSimuToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.doorSimuToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.doorSimuToolStripMenuItem.Text = "模拟门禁";
             this.doorSimuToolStripMenuItem.Click += new System.EventHandler(this.doorSimuToolStripMenuItem_Click);
             // 
@@ -265,21 +273,21 @@
             // logToolMenuItem
             // 
             this.logToolMenuItem.Name = "logToolMenuItem";
-            this.logToolMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.logToolMenuItem.Size = new System.Drawing.Size(152, 22);
             this.logToolMenuItem.Text = "日志分析工具";
             this.logToolMenuItem.Click += new System.EventHandler(this.logToolMenuItem_Click);
             // 
             // logBankMenuItem
             // 
             this.logBankMenuItem.Name = "logBankMenuItem";
-            this.logBankMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.logBankMenuItem.Size = new System.Drawing.Size(152, 22);
             this.logBankMenuItem.Text = "备份日志";
             this.logBankMenuItem.Click += new System.EventHandler(this.logBankMenuItem_Click);
             // 
             // logDelMenuItem
             // 
             this.logDelMenuItem.Name = "logDelMenuItem";
-            this.logDelMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.logDelMenuItem.Size = new System.Drawing.Size(152, 22);
             this.logDelMenuItem.Text = "删除日志";
             this.logDelMenuItem.Click += new System.EventHandler(this.logDelMenuItem_Click);
             // 
@@ -296,19 +304,19 @@
             // docMenuItem
             // 
             this.docMenuItem.Name = "docMenuItem";
-            this.docMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.docMenuItem.Size = new System.Drawing.Size(152, 22);
             this.docMenuItem.Text = "文档";
             this.docMenuItem.Click += new System.EventHandler(this.docMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(97, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // aboutMenuItem
             // 
             this.aboutMenuItem.Name = "aboutMenuItem";
-            this.aboutMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.aboutMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutMenuItem.Text = "关于";
             this.aboutMenuItem.Click += new System.EventHandler(this.aboutMenuItem_Click);
             // 
@@ -456,6 +464,52 @@
             this.deviceListView.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.deviceListView_ItemChecked);
             this.deviceListView.SelectedIndexChanged += new System.EventHandler(this.deviceListView_SelectedIndexChanged);
             // 
+            // mDSToolStripMenuItem
+            // 
+            this.mDSToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.startMDSToolStripMenuItem,
+            this.stopMDSToolStripMenuItem});
+            this.mDSToolStripMenuItem.Name = "mDSToolStripMenuItem";
+            this.mDSToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.mDSToolStripMenuItem.Text = "MDS";
+            // 
+            // startMDSToolStripMenuItem
+            // 
+            this.startMDSToolStripMenuItem.Name = "startMDSToolStripMenuItem";
+            this.startMDSToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.startMDSToolStripMenuItem.Text = "启动";
+            this.startMDSToolStripMenuItem.Click += new System.EventHandler(this.startMDSToolStripMenuItem_Click);
+            // 
+            // stopMDSToolStripMenuItem
+            // 
+            this.stopMDSToolStripMenuItem.Name = "stopMDSToolStripMenuItem";
+            this.stopMDSToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stopMDSToolStripMenuItem.Text = "停止";
+            this.stopMDSToolStripMenuItem.Click += new System.EventHandler(this.stopMDSToolStripMenuItem_Click);
+            // 
+            // aISToolStripMenuItem
+            // 
+            this.aISToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.startAISToolStripMenuItem1,
+            this.stopAISToolStripMenuItem1});
+            this.aISToolStripMenuItem.Name = "aISToolStripMenuItem";
+            this.aISToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aISToolStripMenuItem.Text = "AIS";
+            // 
+            // startAISToolStripMenuItem1
+            // 
+            this.startAISToolStripMenuItem1.Name = "startAISToolStripMenuItem1";
+            this.startAISToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.startAISToolStripMenuItem1.Text = "启动";
+            this.startAISToolStripMenuItem1.Click += new System.EventHandler(this.startAISToolStripMenuItem1_Click);
+            // 
+            // stopAISToolStripMenuItem1
+            // 
+            this.stopAISToolStripMenuItem1.Name = "stopAISToolStripMenuItem1";
+            this.stopAISToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.stopAISToolStripMenuItem1.Text = "停止";
+            this.stopAISToolStripMenuItem1.Click += new System.EventHandler(this.stopAISToolStripMenuItem1_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -531,6 +585,12 @@
         private System.Windows.Forms.ToolStripMenuItem S1ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem S2ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem S3ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mDSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem startMDSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem stopMDSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aISToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem startAISToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem stopAISToolStripMenuItem1;
     }
 }
 

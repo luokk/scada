@@ -36,7 +36,7 @@ namespace Scada.Device.Siemens
             this.mdsDevice = new MDSDevice(entry);
             this.mdsDevice.Start("S7200.OPCServer");
 
-            this.mdsDevice.Send(Encoding.ASCII.GetBytes("connect"), default(DateTime));
+            this.mdsDevice.Send(Encoding.ASCII.GetBytes("connect;Sid=SAMPLE_ID;"), default(DateTime));
         }
 
         private void btnDisconnMDS_Click(object sender, EventArgs e)

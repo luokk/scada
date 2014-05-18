@@ -294,7 +294,9 @@ namespace Scada.Main
 			// Other Device defined in some Assemblies.
             if (entry[DeviceEntry.Assembly] != null)
             {
-                Assembly assembly = Assembly.Load((StringValue)entry[DeviceEntry.Assembly]);
+                string assemblyName = (StringValue)entry[DeviceEntry.Assembly];
+                string assemblyFile = LogPath.GetExeFilePath(assemblyName);
+                Assembly assembly = Assembly.LoadFile(assemblyFile);
                 Type deviceClass = assembly.GetType((StringValue)entry[DeviceEntry.ClassName]);
                 if (deviceClass != null)
                 {
@@ -476,6 +478,22 @@ namespace Scada.Main
                     badDevice.Stop();
                 }
                 this.RunDevice(context);
+            }
+        }
+
+        public void SendDeviceCode(string deviceKey, string code)
+        {
+            deviceKey = deviceKey.ToLower();
+            if (!this.selectedDevices.ContainsKey(deviceKey))
+            {
+                return;
+            }
+
+            DeviceRunContext context = this.selectedDevices[deviceKey];
+            if (context != null)
+            {
+                Device device = context.Device;
+                device.Send(Encoding.UTF8.GetBytes(code), DateTime.Now);
             }
         }
 

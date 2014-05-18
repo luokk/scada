@@ -145,7 +145,31 @@ namespace Scada.Main
         {
             this.SafeInvoke(() => 
             {
- 
+                const string ConnectCommand = "connect"; 
+                const string DisconnectCommand = "disconnect";
+
+                if (line.StartsWith(ConnectCommand))
+                {
+                    if (line.IndexOf("mds") > 0)
+                    {
+                        Program.DeviceManager.SendDeviceCode("Scada.MDS", ConnectCommand);
+                    }
+                    else if (line.IndexOf("ais") > 0)
+                    {
+                        Program.DeviceManager.SendDeviceCode("Scada.AIS", ConnectCommand);
+                    }
+                }
+                else if (line.StartsWith(DisconnectCommand))
+                {
+                    if (line.IndexOf("mds") > 0)
+                    {
+                        Program.DeviceManager.SendDeviceCode("Scada.MDS", DisconnectCommand);
+                    }
+                    else if (line.IndexOf("ais") > 0)
+                    {
+                        Program.DeviceManager.SendDeviceCode("Scada.AIS", DisconnectCommand);
+                    }
+                }
             });
         }
 
@@ -671,6 +695,26 @@ namespace Scada.Main
             DeviceManager.SetDeviceConfigPath("Scada.dwd", false);
             DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", false);
             this.SetDeviceList();
+        }
+
+        private void startMDSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Command.Send(Ports.Main, "connect:mds");
+        }
+
+        private void stopMDSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Command.Send(Ports.Main, "disconnect:mds");
+        }
+
+        private void startAISToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Command.Send(Ports.Main, "connect:ais");
+        }
+
+        private void stopAISToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Command.Send(Ports.Main, "disconnect:ais");
         }
 
     }

@@ -78,6 +78,26 @@ PARTITION y2015 VALUES LESS THAN (TO_DAYS('2016-01-01')),
 PARTITION y2016 VALUES LESS THAN (TO_DAYS('2017-01-01')),
 PARTITION yend VALUES LESS THAN MAXVALUE );
 
+DROP TABLE IF EXISTS `mds_rec`;
+CREATE TABLE `mds_rec` (
+`Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+`Sid` char(48) NOT NULL, /*采样ID,唯一号*/
+`BeginTime` datetime,
+`EndTime` datetime,
+`Volume` char(8), /*真空泵开关状态，单位：无；数据格式：0或1表示开关*/
+`Flow` char(8), /*报警，单位：无；数据格式：0、1、2,，代表不同的报警类型，保留字段*/
+`Hours` char(8),
+`Status` bit,
+`Alarm1` bit,
+`Alarm2` bit,
+`Alarm3` bit,
+PRIMARY KEY (`Time`)
+)ENGINE=MyISAM DEFAULT CHARSET=utf8 PARTITION BY RANGE (TO_DAYS(Time)) 
+(
+PARTITION y2014 VALUES LESS THAN (TO_DAYS('2015-01-01')),
+PARTITION y2015 VALUES LESS THAN (TO_DAYS('2016-01-01')),
+PARTITION y2016 VALUES LESS THAN (TO_DAYS('2017-01-01')),
+PARTITION yend VALUES LESS THAN MAXVALUE );
 
 DROP TABLE IF EXISTS `ISampler_rec`;
 CREATE TABLE `ISampler_rec` (
@@ -89,6 +109,27 @@ CREATE TABLE `ISampler_rec` (
 `Status` bit,
 `BeginTime` datetime,
 `EndTime` datetime,
+`Alarm1` bit,
+`Alarm2` bit,
+`Alarm3` bit,
+PRIMARY KEY (`Time`)
+)ENGINE=MyISAM DEFAULT CHARSET=utf8 PARTITION BY RANGE (TO_DAYS(Time)) 
+(
+PARTITION y2014 VALUES LESS THAN (TO_DAYS('2015-01-01')),
+PARTITION y2015 VALUES LESS THAN (TO_DAYS('2016-01-01')),
+PARTITION y2016 VALUES LESS THAN (TO_DAYS('2017-01-01')),
+PARTITION yend VALUES LESS THAN MAXVALUE );
+
+DROP TABLE IF EXISTS `ais_rec`;
+CREATE TABLE `ais_rec` (
+`Time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+`Sid` char(48) NOT NULL, /*采样ID,唯一号*/
+`BeginTime` datetime,
+`EndTime` datetime,
+`Volume` char(8), /*真空泵开关状态，单位：无；数据格式：0或1表示开关*/
+`Flow` char(8), /*报警，单位：无；数据格式：0、1、2,，代表不同的报警类型，保留字段*/
+`Hours` char(8),
+`Status` bit,
 `Alarm1` bit,
 `Alarm2` bit,
 `Alarm3` bit,
