@@ -38,6 +38,17 @@ namespace Scada.Device.Siemens
 
         private OPCItemResult[] results;
 
+        private string Flow
+        {
+            get;
+            set;
+        }
+
+        private string Hours
+        {
+            get;
+            set;
+        }
 
         private const string TSAP = ":1001:1001,";
 
@@ -68,6 +79,9 @@ namespace Scada.Device.Siemens
             this.Version = entry[DeviceEntry.Version].ToString();
 
             this.ipAddr = entry["IPADDR"].ToString();
+
+            this.Flow = entry["Flow"].ToString();
+            this.Hours = entry["Hours"].ToString();
 
             this.tableName = (StringValue)entry[DeviceEntry.TableName];
             if (!string.IsNullOrEmpty(tableName))
@@ -135,6 +149,8 @@ namespace Scada.Device.Siemens
 
                 this.OnConnect();
 
+                this.Write(new HandleCode(1, this.Flow), new HandleCode(2, this.Hours));
+
                 this.Write(new HandleCode(13, "2"));
 
                 this.timer = new System.Windows.Forms.Timer();
@@ -191,7 +207,7 @@ namespace Scada.Device.Siemens
                     RecordManager.DoSystemEventRecord(this, "Read: " + valueLine, RecordType.Event, true);
 
                     this.latestTime = time;
-                    object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], values[5], values[6] };
+                    object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], values[5], values[6], 0, 0, 0 };
                     DeviceData deviceData = new DeviceData(this, data);
                     deviceData.InsertIntoCommand = this.insertSQL;
                     RecordManager.DoDataRecord(deviceData);
@@ -205,10 +221,9 @@ namespace Scada.Device.Siemens
 
         }
 
-        private bool OnRightTime(out DateTime time)
+        private bool OnRightTime(out DateTime rightTime)
         {
-            time = default(DateTime);
-            return true;
+            return Scada.Declare.Device.At30Sec(DateTime.Now, out rightTime);
         }
 
         private void Disconnect()

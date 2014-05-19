@@ -115,7 +115,7 @@ namespace Scada.Declare
             }
             catch (Exception e)
             {
-                RecordManager.DoSystemEventRecord(data.Device, e.Message, RecordType.Error);
+                RecordManager.DoSystemEventRecord(data.Device, string.Format("{0} => {1}", commandText, e.Message), RecordType.Error);
                 this.RetryConnection(e);
                 return false;
             }
