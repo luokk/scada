@@ -100,8 +100,8 @@ namespace Scada.Logger.Server
             this.tabPage1.Controls.Add(this.CreateListBox("Scada.HPIC"));
             this.tabPage2.Controls.Add(this.CreateListBox("Scada.NaIDevice"));
             this.tabPage3.Controls.Add(this.CreateListBox("Scada.Weather"));
-            this.tabPage4.Controls.Add(this.CreateListBox("Scada.HVSampler"));
-            this.tabPage5.Controls.Add(this.CreateListBox("Scada.ISampler"));
+            this.tabPage4.Controls.Add(this.CreateListBox("Scada.MDS"));
+            this.tabPage5.Controls.Add(this.CreateListBox("Scada.AIS"));
             this.tabPage6.Controls.Add(this.CreateListBox("Scada.Shelter"));
             this.tabPage7.Controls.Add(this.CreateListBox("Scada.DWD"));
             LoggerServer server = new LoggerServer();

@@ -107,6 +107,8 @@ namespace Scada.Device.Siemens
 
         public override void Stop()
         {
+            // ?
+            this.server = null;
             this.started = false;
         }
 

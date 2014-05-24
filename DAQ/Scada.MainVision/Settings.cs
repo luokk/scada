@@ -25,9 +25,9 @@ namespace Scada.MainVision
 
         public const string DeviceKey_Weather = "scada.weather";
 
-        public const string DeviceKey_HvSampler = "scada.hvsampler";
+        public const string DeviceKey_MDS = "scada.mds";
 
-        public const string DeviceKey_ISampler = "scada.isampler";
+        public const string DeviceKey_AIS = "scada.ais";
 
         public const string DeviceKey_Shelter = "scada.shelter";
 
@@ -39,8 +39,8 @@ namespace Scada.MainVision
         public string[] DeviceKeys = {
                                 DeviceKey_Hpic, 
                                 DeviceKey_Weather, 
-                                DeviceKey_HvSampler, 
-                                DeviceKey_ISampler, 
+                                DeviceKey_MDS, 
+                                DeviceKey_AIS, 
                                 DeviceKey_Shelter,
                                 DeviceKey_Dwd,  
                                 DeviceKey_NaI

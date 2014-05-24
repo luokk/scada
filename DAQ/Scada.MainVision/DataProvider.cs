@@ -14,9 +14,9 @@ namespace Scada.MainVision
 
         public const string DeviceKey_Weather = "scada.weather";
 
-        public const string DeviceKey_HvSampler = "scada.hvsampler";
+        public const string DeviceKey_MDS = "scada.mds";
 
-        public const string DeviceKey_ISampler = "scada.isampler";
+        public const string DeviceKey_AIS = "scada.ais";
 
         public const string DeviceKey_Shelter = "scada.shelter";
 

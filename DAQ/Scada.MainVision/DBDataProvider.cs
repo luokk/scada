@@ -71,8 +71,8 @@ namespace Scada.MainVision
         {
             this.allDeviceKeys.Add(DataProvider.DeviceKey_Hpic);
             this.allDeviceKeys.Add(DataProvider.DeviceKey_Dwd);
-            this.allDeviceKeys.Add(DataProvider.DeviceKey_HvSampler);
-            this.allDeviceKeys.Add(DataProvider.DeviceKey_ISampler);
+            this.allDeviceKeys.Add(DataProvider.DeviceKey_MDS);
+            this.allDeviceKeys.Add(DataProvider.DeviceKey_AIS);
             this.allDeviceKeys.Add(DataProvider.DeviceKey_NaI);
             this.allDeviceKeys.Add(DataProvider.DeviceKey_Shelter);
             this.allDeviceKeys.Add(DataProvider.DeviceKey_Weather);

@@ -17,7 +17,7 @@ namespace Scada.MainSettings
             InitializeComponent();
         }
 
-        const string TheDeviceKey = "scada.isampler";
+        const string TheDeviceKey = "scada.ais";
 
         private AisSettings settings = new AisSettings();
 

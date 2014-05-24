@@ -144,9 +144,9 @@ namespace Scada.Data.Client.Tcp
         // Agent ref.
         private Agent agent;
 
-        private SamplerController hvsc = new SamplerController("scada.hvsampler");
+        private SamplerController hvsc = new SamplerController("scada.mds");
 
-        private SamplerController isc = new SamplerController("scada.isampler");
+        private SamplerController isc = new SamplerController("scada.ais");
 
         private Dictionary<string, HistoryDataBundle> taskDict = new Dictionary<string, HistoryDataBundle>();
 
@@ -716,8 +716,8 @@ namespace Scada.Data.Client.Tcp
                         DataPacket p = null;
                         // By different device.
 
-                        if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
-                            deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase))
+                        if (deviceKey.Equals("Scada.mds", StringComparison.OrdinalIgnoreCase) ||
+                            deviceKey.Equals("Scada.ais", StringComparison.OrdinalIgnoreCase))
                         {
                             p = builder.GetFlowDataPacket(deviceKey, item, false);
                         }
@@ -767,11 +767,11 @@ namespace Scada.Data.Client.Tcp
         {
             string eno = Value.Parse(msg, "ENO");
             string deviceKey = Settings.Instance.GetDeviceKeyByEno(eno);
-            if (deviceKey.ToLower() == "Scada.HVSampler".ToLower())
+            if (deviceKey.ToLower() == "Scada.mds".ToLower())
             {
                 hvsc.Start();
             }
-            else if (deviceKey.ToLower() == "Scada.ISampler".ToLower())
+            else if (deviceKey.ToLower() == "Scada.ais".ToLower())
             {
                 isc.Start();
             }
@@ -781,11 +781,11 @@ namespace Scada.Data.Client.Tcp
         {
             string eno = Value.Parse(msg, "ENO");
             string deviceKey = Settings.Instance.GetDeviceKeyByEno(eno);
-            if (deviceKey.ToLower() == "Scada.HVSampler".ToLower())
+            if (deviceKey.ToLower() == Settings.DeviceKey_MDS.ToLower())
             {
                 hvsc.Stop();
             }
-            else if (deviceKey.ToLower() == "Scada.ISampler".ToLower())
+            else if (deviceKey.ToLower() == Settings.DeviceKey_AIS.ToLower())
             {
                 isc.Stop();
             }

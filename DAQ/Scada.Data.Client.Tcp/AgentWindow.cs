@@ -489,7 +489,7 @@ namespace Scada.Data.Client.Tcp
                 {
                     DataPacket p = null;
 
-                    if (Case(deviceKey, "Scada.HVSampler") || Case(deviceKey, "Scada.ISampler"))
+                    if (Case(deviceKey, "Scada.MDS") || Case(deviceKey, "Scada.AIS"))
                     {
                         this.SendFlowDataPackets(deviceKey, this.data[0]);
                     }
@@ -818,8 +818,8 @@ namespace Scada.Data.Client.Tcp
             this.InitDeviceColumn("scada.hpic", "高压电离室");
             this.InitDeviceColumn("scada.naidevice", "NaI谱仪");
             this.InitDeviceColumn("scada.weather", "气象站");
-            this.InitDeviceColumn("scada.hvsampler", "超大流量气溶胶采样器");
-            this.InitDeviceColumn("scada.isampler", "碘采样器");
+            this.InitDeviceColumn("scada.mds", "超大流量气溶胶采样器");
+            this.InitDeviceColumn("scada.ais", "碘采样器");
             this.InitDeviceColumn("scada.shelter", "环境与安防监控");
             this.InitDeviceColumn("scada.dwd", "干湿沉降采样器");
         }

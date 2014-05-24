@@ -34,7 +34,7 @@
 			<code field="Dewpoint">?</code> 
 			-->
     </device>
-    <device id="Scada.HVSampler" table="HVSampler_rec" eno="003001">
+    <device id="Scada.MDS" table="mds_rec" eno="003001">
       <code field="Sid">WorkID</code>
       <code field="BeginTime">BeginTime</code>
       <code field="EndTime">EndTime</code>
@@ -42,7 +42,7 @@
       <code field="Flow">0102069904</code>
       <code field="Volume">0102069905</code>
     </device>
-    <device id="Scada.ISampler" table="ISampler_rec" eno="004000">
+    <device id="Scada.AIS" table="ais_rec" eno="004000">
       <code field="Sid">WorkID</code>
       <code field="BeginTime">BeginTime</code>
       <code field="EndTime">EndTime</code>

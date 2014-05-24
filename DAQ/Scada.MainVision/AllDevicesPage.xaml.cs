@@ -65,8 +65,8 @@ namespace Scada.MainVision
             UpdatePanel_HPIC(this.hpicPane);
             UpdatePanel_Weather(this.weatherPane);
             UpdatePanel_NaI(this.naiPane);
-            UpdatePanel_HV(this.mdsPane);
-            UpdatePanel_I(this.aisPane);
+            UpdatePanel_MDS(this.mdsPane);
+            UpdatePanel_AIS(this.aisPane);
             UpdatePanel_Shelter(this.shelterPane);
             UpdatePanel_DWD(this.dwdPane);
         }
@@ -160,9 +160,9 @@ namespace Scada.MainVision
         }
 
         // 4 采样状态（可用颜色表示）、累计采样体积（重要）、累计采样时间、瞬时采样流量、三种故障报警
-        private void UpdatePanel_HV(SmartDataPane panel)
+        private void UpdatePanel_MDS(SmartDataPane panel)
         {
-            var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_HvSampler);
+            var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_MDS);
             if (d == null)
             {
                 return;
@@ -175,9 +175,9 @@ namespace Scada.MainVision
                 Get(d, "hours", "h"));
         }
         // 5 采样状态（可用颜色表示）、累计采样体积（重要）、累计采样时间、瞬时采样流量、三种故障报警
-        private void UpdatePanel_I(SmartDataPane panel)
+        private void UpdatePanel_AIS(SmartDataPane panel)
         {
-            var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_ISampler);
+            var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_AIS);
             if (d == null)
             {
                 return;

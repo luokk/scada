@@ -446,8 +446,8 @@ namespace Scada.Main
             long now = DateTime.Now.Ticks;
             foreach (string deviceKey in this.lastUpdateDict.Keys)
             {
-                if (deviceKey.Equals("Scada.HVSampler", StringComparison.OrdinalIgnoreCase) ||
-                    deviceKey.Equals("Scada.ISampler", StringComparison.OrdinalIgnoreCase) ||
+                if (deviceKey.Equals("Scada.MDS", StringComparison.OrdinalIgnoreCase) ||
+                    deviceKey.Equals("Scada.AIS", StringComparison.OrdinalIgnoreCase) ||
                     deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
@@ -455,11 +455,22 @@ namespace Scada.Main
 
                 long lastModifyTime = this.lastUpdateDict[deviceKey];
                 long diffInSec = (now - lastModifyTime) / 10000000;
-                // 5分钟无数据...
-                // TODO: ...NaI 5分钟数据, 这里得改
-                if (diffInSec > 60 * 5)
+
+                if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase) ||
+                    deviceKey.Equals("Scada.labr", StringComparison.OrdinalIgnoreCase))
                 {
-                    this.RescueDevice(deviceKey);
+                    // Over 10 sec for NaI device
+                    if (diffInSec > 60 * 10)
+                    {
+                        this.RescueDevice(deviceKey);
+                    }
+                }
+                else
+                {
+                    if (diffInSec > 60 * 3)
+                    {
+                        this.RescueDevice(deviceKey);
+                    }
                 }
             }
         }

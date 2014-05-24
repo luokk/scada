@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300" Loaded="SamplerPanelLoaded">
+             d:DesignHeight="300" d:DesignWidth="300">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -15,7 +15,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     
-    <Grid IsVisibleChanged="IsVisibleChanged" Unloaded="Grid_Unloaded_1">
+    <Grid IsVisibleChanged="IsVisibleChanged">
         <Grid.RowDefinitions>
             <RowDefinition Height="200"></RowDefinition>
             <RowDefinition Height="50"></RowDefinition>

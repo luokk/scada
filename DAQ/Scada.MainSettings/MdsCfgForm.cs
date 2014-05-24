@@ -38,7 +38,7 @@ namespace Scada.MainSettings
             this.settings = (MdsSettings)this.Reset();
         }
 
-        const string TheDeviceKey = "scada.hvsampler";
+        const string TheDeviceKey = "scada.mds";
 
         private MdsSettings settings = new MdsSettings();
 

@@ -235,17 +235,6 @@ namespace Scada.Main
             this.statusLabel.Text = status;
         }
 
-        private void PressVBFormConnectToCPUButtons()
-        {
-            const string Version = "0.9";
-            string path;
-            path = DeviceManager.GetDeviceConfigPath("Scada.HVSampler", Version);
-            FormProxyDevice.PressConnectToCPU("MDS.exe", path);
-
-            path = DeviceManager.GetDeviceConfigPath("Scada.ISampler", Version);
-            FormProxyDevice.PressConnectToCPU("AIS.exe", path);
-        }
-
         private void RunDevices()
         {
             // Update 
@@ -280,10 +269,6 @@ namespace Scada.Main
             // Subitems;
             lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, version));
             lvi.SubItems.Add(new ListViewItem.ListViewSubItem(lvi, status));
-
-            string deviceKey = deviceName.ToLower();
-            if (deviceKey != "scada.hvsampler" && deviceKey != "scada.isampler")
-                lvi.Checked = true;
             return lvi;
         }
 
@@ -662,8 +647,8 @@ namespace Scada.Main
             DeviceManager.SetDeviceConfigPath("scada.labr", false);
             DeviceManager.SetDeviceConfigPath("Scada.HPGE", false);
 
-            DeviceManager.SetDeviceConfigPath("Scada.HVSampler", true);
-            DeviceManager.SetDeviceConfigPath("Scada.ISampler", true);
+            DeviceManager.SetDeviceConfigPath("Scada.MDS", true);
+            DeviceManager.SetDeviceConfigPath("Scada.AIS", true);
             DeviceManager.SetDeviceConfigPath("Scada.dwd", true);
             DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", true);
             this.SetDeviceList();
@@ -676,8 +661,8 @@ namespace Scada.Main
             DeviceManager.SetDeviceConfigPath("scada.labr", true);
             DeviceManager.SetDeviceConfigPath("Scada.HPGE", true);
 
-            DeviceManager.SetDeviceConfigPath("Scada.HVSampler", false);
-            DeviceManager.SetDeviceConfigPath("Scada.ISampler", false);
+            DeviceManager.SetDeviceConfigPath("Scada.MDS", false);
+            DeviceManager.SetDeviceConfigPath("Scada.AIS", false);
             DeviceManager.SetDeviceConfigPath("Scada.dwd", false);
             DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", false);
             this.SetDeviceList();
@@ -690,8 +675,8 @@ namespace Scada.Main
             DeviceManager.SetDeviceConfigPath("scada.labr", false);
             DeviceManager.SetDeviceConfigPath("Scada.HPGE", false);
 
-            DeviceManager.SetDeviceConfigPath("Scada.HVSampler", false);
-            DeviceManager.SetDeviceConfigPath("Scada.ISampler", false);
+            DeviceManager.SetDeviceConfigPath("Scada.MDS", false);
+            DeviceManager.SetDeviceConfigPath("Scada.AIS", false);
             DeviceManager.SetDeviceConfigPath("Scada.dwd", false);
             DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", false);
             this.SetDeviceList();

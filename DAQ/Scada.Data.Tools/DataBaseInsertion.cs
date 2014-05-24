@@ -172,11 +172,11 @@ namespace Scada.Data.Tools
             }
             else if (this.device.ToLower() == "mds")
             {
-                this.insertMdsAisData("hvsampler_rec", t, cmd);
+                this.insertMdsAisData("mds_rec", t, cmd);
             }
             else if (this.device.ToLower() == "ais")
             {
-                this.insertMdsAisData("isampler_rec", t, cmd);
+                this.insertMdsAisData("ais_rec", t, cmd);
             }
             else if (this.device.ToLower() == "dwd")
             {

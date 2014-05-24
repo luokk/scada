@@ -76,13 +76,13 @@ namespace Scada.MainVision
                     // Notice; Comment 4-7.
                     // panel.ListRecentData();
                     // 是否显示 控制面板
-                    if (deviceKey == DataProvider.DeviceKey_HvSampler)
+                    if (deviceKey == DataProvider.DeviceKey_MDS)
                     {
-                        panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_HvSampler);
+                        panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_MDS);
                     }
-                    else if (deviceKey == DataProvider.DeviceKey_ISampler)
+                    else if (deviceKey == DataProvider.DeviceKey_AIS)
                     {
-                        panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_ISampler);
+                        panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_AIS);
                     }
                     else if (deviceKey == DataProvider.DeviceKey_NaI)
                     {

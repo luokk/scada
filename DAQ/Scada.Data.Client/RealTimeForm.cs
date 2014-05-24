@@ -53,8 +53,7 @@ namespace Scada.Data.Client
             this.tabPage1.Controls.Add(this.CreateListBox("Scada.HPIC"));
             this.tabPage2.Controls.Add(this.CreateListBox("Scada.NaIDevice"));
             this.tabPage3.Controls.Add(this.CreateListBox("Scada.Weather"));
-            //this.tabPage4.Controls.Add(this.CreateListBox("Scada.HVSampler"));
-            //this.tabPage5.Controls.Add(this.CreateListBox("Scada.ISampler"));
+
             this.tabPage6.Controls.Add(this.CreateListBox("Scada.Shelter"));
             //this.tabPage7.Controls.Add(this.CreateListBox("Scada.DWD"));
         }

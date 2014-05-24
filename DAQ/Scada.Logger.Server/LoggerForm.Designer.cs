@@ -283,7 +283,7 @@
             // 
             this.HvToolStripMenuItem.Name = "HvToolStripMenuItem";
             this.HvToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
-            this.HvToolStripMenuItem.Tag = "Scada.HVSampler";
+            this.HvToolStripMenuItem.Tag = "Scada.MDS";
             this.HvToolStripMenuItem.Text = "超大流量气溶胶采样器";
             this.HvToolStripMenuItem.Click += new System.EventHandler(this.OnStripMenuItemClick);
             // 
@@ -291,7 +291,7 @@
             // 
             this.IspToolStripMenuItem.Name = "IspToolStripMenuItem";
             this.IspToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
-            this.IspToolStripMenuItem.Tag = "Scada.ISampler";
+            this.IspToolStripMenuItem.Tag = "Scada.AIS";
             this.IspToolStripMenuItem.Text = "碘采样器";
             this.IspToolStripMenuItem.Click += new System.EventHandler(this.OnStripMenuItemClick);
             // 

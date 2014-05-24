@@ -30,8 +30,6 @@ namespace Scada.Declare
 
         private string database = null;
 
-        private Timer retryTimer = null;
-
         public string Database
         {
             get { return this.database; }
@@ -67,21 +65,11 @@ namespace Scada.Declare
             {
                 this.conn = null;
             }
-
-            this.retryTimer = new Timer(30 * 1000);
-            this.retryTimer.Elapsed += this.RetryTimerTick;
-            this.retryTimer.Start();
-        }
-
-        void RetryTimerTick(object sender, ElapsedEventArgs e)
-        {
-            if (this.retryTimer != null)
+            finally
             {
-                this.retryTimer.Stop();
-                this.retryTimer = null;
-
                 this.Reconnect();
             }
+
         }
 
         private void Reconnect()
@@ -96,14 +84,14 @@ namespace Scada.Declare
             {
                 if (this.cmd != null)
                 {
-                    cmd.CommandText = commandText;
+                    this.cmd.CommandText = commandText;
                     var items = data.Data;
                     for (int i = 0; i < items.Length; ++i)
                     {
                         string at = string.Format("@{0}", i + 1);
-                        cmd.Parameters.AddWithValue(at, items[i]);
+                        this.cmd.Parameters.AddWithValue(at, items[i]);
                     }
-                    cmd.ExecuteNonQuery();
+                    this.cmd.ExecuteNonQuery();
                     // If exception, the params would NOT clear.
                     // cmd.Parameters.Clear();
 
@@ -121,9 +109,9 @@ namespace Scada.Declare
             }
             finally
             {
-                if (cmd != null)
+                if (this.cmd != null)
                 {
-                    cmd.Parameters.Clear();
+                    this.cmd.Parameters.Clear();
                 }
             }
 			return true;

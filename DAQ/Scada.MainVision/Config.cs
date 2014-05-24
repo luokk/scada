@@ -414,8 +414,8 @@ namespace Scada.MainVision
             this[DataProvider.DeviceKey_Hpic].Icon = "Images/1.png";
             this[DataProvider.DeviceKey_NaI].Icon = "Images/2.png";
             this[DataProvider.DeviceKey_Weather].Icon = "Images/3.png";
-            this[DataProvider.DeviceKey_HvSampler].Icon = "Images/4.png";
-            this[DataProvider.DeviceKey_ISampler].Icon = "Images/5.png";
+            this[DataProvider.DeviceKey_MDS].Icon = "Images/4.png";
+            this[DataProvider.DeviceKey_AIS].Icon = "Images/5.png";
             this[DataProvider.DeviceKey_Shelter].Icon = "Images/6.png";
             this[DataProvider.DeviceKey_Dwd].Icon = "Images/7.png";
         }
