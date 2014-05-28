@@ -38,6 +38,8 @@ def make_bin_zip(filepath, root, type):
                     add_zipfile(zf, filename, root)
     zf.close()          
 
+# Deprecated
+"""
 def copy_formproxy(folder, curpath):
     print "!!!" + folder
     destpath = os.path.join(curpath, folder, "Scada.FormProxy.exe")
@@ -45,6 +47,7 @@ def copy_formproxy(folder, curpath):
     print srcfile, "****\n"
     print destpath, "****\n"
     shutil.copy(srcfile, destpath)
+"""
 
 def main(args):
     path = os.getcwd() + "\\" + args[0]
@@ -53,7 +56,7 @@ def main(args):
     type = ""
     if len(args) > 0:
         type = args[0]
-    copy_formproxy(type, curpath)
+    # copy_formproxy(type, curpath)
     make_bin_zip(path, curpath, type)
 
 if __name__ == "__main__":

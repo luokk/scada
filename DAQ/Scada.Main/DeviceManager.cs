@@ -497,6 +497,7 @@ namespace Scada.Main
             deviceKey = deviceKey.ToLower();
             if (!this.selectedDevices.ContainsKey(deviceKey))
             {
+                MessageBox.Show("Not Contains the Running device key!");
                 return;
             }
 
@@ -505,6 +506,10 @@ namespace Scada.Main
             {
                 Device device = context.Device;
                 device.Send(Encoding.UTF8.GetBytes(code), DateTime.Now);
+            }
+            else
+            {
+                MessageBox.Show("Not Found the Running device");
             }
         }
 

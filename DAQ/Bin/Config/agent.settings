@@ -1,13 +1,12 @@
-<?xml version="1.0"?>
+/<?xml version="1.0"?>
 <settings>
   <!-- Default Port is 6000 and 7000 -->
   <datacenters>
-    <datacenter ip="122.224.74.82" port="14213" wirelessip="" wirelessport="7000" type="1" />
-    <datacenter ip="122.224.74.82" port="14213" wirelessip="" wirelessport="7000" type="2" />
+    <datacenter ip="10.21.1.101" port="6000" wirelessip="10.21.1.101" wirelessport="7000" type="1" />
     <datacenter2 BaseUrl="http://127.0.0.1" />
   </datacenters>
   <!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
-  <site sysname="" sysst="213213123213123213" adapter="" name="" station="128" sno="0313A08" mn="0313A080000000">
+  <site sysname="" sysst="213213123213123213" adapter="" name="" station="128" sno="0304A11" mn="0304A110000000">
   </site>
   <threshold>
     <polId name="__PLACEHOLDER__" v1="" v2="" />

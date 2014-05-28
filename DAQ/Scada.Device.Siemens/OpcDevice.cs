@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using OPC.Data;
 using System.Windows.Forms;
 using OPC.Data.Interface;
+using System.IO;
 
 namespace Scada.Device.Siemens
 {
@@ -26,17 +27,23 @@ namespace Scada.Device.Siemens
             public string Code { get; set; }
         }
 
+        protected string deviceKey;
+
         private OpcServer server;
 
         private OpcGroup group;
 
-        private bool started = false;
+        private bool connected = false;
+
+        private bool start = false;
 
         private System.Windows.Forms.Timer timer = null;
 
         private string ipAddr;
 
         private OPCItemResult[] results;
+
+        private DateTime lastRecordTime;
 
         private string Flow
         {
@@ -98,45 +105,99 @@ namespace Scada.Device.Siemens
 
         }
 
+        private void PutDeviceFile(bool running)
+        {
+            string statusPath = ConfigPath.GetConfigFilePath("status");
+            if (!Directory.Exists(statusPath))
+            {
+                Directory.CreateDirectory(statusPath);
+            }
+
+            string relFileName = string.Format("status\\@{0}-running", this.deviceKey);
+            string fileName = ConfigPath.GetConfigFilePath(relFileName);
+
+            if (running)
+            {
+                try
+                {
+                    using (File.Create(fileName))
+                    {
+                    }
+                }
+                catch (Exception)
+                { }
+            }
+            else
+            {
+                try
+                {
+                    File.Delete(fileName);
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+        }
+
         public override void Start(string address)
         {
             this.server = new OpcServer();
-            this.started = true;
             this.serverId = address;
         }
 
         public override void Stop()
         {
-            // ?
             this.server = null;
-            this.started = false;
         }
 
         public override void Send(byte[] action, DateTime time)
         {
-            string cmd = Encoding.ASCII.GetString(action);
-            if (this.started)
+            string cmd = Encoding.UTF8.GetString(action);
+            RecordManager.DoSystemEventRecord(this, string.Format("CMD={0}", cmd), RecordType.Event, true);
+
+            if (cmd.IndexOf("connect") >= 0)
+            {   
+                this.Connect();
+            }
+            else if (cmd.IndexOf("disconnect") >= 0)
             {
-                if (cmd.IndexOf("connect") == 0)
+                this.Disconnect();
+            }
+            else if (cmd.IndexOf("start") >= 0)
+            {
+                int b = cmd.IndexOf("Sid=");
+                if (b > 0)
                 {
-                    int b = cmd.IndexOf("Sid=");
-                    if (b > 0)
+                    int length = cmd.IndexOf(";", b) - b - 4;
+                    if (length > 0)
                     {
-                        int length = cmd.IndexOf(";", b) - b - 4;
                         this.Sid = cmd.Substring(b + 4, length);
                     }
                     else
                     {
-                        this.Sid = string.Format("SID-AUTO:{0}", DateTime.Now.ToString());
+                        DateTime n = DateTime.Now;
+                        this.Sid = string.Format("SID-{0}", n.ToString("yyyyMMdd-HHmmss"));
                     }
-                    
-                    this.Connect();
                 }
-                else if (cmd == "disconnect")
+                else
                 {
-                    this.Disconnect();
+                    DateTime n = DateTime.Now;
+                    this.Sid = string.Format("SID-{0}", n.ToString("yyyyMMdd-HHmmss"));
                 }
+                RecordManager.DoSystemEventRecord(this, string.Format("Start SID={0}", this.Sid), RecordType.Event, true);
+
+                this.Start();
             }
+            else if (cmd.IndexOf("stop") >= 0)
+            {
+                this.StopDevice();
+            }
+            else if (cmd == "reset")
+            {
+                this.Reset();
+            }
+            
         }
 
         private void Connect()
@@ -152,8 +213,7 @@ namespace Scada.Device.Siemens
                 this.OnConnect();
 
                 this.Write(new HandleCode(1, this.Flow), new HandleCode(2, this.Hours));
-
-                this.Write(new HandleCode(13, "2"));
+                this.connected = true;
 
                 this.timer = new System.Windows.Forms.Timer();
                 this.timer.Interval = 3000;
@@ -164,10 +224,48 @@ namespace Scada.Device.Siemens
             {
                 RecordManager.DoSystemEventRecord(this, string.Format("Connect:{0}", e.Message), RecordType.Error);
             }
-
         }
 
 
+        private void Start()
+        {
+            if (this.connected)
+            {
+                this.Write(new HandleCode(13, "2"));
+                this.start = true;
+                this.PutDeviceFile(true);
+                RecordManager.DoSystemEventRecord(this, string.Format("Start SID={0}", this.Sid), RecordType.Event, true);
+            }
+        }
+
+        private bool stopping = false;
+
+        private void StopDevice()
+        {
+            if (this.connected)
+            {
+                this.PutDeviceFile(false);
+                this.MarkEndTime();
+                this.Write(new HandleCode(13, "4"));
+                this.stopping = true;
+                RecordManager.DoSystemEventRecord(this, string.Format("Stopping SID={0}", this.Sid), RecordType.Event, true);
+            }
+        }
+
+        private void Reset()
+        {
+            if (this.connected)
+            {
+                this.Write(new HandleCode(13, "1"));
+                RecordManager.DoSystemEventRecord(this, string.Format("Reset"), RecordType.Event, true);
+            }
+        }
+
+
+        /// <summary>
+        /// Functional write data on channel
+        /// </summary>
+        /// <param name="hc"></param>
         private void Write(params HandleCode[] hc)
         {
             int[] h = hc.Select((i) => i.Handle).ToArray();
@@ -192,35 +290,69 @@ namespace Scada.Device.Siemens
 
         private void OnDataTimer(object sender, EventArgs e)
         {
-            DateTime time;
-            if (this.OnRightTime(out time))
+            int[] handles = this.results.Select((r) => r.HandleServer).ToArray();
+            OPCItemState[] states;
+            if (this.group.SyncRead(OPCDATASOURCE.OPC_DS_DEVICE, handles, out states))
             {
-                if (this.beginTime == default(DateTime))
+                if (this.start)
                 {
-                    this.beginTime = time;
-                }
+                    // Start
+                    DateTime time;
+                    if (this.OnRightTime(out time))
+                    {
+                        if (time == this.lastRecordTime)
+                        {
+                            return;
+                        }
 
-                int[] handles = this.results.Select((r) => r.HandleServer).ToArray();
-                OPCItemState[] states;
-                if (this.group.SyncRead(OPCDATASOURCE.OPC_DS_DEVICE, handles, out states))
-                {
-                    object[] values = states.Select((s) => s.DataValue).ToArray();
-                    string valueLine = string.Join(", ", values);
-                    RecordManager.DoSystemEventRecord(this, "Read: " + valueLine, RecordType.Event, true);
+                        this.lastRecordTime = time;
 
-                    this.latestTime = time;
-                    object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], values[5], values[6], 0, 0, 0 };
-                    DeviceData deviceData = new DeviceData(this, data);
-                    deviceData.InsertIntoCommand = this.insertSQL;
-                    RecordManager.DoDataRecord(deviceData);
+                        if (this.beginTime == default(DateTime))
+                        {
+                            this.beginTime = time;
+                        }
+
+                        object[] values = states.Select((s) => s.DataValue).ToArray();
+                        string valueLine = string.Join(", ", values);
+                        RecordManager.DoSystemEventRecord(this, valueLine, RecordType.Origin, true);
+
+                        this.latestTime = time;
+                        string status = values[6].ToString();
+                        RecordManager.DoSystemEventRecord(this, string.Format("STATUS:{0}", status), RecordType.Event, true);
+                        if (this.stopping && status == "0")
+                        {
+                            this.endTime = time;
+                            this.stopping = false;
+                            this.start = false;
+                            RecordManager.DoSystemEventRecord(this, string.Format("Stopped SID={0}", this.Sid), RecordType.Event, true);
+                            this.PutDeviceFile(false);
+                        }
+                        byte statusb = (status == "1") ? (byte)1 : (byte)0;
+                        object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], values[5], statusb, 0, 0, 0 };
+                        DeviceData deviceData = new DeviceData(this, data);
+                        deviceData.InsertIntoCommand = this.insertSQL;
+                        RecordManager.DoDataRecord(deviceData);
+                    }
                 }
                 else
                 {
-                    // 
-                    RecordManager.DoSystemEventRecord(this, "Read Faild", RecordType.Event, true);
+                    // Not start
+                    object[] values = states.Select((s) => s.DataValue).ToArray();
+                    string status = values[6].ToString();
+                    if (status == "0")
+                    {
+                        this.start = false;
+                    }
+                    else if (status == "1")
+                    {
+                        this.start = true;
+                    }
                 }
             }
-
+            else
+            {
+                RecordManager.DoSystemEventRecord(this, "Read Faild", RecordType.Event, true);
+            }
         }
 
         private bool OnRightTime(out DateTime rightTime)
@@ -232,14 +364,11 @@ namespace Scada.Device.Siemens
         {
             try
             {
-                this.started = false;
-                this.MarkEndTime();
-
+                this.connected = false;
                 this.server.Disconnect();
+                RecordManager.DoSystemEventRecord(this, string.Format("Disconnect"), RecordType.Event, true);
 
                 this.timer.Stop();
-                this.timer.Dispose();
-
                 this.timer = null;
             }
             catch (Exception e)
@@ -306,6 +435,18 @@ namespace Scada.Device.Siemens
             }
         }
 
+        public override bool Running
+        {
+            get
+            {
+                return this.start;
+            }
+            set 
+            {
+                this.start = value;
+            }
+        }
+
         private string MakeInsertSQL(string tableName, string tableFields)
         {
             string[] fields = tableFields.Split(',');
@@ -334,6 +475,7 @@ namespace Scada.Device.Siemens
         public MDSDevice(DeviceEntry entry)
             :base(entry)
         {
+            this.deviceKey = "scada.mds";
         }
 
     }
@@ -343,6 +485,7 @@ namespace Scada.Device.Siemens
         public AISDevice(DeviceEntry entry)
             : base(entry)
         {
+            this.deviceKey = "scada.ais";
         }
 
     }

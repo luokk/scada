@@ -161,25 +161,6 @@ namespace Scada.Watch
                     this.WatchProcess(scadaDataClient, "--start");
                 }
 
-                if (this.aisCheck.Checked)
-                {
-                    // per 100 sec
-                    if (this.timesCounter % 5 == 0)
-                    {
-                        this.WatchProcess("AIS", null);
-                    }
-                }
-
-                if (this.mdsCheck.Checked)
-                {
-                    // per 100 sec
-                    if (this.timesCounter % 5 == 1)
-                    {
-
-                        this.WatchProcess("MDS", null);
-                    }
-                }
-
                 this.timesCounter++;
                 return;
             }

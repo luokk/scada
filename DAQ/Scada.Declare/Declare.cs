@@ -182,9 +182,10 @@ namespace Scada.Declare
 			set { this.version = value; }
 		}
 
-        public bool Running
+        public virtual bool Running
         {
             get { return this.running; }
+            set { this.running = value; }
         }
 
         // Default value is 30s. Maybe need change.

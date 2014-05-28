@@ -28,13 +28,23 @@
         <GroupBox Grid.Row="0" Header=" 控制面板 ">
             <StackPanel Orientation="Vertical">
                 <TextBlock x:Name="StatusBox" Margin="5,5,5,5"></TextBlock>
+                <TextBox x:Name="SidText" Margin="5,5,5,5"></TextBox>
                 <StackPanel Orientation="Horizontal">
                     <Button Width="100" Height="30" Foreground="Black"
-                            x:Name="StartButton" Click="OnControl" 
-                            Margin="5, 5, 5, 5"  Style="{StaticResource ButtonKey}">启动</Button>
+                            x:Name="ConnectButton" Click="OnConnectButton" 
+                            Margin="5, 5, 5, 5"  Style="{StaticResource ButtonKey}">连接</Button>
+                    
                     <Button Width="100" Height="30" Foreground="Black"
-                            x:Name="StopButton" Click="OnControl" 
+                            x:Name="StartButton" Click="OnStartButton" 
+                            Margin="5, 5, 5, 5"  Style="{StaticResource ButtonKey}">启动</Button>
+                    
+                    <Button Width="100" Height="30" Foreground="Black"
+                            x:Name="StopButton" Click="OnStopButton" 
                             Margin="5, 5, 5, 5"  Style="{StaticResource ButtonKey}">停止</Button>
+                    
+                    <Button Width="100" Height="30" Foreground="Black"
+                            x:Name="DisconnectButton" Click="OnDisconnectButton" 
+                            Margin="5, 5, 5, 5"  Style="{StaticResource ButtonKey}">断开连接</Button>
                 </StackPanel>
             </StackPanel>
         </GroupBox>

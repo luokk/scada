@@ -35,12 +35,10 @@
             this.textPath = new System.Windows.Forms.TextBox();
             this.watchNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.aisCheck = new System.Windows.Forms.CheckBox();
-            this.mdsCheck = new System.Windows.Forms.CheckBox();
             this.versionCheck = new System.Windows.Forms.CheckBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.updateStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.startStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.updateStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -51,18 +49,18 @@
             this.groupBox2.Controls.Add(this.buttonWatch);
             this.groupBox2.Controls.Add(this.buttonPath);
             this.groupBox2.Controls.Add(this.textPath);
-            this.groupBox2.Location = new System.Drawing.Point(12, 157);
+            this.groupBox2.Location = new System.Drawing.Point(12, 97);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(359, 87);
+            this.groupBox2.Size = new System.Drawing.Size(359, 80);
             this.groupBox2.TabIndex = 0;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "自动更新";
             // 
             // buttonWatch
             // 
-            this.buttonWatch.Location = new System.Drawing.Point(270, 51);
+            this.buttonWatch.Location = new System.Drawing.Point(270, 47);
             this.buttonWatch.Name = "buttonWatch";
-            this.buttonWatch.Size = new System.Drawing.Size(75, 23);
+            this.buttonWatch.Size = new System.Drawing.Size(75, 21);
             this.buttonWatch.TabIndex = 2;
             this.buttonWatch.Text = "监控目录";
             this.buttonWatch.UseVisualStyleBackColor = true;
@@ -70,9 +68,9 @@
             // 
             // buttonPath
             // 
-            this.buttonPath.Location = new System.Drawing.Point(301, 19);
+            this.buttonPath.Location = new System.Drawing.Point(301, 18);
             this.buttonPath.Name = "buttonPath";
-            this.buttonPath.Size = new System.Drawing.Size(44, 23);
+            this.buttonPath.Size = new System.Drawing.Size(44, 21);
             this.buttonPath.TabIndex = 1;
             this.buttonPath.Text = "...";
             this.buttonPath.UseVisualStyleBackColor = true;
@@ -80,9 +78,9 @@
             // 
             // textPath
             // 
-            this.textPath.Location = new System.Drawing.Point(7, 20);
+            this.textPath.Location = new System.Drawing.Point(7, 18);
             this.textPath.Name = "textPath";
-            this.textPath.Size = new System.Drawing.Size(287, 20);
+            this.textPath.Size = new System.Drawing.Size(287, 21);
             this.textPath.TabIndex = 0;
             // 
             // watchNotifyIcon
@@ -93,42 +91,20 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.aisCheck);
-            this.groupBox1.Controls.Add(this.mdsCheck);
             this.groupBox1.Controls.Add(this.versionCheck);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
+            this.groupBox1.Location = new System.Drawing.Point(12, 11);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(359, 125);
+            this.groupBox1.Size = new System.Drawing.Size(359, 70);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "进程监控";
             // 
-            // aisCheck
-            // 
-            this.aisCheck.AutoSize = true;
-            this.aisCheck.Location = new System.Drawing.Point(12, 71);
-            this.aisCheck.Name = "aisCheck";
-            this.aisCheck.Size = new System.Drawing.Size(87, 17);
-            this.aisCheck.TabIndex = 0;
-            this.aisCheck.Text = "启用AIS.exe";
-            this.aisCheck.UseVisualStyleBackColor = true;
-            // 
-            // mdsCheck
-            // 
-            this.mdsCheck.AutoSize = true;
-            this.mdsCheck.Location = new System.Drawing.Point(12, 48);
-            this.mdsCheck.Name = "mdsCheck";
-            this.mdsCheck.Size = new System.Drawing.Size(94, 17);
-            this.mdsCheck.TabIndex = 0;
-            this.mdsCheck.Text = "启用MDS.exe";
-            this.mdsCheck.UseVisualStyleBackColor = true;
-            // 
             // versionCheck
             // 
             this.versionCheck.AutoSize = true;
-            this.versionCheck.Location = new System.Drawing.Point(12, 25);
+            this.versionCheck.Location = new System.Drawing.Point(12, 23);
             this.versionCheck.Name = "versionCheck";
-            this.versionCheck.Size = new System.Drawing.Size(122, 17);
+            this.versionCheck.Size = new System.Drawing.Size(126, 16);
             this.versionCheck.TabIndex = 0;
             this.versionCheck.Text = "启动数据上传 v2.0";
             this.versionCheck.UseVisualStyleBackColor = true;
@@ -139,31 +115,31 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.startStripStatusLabel,
             this.updateStripStatusLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 273);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 196);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(383, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(383, 20);
             this.statusStrip1.SizingGrip = false;
             this.statusStrip1.Stretch = false;
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
-            // updateStripStatusLabel
-            // 
-            this.updateStripStatusLabel.Name = "updateStripStatusLabel";
-            this.updateStripStatusLabel.Size = new System.Drawing.Size(63, 17);
-            this.updateStripStatusLabel.Text = "更新:TIME";
-            // 
             // startStripStatusLabel
             // 
             this.startStripStatusLabel.Name = "startStripStatusLabel";
-            this.startStripStatusLabel.Size = new System.Drawing.Size(63, 17);
+            this.startStripStatusLabel.Size = new System.Drawing.Size(65, 15);
             this.startStripStatusLabel.Text = "启动:TIME";
+            // 
+            // updateStripStatusLabel
+            // 
+            this.updateStripStatusLabel.Name = "updateStripStatusLabel";
+            this.updateStripStatusLabel.Size = new System.Drawing.Size(65, 15);
+            this.updateStripStatusLabel.Text = "更新:TIME";
             // 
             // WatchForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(383, 295);
+            this.ClientSize = new System.Drawing.Size(383, 216);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -196,8 +172,6 @@
         private System.Windows.Forms.NotifyIcon watchNotifyIcon;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox versionCheck;
-        private System.Windows.Forms.CheckBox mdsCheck;
-        private System.Windows.Forms.CheckBox aisCheck;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel updateStripStatusLabel;
         private System.Windows.Forms.ToolStripStatusLabel startStripStatusLabel;

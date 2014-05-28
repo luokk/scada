@@ -145,30 +145,18 @@ namespace Scada.Main
         {
             this.SafeInvoke(() => 
             {
-                const string ConnectCommand = "connect"; 
-                const string DisconnectCommand = "disconnect";
-
-                if (line.StartsWith(ConnectCommand))
+                // RecordManager.DoSystemEventRecord(Device.Main, "Received command:" + line);
+                if (line.StartsWith("scada.mds:"))
                 {
-                    if (line.IndexOf("mds") > 0)
-                    {
-                        Program.DeviceManager.SendDeviceCode("Scada.MDS", ConnectCommand);
-                    }
-                    else if (line.IndexOf("ais") > 0)
-                    {
-                        Program.DeviceManager.SendDeviceCode("Scada.AIS", ConnectCommand);
-                    }
+                    string cmd = line.Substring(10);
+                    RecordManager.DoSystemEventRecord(Device.Main, "(MDS):" + cmd);
+                    Program.DeviceManager.SendDeviceCode("Scada.MDS", cmd);
                 }
-                else if (line.StartsWith(DisconnectCommand))
+                else if (line.StartsWith("scada.ais:"))
                 {
-                    if (line.IndexOf("mds") > 0)
-                    {
-                        Program.DeviceManager.SendDeviceCode("Scada.MDS", DisconnectCommand);
-                    }
-                    else if (line.IndexOf("ais") > 0)
-                    {
-                        Program.DeviceManager.SendDeviceCode("Scada.AIS", DisconnectCommand);
-                    }
+                    string cmd = line.Substring(10);
+                    RecordManager.DoSystemEventRecord(Device.Main, "(AIS):" + cmd);
+                    Program.DeviceManager.SendDeviceCode("Scada.AIS", cmd);
                 }
             });
         }
