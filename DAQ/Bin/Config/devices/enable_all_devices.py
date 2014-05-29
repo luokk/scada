@@ -2,7 +2,7 @@
 
 import os
 
-ps = ["hpic", "weather", "shelter", "dwd", "hpge", "labr", "hvsampler", "isampler", "cinderella.data", "cinderella.status"]
+ps = ["hpic", "weather", "shelter", "dwd", "hpge", "labr", "mds", "ais", "cinderella.data", "cinderella.status"]
 
 for p in ps:
 	try:
