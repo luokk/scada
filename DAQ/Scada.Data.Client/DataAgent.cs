@@ -63,7 +63,7 @@ namespace Scada.Data.Client
         /// </summary>
         internal void FetchCommands()
         {
-            Uri uri = new Uri(this.DataCenter.GetUrl("cmd/query"));
+            Uri uri = new Uri(this.DataCenter.GetUrl("command/query"));
             try
             {
                 WebClient wc = new WebClient();
@@ -173,7 +173,7 @@ namespace Scada.Data.Client
                 return;
             }
 
-            Uri uri = new Uri(this.DataCenter.GetUrl("data/upload"));
+            Uri uri = new Uri(this.DataCenter.GetUrl(this.GetUploadApi(packet.FileType)));
             try
             {
                 using (WebClient wc = new WebClient())
@@ -202,6 +202,12 @@ namespace Scada.Data.Client
             {
              
             }
+        }
+
+        private string GetUploadApi(string fileType)
+        {
+            string stationId = Settings.Instance.Station;
+            return string.Format("data/upload/{0}/{1}", stationId, fileType);
         }
 
         private void HandleWebException(Exception e)

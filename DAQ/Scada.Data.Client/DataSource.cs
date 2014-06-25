@@ -203,11 +203,6 @@ namespace Scada.Data.Client
             return null;
         }
 
-        public string GetHPGeDeviceFile(DateTime time)
-        {
-            return "";   
-        }
-
         private string GetLabrFileName(DateTime time)
         {
             // int minuteAdjust = Settings.Instance.MinuteAdjust;
@@ -241,5 +236,11 @@ namespace Scada.Data.Client
             return 1;
         }
 
+
+        internal string GetNewHpGeFile()
+        {
+            string path = LogPath.GetDeviceLogFilePath("scada.hpge", DateTime.Now);
+            return "";
+        }
     }
 }

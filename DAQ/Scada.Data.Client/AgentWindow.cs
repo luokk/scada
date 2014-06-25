@@ -329,7 +329,7 @@ namespace Scada.Data.Client
             {
                 if (deviceKey.IndexOf("labr") >= 0)
                 {
-                    Packet p = builder.GetFilePacket(DataSource.Instance.GetLabrDeviceFile(time));
+                    Packet p = builder.GetFilePacket(DataSource.Instance.GetLabrDeviceFile(time), "labr");
                     if (p != null)
                     {
                         p.Id = packetId;
@@ -338,11 +338,15 @@ namespace Scada.Data.Client
                 }
                 else if (deviceKey.IndexOf("hpge") >= 0)
                 {
-                    Packet p = builder.GetFilePacket(DataSource.Instance.GetHPGeDeviceFile(time));
-                    if (p != null)
+                    string filePath = DataSource.Instance.GetNewHpGeFile();
+                    if (!string.IsNullOrEmpty(filePath))
                     {
-                        p.Id = packetId;
-                        return p;
+                        Packet p = builder.GetFilePacket(filePath, "hpge1");
+                        if (p != null)
+                        {
+                            p.Id = packetId;
+                            return p;
+                        }
                     }
                 }
                 return null;

@@ -77,5 +77,12 @@
       <code field="StateBits" type="str">01</code>
     </device>
 
+    <!-- NOTICE -->
+    <device id="Scada.Hpge" table="Hpge_Rec" eno="Scada.Hpge" debug-data-time="2014-04-27 10:18:33">
+      <code field="file-content">01</code>
+      <code field="file-content">02</code>
+    </device>
+
+
   </devices>
 </settings>

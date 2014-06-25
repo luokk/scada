@@ -670,26 +670,6 @@ namespace Scada.Main
             this.SetDeviceList();
         }
 
-        private void startMDSToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Command.Send(Ports.Main, "connect:mds");
-        }
-
-        private void stopMDSToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Command.Send(Ports.Main, "disconnect:mds");
-        }
-
-        private void startAISToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            Command.Send(Ports.Main, "connect:ais");
-        }
-
-        private void stopAISToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            Command.Send(Ports.Main, "disconnect:ais");
-        }
-
     }
 
     static class ControlInvoke

@@ -38,6 +38,7 @@ namespace Scada.Data.Client
             return packet;
         }
 
+        /*
         private string RenameFileNameForUpload(string fileName)
         {
             string basePath = Path.GetDirectoryName(fileName);
@@ -48,13 +49,15 @@ namespace Scada.Data.Client
             File.Move(fileName, filePath);
             return filePath;
         }
+        */
 
-        internal Packet GetFilePacket(string fileName)
+        internal Packet GetFilePacket(string fileName, string fileType)
         {
             if (!string.IsNullOrEmpty(fileName) && File.Exists(fileName))
             {
                 Packet packet = new Packet(this.Token);
-                packet.Path = RenameFileNameForUpload(fileName);
+                packet.Path = fileName;
+                packet.FileType = fileType;
                 packet.IsFilePacket = true;
                 return packet;
             }

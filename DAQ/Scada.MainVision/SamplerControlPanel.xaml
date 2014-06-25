@@ -41,7 +41,11 @@
                     <Button Width="100" Height="30" Foreground="Black"
                             x:Name="StopButton" Click="OnStopButton" 
                             Margin="5, 5, 5, 5"  Style="{StaticResource ButtonKey}">停止</Button>
-                    
+
+                    <Button Width="100" Height="30" Foreground="Black"
+                            x:Name="ResetButton" Click="OnResetButton" 
+                            Margin="5, 5, 5, 5"  Style="{StaticResource ButtonKey}">重置</Button>
+
                     <Button Width="100" Height="30" Foreground="Black"
                             x:Name="DisconnectButton" Click="OnDisconnectButton" 
                             Margin="5, 5, 5, 5"  Style="{StaticResource ButtonKey}">断开连接</Button>

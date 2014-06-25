@@ -108,6 +108,11 @@ namespace Scada.MainVision
             this.StopButton.IsEnabled = false;
         }
 
+
+        private void OnResetButton(object sender, RoutedEventArgs e)
+        {
+            Command.Send(Ports.Main, GetRemoteCommand("reset"));
+        }
         public string DeviceKey
         {
             get;

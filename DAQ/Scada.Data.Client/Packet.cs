@@ -134,6 +134,7 @@ namespace Scada.Data.Client
             this.GetEntries().Add(entry);
         }
 
+        // in fact the model class name in Server side.
         private static string GetDataCenterDeviceId(string deviceKey)
         {
             if (deviceKey == Devices.Hpic)
@@ -150,7 +151,7 @@ namespace Scada.Data.Client
                 return "cinderelladata";
             else if (deviceKey == Devices.CinderellaStatus)
                 return "cinderellastatus";
-            else
+            else;
                 return string.Empty;
         }
 
@@ -212,5 +213,7 @@ namespace Scada.Data.Client
             get;
             set;
         }
+
+        public string FileType { get; set; }
     }
 }
