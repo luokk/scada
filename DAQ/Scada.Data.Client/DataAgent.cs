@@ -173,7 +173,17 @@ namespace Scada.Data.Client
                 return;
             }
 
-            Uri uri = new Uri(this.DataCenter.GetUrl(this.GetUploadApi(packet.FileType)));
+            string folder = string.Empty;
+            if (packet.FileType.Equals("labr", StringComparison.OrdinalIgnoreCase))
+            {
+                folder = Path.GetFileName(Path.GetDirectoryName(packet.Path));
+            }
+            else if (packet.FileType.Equals("hpge", StringComparison.OrdinalIgnoreCase))
+            {
+                folder = DataSource.GetCurrentSid();
+            }
+
+            Uri uri = new Uri(this.DataCenter.GetUrl(this.GetUploadApi(packet.FileType, folder)));
             try
             {
                 using (WebClient wc = new WebClient())
@@ -187,6 +197,7 @@ namespace Scada.Data.Client
                                 if (e.Error == null)
                                 {
                                     string result = Encoding.UTF8.GetString(e.Result);
+                                    this.RemovePrefix(p.Path);
                                     this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = result });
                                 }
                                 else
@@ -204,10 +215,24 @@ namespace Scada.Data.Client
             }
         }
 
-        private string GetUploadApi(string fileType)
+        private void RemovePrefix(string p)
+        {
+            if (File.Exists(p))
+            {
+                string fileName = Path.GetFileName(p);
+                if (fileName.StartsWith("!"))
+                {
+                    string dirName = Path.GetDirectoryName(p);
+                    File.Move(p, Path.Combine(dirName, fileName.Substring(1)));
+                }
+            }
+        }
+
+        private string GetUploadApi(string fileType, string folder)
         {
             string stationId = Settings.Instance.Station;
-            return string.Format("data/upload/{0}/{1}", stationId, fileType);
+
+            return string.Format("data/upload/{0}/{1}/{2}", stationId, fileType, folder);
         }
 
         private void HandleWebException(Exception e)

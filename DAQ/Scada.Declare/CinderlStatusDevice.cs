@@ -1,6 +1,7 @@
 ﻿using Scada.Config;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -38,6 +39,8 @@ namespace Scada.Declare
                 bool stateChanged = (this.lastStatus != status);
                 this.lastStatus = status;
 
+                this.CheckStatus(status);
+
                 string statusLine = string.Format("STATUS:{0}", status);
                 RecordManager.DoSystemEventRecord(this, statusLine);
                 return stateChanged;
@@ -47,6 +50,45 @@ namespace Scada.Declare
                 return false;
             }
 
+        }
+
+        private void CheckStatus(int status)
+        {
+            string statusBin = "00000000" + Convert.ToString(status, 2);
+            statusBin = statusBin.Substring(statusBin.Length - 24);
+
+            if (statusBin == "") 
+            {
+            }
+            else if (statusBin == "010000000100001100111100")
+            {
+                // TODO: start
+            } 
+            else if (statusBin == "110000000100001100111010")
+            {
+                // QAMeasure.bat
+                this.ExecQAMeasure();
+            }
+            else if (statusBin == "110000000100001100111100")
+            {
+                // SampleMeasure24.bat
+                this.ExecSample24HourMeasure();
+            }
+
+        }
+
+        private void ExecQAMeasure()
+        {
+            using (Process p = Process.Start(@"c:/QAMeasure.bat"))
+            {
+            }
+        }
+
+        private void ExecSample24HourMeasure()
+        {
+            using (Process p = Process.Start(@"c:/SampleMeasure24.bat"))
+            {
+            }
         }
     }
 }

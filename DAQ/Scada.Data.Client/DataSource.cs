@@ -164,7 +164,7 @@ namespace Scada.Data.Client
             }
         }
 
-        private string GetDatePath(DateTime date)
+        public static string GetDatePath(DateTime date)
         {
             return string.Format("{0}-{1:D2}", date.Year, date.Month);
         }
@@ -172,9 +172,8 @@ namespace Scada.Data.Client
         // NO USE for NaI device.
         public string GetNaIDeviceData(DateTime time)
         {
-            throw new NotSupportedException();
             string fileName = this.GetLabrFileName(time);
-            string datePath = this.GetDatePath(time);
+            string datePath = GetDatePath(time);
             string filePath = LogPath.GetDeviceLogFilePath("scada.naidevice", time) + "\\" + fileName;
             string content = string.Empty;
             if (File.Exists(filePath))
@@ -193,7 +192,7 @@ namespace Scada.Data.Client
         public string GetLabrDeviceFile(DateTime time)
         {
             string fileName = this.GetLabrFileName(time);
-            string datePath = this.GetDatePath(time);
+            string datePath = GetDatePath(time);
             string filePath = LogPath.GetDeviceLogFilePath("scada.labr", time) + "\\" + fileName;
             string content = string.Empty;
             if (File.Exists(filePath))
@@ -236,11 +235,40 @@ namespace Scada.Data.Client
             return 1;
         }
 
+        internal static string GetCurrentSid()
+        {
+            string path = LogPath.GetDeviceLogFilePath("scada.hpge");
+            string sidFile = Path.Combine(path, "SID");
+            string sid = string.Empty;
+            if (!File.Exists(sidFile))
+            {
+                return string.Empty;
+            }
+            using (FileStream fs = File.OpenRead(sidFile))
+            {
+                long len = fs.Length;
+                byte[] bs = new byte[len];
+                fs.Read(bs, 0, (int)len);
+                sid = Encoding.ASCII.GetString(bs);
+            }
+            return sid;
+        }
 
         internal string GetNewHpGeFile()
         {
-            string path = LogPath.GetDeviceLogFilePath("scada.hpge", DateTime.Now);
-            return "";
+            string path = LogPath.GetDeviceLogFilePath("scada.hpge");
+            string sid = GetCurrentSid();
+
+            string currentFilePath = Path.Combine(path, sid);
+
+            string[] files = Directory.GetFiles(currentFilePath);
+            foreach (var file in files)
+            {
+                string fileName = Path.GetFileName(file);
+                if (fileName.StartsWith("!"))
+                    return file;
+            }
+            return string.Empty;
         }
     }
 }

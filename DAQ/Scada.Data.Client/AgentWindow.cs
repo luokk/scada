@@ -106,6 +106,8 @@ namespace Scada.Data.Client
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add(this.pingLabel);
 
+            this.CheckLastSendTime = true;
+
             this.cmdReceiver = new CommandReceiver(Ports.DataClient);
             cmdReceiver.Start(this.OnLocalCommand);
 
@@ -341,7 +343,7 @@ namespace Scada.Data.Client
                     string filePath = DataSource.Instance.GetNewHpGeFile();
                     if (!string.IsNullOrEmpty(filePath))
                     {
-                        Packet p = builder.GetFilePacket(filePath, "hpge1");
+                        Packet p = builder.GetFilePacket(filePath, "hpge");
                         if (p != null)
                         {
                             p.Id = packetId;

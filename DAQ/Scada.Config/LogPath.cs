@@ -24,7 +24,7 @@ namespace Scada.Config
         }
 
         // Maybe NO use
-        private static string GetDeviceLogFilePath(string deviceName)
+        public static string GetDeviceLogFilePath(string deviceName)
         {
             return Path.Combine(LogPathBase, deviceName);
         }

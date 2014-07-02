@@ -117,6 +117,8 @@ namespace Scada.Data.Client
 
             public string EquipNumber { get; set; }
 
+            public string FilePath { get; set; }
+
             internal List<DeviceCode> GetCodes()
             {
                 return this.codes;
@@ -238,10 +240,21 @@ namespace Scada.Data.Client
                 }
             }
 
+            string filePath = null;
+            var filePathNode = deviceNode.Attributes.GetNamedItem("filepath");
+            if (filePathNode != null)
+            {
+                if (!string.IsNullOrEmpty(filePathNode.Value))
+                {
+                    filePath = filePathNode.Value;
+                }
+            }
+
             Device device = new Device();
             device.TableName = tableName;
             device.Key = deviceKey;
             device.EquipNumber = equipNumber;
+            device.FilePath = filePath;
             return device;
         }
 
@@ -404,6 +417,16 @@ namespace Scada.Data.Client
             if (device != null)
             {
                 return device.Key;
+            }
+            return string.Empty;
+        }
+
+        internal string GetDeviceFilePath(string deviceKey)
+        {
+            Device device = devices.Find((d) => { return deviceKey.Equals(d.Key, StringComparison.OrdinalIgnoreCase); });
+            if (device != null)
+            {
+                return device.FilePath;
             }
             return string.Empty;
         }

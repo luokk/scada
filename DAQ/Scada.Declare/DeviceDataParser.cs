@@ -304,6 +304,12 @@ namespace Scada.Declare
 
     public class CinderlDataParser : DataParser
     {
+        public static string CurrentSid
+        {
+            get;
+            set;
+        }
+
         public CinderlDataParser()
 		{		
 		}
@@ -346,6 +352,12 @@ namespace Scada.Declare
             content = content.Trim(',');
             
             string[] ret = content.Split(',');
+
+            string sid = ret[0];
+            if (CurrentSid != sid)
+            {
+                CurrentSid = sid;
+            }
             ret[2] = ParseTime(ret[2]);
             ret[3] = ParseTime(ret[3]);
             return ret;

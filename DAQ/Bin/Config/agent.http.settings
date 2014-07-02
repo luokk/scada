@@ -2,11 +2,17 @@
 <settings>
   <!-- Default Port is 6000 and 7000 -->
   <datacenters>
+    <!--
     <datacenter2 BaseUrl="http://127.0.0.1" />
+    -->
+    <datacenter2 BaseUrl="http://192.168.1.203" />
+    
   </datacenters>
   <!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
   <site sysname="" sysst="213213123213123213" adapter="" name="" station="128" sno="0313A08" mn="0313A080000000">
   </site>
+
+
 
   <threshold>
     <polId name="__PLACEHOLDER__" v1="" v2="" />
@@ -78,7 +84,7 @@
     </device>
 
     <!-- NOTICE -->
-    <device id="Scada.Hpge" table="Hpge_Rec" eno="Scada.Hpge" debug-data-time="2014-04-27 10:18:33">
+    <device id="Scada.Hpge" table="Hpge_Rec" eno="Scada.Hpge" filepath="">
       <code field="file-content">01</code>
       <code field="file-content">02</code>
     </device>
