@@ -80,7 +80,7 @@ namespace Scada.Declare
                 var bs = Encoding.ASCII.GetBytes(sid);
                 fs.Write(bs, 0, bs.Length);
 
-                string sidFolder = Path.Combine(path, "SID");
+                string sidFolder = Path.Combine(path, sid);
                 Directory.CreateDirectory(sidFolder);
             }
         }

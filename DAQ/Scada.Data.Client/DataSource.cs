@@ -78,12 +78,13 @@ namespace Scada.Data.Client
         private static string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
         {
             // Get the recent <count> entries.
-            string format = "select * from {0} where time>='{1}' and time<='{2}'";
+            string format = "select * from {0} where time>'{1}' and time<='{2}'";
             string sql = string.Format(format, tableName, fromTime, toTime);
             return sql;
         }
 
         // Not care PolId in HTTP uploading.
+        // SELECT * from <DEVICE TABLE> where time in (t1, t2]
         public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime time1, DateTime time2, List<Dictionary<string, object>> data, out string errorMsg)
         {
             errorMsg = string.Empty;

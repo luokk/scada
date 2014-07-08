@@ -497,7 +497,7 @@ namespace Scada.Main
             deviceKey = deviceKey.ToLower();
             if (!this.selectedDevices.ContainsKey(deviceKey))
             {
-                MessageBox.Show("Not Contains the Running device key!");
+                MessageBox.Show(string.Format("Not contains device-key = {0}", deviceKey));
                 return;
             }
 

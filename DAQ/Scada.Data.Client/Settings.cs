@@ -198,10 +198,10 @@ namespace Scada.Data.Client
 
             // Load NaI device config.
             // TODO: 
-            string configNaIPath = ConfigPath.GetDeviceConfigFilePath("scada.naidevice", "0.9");
-            if (Directory.Exists(configNaIPath))
+            string configLabrPath = ConfigPath.GetDeviceConfigFilePath("scada.labr", "0.9");
+            if (File.Exists(configLabrPath))
             {
-                DeviceEntry entry = LoadFromConfig("Scada.NaIDevice", configNaIPath);
+                DeviceEntry entry = LoadFromConfig("Scada.Labr", configLabrPath);
 
                 this.NaIDeviceSn = (StringValue)entry["DeviceSn"];
                 this.MinuteAdjust = (StringValue)entry["MinuteAdjust"];

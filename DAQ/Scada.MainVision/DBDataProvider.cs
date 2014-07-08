@@ -310,6 +310,7 @@ namespace Scada.MainVision
             {
                 cmd.CommandText = this.GetSelectStatement(entry.TableName, fromTime, toTime);
             }
+
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
                 int index = 0;
@@ -334,6 +335,7 @@ namespace Scada.MainVision
                         }
                         catch (Exception)
                         {
+                            break;
                             // No this field.
                         }
                     }

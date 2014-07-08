@@ -361,12 +361,14 @@ namespace Scada.Data.Client
                 }
 
                 string errorMsg;
-                ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, time, default(DateTime), this.data, out errorMsg);
+
+                DateTime from = time.AddSeconds(-30);
+                ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, this.data, out errorMsg);
                 if (d == ReadResult.ReadDataOK)
                 {
                     if (this.data.Count > 0)
                     {
-                        Packet p = builder.GetPacket(deviceKey, this.data[0], true);
+                        Packet p = builder.GetPacket(deviceKey, this.data, true);
                         p.Id = packetId;
                         return p;
                     }

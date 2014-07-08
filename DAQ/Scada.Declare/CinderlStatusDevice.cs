@@ -63,7 +63,7 @@ namespace Scada.Declare
             else if (statusBin == "010000000100001100111100")
             {
                 // TODO: start
-            } 
+            }
             else if (statusBin == "110000000100001100111010")
             {
                 // QAMeasure.bat
@@ -79,14 +79,16 @@ namespace Scada.Declare
 
         private void ExecQAMeasure()
         {
-            using (Process p = Process.Start(@"c:/QAMeasure.bat"))
+            var bat = ConfigPath.GetConfigFilePath("devices/Scada.HPGE/0.9/script/QAMeasure.bat");
+            using (Process p = Process.Start(bat))
             {
             }
         }
 
         private void ExecSample24HourMeasure()
         {
-            using (Process p = Process.Start(@"c:/SampleMeasure24.bat"))
+            var bat = ConfigPath.GetConfigFilePath("devices/Scada.HPGE/0.9/script/SampleMeasure24.bat");
+            using (Process p = Process.Start(bat))
             {
             }
         }

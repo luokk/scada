@@ -20,9 +20,14 @@ namespace Scada.Data.Client
             this.Token = "";
         }
 
-        internal List<Packet> GetPackets(string deviceKey, DateTime time, string content)
+        internal Packet GetPacket(string deviceKey, List<Dictionary<string, object>> list, bool p)
         {
-            throw new NotImplementedException();
+            Packet packet = null;
+            foreach (Dictionary<string, object> data in list)
+            {
+                packet = this.CombinePacket(packet, this.GetPacket(deviceKey, data, p));
+            }
+            return packet;
         }
 
         internal Packet GetPacket(string deviceKey, Dictionary<string, object> data, bool p)
@@ -100,7 +105,6 @@ namespace Scada.Data.Client
             }
             return packets;
         }
-
 
     }
 }

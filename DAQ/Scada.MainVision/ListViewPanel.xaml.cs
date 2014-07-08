@@ -18,13 +18,13 @@ namespace Scada.Controls
     using System.Windows.Media.Imaging;
     using System.Windows.Input;
     using System.Threading;
-using MySql.Data.MySqlClient;
+    using MySql.Data.MySqlClient;
 
 	/// <summary>
 	/// Interaction logic for ListViewPanel.xaml
 	/// </summary>
-	public partial class ListViewPanel : UserControl
-	{
+    public partial class ListViewPanel : UserControl
+    {
         private Control listView = null;
 
         private Control searchView = null;
@@ -37,13 +37,15 @@ using MySql.Data.MySqlClient;
 
         private Control energyView = null;
 
-		private DataListener dataListener;
+        private DataListener dataListener;
 
         private DBDataProvider dataProvider;
 
         private string deviceKey;
 
-		private List<Dictionary<string, object>> dataSource;
+        private static string currentDeviceKey;
+
+        private List<Dictionary<string, object>> dataSource;
 
         private List<Dictionary<string, object>> searchDataSource;
 
@@ -84,55 +86,43 @@ using MySql.Data.MySqlClient;
         /// <param name="displayName">Display Name</param>
         /// <param name="interval">In Seconds</param>
         public ListViewPanel(DBDataProvider dataProvider, ConfigEntry entry)
-		{
-			InitializeComponent();
+        {
+            InitializeComponent();
             this.deviceKey = entry.DeviceKey;
             this.DisplayName = entry.DisplayName;
             this.dataProvider = dataProvider;
 
             this.dbConn = this.dataProvider.GetMySqlConnection();
-            
-            this.SynchronizationContext = SynchronizationContext.Current;
-            this.fetchDataThread = new Thread(new ParameterizedThreadStart((o) => 
+
+            var dbCmd = this.dbConn.CreateCommand();
+            var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            dispatcherTimer.Tick += (s, evt) =>
             {
-                var dbCmd = this.dbConn.CreateCommand();
-                while (true)
+                if (this.Shown && this.deviceKey != currentDeviceKey)
                 {
-                    if (dataProvider.Quit)
-                    {
-                        break;
-                    }
-
-                    if (!this.Shown)
-                    {
-                        Thread.Sleep(1500);
-                        continue;
-                    }
-
+                    currentDeviceKey = this.deviceKey;
                     this.ListRecentData(dbCmd);
-                    Thread.Sleep(10 * 1000);
                 }
-            }));
-            this.fetchDataThread.Start(null);
-		}
+            };
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
+            dispatcherTimer.Start();
+
+        }
 
         internal void ListRecentData(MySqlCommand dbCmd)
         {
-            lock (this.dataProvider)
-            {
-                this.dataProvider.RefreshTimeline(this.deviceKey, dbCmd);
-            }
+            this.dataProvider.RefreshTimeline(this.deviceKey, dbCmd);
         }
 
         public Control ListView
-		{
-			get { return this.listView; }
-			set
-			{
+        {
+            get { return this.listView; }
+            set
+            {
                 this.listView = value;
                 this.SetupListView();
-			}
-		}
+            }
+        }
 
         public Control SearchView
         {
@@ -145,20 +135,20 @@ using MySql.Data.MySqlClient;
         }
 
         public Control GraphView
-		{
-			get
-			{
+        {
+            get
+            {
                 return this.graphView;
-			}
-			set
-			{
+            }
+            set
+            {
                 this.graphView = value;
                 if (this.graphView != null)
                 {
                     this.GraphViewContainer.Content = this.graphView;
                 }
-			}
-		}
+            }
+        }
 
         public Control GraphSearchView
         {
@@ -258,7 +248,7 @@ using MySql.Data.MySqlClient;
         {
             this.currentSelectedItem = null;
             ListView listView = (ListView)sender;
-            
+
             if (this.HasItemClicked(listView, e))
             {
                 this.currentSelectedItem = listView.SelectedItem;
@@ -307,8 +297,8 @@ using MySql.Data.MySqlClient;
             set;
         }
 
-		[Category("Behavior")]
-		public event RoutedEventHandler CloseClick;
+        [Category("Behavior")]
+        public event RoutedEventHandler CloseClick;
 
         private void ApplyListStyle(ListView listView)
         {
@@ -319,18 +309,18 @@ using MySql.Data.MySqlClient;
             listView.Style = (Style)this.Resources["ListViewKey"];
         }
 
-		public override void OnApplyTemplate()
-		{
-			base.OnApplyTemplate();
+        public override void OnApplyTemplate()
+        {
+            base.OnApplyTemplate();
 
             DateTime now = DateTime.Now;
             this.FromDate.SelectedDate = now.AddDays(-2);
             this.ToDate.SelectedDate = now.AddDays(-1);
-			// Can NOT Find Element in Template;
-		}
+            // Can NOT Find Element in Template;
+        }
 
-		private void ContentLoaded(object sender, RoutedEventArgs e)
-		{
+        private void ContentLoaded(object sender, RoutedEventArgs e)
+        {
             this.Title.Text = this.DisplayName;
 
             DateTime yestoday = DateTime.Now.AddDays(-1);
@@ -340,152 +330,147 @@ using MySql.Data.MySqlClient;
             this.FromDateText.Text = from.ToString();
             this.ToDateText.Text = to.ToString();
 
-            this.CloseButton.Click += (s, c) =>  {
-		        this.CloseClick(this, c);
+            this.CloseButton.Click += (s, c) =>
+            {
+                this.CloseClick(this, c);
             };
 
-		}
+        }
 
-		public void AddDataListener(DataListener listener)
-		{
-			this.dataListener = listener;
-			if (this.dataListener != null)
-			{
-				this.dataListener.OnDataArrivalBegin += this.OnDataArrivalBegin;
-				this.dataListener.OnDataArrival += this.OnDataArrival;
-				this.dataListener.OnDataArrivalEnd += this.OnDataArrivalEnd;
-			}
+        public void AddDataListener(DataListener listener)
+        {
+            this.dataListener = listener;
+            if (this.dataListener != null)
+            {
+                this.dataListener.OnDataArrivalBegin += this.OnDataArrivalBegin;
+                this.dataListener.OnDataArrival += this.OnDataArrival;
+                this.dataListener.OnDataArrivalEnd += this.OnDataArrivalEnd;
+            }
 
             // TODO: !!
             this.dataSource = new List<Dictionary<string, object>>();
 
             this.searchDataSource = new List<Dictionary<string, object>>();
-		}
+        }
 
         // BEGIN
         private void OnDataArrivalBegin(DataArrivalConfig config)
-		{
-            this.SynchronizationContext.Post(new SendOrPostCallback((o) =>
+        {
+            if (config == DataArrivalConfig.TimeNew)
             {
-                if (config == DataArrivalConfig.TimeNew)
-                {
-                    // DO nothing for the realtime data-source
-                }
-                else if (config == DataArrivalConfig.TimeRange)
-                {
-                    // For show new data source, so clear the old data source.
-                    this.searchDataSource.Clear();
-                }
-                else if (config == DataArrivalConfig.TimeRecent)
-                {
-                    this.dataSource.Clear();
-                }
- 
-            }), config);
-		}
+                // DO nothing for the realtime data-source
+            }
+            else if (config == DataArrivalConfig.TimeRange)
+            {
+                // For show new data source, so clear the old data source.
+                this.searchDataSource.Clear();
+            }
+            else if (config == DataArrivalConfig.TimeRecent)
+            {
+                this.dataSource.Clear();
+            }
+        }
 
 
         // ARRIVAL
-		private void OnDataArrival(DataArrivalConfig config, Dictionary<string, object> entry)
-		{
-            this.SynchronizationContext.Post(new SendOrPostCallback((o) =>
+        private void OnDataArrival(DataArrivalConfig config, Dictionary<string, object> entry)
+        {
+
+            if (config == DataArrivalConfig.TimeRecent)
             {
-                if (config == DataArrivalConfig.TimeRecent)
+                // Debug.Assert(false, "Time Recent should not be here.");
+                this.dataSource.Add(entry);
+            }
+            else if (config == DataArrivalConfig.TimeRange)
+            {
+                this.searchDataSource.Add(entry);
+            }
+            else if (config == DataArrivalConfig.TimeNew)
+            {
+                const string Time = "time";
+                if (!entry.ContainsKey(Time))
                 {
-                    // Debug.Assert(false, "Time Recent should not be here.");
-                    this.dataSource.Add(entry);
+                    return;
                 }
-                else if (config == DataArrivalConfig.TimeRange)
-                {
-                    this.searchDataSource.Add(entry);
-                }
-                else if (config == DataArrivalConfig.TimeNew)
-                {
-                    const string Time = "time";
-                    if (!entry.ContainsKey(Time))
-                    {
-                        return;
-                    }
 
-                    if (this.dataSource.Count > 0)
-                    {
-                        Dictionary<string, object> latest = this.dataSource[0];
-                        DateTime latestDateTime = DateTime.Parse((string)latest[Time]);
+                if (this.dataSource.Count > 0)
+                {
+                    Dictionary<string, object> latest = this.dataSource[0];
+                    DateTime latestDateTime = DateTime.Parse((string)latest[Time]);
 
-                        DateTime dt = DateTime.Parse((string)entry[Time]);
-                        if (dt > latestDateTime)
-                        {
-                            this.dataSource.Insert(0, entry);
-                        }
-                        else
-                        {
-                            return;
-                        }
+                    DateTime dt = DateTime.Parse((string)entry[Time]);
+                    if (dt > latestDateTime)
+                    {
+                        this.dataSource.Insert(0, entry);
                     }
                     else
                     {
-                        this.dataSource.Add(entry);
-                    }
-
-                    ListView listView = (ListView)this.ListView;
-                    int selected = listView.SelectedIndex;
-                    listView.ItemsSource = null;
-                    listView.ItemsSource = this.dataSource;
-                    listView.SelectedIndex = selected;
-
-                    if (this.dataSource.Count > MaxListCount)
-                    {
-                        int p = MaxListCount;
-                        int l = this.dataSource.Count - p;
-                        this.dataSource.RemoveRange(p, l);
+                        return;
                     }
                 }
-            }), null);
-		}
+                else
+                {
+                    this.dataSource.Add(entry);
+                }
+
+                ListView listView = (ListView)this.ListView;
+                int selected = listView.SelectedIndex;
+                listView.ItemsSource = null;
+                listView.ItemsSource = this.dataSource;
+                listView.SelectedIndex = selected;
+
+                if (this.dataSource.Count > MaxListCount)
+                {
+                    int p = MaxListCount;
+                    int l = this.dataSource.Count - p;
+                    this.dataSource.RemoveRange(p, l);
+                }
+            }
+
+        }
 
         // END
         private void OnDataArrivalEnd(DataArrivalConfig config)
-		{
-            this.SynchronizationContext.Post(new SendOrPostCallback((o) =>
+        {
+
+            if (config == DataArrivalConfig.TimeRecent)
             {
-                if (config == DataArrivalConfig.TimeRecent)
+
+                if (this.ListView == null || !(this.ListView is ListView))
+                    return;
+
+                this.dataSource.Sort(DBDataProvider.DateTimeCompare);
+
+                ListView listView = (ListView)this.ListView;
+                // Remember the Selected item.
+                int selected = listView.SelectedIndex;
+                listView.ItemsSource = null;
+                // List can only hold 100 items.
+                if (this.dataSource.Count > MaxListCount)
                 {
-
-                    if (this.ListView == null || !(this.ListView is ListView))
-                        return;
-
-                    this.dataSource.Sort(DBDataProvider.DateTimeCompare);
-
-                    ListView listView = (ListView)this.ListView;
-                    // Remember the Selected item.
-                    int selected = listView.SelectedIndex;
-                    listView.ItemsSource = null;
-                    // List can only hold 100 items.
-                    if (this.dataSource.Count > MaxListCount)
-                    {
-                        int p = MaxListCount;
-                        int l = this.dataSource.Count - p;
-                        this.dataSource.RemoveRange(p, l);
-                    }
-                    listView.ItemsSource = this.dataSource;
-                    listView.SelectedIndex = selected;
-
+                    int p = MaxListCount;
+                    int l = this.dataSource.Count - p;
+                    this.dataSource.RemoveRange(p, l);
                 }
-                else if (config == DataArrivalConfig.TimeRange)
-                {
-                    if (this.SearchView == null || !(this.SearchView is ListView))
-                        return;
+                listView.ItemsSource = this.dataSource;
+                listView.SelectedIndex = selected;
 
-                    this.searchDataSource.Sort(DBDataProvider.DateTimeCompare);
+            }
+            else if (config == DataArrivalConfig.TimeRange)
+            {
+                if (this.SearchView == null || !(this.SearchView is ListView))
+                    return;
 
-                    ListView searchListView = (ListView)this.SearchView;
-                    searchListView.ItemsSource = null;
-                    searchListView.ItemsSource = this.searchDataSource;
-                }
-            }), null);
+                this.searchDataSource.Sort(DBDataProvider.DateTimeCompare);
 
-		}
-        
+                ListView searchListView = (ListView)this.SearchView;
+                searchListView.ItemsSource = null;
+                searchListView.ItemsSource = this.searchDataSource;
+            }
+
+
+        }
+
         ////////////////////////////////////////////////////////////////////////////
         // When click the Search Button.
         private void SearchByDateRange(object sender, RoutedEventArgs e)
@@ -586,7 +571,7 @@ using MySql.Data.MySqlClient;
                 }
 
             }
-    
+
         }
 
         /* Pages about.
@@ -630,7 +615,7 @@ using MySql.Data.MySqlClient;
  
 
         }
-        */ 
+        */
 
         // Select the ChartView to show.
         private void ShowChartView(object sender, RoutedEventArgs e)
@@ -669,7 +654,7 @@ using MySql.Data.MySqlClient;
                 foreach (Dictionary<string, object> i in dataList)
                 {
                     StringBuilder sb = new StringBuilder();
-                    
+
                     foreach (object item in i.Values)
                     {
                         sb.Append(item.ToString()).Append(",");
@@ -744,7 +729,7 @@ using MySql.Data.MySqlClient;
             {
                 ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData);
             }
-            
+
         }
 
         internal void SetIcon(string icon)
@@ -752,6 +737,19 @@ using MySql.Data.MySqlClient;
             this.Icon.Source = new BitmapImage(new Uri("pack://application:,,,/" + icon));
         }
 
-        public bool Shown { get; set; }
+        private bool shown = false;
+
+        public bool Shown
+        {
+            get
+            {
+                return this.shown;
+            }
+            set
+            {
+                this.shown = value;
+                // currentDeviceKey = this.deviceKey;
+            }
+        }
     }
 }

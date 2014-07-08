@@ -24,6 +24,12 @@ namespace Scada.MainVision
 
         public const string DeviceKey_NaI = "scada.naidevice";
 
+        public const string DeviceKey_Labr = "scada.labr";
+
+        public const string DeviceKey_Cinderella = "scada.cinderella";
+
+        public const string DeviceKey_Hpge = "scada.hpge";
+
 
 
        
