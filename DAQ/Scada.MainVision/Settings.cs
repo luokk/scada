@@ -46,6 +46,8 @@ namespace Scada.MainVision
                                 DeviceKey_NaI
                                      };
 
+        public bool IsCAS { get; set; }
+
         public static Settings Instance = new Settings();
 
         /// <summary>
@@ -60,6 +62,13 @@ namespace Scada.MainVision
             if (!File.Exists(settingFileName))
             {
                 return;
+            }
+
+            this.IsCAS = false;
+            string cfg2FileName = ConfigPath.GetConfigFilePath("dsm2.cfg");
+            if (File.Exists(cfg2FileName))
+            {
+                this.IsCAS = true;
             }
 
             doc.Load(settingFileName);

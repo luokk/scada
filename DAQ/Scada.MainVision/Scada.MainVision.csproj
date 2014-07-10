@@ -107,6 +107,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CinderellaPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CommStatusPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -195,6 +199,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="CanvasEx.cs" />
+    <Compile Include="CinderellaPage.xaml.cs">
+      <DependentUpon>CinderellaPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CommStatusPage.xaml.cs">
       <DependentUpon>CommStatusPage.xaml</DependentUpon>
     </Compile>

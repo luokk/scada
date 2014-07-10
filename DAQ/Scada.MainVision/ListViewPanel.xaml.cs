@@ -734,7 +734,10 @@ namespace Scada.Controls
 
         internal void SetIcon(string icon)
         {
-            this.Icon.Source = new BitmapImage(new Uri("pack://application:,,,/" + icon));
+            if (icon != null)
+            {
+                this.Icon.Source = new BitmapImage(new Uri("pack://application:,,,/" + icon));
+            }
         }
 
         private bool shown = false;

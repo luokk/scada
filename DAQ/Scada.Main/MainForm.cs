@@ -316,7 +316,7 @@ namespace Scada.Main
         private void BringDataUploadUI()
         {
             string dataUploadExe = "Scada.Data.Client.exe";
-            if (File.Exists(ConfigPath.GetConfigFilePath("as1.type")))
+            if (!File.Exists(ConfigPath.GetConfigFilePath("agent.http.settings")))
             {
                 dataUploadExe = "Scada.DataCenterAgent.exe";
             }

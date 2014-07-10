@@ -22,6 +22,8 @@ namespace Scada.MainVision
 
         public const string DevicesRunStatus = "Devices-Run-Status";
 
+        public const string CinderellaRunStatus = "Cinderella-Run-Status";
+
         public const string CurrentCommStatus = "Current-Comm-Status";
 
         public const string HistoryCommStatus = "History-Comm-Status";
@@ -254,6 +256,10 @@ namespace Scada.MainVision
                     containerPage.AddTab(name, "设备管理", mainPage);
                     // TODO: add other tab
                 }
+                else if (name == PanelManager.CinderellaRunStatus)
+                {
+                    containerPage.AddTab(name, "Cinderella管理", mainPage);
+                }
             }
             else
             {
@@ -297,9 +303,13 @@ namespace Scada.MainVision
             {
                 return new DataCounterPane();
             }
+            else if (name == PanelManager.CinderellaRunStatus)
+            {
+                return new CinderellaPage();
+            }
             else if (name == PanelManager.DevicesRunStatus)
             {
-                if (File.Exists(ConfigPath.GetConfigFilePath("as1.type")))
+                if (!Settings.Instance.IsCAS)
                 {
                     AllDevicesPage page = new AllDevicesPage();
                     page.SetDataProvider(dataProvider);

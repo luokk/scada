@@ -89,6 +89,7 @@ namespace Scada.MainVision
 
             this.AddPageEntry("自动站介绍", PanelManager.StationIntroduction, this.FirstShowTree);
             this.AddPageEntry("设备运行状态", PanelManager.DevicesRunStatus, this.FirstShowTree);
+            this.AddPageEntry("Cinderella运行状态", PanelManager.CinderellaRunStatus, this.FirstShowTree);
 
             this.AddPageEntry("当前通信状态", PanelManager.CurrentCommStatus, this.CommStatusTree);
             // this.AddPageEntry("历史通信状态", PanelManager.HistoryCommStatus, this.CommStatusTree);
@@ -106,8 +107,13 @@ namespace Scada.MainVision
 
 		private void LoadConfig()
 		{
-            string fileName = ConfigPath.GetConfigFilePath("dsm.cfg");
-            Config.Instance().Load(fileName);
+            string fileName = "dsm.cfg";
+            if (Settings.Instance.IsCAS)
+            {
+                fileName = "dsm2.cfg";    
+            }
+            string filePath = ConfigPath.GetConfigFilePath(fileName);
+            Config.Instance().Load(filePath);
 		}
 
         private string HeaderContent
