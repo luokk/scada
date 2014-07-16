@@ -96,6 +96,7 @@ namespace Scada.Declare
 			if (!RecordManager.mysql.DoRecord(deviceData))
 			{
 				// TODO: Do log this failure.
+                RecordManager.WriteDataToLog(deviceData.Device, "Insert to DB Error", RecordType.Data);
 			}
 		}
 

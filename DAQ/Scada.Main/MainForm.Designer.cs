@@ -170,8 +170,6 @@
             // 
             // selectAllToolStripMenuItem
             // 
-            this.selectAllToolStripMenuItem.Checked = true;
-            this.selectAllToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
             this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.selectAllToolStripMenuItem.Text = "选择全部";
@@ -223,32 +221,32 @@
             // startMainVisionMenuItem
             // 
             this.startMainVisionMenuItem.Name = "startMainVisionMenuItem";
-            this.startMainVisionMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.startMainVisionMenuItem.Size = new System.Drawing.Size(152, 22);
             this.startMainVisionMenuItem.Text = "启动数据视图";
             this.startMainVisionMenuItem.Click += new System.EventHandler(this.startMainVisionMenuItem_Click);
             // 
             // dataUploadToolStripMenuItem
             // 
             this.dataUploadToolStripMenuItem.Name = "dataUploadToolStripMenuItem";
-            this.dataUploadToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.dataUploadToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.dataUploadToolStripMenuItem.Text = "数据上传";
             this.dataUploadToolStripMenuItem.Click += new System.EventHandler(this.dataUploadToolStripMenuItem_Click);
             // 
             // dataCenterSetMenuItem
             // 
             this.dataCenterSetMenuItem.Name = "dataCenterSetMenuItem";
-            this.dataCenterSetMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.dataCenterSetMenuItem.Size = new System.Drawing.Size(152, 22);
             this.dataCenterSetMenuItem.Text = "数据中心设置";
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(145, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(149, 6);
             // 
             // doorSimuToolStripMenuItem
             // 
             this.doorSimuToolStripMenuItem.Name = "doorSimuToolStripMenuItem";
-            this.doorSimuToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.doorSimuToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.doorSimuToolStripMenuItem.Text = "模拟门禁";
             this.doorSimuToolStripMenuItem.Click += new System.EventHandler(this.doorSimuToolStripMenuItem_Click);
             // 

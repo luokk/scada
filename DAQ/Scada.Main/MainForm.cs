@@ -225,7 +225,7 @@ namespace Scada.Main
 
         private void RunDevices()
         {
-            // Update 
+            // UI status update 
             var hasSelectedDevices = this.UpdateDevicesRunningStatus();
             if (!hasSelectedDevices)
             {
@@ -235,6 +235,7 @@ namespace Scada.Main
             this.deviceRunning = true;
             this.startToolBarButton.Enabled = false;
             
+            // initialize db connector
             RecordManager.Initialize();
             Program.DeviceManager.DataReceived = this.OnDataReceived;
             Program.DeviceManager.Run(SynchronizationContext.Current, this.OnDataReceived);
@@ -640,6 +641,8 @@ namespace Scada.Main
             DeviceManager.SetDeviceConfigPath("Scada.dwd", true);
             DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", true);
             this.SetDeviceList();
+
+            selectAllToolStripMenuItem.Checked = false;
         }
 
         private void S1ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -654,6 +657,8 @@ namespace Scada.Main
             DeviceManager.SetDeviceConfigPath("Scada.dwd", false);
             DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", false);
             this.SetDeviceList();
+
+            selectAllToolStripMenuItem.Checked = false;
         }
 
         private void S3ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -668,6 +673,8 @@ namespace Scada.Main
             DeviceManager.SetDeviceConfigPath("Scada.dwd", false);
             DeviceManager.SetDeviceConfigPath("Scada.NaIDevice", false);
             this.SetDeviceList();
+
+            selectAllToolStripMenuItem.Checked = false;
         }
 
     }
