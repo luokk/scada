@@ -1,4 +1,5 @@
-﻿using Scada.Config;
+﻿using Scada.Common;
+using Scada.Config;
 using Scada.Controls;
 using Scada.Controls.Data;
 using System;
@@ -8,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -33,7 +35,12 @@ namespace Scada.MainVision
         private bool loaded = false;
 
         private static TextBlock statusBar;
-        
+
+        private CommandReceiver commandReceiver;
+
+        private SynchronizationContext SynchronizationContext
+        { get; set; }
+
 
         public static string Status
         {
@@ -89,7 +96,7 @@ namespace Scada.MainVision
 
             this.AddPageEntry("自动站介绍", PanelManager.StationIntroduction, this.FirstShowTree);
             this.AddPageEntry("设备运行状态", PanelManager.DevicesRunStatus, this.FirstShowTree);
-            this.AddPageEntry("Cinderella运行状态", PanelManager.CinderellaRunStatus, this.FirstShowTree);
+            this.AddPageEntry("特征核素识别系统", PanelManager.CinderellaRunStatus, this.FirstShowTree);
 
             this.AddPageEntry("当前通信状态", PanelManager.CurrentCommStatus, this.CommStatusTree);
             // this.AddPageEntry("历史通信状态", PanelManager.HistoryCommStatus, this.CommStatusTree);
@@ -103,6 +110,36 @@ namespace Scada.MainVision
             this.loaded = true;
             // Max when startup;
             this.OnMaxButton(null, null);
+
+            this.SynchronizationContext = SynchronizationContext.Current;
+            try
+            {
+                this.commandReceiver = new CommandReceiver(Ports.MainVision);
+                this.commandReceiver.Start(this.OnReceivedCommandLine);
+            }
+            catch (Exception)
+            {
+                System.Windows.Forms.MessageBox.Show("Command receiver initialized failed.");
+            }
+        }
+
+        private void OnReceivedCommandLine(string line)
+        {
+            this.SynchronizationContext.Post(new SendOrPostCallback((o) => 
+            {
+                try
+                {
+                    Command cmd = Command.Parse(line);
+                    if (cmd.Type == "cinderella_status")
+                    {
+                        this.panelManager.SendCommandToCinderellaPage(cmd);
+                    }
+                }
+                catch (Exception)
+                {
+                    // Maybe NOT Json string
+                }
+            }), null);
         }
 
 		private void LoadConfig()
@@ -293,6 +330,7 @@ namespace Scada.MainVision
         private void OnCloseButton(object sender, RoutedEventArgs e)
         {
             this.dataProvider.Quit = true;
+            commandReceiver.Close();
             this.Close();
         }
 

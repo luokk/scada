@@ -1,4 +1,5 @@
-﻿using Scada.Config;
+﻿using Scada.Common;
+using Scada.Config;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -56,6 +57,8 @@ namespace Scada.Declare
         {
             string statusBin = "00000000" + Convert.ToString(status, 2);
             statusBin = statusBin.Substring(statusBin.Length - 24);
+
+            Command.Send(Ports.MainVision, new Command("main", "mv", "cinderella_status", statusBin));
 
             if (statusBin == "") 
             {

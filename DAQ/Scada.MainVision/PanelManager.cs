@@ -1,4 +1,5 @@
-﻿using Scada.Config;
+﻿using Scada.Common;
+using Scada.Config;
 using Scada.Controls;
 using Scada.Controls.Data;
 using System;
@@ -34,6 +35,8 @@ namespace Scada.MainVision
 
 
 		private Grid theGrid;
+
+        private CinderellaPage cinderellaPage;
 
 		private List<ListViewPanel> panelList = new List<ListViewPanel>();
 
@@ -305,7 +308,8 @@ namespace Scada.MainVision
             }
             else if (name == PanelManager.CinderellaRunStatus)
             {
-                return new CinderellaPage();
+                this.cinderellaPage = new CinderellaPage();
+                return this.cinderellaPage;
             }
             else if (name == PanelManager.DevicesRunStatus)
             {
@@ -323,6 +327,14 @@ namespace Scada.MainVision
                 }
             }
             return null;
+        }
+
+        public void SendCommandToCinderellaPage(Command cmd)
+        {
+            if (this.cinderellaPage != null)
+            {
+                this.cinderellaPage.OnReceivedCommand(cmd);
+            }
         }
     }
 }

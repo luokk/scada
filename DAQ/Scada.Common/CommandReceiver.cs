@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -8,21 +9,6 @@ using System.Threading;
 
 namespace Scada.Common
 {
-    public class StateObject
-    {
-        public Socket Socket
-        {
-            get;
-            set;
-        }
-
-        public byte[] bytes
-        {
-            get;
-            set;
-        }
-    }
-
     public class CommandReceiver
     {
         private Socket WinSocket = null;
@@ -89,15 +75,56 @@ namespace Scada.Common
     /// </summary>
     public class Command
     {
+        public string Source { get; set; }
+
+        public string Dest { get; set; }
+
+        public string Type { get; set; }
+
+        public string Content { get; set; }
+
+        public Command(string source, string dest, string type, string content)
+        {
+            this.Source = source;
+            this.Dest = dest;
+            this.Type = type;
+            this.Content = content;
+        }
+
+        public override string ToString()
+        {
+            JObject jobject = new JObject();
+            jobject["src"] = this.Source;       
+            jobject["dest"] = this.Dest;
+            jobject["type"] = this.Type;
+            jobject["content"] = this.Content;
+            return jobject.ToString();
+        }
+
+        public static Command Parse(string cmd)
+        {
+            JObject j = JObject.Parse(cmd);
+            string source = j["src"].ToString();
+            string dest = j["dest"].ToString();
+            string type = j["type"].ToString();
+            string content = j["content"].ToString();
+            return new Command(source, dest, type, content);
+        }
+
         public static int Send(int port, string msg)
         {
-            IPEndPoint RemoteEndPoint = new IPEndPoint( IPAddress.Parse("127.0.0.1"), port );
+            IPEndPoint RemoteEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
             UdpClient client = new UdpClient();
 
             var data = Encoding.UTF8.GetBytes(msg);
             int r = client.Send(data, data.Length, RemoteEndPoint);
             client.Close();
             return r;
+        }
+
+        public static int Send(int port, Command cmd)
+        {
+            return Send(port, cmd.ToString());
         }
     }
 

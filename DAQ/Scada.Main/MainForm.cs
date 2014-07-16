@@ -280,6 +280,8 @@ namespace Scada.Main
 
             // Check the Last Modify time of each device.
             Program.DeviceManager.CheckLastModifyTime();
+
+            Command.Send(Ports.MainVision, "Keep-Alive");
 		}
 
 		private void InitSysNotifyIcon()
