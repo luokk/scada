@@ -354,9 +354,8 @@ namespace Scada.Declare
 
 			if (this.IsRealDevice)
 			{
-                // Try to Sleep 100ms and make one time callback.
-                // 200 ms is enough for BoudRate 9600
-                Thread.Sleep(200);
+                // important, sleep 400ms to wait all the data come to system buffer, Kaikai
+                Thread.Sleep(400);
 
 				int n = this.serialPort.BytesToRead;
 				byte[] buffer = new byte[n];
@@ -403,9 +402,6 @@ namespace Scada.Declare
 
 		private void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs evt)  
 		{
-            //important, sleep 200ms to wait all the data come to system buffer, Kaikai
-            Thread.Sleep(200);
-
 			Debug.Assert(this.DataReceived != null);
 			try
 			{
