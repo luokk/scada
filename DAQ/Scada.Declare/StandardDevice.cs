@@ -10,6 +10,7 @@ using Scada.Common;
 using System.Reflection;
 using System.Globalization;
 using Scada.Config;
+using System.Threading;
 
 namespace Scada.Declare
 {
@@ -243,8 +244,8 @@ namespace Scada.Declare
                 this.serialPort.BaudRate = this.baudRate;
 
                 this.serialPort.Parity = this.parity;       //Parity none
-                this.serialPort.StopBits = StopBits.One;    //(StopBits)this.stopBits;    //StopBits 1
-                this.serialPort.DataBits = 8;               // this.dataBits;   // DataBits 8bit
+                this.serialPort.StopBits = this.stopBits;    //(StopBits)this.stopBits;    //StopBits 1
+                this.serialPort.DataBits = this.dataBits;               // this.dataBits;   // DataBits 8bit
                 this.serialPort.ReadTimeout = 10000;        // this.readTimeout;
 
                 this.serialPort.RtsEnable = true;
@@ -402,6 +403,9 @@ namespace Scada.Declare
 
 		private void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs evt)  
 		{
+            //important, sleep 200ms to wait all the data come to system buffer, Kaikai
+            Thread.Sleep(200);
+
 			Debug.Assert(this.DataReceived != null);
 			try
 			{
@@ -414,7 +418,7 @@ namespace Scada.Declare
                     return;
 				}
 
-                if (this.sensitive)
+                if (this.sensitive)                
                 {
                     DeviceData sdd;
                     if (this.GetSensitiveData(line, out sdd))
