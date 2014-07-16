@@ -26,6 +26,13 @@ namespace Scada.Declare
 
         public override bool OnReceiveData(byte[] data)
         {
+            // Cinderella data标准输出是203，不等于203时，不做处理      by Kaikai
+            if (data.Length != 203) 
+            {
+                RecordManager.DoSystemEventRecord(this, " cinderella data output bits exception!");
+                return false;
+            }
+
             bool start = false;
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < data.Length; ++i)

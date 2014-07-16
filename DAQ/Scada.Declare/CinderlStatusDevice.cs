@@ -23,6 +23,13 @@ namespace Scada.Declare
 
         public override bool OnReceiveData(byte[] line)
         {
+            // Cinderella status标准输出是10，不等于10时，不做处理      by Kaikai
+            if (line.Length != 10 && line.Length != 9)
+            {
+                RecordManager.DoSystemEventRecord(this, " cinderella status output bits exception!");
+                return false;
+            }
+
             StringBuilder sb = new StringBuilder();
             foreach (byte b in line)
             {
@@ -39,11 +46,15 @@ namespace Scada.Declare
                 bool stateChanged = (this.lastStatus != status);
                 this.lastStatus = status;
 
-                this.CheckStatus(status);
+                //important 状态判断！ by Kaikai
+                if (stateChanged)
+                {
+                    this.CheckStatus(status);
+                }
 
-                string statusLine = string.Format("STATUS:{0}", status);
-                RecordManager.DoSystemEventRecord(this, statusLine);
-                return stateChanged;
+                //string statusLine = string.Format("STATUS:{0}", status);
+                //RecordManager.DoSystemEventRecord(this, statusLine);
+                return true;
             }
             else
             {
@@ -52,8 +63,65 @@ namespace Scada.Declare
 
         }
 
-        private void CheckStatus(int status)
+        private bool CheckStatus(int status)
         {
+            // 转成2进制的string
+            string str = Convert.ToString(status, 2);
+
+            //
+            if (str.Length == 23)
+            {
+                str = "0" + str;
+            }
+
+            if (str.Length != 24)
+            {
+                return false;
+            }
+
+            //取相反的序列，方便数位数
+            int datalen = str.Length;
+            string[] data = new string[datalen];
+            for (int i = 0; i < datalen; i++)
+            {
+                data[i] = str.Substring(datalen - 1 - i, 1);
+            }
+            
+            // 自动模式
+            if (data[15] == "0")
+            {
+                // 24小时模式
+                if (data[14] == "1" && data[13] == "0" && data[12] == "0" && data[11] == "0")
+                {
+                    return true;
+                }
+
+                if (data[14] == "0" && data[13] == "1" && data[12] == "0" && data[11] == "0")
+                {
+                    return true;
+                }
+
+                if (data[14] == "0" && data[13] == "0" && data[12] == "1" && data[11] == "0")
+                {
+
+                }
+
+                if (data[14] == "0" && data[13] == "0" && data[12] == "0" && data[11] == "1")
+                {
+
+                }
+            
+            
+            }
+
+
+
+
+
+            return true;
+
+            
+            /*
             string statusBin = "00000000" + Convert.ToString(status, 2);
             statusBin = statusBin.Substring(statusBin.Length - 24);
 
@@ -74,7 +142,7 @@ namespace Scada.Declare
                 // SampleMeasure24.bat
                 this.ExecSample24HourMeasure();
             }
-
+            */
         }
 
         private void ExecQAMeasure()

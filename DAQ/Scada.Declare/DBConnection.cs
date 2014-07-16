@@ -47,7 +47,10 @@ namespace Scada.Declare
             }
             catch (Exception e)
             {
-                this.RetryConnection(e);
+                RecordManager.DoSystemEventRecord(Device.Main, e.Message, RecordType.Error);
+                
+                // disable RetryConnection      by Kaikai
+                //this.RetryConnection(e);
             }
         }
 
@@ -72,9 +75,30 @@ namespace Scada.Declare
 
         }
 
+        public void Disconnect()
+        {
+            try
+            {
+                if (this.conn != null)
+                {
+                    this.conn.Clone();
+                    this.conn = null;
+                }
+            }
+            catch (Exception)
+            {
+                this.conn = null;
+            }
+            finally
+            {
+                this.conn = null;
+            }
+ 
+        }
+
         private void Reconnect()
         {
-            RecordManager.DoSystemEventRecord(Device.Main, "Reconnect to MySQL DB", RecordType.Notice);
+            RecordManager.DoSystemEventRecord(Device.Main, "Reconnecting to MySQL DB", RecordType.Notice);
             this.Connect();
         }
 
@@ -91,7 +115,13 @@ namespace Scada.Declare
                         string at = string.Format("@{0}", i + 1);
                         this.cmd.Parameters.AddWithValue(at, items[i]);
                     }
-                    this.cmd.ExecuteNonQuery();
+                    
+                    int num = this.cmd.ExecuteNonQuery();
+                    if (num != 1)
+                    {
+                        this.cmd.Parameters.Clear();
+                        return false;
+                    }
                     // If exception, the params would NOT clear.
                     // cmd.Parameters.Clear();
 
@@ -104,7 +134,8 @@ namespace Scada.Declare
             catch (Exception e)
             {
                 RecordManager.DoSystemEventRecord(data.Device, string.Format("{0} => {1}", commandText, e.Message), RecordType.Error);
-                this.RetryConnection(e);
+                //this.RetryConnection(e);
+                cmd.Parameters.Clear();
                 return false;
             }
             finally
