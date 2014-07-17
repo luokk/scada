@@ -86,11 +86,15 @@ namespace Scada.Declare
                     return;
                 }
                 string originLine = deviceData.OriginData;
-                RecordManager.WriteDataToLog(deviceData.Device, originLine.Trim(), RecordType.Origin);
+
+                // remove temp by kaikai
+                //RecordManager.WriteDataToLog(deviceData.Device, originLine.Trim(), RecordType.Origin);
             }
 
 			string line = RecordManager.PackDeviceData(deviceData);
-			RecordManager.WriteDataToLog(deviceData.Device, line, RecordType.Data);
+			
+            // remove temp by Kaikai
+            //RecordManager.WriteDataToLog(deviceData.Device, line, RecordType.Data);
 
             // Record into MySQL:)
 			if (!RecordManager.mysql.DoRecord(deviceData))

@@ -22,6 +22,38 @@ namespace Scada.Declare
 
         private int lastStatus = 0;
 
+        private enum Mode24_Process
+        {
+            Mode24_Process_SampleMeasure = 0,	                //初始状态/样品测量
+            Mode24_Process_ChangeStart = 1,	                    //机械臂开始移动
+            Mode24_Process_MovingPlate = 2,	                    //开始拖动滤纸夹
+            Mode24_Process_Cutting = 3,	                        //滤纸夹就位，开始切割
+            Mode24_Process_MovingLead_AfterCutting = 4,	        //切割完毕，铅室盖打开中
+            Mode24_Process_LeadOpen_AfterCutting = 5,		    //完全打开铅室盖
+            Mode24_Process_StartQA = 7,		                    //开始QA测量
+            Mode24_Process_QAFinish = 8,		                //QA测量结束
+            Mode24_Process_MovingLead_AfterQAFinish = 9,		//QA测量完毕，铅室盖关闭中
+            Mode24_Process_LeadClose = 10		                //QA测量完毕，铅室盖完全关闭
+        }
+
+        //状态、报警
+        private bool Status_BackPlexDoor = false;	    //后玻璃门状态
+        private bool Status_Flow = false;	            //采样流量状态
+        private bool Status_NewCatridge = false;	    //新滤纸夹舱状态
+        private bool Status_CuttingPosition = false;	//切割位置状态
+        private bool Status_OldCatridge = false;		//旧滤纸夹舱状态
+        private bool Status_CatridgeDirection = false;	//新滤纸夹具方向
+        private bool Status_BeakerHolder = false;		//抽屉状态
+        private bool Status_FrontPlexDoor = false;	    //前玻璃门状态
+        private bool Status_Beaker = false;			    //新滤纸盒状态
+        private bool Status_OldCatridgeDoor = false;	//旧滤纸夹舱门状态
+        private bool Status_NewCatridgeDoor = false;	//新滤纸夹舱门状态
+        private bool Status_Emergency = false;	        //紧急停止状态
+
+
+
+        private int Running_Process = 0;
+
         public override bool OnReceiveData(byte[] line)
         {
             // Cinderella status标准输出是10，不等于10时，不做处理      by Kaikai
@@ -45,16 +77,18 @@ namespace Scada.Declare
             if (int.TryParse(record, out status))
             {
                 bool stateChanged = (this.lastStatus != status);
-                this.lastStatus = status;
-
                 //important 状态判断！ by Kaikai
-                if (stateChanged)
+                if (!stateChanged)
                 {
-                    this.CheckStatus(status);
+                    return false;  
                 }
 
-                //string statusLine = string.Format("STATUS:{0}", status);
-                //RecordManager.DoSystemEventRecord(this, statusLine);
+                this.lastStatus = status;
+
+                this.CheckStatus(status);
+
+                string statusLine = string.Format("STATUS:{0}", status);
+                RecordManager.DoSystemEventRecord(this, statusLine);
                 return true;
             }
             else
@@ -69,15 +103,15 @@ namespace Scada.Declare
             // 转成2进制的string
             string str = Convert.ToString(status, 2);
 
-            //
-            if (str.Length == 23)
-            {
-                str = "0" + str;
-            }
-
-            if (str.Length != 24)
+            if (str.Length > 24)
             {
                 return false;
+            }
+
+            int index = 24 - str.Length;
+            for (int i = 0; i < index; i++)
+            {
+                str = str + "0";
             }
 
             //取相反的序列，方便数位数
@@ -87,65 +121,411 @@ namespace Scada.Declare
             {
                 data[i] = str.Substring(datalen - 1 - i, 1);
             }
+
+            // 判断状态、报警
+            SearchBitStatus(data);
             
             // 自动模式
             if (data[15] == "0")
             {
-                // 24小时模式
-                if (data[14] == "1" && data[13] == "0" && data[12] == "0" && data[11] == "0")
-                {
-                    return true;
-                }
+                return AutoMode(data);
+            }
+            else
+            {
+                return ManualMode(data);
+            }
+        }
 
-                if (data[14] == "0" && data[13] == "1" && data[12] == "0" && data[11] == "0")
-                {
-                    return true;
-                }
-
-                if (data[14] == "0" && data[13] == "0" && data[12] == "1" && data[11] == "0")
-                {
-
-                }
-
-                if (data[14] == "0" && data[13] == "0" && data[12] == "0" && data[11] == "1")
-                {
-
-                }
-            
-            
+        private bool SearchBitStatus(string[] data)
+        {
+            // 触发后玻璃门开
+            if (data[22] == "0" && Status_BackPlexDoor == false)
+            {
+                Status_BackPlexDoor = true;
+                RecordManager.DoSystemEventRecord(this, "后侧玻璃门打开", RecordType.Event);
+            }
+            //触发后玻璃门关
+            if (data[22] == "1" && Status_BackPlexDoor == true)
+            {
+                Status_BackPlexDoor = false;
+                RecordManager.DoSystemEventRecord(this, "后侧玻璃门关闭", RecordType.Event);
             }
 
+            //触发流量低报警
+            if (data[21] == "1" && Status_Flow == false)
+            {
+                Status_Flow = true;
+                RecordManager.DoSystemEventRecord(this, "流量低", RecordType.Event);
+            }
+            if (data[21] == "0" && Status_Flow == true)
+            {
+                Status_Flow = false;
+                RecordManager.DoSystemEventRecord(this, "流量正常", RecordType.Event);
+            }
 
+            //新滤纸夹舱空报警
+            if (data[19] == "1" && Status_NewCatridge == false)
+            {
+                Status_NewCatridge = true;
+                RecordManager.DoSystemEventRecord(this, "新滤纸夹舱空", RecordType.Event);
+            }
+            if (data[19] == "0" && Status_NewCatridge == true)
+            {
+                Status_NewCatridge = false;
+                RecordManager.DoSystemEventRecord(this, "新滤纸夹舱正常", RecordType.Event);
+            }
 
+            //切割位置未找到滤纸夹具
+            if (data[18] == "1" && Status_CuttingPosition == false)
+            {
+                Status_CuttingPosition = true;
+                RecordManager.DoSystemEventRecord(this, "切割位置未找到滤纸夹具", RecordType.Event);
+            }
+            if (data[18] == "0" && Status_CuttingPosition == true)
+            {
+                Status_CuttingPosition = false;
+                RecordManager.DoSystemEventRecord(this, "切割位置正常", RecordType.Event);
+            }
 
+            //旧滤纸夹舱满报警
+            if (data[17] == "1" && Status_OldCatridge == false)
+            {
+                Status_OldCatridge = true;
+                RecordManager.DoSystemEventRecord(this, "旧滤纸夹舱满报警", RecordType.Event);
+            }
+            if (data[17] == "0" && Status_OldCatridge == true)
+            {
+                Status_OldCatridge = false;
+                RecordManager.DoSystemEventRecord(this, "旧滤纸夹舱正常", RecordType.Event);
+            }
+
+            //滤纸方向放反了
+            if (data[10] == "1" && Status_CatridgeDirection == false)
+            {
+                Status_CatridgeDirection = true;
+                RecordManager.DoSystemEventRecord(this, "滤纸夹方向错误", RecordType.Event);
+            }
+            if (data[10] == "0" && Status_CatridgeDirection == true)
+            {
+                Status_CatridgeDirection = false;
+                RecordManager.DoSystemEventRecord(this, "滤纸夹方向正常", RecordType.Event);
+            }
+
+            //抽屉空了
+            if (data[9] == "0" && Status_BeakerHolder == false)
+            {
+                Status_BeakerHolder = true;
+                RecordManager.DoSystemEventRecord(this, "抽屉被抽出", RecordType.Event);
+            }
+            if (data[9] == "1" && Status_BeakerHolder == true)
+            {
+                Status_BeakerHolder = false;
+                RecordManager.DoSystemEventRecord(this, "抽屉正常", RecordType.Event);
+            }
+
+            //前玻璃门打开
+            if (data[8] == "0" && Status_FrontPlexDoor == false)
+            {
+                Status_FrontPlexDoor = true;
+                RecordManager.DoSystemEventRecord(this, "前侧玻璃门打开", RecordType.Event);
+            }
+            if (data[8] == "1" && Status_FrontPlexDoor == true)
+            {
+                Status_FrontPlexDoor = false;
+                RecordManager.DoSystemEventRecord(this, "前侧玻璃门关闭", RecordType.Event);
+            }
+
+            //新滤纸盒空了
+            if (data[6] == "1" && Status_Beaker == false)
+            {
+                Status_Beaker = true;
+                RecordManager.DoSystemEventRecord(this, "新滤纸盒位置空", RecordType.Event);
+            }
+            if (data[6] == "0" && Status_Beaker == true)
+            {
+                Status_Beaker = false;
+                RecordManager.DoSystemEventRecord(this, "新滤纸盒位置正常", RecordType.Event);
+            }
+
+            //旧滤纸夹具舱门打开
+            if (data[5] == "0" && Status_OldCatridgeDoor == false)
+            {
+                Status_OldCatridgeDoor = true;
+                RecordManager.DoSystemEventRecord(this, "旧滤纸夹具舱门打开", RecordType.Event);
+            }
+            if (data[5] == "1" && Status_OldCatridgeDoor == true)
+            {
+                Status_OldCatridgeDoor = false;
+                RecordManager.DoSystemEventRecord(this, "旧滤纸夹具舱门关闭", RecordType.Event);
+            }
+
+            //新滤纸夹具舱门打开
+            if (data[4] == "0" && Status_NewCatridgeDoor == false)
+            {
+                Status_NewCatridgeDoor = true;
+                RecordManager.DoSystemEventRecord(this, "新滤纸夹具舱门打开", RecordType.Event);
+            }
+            if (data[4] == "1" && Status_NewCatridgeDoor == true)
+            {
+                Status_NewCatridgeDoor = false;
+                RecordManager.DoSystemEventRecord(this, "新滤纸夹具舱门关闭", RecordType.Event);
+            }
+
+            //应急报警
+            if (data[0] == "1" && Status_Emergency == false)
+            {
+                Status_Emergency = true;
+                RecordManager.DoSystemEventRecord(this, "紧急开关报警", RecordType.Event);
+            }
+            if (data[0] == "0" && Status_Emergency == true)
+            {
+                Status_Emergency = false;
+                RecordManager.DoSystemEventRecord(this, "紧急开关正常", RecordType.Event);
+            }
 
             return true;
+        }
 
+        private bool AutoMode(string[] data)
+        {
+            //RecordManager.DoSystemEventRecord(this, "进入自动模式", RecordType.Event);
             
-            /*
-            string statusBin = "00000000" + Convert.ToString(status, 2);
-            statusBin = statusBin.Substring(statusBin.Length - 24);
+            // 24小时模式
+            if (data[14] == "1" && data[13] == "0" && data[12] == "0" && data[11] == "0")
+            {
+                return Mode24(data);
+            }
 
-            Command.Send(Ports.MainVision, new Command("main", "mv", "cinderella_status", statusBin));
+            // 8小时模式
+            if (data[14] == "0" && data[13] == "1" && data[12] == "0" && data[11] == "0")
+            {
+                return Mode8(data);
+            }
 
-            if (statusBin == "") 
+            // 6小时模式
+            if (data[14] == "0" && data[13] == "0" && data[12] == "1" && data[11] == "0")
             {
+                return Mode6(data);
             }
-            else if (statusBin == "010000000100001100111100")
+
+            // 1小时模式
+            if (data[14] == "0" && data[13] == "0" && data[12] == "0" && data[11] == "1")
             {
-                // TODO: start
+                return Mode1(data);
             }
-            else if (statusBin == "110000000100001100111010")
+                
+            else
             {
-                // QAMeasure.bat
-                this.ExecQAMeasure();
+                RecordManager.DoSystemEventRecord(this, "Unknown mode");
+                return false;
             }
-            else if (statusBin == "110000000100001100111100")
+        }
+
+        private bool ManualMode(string[] data)
+        {
+            RecordManager.DoSystemEventRecord(this, "进入手动模式", RecordType.Event);
+
+            // to do        by Kaikai
+
+            return true;
+        }
+
+        private bool Mode8(string[] data)
+        {
+            RecordManager.DoSystemEventRecord(this, "进入8小时模式", RecordType.Event);
+            return true;
+        }
+
+        private bool Mode6(string[] data)
+        {
+            RecordManager.DoSystemEventRecord(this, "进入6小时模式", RecordType.Event);
+            return true;
+        }
+
+        private bool Mode1(string[] data)
+        {
+            RecordManager.DoSystemEventRecord(this, "进入1小时模式", RecordType.Event);
+            return true;
+        }
+
+        private bool Mode24(string[] data)
+        {
+            //RecordManager.DoSystemEventRecord(this, "进入24小时模式", RecordType.Event);
+
+            // 状态 = 00110
+            if (data[23] == "0" && data[7] == "0" && data[3] == "1" && data[2] == "1" && data[1] == "0")
             {
-                // SampleMeasure24.bat
-                this.ExecSample24HourMeasure();
+                Running_Process = (int)Mode24_Process.Mode24_Process_SampleMeasure;
+
+                //RecordManager.DoSystemEventRecord(this, "初始状态/样品测量", RecordType.Event);
+                return true;
             }
-            */
+
+            // 状态 = 10110
+            if (data[23] == "1" && data[7] == "0" && data[3] == "1" && data[2] == "1" && data[1] == "0")
+            {
+                // 判断是否原有状态之一，避免状态重复出现
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_ChangeStart ||
+                    Running_Process == (int)Mode24_Process.Mode24_Process_Cutting ||
+                    Running_Process == (int)Mode24_Process.Mode24_Process_LeadClose)
+                {
+                    return true;
+                }
+
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_SampleMeasure)
+                {
+                    Running_Process = (int)Mode24_Process.Mode24_Process_ChangeStart;
+
+                    RecordManager.DoSystemEventRecord(this, "机械臂开始移动", RecordType.Event);
+                    return true;
+                }
+
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_MovingPlate)
+                {
+                    Running_Process = (int)Mode24_Process.Mode24_Process_Cutting;
+
+                    RecordManager.DoSystemEventRecord(this, "滤纸夹就位，开始切割", RecordType.Event);
+                    return true;
+                }
+
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_MovingLead_AfterQAFinish)
+                {
+                    Running_Process = (int)Mode24_Process.Mode24_Process_LeadClose;
+
+                    RecordManager.DoSystemEventRecord(this, "铅室盖完全关闭，准备开始样品测量", RecordType.Event);
+
+                    // to do sample measurement
+
+                    return true;
+                }
+
+                else
+                {
+                    RecordManager.DoSystemEventRecord(this, "未知状态，状态号10110", RecordType.Event);
+                    return false;
+                }
+
+            }
+
+            // 状态 = 10010
+            if (data[23] == "1" && data[7] == "0" && data[3] == "0" && data[2] == "1" && data[1] == "0")
+            {
+                // 判断是否原有状态之一，避免状态重复出现
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_MovingPlate)
+                {
+                    return true;
+                }
+
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_ChangeStart)
+                {
+                    Running_Process = (int)Mode24_Process.Mode24_Process_MovingPlate;
+
+                    RecordManager.DoSystemEventRecord(this, "开始移动滤纸夹", RecordType.Event);
+                    return true;
+                }
+
+                else
+                {
+                    RecordManager.DoSystemEventRecord(this, "未知状态，状态号10010", RecordType.Event);
+                    return false;
+                }
+            }
+
+            // 状态 = 10100
+            if (data[23] == "1" && data[7] == "0" && data[3] == "1" && data[2] == "0" && data[1] == "0")
+            {
+                // 判断是否原有状态之一，避免状态重复出现
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_MovingLead_AfterCutting ||
+                    Running_Process == (int)Mode24_Process.Mode24_Process_MovingLead_AfterQAFinish)
+                {
+                    return true;
+                }
+
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_Cutting)
+                {
+                    Running_Process = (int)Mode24_Process.Mode24_Process_MovingLead_AfterCutting;
+
+                    RecordManager.DoSystemEventRecord(this, "切割完毕，打开铅室盖中", RecordType.Event);
+                    return true;
+                }
+
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_QAFinish)
+                {
+                    Running_Process = (int)Mode24_Process.Mode24_Process_MovingLead_AfterQAFinish;
+
+                    RecordManager.DoSystemEventRecord(this, "QA测量结束，关闭铅室盖中", RecordType.Event);
+                    return true;
+                }
+
+                else
+                {
+                    RecordManager.DoSystemEventRecord(this, "未知状态，状态号10100", RecordType.Event);
+                    return false;
+                }
+            }
+
+            // 状态 = 10101
+            if (data[23] == "1" && data[7] == "0" && data[3] == "1" && data[2] == "0" && data[1] == "1")
+            {
+                // 判断是否原有状态之一，避免状态重复出现
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_LeadOpen_AfterCutting ||
+                    Running_Process == (int)Mode24_Process.Mode24_Process_QAFinish)
+                {
+                    return true;
+                }
+
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_MovingLead_AfterCutting)
+                {
+                    Running_Process = (int)Mode24_Process.Mode24_Process_LeadOpen_AfterCutting;
+
+                    RecordManager.DoSystemEventRecord(this, "切割结束，铅室盖打开完毕", RecordType.Event);
+                    return true;
+                }
+
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_StartQA)
+                {
+                    Running_Process = (int)Mode24_Process.Mode24_Process_QAFinish;
+
+                    RecordManager.DoSystemEventRecord(this, "QA测量结束", RecordType.Event);
+                    return true;
+                }
+
+                else
+                {
+                    RecordManager.DoSystemEventRecord(this, "未知状态，状态号10101", RecordType.Event);
+                    return false;
+                }
+            }
+
+            // 状态 = 11101
+            if (data[23] == "1" && data[7] == "1" && data[3] == "1" && data[2] == "0" && data[1] == "1")
+            {
+                // 判断是否原有状态之一，避免状态重复出现
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_StartQA)
+                {
+                    return true;
+                }
+
+                if (Running_Process == (int)Mode24_Process.Mode24_Process_LeadOpen_AfterCutting)
+                {
+                    Running_Process = (int)Mode24_Process.Mode24_Process_StartQA;
+
+                    RecordManager.DoSystemEventRecord(this, "开始QA测量", RecordType.Event);
+                    return true;
+                }
+
+                else
+                {
+                    RecordManager.DoSystemEventRecord(this, "未知状态，状态号11101", RecordType.Event);
+                    return false;
+                }
+            }
+
+            else
+            {
+                RecordManager.DoSystemEventRecord(this, "未知状态，24小时模式", RecordType.Event);
+                return false;
+            }
         }
 
         private void ExecQAMeasure()

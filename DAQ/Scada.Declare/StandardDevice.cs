@@ -10,7 +10,6 @@ using Scada.Common;
 using System.Reflection;
 using System.Globalization;
 using Scada.Config;
-using System.Threading;
 
 namespace Scada.Declare
 {
@@ -355,7 +354,7 @@ namespace Scada.Declare
 			if (this.IsRealDevice)
 			{
                 // important, sleep 400ms to wait all the data come to system buffer, Kaikai
-                Thread.Sleep(400);
+                Thread.Sleep(300);
 
 				int n = this.serialPort.BytesToRead;
 				byte[] buffer = new byte[n];
