@@ -43,16 +43,14 @@
                     <RowDefinition Height="40"></RowDefinition>
                     <RowDefinition Height="40"></RowDefinition>
                 </Grid.RowDefinitions>
-                <ToggleButton Grid.Row="0" Grid.Column="0" Content="手动" Margin="5" Click="AutoClick"></ToggleButton>
+                <ToggleButton Grid.Row="0" Grid.Column="0" Content="自动/手动" Margin="5" Click="AutoClick"></ToggleButton>
                 <Button Grid.Row="0" Grid.Column="1" Content="开始循环" Margin="5" Click="LoopClick"></Button>
-                <Button Grid.Row="0" Grid.Column="2" Content="填充" Margin="5" Click="FillClick"></Button>
-                
-                <Button Grid.Row="0" Grid.Column="3" Content="关闭铅室盖" Margin="5" Click="CoverClick"></Button>
-                <Button Grid.Row="0" Grid.Column="4" Content="关闭真空泵" Margin="5" Click="PumpClick"></Button>
-                <ToggleButton Grid.Row="1" Grid.Column="0" Content="1 小时" Margin="5" x:Name="h1" Click="hourClick"></ToggleButton>
-                <ToggleButton Grid.Row="1" Grid.Column="1" Content="6 小时" Margin="5" x:Name="h6" Click="hourClick"></ToggleButton>
-                <ToggleButton Grid.Row="1" Grid.Column="2" Content="8 小时" Margin="5" x:Name="h8" Click="hourClick"></ToggleButton>
-                <ToggleButton Grid.Row="1" Grid.Column="3" Content="24小时" Margin="5" x:Name="h24" Click="hourClick"></ToggleButton>
+
+                <ToggleButton Grid.Row="0" Grid.Column="2" Content="关闭/打开真空泵" Margin="5" Click="PumpClick"></ToggleButton>
+                <ToggleButton Grid.Row="1" Grid.Column="0" Content="1 小时" Margin="5" x:Name="h1H" Click="hourClick"></ToggleButton>
+                <ToggleButton Grid.Row="1" Grid.Column="1" Content="6 小时" Margin="5" x:Name="h6H" Click="hourClick"></ToggleButton>
+                <ToggleButton Grid.Row="1" Grid.Column="2" Content="8 小时" Margin="5" x:Name="h8H" Click="hourClick"></ToggleButton>
+                <ToggleButton Grid.Row="1" Grid.Column="3" Content="24小时" Margin="5" x:Name="h24H" Click="hourClick"></ToggleButton>
                 
             </Grid>
         </GroupBox>
@@ -67,7 +65,7 @@
             <m:SmartDataPane x:Name="hpgePane" Title="高纯锗谱仪" Canvas.Left="187" Canvas.Top="66">
             </m:SmartDataPane>
 
-            <m:SmartDataPane x:Name="statusPane" Title="系统运行状态" Canvas.Left="187" Canvas.Top="66">
+            <m:SmartDataPane x:Name="statusPane" Title="系统运行状态" Canvas.Left="387" Canvas.Top="66">
             </m:SmartDataPane>
         </m:CanvasEx>
     </Grid>

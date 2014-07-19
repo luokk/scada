@@ -88,6 +88,7 @@ namespace Scada.Declare
                 this.CheckStatus(status);
 
                 string statusLine = string.Format("STATUS:{0}", status);
+                Command.Send(Ports.MainVision, new Command("m", "mv", "cinderella.status", status.ToString()));
                 RecordManager.DoSystemEventRecord(this, statusLine);
                 return true;
             }
@@ -111,7 +112,7 @@ namespace Scada.Declare
             int index = 24 - str.Length;
             for (int i = 0; i < index; i++)
             {
-                str = str + "0";
+                str = "0" + str;
             }
 
             //取相反的序列，方便数位数
@@ -357,7 +358,7 @@ namespace Scada.Declare
             {
                 Running_Process = (int)Mode24_Process.Mode24_Process_SampleMeasure;
 
-                //RecordManager.DoSystemEventRecord(this, "初始状态/样品测量", RecordType.Event);
+                RecordManager.DoSystemEventRecord(this, "初始状态/样品测量", RecordType.Event);
                 return true;
             }
 
@@ -542,6 +543,11 @@ namespace Scada.Declare
             using (Process p = Process.Start(bat))
             {
             }
+        }
+
+        public override void Send(byte[] action, DateTime time)
+        {
+            this.Write(action, default(DateTime));
         }
     }
 }

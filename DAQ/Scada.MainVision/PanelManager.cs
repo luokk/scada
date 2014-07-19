@@ -309,6 +309,7 @@ namespace Scada.MainVision
             else if (name == PanelManager.CinderellaRunStatus)
             {
                 this.cinderellaPage = new CinderellaPage();
+                this.cinderellaPage.SetDataProvider(dataProvider);
                 return this.cinderellaPage;
             }
             else if (name == PanelManager.DevicesRunStatus)
@@ -322,7 +323,7 @@ namespace Scada.MainVision
                 else
                 {
                     AllDevicesPage2 page = new AllDevicesPage2();
-                    // page.SetDataProvider(dataProvider);
+                    page.SetDataProvider(dataProvider);
                     return page;
                 }
             }
