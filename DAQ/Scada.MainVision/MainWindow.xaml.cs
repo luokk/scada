@@ -125,12 +125,18 @@ namespace Scada.MainVision
 
         private void OnReceivedCommandLine(string line)
         {
+
             this.SynchronizationContext.Post(new SendOrPostCallback((o) => 
             {
+                if (line == "Keep-Alive")
+                {
+                    return;
+                }
                 try
                 {
                     Command cmd = Command.Parse(line);
-                    if (cmd.Type == "cinderella_status")
+                    string type = cmd.Type.Trim('"');
+                    if (type == "cinderella.status")
                     {
                         this.panelManager.SendCommandToCinderellaPage(cmd);
                     }

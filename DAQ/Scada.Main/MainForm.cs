@@ -18,6 +18,7 @@ using System.Security.Principal;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json.Linq;
 
 namespace Scada.Main
 {
@@ -157,6 +158,23 @@ namespace Scada.Main
                     string cmd = line.Substring(10);
                     RecordManager.DoSystemEventRecord(Device.Main, "(AIS):" + cmd);
                     Program.DeviceManager.SendDeviceCode("Scada.AIS", cmd);
+                }
+                else
+                {
+                    try
+                    {
+                        JObject json = JObject.Parse(line);
+                        string type = json["type"].ToString().Trim('"');
+                        string commandLine = json["content"].ToString().Trim('"');
+                        if (type == "cinderella")
+                        {
+                            Program.DeviceManager.SendDeviceCode("Scada.Cinderella.Status", commandLine);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+
                 }
             });
         }

@@ -69,13 +69,23 @@ namespace Scada.MainVision
         /// </summary>
         public DBDataProvider()
         {
-            this.allDeviceKeys.Add(DataProvider.DeviceKey_Hpic);
-            this.allDeviceKeys.Add(DataProvider.DeviceKey_Dwd);
-            this.allDeviceKeys.Add(DataProvider.DeviceKey_MDS);
-            this.allDeviceKeys.Add(DataProvider.DeviceKey_AIS);
-            this.allDeviceKeys.Add(DataProvider.DeviceKey_NaI);
-            this.allDeviceKeys.Add(DataProvider.DeviceKey_Shelter);
-            this.allDeviceKeys.Add(DataProvider.DeviceKey_Weather);
+            if (Settings.Instance.IsCAS)
+            {
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_Hpic);
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_Labr);
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_Shelter);
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_Weather);
+            }
+            else
+            {
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_Hpic);
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_Dwd);
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_MDS);
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_AIS);
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_NaI);
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_Shelter);
+                this.allDeviceKeys.Add(DataProvider.DeviceKey_Weather);
+            }
 
             this.FetchCount = 26;
 
@@ -237,7 +247,7 @@ namespace Scada.MainVision
             return new List<Dictionary<string, object>>();
         }
 
-        private Dictionary<string, object> RefreshTimeNow(string deviceKey, MySqlCommand cmd)
+        public Dictionary<string, object> RefreshTimeNow(string deviceKey, MySqlCommand cmd)
         {
 
             // Return values
