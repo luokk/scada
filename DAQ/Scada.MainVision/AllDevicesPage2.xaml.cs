@@ -60,7 +60,7 @@ namespace Scada.MainVision
 
             UpdatePanel_HPIC(this.hpicPane);
             UpdatePanel_Weather(this.weatherPane);
-            UpdatePanel_NaI(this.naiPane);
+            UpdatePanel_Labr(this.naiPane);
             UpdatePanel_Shelter(this.shelterPane);
 
         }
@@ -93,9 +93,9 @@ namespace Scada.MainVision
             Ru-103 = Ru-103; (0, 100, 100)
             Te-129 = Te-129;(0, 100, 100)
          */
-        private void UpdatePanel_NaI(SmartDataPane panel)
+        private void UpdatePanel_Labr(SmartDataPane panel)
         {
-            var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_NaI);
+            var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Labr);
             if (d == null)
             {
                 return;

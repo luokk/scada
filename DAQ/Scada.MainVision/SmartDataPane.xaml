@@ -16,7 +16,7 @@
             
         </Grid>
         
-        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,1,1,0">
+        <Border Grid.Row="0" BorderBrush="Black" BorderThickness="1,1,1,0" Background="AliceBlue">
             <Label x:Name="DisplayName" Foreground="Green" FontWeight="SemiBold" HorizontalAlignment="Center"></Label>
         </Border>
         

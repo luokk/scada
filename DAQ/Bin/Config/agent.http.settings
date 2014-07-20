@@ -2,11 +2,11 @@
 <settings>
   <!-- Default Port is 6000 and 7000 -->
   <datacenters>
-    
+     <!--
     <datacenter2 BaseUrl="http://127.0.0.1" />
-    <!--
-    <datacenter2 BaseUrl="http://192.168.1.203" />
-    -->
+   -->
+    <datacenter2 BaseUrl="http://192.168.1.107" />
+    
   </datacenters>
   <!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
   <site sysname="" sysst="213213123213123213" adapter="" name="" station="128" sno="0313A08" mn="0313A080000000">
@@ -45,12 +45,12 @@
     <!-- NOTICE -->
     <!-- File Time -->
     <!-- NOTICE -->
-    <device id="Scada.Labr" table="Labr_Rec" eno="010002" debug-data-time="2014-04-25 23:00:00">
+    <device id="Scada.LabrDevice" table="Labr_Rec" eno="010002" debug-data-time="2014-07-20 14:40:00">
       <code field="file-content">0102060332</code>
     </device>
     <!-- NOTICE -->
     <!-- NOTICE -->
-    <device id="Scada.Shelter" table="environment_rec" eno="999000" debug-data-time="2014-04-24 23:11:30">
+    <device id="Scada.Shelter" table="environment_rec" eno="999000" debug-data-time="2014-07-20 13:44:30">
       <code field="IfMainPowerOff" type="bit">0102069909</code>
       <code field="BatteryHours">0102069910</code>
       <code field="IfDoorOpen" type="bit">0102069906</code>
@@ -63,7 +63,7 @@
     <!-- NOTICE -->
     <!-- NOTICE -->
     <device id="Scada.Cinderella.Data" table="CinderellaData_Rec" 
-      eno="Scada.Cinderella.Data" debug-data-time="2014-04-27 10:19:30">
+      eno="Scada.Cinderella.Data" debug-data-time="2014-07-16 16:38:30">
       <code field="DeviceTime" type="str">01</code>
       <code field="Sid" type="str">02</code>
       <code field="barcode" type="str">03</code>

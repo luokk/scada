@@ -49,7 +49,7 @@ namespace Scada.MainVision
                 "新滤纸夹具方向", "新率纸盒状态", "抽屉状态", "采样流量状态", "新滤纸夹仓门状态", "旧滤纸夹仓门状态", "紧急停止状态"});*/
 
             this.statusPane.Initialize(new string[] { 
-                "", "", "", "", ""});
+                "工作模式", "循环模式", "当前流程", "报警:", "", "", "", ""});
             this.dbConn = this.dataProvider.GetMySqlConnection();
 
             MySqlCommand cmd = this.dbConn.CreateCommand();
@@ -76,6 +76,9 @@ namespace Scada.MainVision
                 return;
             }
             panel.SetData(
+                Get(d, "mode", ""),
+                Get(d, "loop", ""),
+                Get(d, "step", ""),
                 Get(d, "0", ""),
                 Get(d, "1", ""),
                 Get(d, "2", ""),
@@ -116,8 +119,9 @@ namespace Scada.MainVision
 
         internal void OnReceivedCommand(Common.Command cmd)
         {
-            int status = int.Parse(cmd.Content.Trim('"'));
-            string str = Convert.ToString(status, 2);
+            string c = cmd.Content.Trim('"');
+            string[] p = c.Split(';');
+            string str = Convert.ToString(int.Parse(p[3]), 2);
 
             if (str.Length > 24)
             {
@@ -136,7 +140,8 @@ namespace Scada.MainVision
             {
                 data[i] = str.Substring(datalen - 1 - i, 1);
             }
-            SearchBitStatus(data);
+            
+            SearchBitStatus(data, p);
         }
 
 
@@ -148,10 +153,10 @@ namespace Scada.MainVision
             Mode24_Process_Cutting = 3,	                        //滤纸夹就位，开始切割
             Mode24_Process_MovingLead_AfterCutting = 4,	        //切割完毕，铅室盖打开中
             Mode24_Process_LeadOpen_AfterCutting = 5,		    //完全打开铅室盖
-            Mode24_Process_StartQA = 7,		                    //开始QA测量
-            Mode24_Process_QAFinish = 8,		                //QA测量结束
-            Mode24_Process_MovingLead_AfterQAFinish = 9,		//QA测量完毕，铅室盖关闭中
-            Mode24_Process_LeadClose = 10		                //QA测量完毕，铅室盖完全关闭
+            Mode24_Process_StartQA = 6,		                    //开始QA测量
+            Mode24_Process_QAFinish = 7,		                //QA测量结束
+            Mode24_Process_MovingLead_AfterQAFinish = 8,		//QA测量完毕，铅室盖关闭中
+            Mode24_Process_LeadClose = 9		                //QA测量完毕，铅室盖完全关闭
         }
 
         //状态、报警
@@ -178,7 +183,7 @@ namespace Scada.MainVision
             this.statusKey ++;
         }
 
-        private bool SearchBitStatus(string[] data)
+        private bool SearchBitStatus(string[] data, string [] p)
         {
             statusDict.Clear();
             statusKey = 0;
@@ -328,10 +333,77 @@ namespace Scada.MainVision
                 //UpdateStatus("紧急开关正常");
             }
 
+            if (p[0] == "0")
+            {
+                this.statusDict.Add("mode", "自动模式");
+            }
+            else if (p[0] == "1")
+            {
+                this.statusDict.Add("mode", "手动模式");
+            }       
+              
+            if (p[1] == "0")
+            {
+                this.statusDict.Add("loop", "24小时模式");
+            }
+            else if (p[1] == "1")
+            {
+                this.statusDict.Add("loop", "8小时模式");
+            }
+            else if (p[1] == "2")
+            {
+                this.statusDict.Add("loop", "6小时模式");
+            }
+            else if (p[1] == "3")
+            {
+                this.statusDict.Add("loop", "1小时模式");
+            }
+
+            if (p[2] == "0")
+            {
+                this.statusDict.Add("step", "初始状态/样品测量");
+            }
+            else if (p[2] == "1")
+            {
+                this.statusDict.Add("step", "机械臂开始移动");
+            }
+            else if (p[2] == "2")
+            {
+                this.statusDict.Add("step", "开始拖动滤纸夹");
+            }
+            else if (p[2] == "3")
+            {
+                this.statusDict.Add("step", "滤纸夹就位，开始切割");
+            }
+            else if (p[2] == "4")
+            {
+                this.statusDict.Add("step", "切割完毕，铅室盖打开中");
+            }
+            else if (p[2] == "5")
+            {
+                this.statusDict.Add("step", "完全打开铅室盖");
+            }
+            else if (p[2] == "6")
+            {
+                this.statusDict.Add("step", "开始QA测量");
+            }
+            else if (p[2] == "7")
+            {
+                this.statusDict.Add("step", "QA测量结束");
+            }
+            else if (p[2] == "8")
+            {
+                this.statusDict.Add("step", "QA测量完毕，铅室盖关闭中");
+            }
+            else if (p[2] == "9")
+            {
+                this.statusDict.Add("step", "QA测量完毕，铅室盖完全关闭");
+            }
+
+
             this.UpdateCinderellaStatusPanel(this.statusPane, this.statusDict);
             return true;
         }
-
 
         private void AutoClick(object sender, RoutedEventArgs e)
         {

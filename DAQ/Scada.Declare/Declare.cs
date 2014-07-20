@@ -195,6 +195,11 @@ namespace Scada.Declare
             set;
         }
 
+        public int BufferSleep
+        {
+            get;
+            set;
+        }
 		
 
         public SendOrPostCallback DataReceived

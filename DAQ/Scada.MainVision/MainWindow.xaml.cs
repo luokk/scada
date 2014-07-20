@@ -141,7 +141,7 @@ namespace Scada.MainVision
                         this.panelManager.SendCommandToCinderellaPage(cmd);
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     // Maybe NOT Json string
                 }

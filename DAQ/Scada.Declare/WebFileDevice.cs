@@ -146,9 +146,13 @@ namespace Scada.Declare
                 // Start download ...
                 string fileName1 = GetFileNameOnDevice(now);
                 string fileName2 = GetFileName(now);
-                string datePath = LogPath.GetDeviceLogFilePath("scada.naidevice", now);
+                string datePath = LogPath.GetDeviceLogFilePath(this.Id, now) + "\\" + now.Day.ToString() ;
                 this.DoFolderPolicy(datePath);
 
+                if (!Directory.Exists(datePath))
+                {
+                    Directory.CreateDirectory(datePath);
+                }
                 filePath = datePath + "\\" + fileName2;
 				if (File.Exists(filePath))
                 {
@@ -237,7 +241,7 @@ namespace Scada.Declare
             // double minutesAdjust = this.minuteAdjust / 5 * 5 - 5;
             // time = time.AddMinutes(-minutesAdjust);
 
-            var dd = this.ParseNaI(set, time);
+            var dd = this.ParseN42File(set, time);
             this.SynchronizationContext.Post(this.DataReceived, dd);
             foreach (var nd in set.sets)
             {
@@ -249,7 +253,7 @@ namespace Scada.Declare
             }
         }
 
-        private DeviceData ParseNaI(NuclideDataSet s, DateTime time)
+        private DeviceData ParseN42File(NuclideDataSet s, DateTime time)
         {
             object[] data = new object[]{ time,
                 time.AddMinutes(-5) , time, s.Coefficients, 

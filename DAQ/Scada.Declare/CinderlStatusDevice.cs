@@ -30,10 +30,10 @@ namespace Scada.Declare
             Mode24_Process_Cutting = 3,	                        //滤纸夹就位，开始切割
             Mode24_Process_MovingLead_AfterCutting = 4,	        //切割完毕，铅室盖打开中
             Mode24_Process_LeadOpen_AfterCutting = 5,		    //完全打开铅室盖
-            Mode24_Process_StartQA = 7,		                    //开始QA测量
-            Mode24_Process_QAFinish = 8,		                //QA测量结束
-            Mode24_Process_MovingLead_AfterQAFinish = 9,		//QA测量完毕，铅室盖关闭中
-            Mode24_Process_LeadClose = 10		                //QA测量完毕，铅室盖完全关闭
+            Mode24_Process_StartQA = 6,		                    //开始QA测量
+            Mode24_Process_QAFinish = 7,		                //QA测量结束
+            Mode24_Process_MovingLead_AfterQAFinish = 8,		//QA测量完毕，铅室盖关闭中
+            Mode24_Process_LeadClose = 9		                //QA测量完毕，铅室盖完全关闭
         }
 
         //状态、报警
@@ -50,19 +50,19 @@ namespace Scada.Declare
         private bool Status_NewCatridgeDoor = false;	//新滤纸夹舱门状态
         private bool Status_Emergency = false;	        //紧急停止状态
 
+        // to MV
+        // WorkMode =0, AUTO, WorkMode=1, MANUAL
+        private int WorkMode = -1;
 
+        // LoopMode = 0, 24h, 1, 8h, 2, 6h, 3, 1h
+        private int LoopMode = -1;
 
-        private int Running_Process = 0;
+        private int Running_Process = -1;
+
+        private int counter = 0;
 
         public override bool OnReceiveData(byte[] line)
         {
-            // Cinderella status标准输出是10，不等于10时，不做处理      by Kaikai
-            if (line.Length != 10 && line.Length != 9)
-            {
-                RecordManager.DoSystemEventRecord(this, " cinderella status output bits exception!");
-                return false;
-            }
-
             StringBuilder sb = new StringBuilder();
             foreach (byte b in line)
             {
@@ -73,9 +73,27 @@ namespace Scada.Declare
             }
 
             string record = sb.ToString();
+
+            // Cinderella status标准输出是10，不等于10时，不做处理      by Kaikai
+            if (line.Length > 10 || line.Length < 9)
+            {
+                RecordManager.DoSystemEventRecord(this, record + "," + line.Length.ToString());
+                return false;
+            }
+
+            
             int status = 0;
             if (int.TryParse(record, out status))
             {
+                if (counter % 5 == 0)
+                {
+                    counter = 0;
+                    string c = WorkMode.ToString() + ";" + LoopMode.ToString() + ";" + Running_Process.ToString() + ";" + status.ToString();
+                    Command.Send(Ports.MainVision, new Command("m", "mv", "cinderella.status", c));
+                }
+                counter++;
+
+
                 bool stateChanged = (this.lastStatus != status);
                 //important 状态判断！ by Kaikai
                 if (!stateChanged)
@@ -88,7 +106,7 @@ namespace Scada.Declare
                 this.CheckStatus(status);
 
                 string statusLine = string.Format("STATUS:{0}", status);
-                Command.Send(Ports.MainVision, new Command("m", "mv", "cinderella.status", status.ToString()));
+                
                 RecordManager.DoSystemEventRecord(this, statusLine);
                 return true;
             }
@@ -129,10 +147,14 @@ namespace Scada.Declare
             // 自动模式
             if (data[15] == "0")
             {
+                // AUTO
+                WorkMode = 0;
                 return AutoMode(data);
             }
             else
             {
+                // MANUAL
+                WorkMode = 1;
                 return ManualMode(data);
             }
         }
@@ -294,24 +316,28 @@ namespace Scada.Declare
             // 24小时模式
             if (data[14] == "1" && data[13] == "0" && data[12] == "0" && data[11] == "0")
             {
+                LoopMode = 0;
                 return Mode24(data);
             }
 
             // 8小时模式
             if (data[14] == "0" && data[13] == "1" && data[12] == "0" && data[11] == "0")
             {
+                LoopMode = 1;
                 return Mode8(data);
             }
 
             // 6小时模式
             if (data[14] == "0" && data[13] == "0" && data[12] == "1" && data[11] == "0")
             {
+                LoopMode = 2;
                 return Mode6(data);
             }
 
             // 1小时模式
             if (data[14] == "0" && data[13] == "0" && data[12] == "0" && data[11] == "1")
             {
+                LoopMode = 3;
                 return Mode1(data);
             }
                 
@@ -396,6 +422,7 @@ namespace Scada.Declare
                     RecordManager.DoSystemEventRecord(this, "铅室盖完全关闭，准备开始样品测量", RecordType.Event);
 
                     // to do sample measurement
+                    ExecSample24HourMeasure();
 
                     return true;
                 }
@@ -512,6 +539,9 @@ namespace Scada.Declare
                     Running_Process = (int)Mode24_Process.Mode24_Process_StartQA;
 
                     RecordManager.DoSystemEventRecord(this, "开始QA测量", RecordType.Event);
+
+                    // to do QA Measurement
+                    ExecQAMeasure();
                     return true;
                 }
 
@@ -547,7 +577,7 @@ namespace Scada.Declare
 
         public override void Send(byte[] action, DateTime time)
         {
-            this.Write(action, default(DateTime));
+            this.Write(action);
         }
     }
 }
