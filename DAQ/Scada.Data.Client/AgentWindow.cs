@@ -306,13 +306,18 @@ namespace Scada.Data.Client
                 Packet packet = this.GetPacket(sendTime, deviceKey, packetId);
                 if (packet != null)
                 {
-                    packets.Add(packet);
+                    this.agent.SendPacket(packet);
                 }
+
+                //if (packet != null)
+                //{
+                    //packets.Add(packet);
+                //}
             }
 
             // Send ...
-            packets = this.builder.CombinePackets(packets);
-            this.SendPackets(packets);
+            //packets = this.builder.CombinePackets(packets);
+            //this.SendPackets(packets);
         }
 
         private void SendPackets(List<Packet> packets)

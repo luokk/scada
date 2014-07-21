@@ -334,7 +334,7 @@
             // 
             this.SendLabrToolStripMenuItem.Name = "SendLabrToolStripMenuItem";
             this.SendLabrToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.SendLabrToolStripMenuItem.Tag = "scada.labr";
+            this.SendLabrToolStripMenuItem.Tag = "scada.labrdevice";
             this.SendLabrToolStripMenuItem.Text = "Labr谱仪";
             this.SendLabrToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
