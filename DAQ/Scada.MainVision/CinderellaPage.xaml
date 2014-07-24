@@ -15,6 +15,9 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="Images/background.png" Stretch="Uniform"></ImageBrush>
+        </Grid.Background>
         <Grid.ColumnDefinitions>
             
         </Grid.ColumnDefinitions>
@@ -46,7 +49,7 @@
                 <ToggleButton Grid.Row="0" Grid.Column="0" Content="自动/手动" Margin="5" Click="AutoClick"></ToggleButton>
                 <Button Grid.Row="0" Grid.Column="1" Content="开始循环" Margin="5" Click="LoopClick"></Button>
 
-                <ToggleButton Grid.Row="0" Grid.Column="2" Content="关闭/打开真空泵" Margin="5" Click="PumpClick"></ToggleButton>
+                <ToggleButton Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Content="关闭/打开真空泵" Margin="5" Click="PumpClick"></ToggleButton>
                 <ToggleButton Grid.Row="1" Grid.Column="0" Content="1 小时" Margin="5" x:Name="h1H" Click="hourClick"></ToggleButton>
                 <ToggleButton Grid.Row="1" Grid.Column="1" Content="6 小时" Margin="5" x:Name="h6H" Click="hourClick"></ToggleButton>
                 <ToggleButton Grid.Row="1" Grid.Column="2" Content="8 小时" Margin="5" x:Name="h8H" Click="hourClick"></ToggleButton>

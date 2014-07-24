@@ -96,6 +96,7 @@
     <Compile Include="RecordManager.cs" />
     <Compile Include="Records.cs" />
     <Compile Include="ScadaReader.cs" />
+    <Compile Include="ShelterDevice.cs" />
     <Compile Include="StandardDevice.cs" />
     <Compile Include="WebFileDevice.cs" />
     <Compile Include="XmlExtensions.cs" />

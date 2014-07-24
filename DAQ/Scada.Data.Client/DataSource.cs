@@ -194,7 +194,7 @@ namespace Scada.Data.Client
         {
             string fileName = this.GetLabrFileName(time);
             string datePath = GetDatePath(time);
-            string filePath = LogPath.GetDeviceLogFilePath("scada.labr", time) + "\\" + fileName;
+            string filePath = LogPath.GetDeviceLogFilePath(Devices.Labr, time) + "\\" + time.Day.ToString() + "\\" + fileName;
             string content = string.Empty;
             if (File.Exists(filePath))
             {

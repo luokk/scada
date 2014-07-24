@@ -57,17 +57,17 @@ namespace Scada.Declare
 
 		private string insertIntoCommand = string.Empty;
 
-        private bool sensitive = false;
+        // private bool sensitive = false;
 
-        private int sensitiveIndex = -1;
+        // private int sensitiveIndex = -1;
 
-        private string sensitiveDataTable = string.Empty;
+        // private string sensitiveDataTable = string.Empty;
         
 		//private string fieldsConfig = string.Empty;
 
 		private FieldConfig[] fieldsConfig = null;
 
-        private FieldConfig[] sensitiveFieldsConfig = null;
+        // private FieldConfig[] sensitiveFieldsConfig = null;
 
 		private DataParser dataParser = null;
 		
@@ -94,6 +94,9 @@ namespace Scada.Declare
         private byte[] lastLine;
 
         private bool calcDataWithLastData = false;
+
+        // Serial port sleep 200 ms as default before read
+        private int bufferSleep = 200;
 
 
 		public StandardDevice(DeviceEntry entry)
@@ -133,6 +136,12 @@ namespace Scada.Declare
 				this.isVirtual = true;
 			}
 
+            string bufferSleepString = (StringValue)entry["BufferSleep"];
+            if (bufferSleepString != null)
+            {
+                this.bufferSleep = int.Parse(bufferSleepString);
+            }
+
 			this.actionCondition = (StringValue)entry[DeviceEntry.ActionCondition];
 			string actionSendInHex = (StringValue)entry[DeviceEntry.ActionSendInHex];
 			if (actionSendInHex != "true")
@@ -162,6 +171,7 @@ namespace Scada.Declare
             this.RecordInterval = this.GetValue(entry, DeviceEntry.RecordInterval, DefaultRecordInterval);
             this.recordTimePolicy.Interval = this.RecordInterval;
 
+            /*
             var sensitive = this.GetValue(entry, DeviceEntry.Sensitive, "false");
             this.sensitive = (sensitive.ToLower() == "true");
 
@@ -169,6 +179,7 @@ namespace Scada.Declare
             this.sensitiveIndex = int.Parse(sensitiveIndexStr);
 
             this.sensitiveDataTable = this.GetValue(entry, "SensitiveDataTable", "");
+             */
 
             this.calcDataWithLastData = this.GetValue(entry, "CalcLast", 0) == 1;
 
@@ -200,12 +211,14 @@ namespace Scada.Declare
             List<FieldConfig> fieldConfigList = ParseDataFieldConfig(fieldsConfigStr);
 			this.fieldsConfig = fieldConfigList.ToArray<FieldConfig>();
 
+            /*
             if (this.sensitive)
             {
                 string sensitiveFieldsConfigStr = (StringValue)entry["SensitiveFieldsConfig"];
                 List<FieldConfig> sensitiveFieldConfigList = ParseDataFieldConfig(sensitiveFieldsConfigStr);
                 this.sensitiveFieldsConfig = sensitiveFieldConfigList.ToArray<FieldConfig>();
             }
+             */
 
 			if (!this.IsRealDevice)
 			{
@@ -262,7 +275,7 @@ namespace Scada.Declare
 					}
 					else
                     {
-                        this.Write(this.actionSend, default(DateTime));
+                        this.Write(this.actionSend);
 					}
                     // Set status of starting.
                     PostStartStatus();
@@ -302,26 +315,10 @@ namespace Scada.Declare
             {
                 const int MinInterval = 2;
                 this.senderTimer = MainApplication.TimerCreator.CreateTimer(MinInterval);
-                // Trigger every 1s.
+                // Trigger every 2s.
                 this.senderTimer.Start(() => 
                 {
-                    DateTime rightTime = default(DateTime);
-                    if (this.sensitive)
-                    {
-                        // Send every MinInterval seconds.
-                        this.Write(this.actionSend, rightTime);
-                    }
-                    else
-                    {
-                        if (!this.recordTimePolicy.NowAtRightTime(out rightTime) ||
-                            rightTime == this.currentActionTime)
-                        {
-                            return;
-                        }
-                        this.currentActionTime = rightTime;
-                        // Send every 30 seconds.
-                        this.Write(this.actionSend, rightTime);
-                    }
+                    this.Write(this.actionSend);
                 });
 
             }
@@ -354,7 +351,7 @@ namespace Scada.Declare
 			if (this.IsRealDevice)
 			{
                 // important, sleep 400ms to wait all the data come to system buffer, Kaikai
-                Thread.Sleep(300);
+                Thread.Sleep(this.bufferSleep);
 
 				int n = this.serialPort.BytesToRead;
 				byte[] buffer = new byte[n];
@@ -413,6 +410,7 @@ namespace Scada.Declare
                     return;
 				}
 
+                /*
                 if (this.sensitive)                
                 {
                     DeviceData sdd;
@@ -421,6 +419,7 @@ namespace Scada.Declare
                         this.SynchronizationContext.Post(this.DataReceived, sdd);
                     }
                 }
+                 * */
 
                 if (this.OnReceiveData(line))
                 {
@@ -472,6 +471,7 @@ namespace Scada.Declare
             this.SynchronizationContext.Post(this.DataReceived, dd);
         }
 
+        /*
         private bool GetSensitiveData(byte[] line, out DeviceData data)
         {
             data = default(DeviceData);
@@ -501,8 +501,9 @@ namespace Scada.Declare
             }
             return false;
         }
+         * */
 
-		private bool GetDeviceData(byte[] line, DateTime time, out DeviceData dd)
+		protected bool GetDeviceData(byte[] line, DateTime time, out DeviceData dd)
 		{
             if (time == default(DateTime))
             {
@@ -555,7 +556,7 @@ namespace Scada.Declare
             }
         }
 
-		public void Write(byte[] action, DateTime time)
+		public void Write(byte[] action)
 		{
             if (action == null || action.Length == 0)
             {
@@ -574,7 +575,6 @@ namespace Scada.Declare
                 #region Virtual-Device
                 else
 				{
-                    this.currentActionTime = time;
                     this.OnSendDataToVirtualDevice(action);
                 }
                 #endregion

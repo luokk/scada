@@ -13,7 +13,7 @@ namespace Scada.Data.Client
 
         public const string Weather = Prefix + "weather";
 
-        public const string Labr = Prefix + "labr";
+        public const string Labr = Prefix + "labrdevice";
 
         public const string HPGe = Prefix + "hpge";
 
