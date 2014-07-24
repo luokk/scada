@@ -179,7 +179,7 @@ namespace Scada.Data.Client
                 string path = Path.GetDirectoryName(packet.Path);
                 var folder1 = Path.GetFileName(Path.GetDirectoryName(path));
                 var folder2 = Path.GetFileName(path);
-                this.GetUploadApi(packet.FileType, folder1, folder2);
+                uploadUrl = this.GetUploadApi(packet.FileType, folder1, folder2);
             }
             else if (packet.FileType.Equals("hpge", StringComparison.OrdinalIgnoreCase))
             {

@@ -2,11 +2,11 @@
 <settings>
   <!-- Default Port is 6000 and 7000 -->
   <datacenters>
-     <!--
-    <datacenter2 BaseUrl="http://127.0.0.1" />
-   -->
-    <datacenter2 BaseUrl="http://192.168.1.107" />
     
+    <datacenter2 BaseUrl="http://127.0.0.1" />
+    <!--
+    <datacenter2 BaseUrl="http://192.168.1.107" />
+    -->
   </datacenters>
   <!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
   <site sysname="" sysst="213213123213123213" adapter="" name="" station="128" sno="0313A08" mn="0313A080000000">
@@ -45,7 +45,7 @@
     <!-- NOTICE -->
     <!-- File Time -->
     <!-- NOTICE -->
-    <device id="Scada.LabrDevice" table="Labr_Rec" eno="010002" debug-data-time="2014-07-20 14:40:00">
+    <device id="Scada.LabrDevice" table="Labr_Rec" eno="010002" debug-data-time="2014-07-24 23:00:00">
       <code field="file-content">0102060332</code>
     </device>
     <!-- NOTICE -->
