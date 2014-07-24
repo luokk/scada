@@ -173,17 +173,21 @@ namespace Scada.Data.Client
                 return;
             }
 
-            string folder = string.Empty;
+            string uploadUrl = string.Empty;
             if (packet.FileType.Equals("labr", StringComparison.OrdinalIgnoreCase))
             {
-                folder = Path.GetFileName(Path.GetDirectoryName(packet.Path));
+                string path = Path.GetDirectoryName(packet.Path);
+                var folder1 = Path.GetFileName(Path.GetDirectoryName(path));
+                var folder2 = Path.GetFileName(path);
+                this.GetUploadApi(packet.FileType, folder1, folder2);
             }
             else if (packet.FileType.Equals("hpge", StringComparison.OrdinalIgnoreCase))
             {
-                folder = DataSource.GetCurrentSid();
+                var folder = DataSource.GetCurrentSid();
+                uploadUrl = this.GetUploadApi(packet.FileType, folder);
             }
 
-            Uri uri = new Uri(this.DataCenter.GetUrl(this.GetUploadApi(packet.FileType, folder)));
+            Uri uri = new Uri(this.DataCenter.GetUrl(uploadUrl));
             try
             {
                 using (WebClient wc = new WebClient())
@@ -233,6 +237,13 @@ namespace Scada.Data.Client
             string stationId = Settings.Instance.Station;
 
             return string.Format("data/upload/{0}/{1}/{2}", stationId, fileType, folder);
+        }
+
+        private string GetUploadApi(string fileType, string folder1, string folder2)
+        {
+            string stationId = Settings.Instance.Station;
+
+            return string.Format("data/upload/{0}/{1}/{2}/{3}", stationId, fileType, folder1, folder2);
         }
 
         private void HandleWebException(Exception e)

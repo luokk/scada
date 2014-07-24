@@ -337,5 +337,13 @@ namespace Scada.MainVision
                 this.cinderellaPage.OnReceivedCommand(cmd);
             }
         }
+
+        internal void SendFileCreatedToCinderellaPage(string filePath)
+        {
+            if (this.cinderellaPage != null)
+            {
+                this.cinderellaPage.OnFileCreated(filePath);
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Scada.Common;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -167,6 +168,7 @@ namespace Scada.MainVision
         private bool Status_OldCatridgeDoor = false;	//旧滤纸夹舱门状态
         private bool Status_NewCatridgeDoor = false;	//新滤纸夹舱门状态
         private bool Status_Emergency = false;	        //紧急停止状态
+        
 
         private Dictionary<string, object> statusDict = new Dictionary<string, object>(10);
 
@@ -384,6 +386,26 @@ namespace Scada.MainVision
             var command = b.Name.Substring(1);
 
             Command.Send(Ports.Main, new Command("mv", "main", "cinderella.hour", command));
+        }
+
+        private Dictionary<string, object> hpgeData = new Dictionary<string, object>();
+
+        internal void OnFileCreated(string filePath)
+        {
+            hpgeData.Clear();
+            hpgeData.Add("time", new FileInfo(filePath).CreationTime.ToString());
+            hpgeData.Add("file", System.IO.Path.GetFileName(filePath));
+            this.UpdateHpgeStatusPanel(this.hpgePane, this.hpgeData);
+        }
+
+        private void UpdateHpgeStatusPanel(SmartDataPane panel, Dictionary<string, object> d)
+        {
+            if (d == null)
+            {
+                return;
+            }
+
+            panel.SetData(Get(d, "time", ""), Get(d, "file", ""));
         }
     }
 }

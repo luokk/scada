@@ -38,6 +38,8 @@ namespace Scada.MainVision
 
         private CommandReceiver commandReceiver;
 
+        private FileSystemWatcher hpgeFileWatcher = null;
+
         private SynchronizationContext SynchronizationContext
         { get; set; }
 
@@ -121,6 +123,21 @@ namespace Scada.MainVision
             {
                 System.Windows.Forms.MessageBox.Show("Command receiver initialized failed.");
             }
+
+
+            var path = LogPath.GetDeviceLogFilePath("scada.hpge");
+            this.hpgeFileWatcher = new FileSystemWatcher(path);
+            this.hpgeFileWatcher.IncludeSubdirectories = true;
+            this.hpgeFileWatcher.Created += (object s, FileSystemEventArgs evt) =>
+            {
+                string fileName = evt.Name.ToLower();
+                string filePath = System.IO.Path.Combine(path, fileName);
+                this.SynchronizationContext.Post(new SendOrPostCallback((o) =>
+                {
+                    this.panelManager.SendFileCreatedToCinderellaPage(filePath);
+                }), null);
+            };
+            this.hpgeFileWatcher.EnableRaisingEvents = true;
         }
 
         private void OnReceivedCommandLine(string line)
@@ -132,6 +149,7 @@ namespace Scada.MainVision
                 {
                     return;
                 }
+
                 try
                 {
                     Command cmd = Command.Parse(line);
