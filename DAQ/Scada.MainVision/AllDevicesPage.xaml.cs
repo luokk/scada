@@ -36,13 +36,13 @@ namespace Scada.MainVision
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            this.hpicPane.Initialize(new string[] { "剂量率"});
-            this.weatherPane.Initialize(new string[] { "温度", "湿度", "雨量", "风速", "风向", "气压" });
-            this.naiPane.Initialize(new string[] { "总剂量率" });
-            this.mdsPane.Initialize(new string[] { "瞬时采样流量", "累计采样流量", "累积采样时间" });
-            this.aisPane.Initialize(new string[] { "瞬时采样流量", "累计采样流量", "累积采样时间" });
-            this.dwdPane.Initialize(new string[] { "采样状态" });
-            this.shelterPane.Initialize(new string[] { "市电状态", "备电时间", "舱内温度" });
+            this.hpicPane.Initialize(new string[] { "时间", "剂量率"});
+            this.weatherPane.Initialize(new string[] { "时间", "温度", "湿度", "雨量", "风速", "风向", "气压" });
+            this.naiPane.Initialize(new string[] { "时间", "总剂量率" });
+            this.mdsPane.Initialize(new string[] { "时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
+            this.aisPane.Initialize(new string[] { "时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
+            this.dwdPane.Initialize(new string[] { "时间", "采样状态" });
+            this.shelterPane.Initialize(new string[] { "时间", "市电状态", "备电时间", "舱内温度" });
 
             this.dbConn = this.dataProvider.GetMySqlConnection();
 
@@ -79,7 +79,7 @@ namespace Scada.MainVision
                 return;
             }
             const string Doserate = "doserate";
-            panel.SetData(Get(d, Doserate, "nGy/h"));
+            panel.SetData(Get(d, "time", ""), Get(d, Doserate, "nGy/h"));
         }
         
         
@@ -138,7 +138,7 @@ namespace Scada.MainVision
             {
                 nuclideMsgs[k] = nuclideMsgs[k].TrimEnd(' ', ',');
             }
-            panel.SetData(Get(d, Doserate, "nSv/h"));
+            panel.SetData(Get(d, "time", ""), Get(d, Doserate, "nSv/h"));
         }
 
         private void UpdatePanel_Weather(SmartDataPane panel)
@@ -151,6 +151,7 @@ namespace Scada.MainVision
             
             // "温度", "湿度", "雨量", "风速", "风向" "气压"
             panel.SetData(
+                Get(d, "time", ""), 
                 Get(d, "Temperature", "℃"),
                 Get(d, "Humidity", "%"),
                 Get(d, "Raingauge", "mm"),
@@ -170,6 +171,7 @@ namespace Scada.MainVision
 
             //"瞬时采样流量", "累计采样流量", "累积采样时间"
             panel.SetData(
+                Get(d, "time", ""), 
                 Get(d, "flow", "m³/h"),
                 Get(d, "volume", "m³"),
                 Get(d, "hours", "h"));
@@ -184,6 +186,7 @@ namespace Scada.MainVision
             }            
             //"瞬时采样流量", "累计采样流量", "累积采样时间"
             panel.SetData(
+                Get(d, "time", ""), 
                 Get(d, "flow", "m³/h"),
                 Get(d, "volume", "m³"),
                 Get(d, "hours", "h"));
@@ -235,7 +238,7 @@ namespace Scada.MainVision
             string batteryHoursMsg = string.Format("{0}h", batteryHours);
             string tempMsg = string.Format("{0}℃", temperature);
 
-            panel.SetData(mainPowMsg, batteryHoursMsg, tempMsg);
+            panel.SetData(Get(d, "time", ""), mainPowMsg, batteryHoursMsg, tempMsg);
 
         }
         // 7 仅工作状态
@@ -252,7 +255,7 @@ namespace Scada.MainVision
             }
             string isLidOpen = (string)d["islidopen"];
             string LidOpenMsg = (isLidOpen == "1") ? "雨水采集" : "沉降灰采集";
-            panel.SetData(LidOpenMsg);
+            panel.SetData(Get(d, "time", ""), LidOpenMsg);
         }
 
         private static double ConvertDouble(double d, int n)

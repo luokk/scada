@@ -41,7 +41,7 @@ namespace Scada.MainVision
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            this.cinderellaPane.Initialize(new string[] { "条形码", "开始时间", "工作时间", "瞬时流量", "累计流量", "大气压", "温度" });
+            this.cinderellaPane.Initialize(new string[] { "时间", "条形码", "开始时间", "工作时间", "瞬时流量", "累计流量", "大气压", "温度" });
             this.hpgePane.Initialize(new string[] { "上次测量时间", "生成文件" });
             /*
             this.statusPane.Initialize(new string[] { 
@@ -95,6 +95,7 @@ namespace Scada.MainVision
             }
 
             panel.SetData(
+                Get(d, "time", ""),
                 Get(d, "barcode", ""),
                 Get(d, "begintime", ""),
                 Get(d, "worktime", ""),
