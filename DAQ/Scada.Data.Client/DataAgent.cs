@@ -184,7 +184,9 @@ namespace Scada.Data.Client
             else if (packet.FileType.Equals("hpge", StringComparison.OrdinalIgnoreCase))
             {
                 var folder = DataSource.GetCurrentSid();
-                uploadUrl = this.GetUploadApi(packet.FileType, folder);
+                var param = this.GetHpGeParams(packet.Path);    // "2014-07-04 00:00:00,2014-07-04 00:00:00,2014-07-04 00:00:00,PRT";
+                param = param.Replace('/', '-');
+                uploadUrl = this.GetUploadApi(packet.FileType, folder, param);
             }
 
             Uri uri = new Uri(this.DataCenter.GetUrl(uploadUrl));
@@ -217,6 +219,72 @@ namespace Scada.Data.Client
             {
              
             }
+        }
+
+        private string GetHpGeParams(string fileName)
+        {
+            string filename = Path.GetFileName(fileName).ToLower();
+            string mode = string.Empty;
+            if (filename.IndexOf("qaspectra") >= 0)
+            {
+                mode = "QA.SPE";
+            }
+            else if (filename.EndsWith(".rpt"))
+            {
+                mode = "RPT";
+            }
+            else if (filename.IndexOf("spectra24") >= 0)
+            {
+                mode = "Sample24.SPE";
+            }
+            else
+            {
+                mode = "Sample2.SPE";
+            }
+
+            int p = filename.IndexOf("_");
+            int e = filename.IndexOf(".");
+            string time = filename.Substring(p + 1, e - p - 1);
+            time = time.Replace('t', ' ');
+            time = time.Replace('_', ':');
+
+            DateTime dt = DateTime.ParseExact(time, "yyyy-MM-dd hh:mm:ss", null);
+
+            string[] lines = File.ReadAllLines(fileName);
+            string starttime = "";
+            bool b1 = false;
+            bool b2 = false;
+            DateTime startTime = default(DateTime);
+            DateTime endTime = default(DateTime);
+            foreach (var line in lines)
+            {
+                if (b1)
+                {
+                    startTime = DateTime.ParseExact(line, "MM/dd/yyyy hh:mm:ss", null);
+                    
+                    b1 = false;
+                    continue;
+                }
+                if (b2)
+                {
+                    string[] parts = line.Split(' ');
+                    int max = Math.Max(int.Parse(parts[0]), int.Parse(parts[1]));
+                    endTime = startTime.AddSeconds(max);
+                    break;
+                }
+                if (line.IndexOf("$DATE_MEA:") >= 0)
+                {
+                    b1 = true;
+                    continue;
+                }
+
+                if (line.IndexOf("$MEAS_TIM:") >= 0)
+                {
+                    b2 = true;
+                }
+            }
+
+            return string.Format("{0},{1},{2},{3}", dt, startTime, endTime, mode);
         }
 
         private void RemovePrefix(string p)

@@ -453,7 +453,9 @@ namespace Scada.Main
             {
                 if (deviceKey.Equals("Scada.MDS", StringComparison.OrdinalIgnoreCase) ||
                     deviceKey.Equals("Scada.AIS", StringComparison.OrdinalIgnoreCase) ||
-                    deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase))
+                    deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase) ||
+                    deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase) ||
+                    deviceKey.Equals("Scada.LabrDevice", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -461,21 +463,9 @@ namespace Scada.Main
                 long lastModifyTime = this.lastUpdateDict[deviceKey];
                 long diffInSec = (now - lastModifyTime) / 10000000;
 
-                if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase) ||
-                    deviceKey.Equals("Scada.labr", StringComparison.OrdinalIgnoreCase))
+                if (diffInSec > 60 * 3)
                 {
-                    // Over 10 sec for NaI device
-                    if (diffInSec > 60 * 10)
-                    {
-                        this.RescueDevice(deviceKey);
-                    }
-                }
-                else
-                {
-                    if (diffInSec > 60 * 3)
-                    {
-                        this.RescueDevice(deviceKey);
-                    }
+                    this.RescueDevice(deviceKey);
                 }
             }
         }
