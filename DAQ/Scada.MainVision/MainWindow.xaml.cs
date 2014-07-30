@@ -124,7 +124,7 @@ namespace Scada.MainVision
                 System.Windows.Forms.MessageBox.Show("Command receiver initialized failed.");
             }
 
-
+            // watch changed file
             var path = LogPath.GetDeviceLogFilePath("scada.hpge");
             this.hpgeFileWatcher = new FileSystemWatcher(path);
             this.hpgeFileWatcher.IncludeSubdirectories = true;
