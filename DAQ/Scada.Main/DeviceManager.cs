@@ -295,6 +295,10 @@ namespace Scada.Main
             {
                 return new ShelterDevice(entry);
             }
+            else if (typeof(HPGEFileDevice).ToString() == className)
+            {
+                return new HPGEFileDevice(entry);
+            }
 
 			// Other Device defined in some Assemblies.
             if (entry[DeviceEntry.Assembly] != null)
@@ -455,7 +459,8 @@ namespace Scada.Main
                     deviceKey.Equals("Scada.AIS", StringComparison.OrdinalIgnoreCase) ||
                     deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase) ||
                     deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase) ||
-                    deviceKey.Equals("Scada.LabrDevice", StringComparison.OrdinalIgnoreCase))
+                    deviceKey.Equals("Scada.LabrDevice", StringComparison.OrdinalIgnoreCase) ||
+                    deviceKey.Equals("Scada.hpge", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
