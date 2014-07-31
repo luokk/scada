@@ -45,12 +45,12 @@
             this.historyHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.historyLatestHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.fileUploadTabPage = new System.Windows.Forms.TabPage();
+            this.fileUploadInfoListBox = new System.Windows.Forms.ListBox();
             this.debugPage = new System.Windows.Forms.TabPage();
             this.debugConsole = new System.Windows.Forms.TextBox();
             this.mainToolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.detailsButton = new System.Windows.Forms.ToolStripButton();
             this.testToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.SendHpicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -75,6 +75,7 @@
             this.mainTabControl.SuspendLayout();
             this.eventTabPage.SuspendLayout();
             this.dataUploadTabPage.SuspendLayout();
+            this.fileUploadTabPage.SuspendLayout();
             this.debugPage.SuspendLayout();
             this.mainToolStrip.SuspendLayout();
             this.mainMenuStrip.SuspendLayout();
@@ -213,21 +214,22 @@
             // 
             // percentHeader
             // 
-            this.percentHeader.Text = "实时数据上传率(当日)";
+            this.percentHeader.Text = "实时数据上传时间";
             this.percentHeader.Width = 139;
             // 
             // historyHeader
             // 
             this.historyHeader.Text = "历史数据上传数量";
-            this.historyHeader.Width = 143;
+            this.historyHeader.Width = 0;
             // 
             // historyLatestHeader
             // 
             this.historyLatestHeader.Text = "历史数据最后上传时间";
-            this.historyLatestHeader.Width = 207;
+            this.historyLatestHeader.Width = 0;
             // 
             // fileUploadTabPage
             // 
+            this.fileUploadTabPage.Controls.Add(this.fileUploadInfoListBox);
             this.fileUploadTabPage.Location = new System.Drawing.Point(4, 22);
             this.fileUploadTabPage.Name = "fileUploadTabPage";
             this.fileUploadTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -235,6 +237,17 @@
             this.fileUploadTabPage.TabIndex = 3;
             this.fileUploadTabPage.Text = "文件上传统计";
             this.fileUploadTabPage.UseVisualStyleBackColor = true;
+            // 
+            // fileUploadInfoListBox
+            // 
+            this.fileUploadInfoListBox.BackColor = System.Drawing.SystemColors.Info;
+            this.fileUploadInfoListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fileUploadInfoListBox.FormattingEnabled = true;
+            this.fileUploadInfoListBox.ItemHeight = 12;
+            this.fileUploadInfoListBox.Location = new System.Drawing.Point(3, 3);
+            this.fileUploadInfoListBox.Name = "fileUploadInfoListBox";
+            this.fileUploadInfoListBox.Size = new System.Drawing.Size(830, 318);
+            this.fileUploadInfoListBox.TabIndex = 0;
             // 
             // debugPage
             // 
@@ -262,12 +275,11 @@
             this.mainToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
             this.toolStripSeparator1,
-            this.detailsButton,
             this.testToolStripButton,
             this.toolStripDropDownButton1});
             this.mainToolStrip.Location = new System.Drawing.Point(3, 0);
             this.mainToolStrip.Name = "mainToolStrip";
-            this.mainToolStrip.Size = new System.Drawing.Size(262, 25);
+            this.mainToolStrip.Size = new System.Drawing.Size(179, 25);
             this.mainToolStrip.TabIndex = 0;
             // 
             // toolStripLabel1
@@ -279,15 +291,6 @@
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // detailsButton
-            // 
-            this.detailsButton.Image = ((System.Drawing.Image)(resources.GetObject("detailsButton.Image")));
-            this.detailsButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.detailsButton.Name = "detailsButton";
-            this.detailsButton.Size = new System.Drawing.Size(52, 22);
-            this.detailsButton.Text = "详情";
-            this.detailsButton.Click += new System.EventHandler(this.OnDetailsButtonClick);
             // 
             // testToolStripButton
             // 
@@ -451,6 +454,7 @@
             this.mainTabControl.ResumeLayout(false);
             this.eventTabPage.ResumeLayout(false);
             this.dataUploadTabPage.ResumeLayout(false);
+            this.fileUploadTabPage.ResumeLayout(false);
             this.debugPage.ResumeLayout(false);
             this.debugPage.PerformLayout();
             this.mainToolStrip.ResumeLayout(false);
@@ -472,7 +476,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ListBox mainListBox;
         private System.Windows.Forms.Splitter splitter1;
-        private System.Windows.Forms.ToolStripButton detailsButton;
         private System.Windows.Forms.NotifyIcon sysNotifyIcon;
         private System.Windows.Forms.TabControl mainTabControl;
         private System.Windows.Forms.TabPage eventTabPage;
@@ -501,6 +504,7 @@
         private System.Windows.Forms.TextBox debugConsole;
         private System.Windows.Forms.ToolStripMenuItem QuitToolStripMenuItem;
         private System.Windows.Forms.TabPage fileUploadTabPage;
+        private System.Windows.Forms.ListBox fileUploadInfoListBox;
 
     }
 }

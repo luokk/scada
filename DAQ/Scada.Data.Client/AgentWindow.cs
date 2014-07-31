@@ -226,7 +226,7 @@ namespace Scada.Data.Client
             this.agent.DoAuth();
 
             this.statusLabel.Text = string.Format("开始:[{0}]", DateTime.Now);
-            this.addressLabel.Text = string.Format("<{0}>", dc.BaseUrl);
+            this.addressLabel.Text = string.Format("已连接{0}", dc.BaseUrl);
             this.counterLabel.Text = string.Format("已发送: 0");
             this.uploadLabel.Text = string.Format("实时数据最后上传时间: {0}", FormatTime(DateTime.Now));
             return true;
@@ -339,6 +339,7 @@ namespace Scada.Data.Client
                     Packet p = builder.GetFilePacket(DataSource.Instance.GetLabrDeviceFile(time), "labr");
                     if (p != null)
                     {
+                        p.DeviceKey = deviceKey;
                         p.Id = packetId;
                         return p;
                     }
@@ -351,6 +352,7 @@ namespace Scada.Data.Client
                         Packet p = builder.GetFilePacket(filePath, "hpge");
                         if (p != null)
                         {
+                            p.DeviceKey = deviceKey;
                             p.Id = packetId;
                             return p;
                         }
@@ -374,6 +376,7 @@ namespace Scada.Data.Client
                     if (this.data.Count > 0)
                     {
                         Packet p = builder.GetPacket(deviceKey, this.data, true);
+                        p.DeviceKey = deviceKey;
                         p.Id = packetId;
                         return p;
                     }
@@ -425,38 +428,6 @@ namespace Scada.Data.Client
                 return true;
             }
             return false;
-        }
-
-        private void OnNotifyEvent(DataAgent agent, NotifyEvents ne, string msg)
-        {
-            this.SafeInvoke(() =>
-            {
-                /*
-                if (NotifyEvents.Connected == ne)
-                {
-                    string logger = agent.ToString() + " 已连接";
-                    this.statusStrip1.Items[1].Text = logger;
-                    Log.GetLogFile(Program.DataClient).Log(logger);
-                }
-                else if (NotifyEvents.ConnectError == ne)
-                {
-                    this.statusStrip1.Items[1].Text = msg;
-                    Log.GetLogFile(Program.DataClient).Log(msg);
-                }
-                else if (NotifyEvents.ConnectToCountryCenter == ne)
-                {
-                    // this.StartConnectCountryCenter();
-                    this.listBox1.Items.Add(msg);
-                    Log.GetLogFile(Program.DataClient).Log(msg);
-                }
-                else if (NotifyEvents.DisconnectToCountryCenter == ne)
-                {
-                    // this.StopConnectCountryCenter();
-                    this.listBox1.Items.Add(msg);
-                    Log.GetLogFile(Program.DataClient).Log(msg);
-                }
-                 * */
-            });
         }
 
         private void OnDetailsButtonClick(object sender, EventArgs e)
@@ -530,6 +501,35 @@ namespace Scada.Data.Client
 
             this.detailsListView.Items.Add(lvi);
             this.detailsDict.Add(deviceKey, new DeviceDataDetails());
+        }
+
+        private int updateCounter = 0;
+        private long packetCount = 0;
+        private void UpdateSendDataRecord(string deviceKey, bool history)
+        {
+            if (!this.detailsDict.ContainsKey(deviceKey))
+                return;
+            var details = this.detailsDict[deviceKey];
+            if (history)
+            {
+                details.LatestSendHistoryDataTime = DateTime.Now;
+            }
+            else
+            {
+                details.LatestSendDataTime = DateTime.Now;
+            }
+            details.SendDataCount += 1;
+
+            this.packetCount++;
+            this.counterLabel.Text = string.Format("已发送: {0}", this.packetCount);
+
+            // 主动更新数据表
+            this.updateCounter++;
+            if (this.updateCounter > 5)
+            {
+                this.updateCounter = 0;
+                this.UpdateDetailsListView();
+            }
         }
 
         private void UpdateDetailsListView()
@@ -622,9 +622,36 @@ namespace Scada.Data.Client
         /// <param name="agent"></param>
         /// <param name="notifyEvent"></param>
         /// <param name="msg"></param>
-        private void OnNotifyAtUIThread(DataAgent agent, NotifyEvents notifyEvent, PacketBase p)
+        private void OnNotifyAtUIThread(DataAgent agent, NotifyEvents ne, PacketBase p)
         {
-            this.debugConsole.Text += string.Format("{0}\n", p.Message);
+            this.SafeInvoke(() =>
+            {
+                string msg = string.Format("{0}: {1}", DateTime.Now, p.Message);
+                if (ne == NotifyEvents.UploadFileOK)
+                {
+                    fileUploadInfoListBox.Items.Add(msg);
+                }
+                else if (ne == NotifyEvents.UploadFileFailed)
+                {
+                    fileUploadInfoListBox.Items.Add(msg);
+                }
+                else if (ne == NotifyEvents.DebugMessage)
+                {
+                    this.debugConsole.Text += string.Format("{0}\n", p.Message);
+                }
+                else if (ne == NotifyEvents.EventMessage)
+                {
+                    mainListBox.Items.Add(msg);
+                }
+                else if (ne == NotifyEvents.SendDataOK)
+                {
+                    this.UpdateSendDataRecord(p.DeviceKey, false);
+                }
+                else if (ne == NotifyEvents.SendDataFailed)
+                {
+                    //this.UpdateSendDataRecord(p.DeviceKey, false);
+                }
+            });
         }
 
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)

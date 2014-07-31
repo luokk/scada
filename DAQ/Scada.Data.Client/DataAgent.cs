@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using Scada.Config;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,7 +16,12 @@ namespace Scada.Data.Client
     /// </summary>
     public enum NotifyEvents
     {
-        LocalMessage
+        DebugMessage,
+        EventMessage,
+        UploadFileOK,
+        UploadFileFailed,
+        SendDataOK,
+        SendDataFailed
     }
 
     public delegate void OnNotifyEvent(DataAgent agent, NotifyEvents notifyEvent, PacketBase p);
@@ -71,12 +77,12 @@ namespace Scada.Data.Client
                     {
                         if (e.Error == null)
                         {
-                            this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = e.Result });
+                            this.NotifyEvent(this, NotifyEvents.EventMessage, new PacketBase() { Message = e.Result });
                             this.ParseCommand(e.Result);
                         }
                         else
                         {
-                            this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = e.Error.Message });
+                            this.NotifyEvent(this, NotifyEvents.EventMessage, new PacketBase() { Message = e.Error.Message });
                         }
 
                     };
@@ -96,7 +102,7 @@ namespace Scada.Data.Client
             }
             catch (Exception e)
             {
-                this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = e.Message });
+                this.NotifyEvent(this, NotifyEvents.EventMessage, new PacketBase() { Message = e.Message });
             }
         }
 
@@ -134,6 +140,7 @@ namespace Scada.Data.Client
                     {
                         if (e.Error != null)
                         {
+                            this.NotifyEvent(this, NotifyEvents.SendDataOK, new PacketBase() { DeviceKey = packet.DeviceKey, Message = e.Error.Message });
                             this.HandleWebException(e.Error);
                             return;
                         }
@@ -145,7 +152,7 @@ namespace Scada.Data.Client
                             result = result.Trim();
                             if (!string.IsNullOrEmpty(result))
                             {
-                                this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = result });
+                                this.NotifyEvent(this, NotifyEvents.SendDataOK, new PacketBase() { DeviceKey = packet.DeviceKey, Message = result });
                             }
                         }
                     };
@@ -169,7 +176,7 @@ namespace Scada.Data.Client
             {
                 PacketBase msg = new PacketBase();
                 msg.Message = "No File Found";
-                this.NotifyEvent(this, NotifyEvents.LocalMessage, msg);
+                this.NotifyEvent(this, NotifyEvents.EventMessage, msg);
                 return;
             }
 
@@ -204,11 +211,13 @@ namespace Scada.Data.Client
                                 {
                                     string result = Encoding.UTF8.GetString(e.Result);
                                     this.RemovePrefix(p.Path);
-                                    this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = result });
+                                    // LogPath.GetDeviceLogFilePath("");
+                                    string msg = string.Format("成功上传 {0}", this.GetRelFilePath(packet));
+                                    this.NotifyEvent(this, NotifyEvents.UploadFileOK, new PacketBase() { Message = msg });
                                 }
                                 else
                                 {
-                                    this.NotifyEvent(this, NotifyEvents.LocalMessage, new PacketBase() { Message = e.Error.Message });
+                                    this.NotifyEvent(this, NotifyEvents.UploadFileFailed, new PacketBase() { Message = e.Error.Message });
                                 }
                             }
                         };
@@ -219,6 +228,28 @@ namespace Scada.Data.Client
             {
              
             }
+        }
+
+        private string GetRelFilePath(Packet packet)
+        {
+            if (packet.FileType.Equals("labr", StringComparison.OrdinalIgnoreCase))
+            {
+                string fileName = Path.GetFileName(packet.Path);
+
+                return string.Format("{0}", fileName);
+            }
+            else if (packet.FileType.Equals("hpge", StringComparison.OrdinalIgnoreCase))
+            {
+                string fileName = Path.GetFileName(packet.Path);
+                string path = Path.GetDirectoryName(packet.Path);
+                var sidFolder = Path.GetFileName(path);
+                if (fileName.StartsWith("!"))
+                {
+                    return string.Format("{0}\\{1}", sidFolder, fileName.Remove(0, 1));
+                }
+                return string.Format("{0}\\{1}", sidFolder, fileName);
+            }
+            return string.Empty;
         }
 
         private string GetHpGeParams(string fileName)
@@ -251,7 +282,7 @@ namespace Scada.Data.Client
             DateTime dt = DateTime.ParseExact(time, "yyyy-MM-dd hh:mm:ss", null);
 
             string[] lines = File.ReadAllLines(fileName);
-            string starttime = "";
+
             bool b1 = false;
             bool b2 = false;
             DateTime startTime = default(DateTime);
