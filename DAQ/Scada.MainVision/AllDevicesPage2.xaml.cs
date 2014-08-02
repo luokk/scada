@@ -39,7 +39,7 @@ namespace Scada.MainVision
             this.hpicPane.Initialize(new string[] { "时间", "剂量率" });
             this.weatherPane.Initialize(new string[] { "时间", "温度", "湿度", "雨量", "风速", "风向", "气压" });
             this.naiPane.Initialize(new string[] { "时间", "总剂量率" });
-            this.shelterPane.Initialize(new string[] { "时间", "市电状态", "备电时间", "舱内温度" });
+            this.shelterPane.Initialize(new string[] { "时间", "市电状态", "备电时间", "舱内温度", "舱内湿度" });
 
             this.dbConn = this.dataProvider.GetMySqlConnection();
             MySqlCommand cmd = this.dbConn.CreateCommand();
@@ -196,10 +196,13 @@ namespace Scada.MainVision
             string batteryHours = "";
             string mainPowerWay = "";
             string temperature = "";
+            string humidity = "";
 
             const string MainPowKey = "ifmainpoweroff";
             const string BatteryHoursKey = "batteryhours";
             const string TemperatureKey = "temperature";
+            const string HumidityKey = "humidity";
+
             if (d.ContainsKey(MainPowKey))
             {
                 string m = (string)d[MainPowKey];
@@ -227,11 +230,23 @@ namespace Scada.MainVision
 
             }
 
+            if (d.ContainsKey(humidity))
+            {
+                humidity = (string)d[HumidityKey];
+                double v;
+                if (double.TryParse(humidity, out v))
+                {
+                    humidity = Math.Round(v, 0).ToString();
+                }
+
+            }
+
             string mainPowMsg = string.Format("{0}", mainPowerWay);
             string batteryHoursMsg = string.Format("{0}h", batteryHours);
             string tempMsg = string.Format("{0}℃", temperature);
+            string humidityMsg = string.Format("{0}%", humidity);
 
-            panel.SetData(Get(d, "time", ""), mainPowMsg, batteryHoursMsg, tempMsg);
+            panel.SetData(Get(d, "time", ""), mainPowMsg, batteryHoursMsg, tempMsg, humidityMsg);
 
         }
 
