@@ -453,7 +453,9 @@ namespace Scada.Chart
             }
 
             if (n > 15)
+            {
                 n = 15;
+            }
 
             return Math.Round(d, n);
         }
