@@ -270,6 +270,8 @@ namespace Scada.Main
 			if (entry == null)
 				return null;
 
+
+            //实例化设备
             StringValue className = (StringValue)entry[DeviceEntry.ClassName];
             if (typeof(StandardDevice).ToString() == className)
             {
