@@ -98,8 +98,10 @@ namespace Scada.MainVision
 
             this.AddPageEntry("自动站介绍", PanelManager.StationIntroduction, this.FirstShowTree);
             this.AddPageEntry("设备运行状态", PanelManager.DevicesRunStatus, this.FirstShowTree);
-            this.AddPageEntry("特征核素识别系统", PanelManager.CinderellaRunStatus, this.FirstShowTree);
-
+            if (Settings.Instance.IsCAS)
+            {
+                this.AddPageEntry("特征核素识别系统", PanelManager.CinderellaRunStatus, this.FirstShowTree);
+            }
             this.AddPageEntry("当前通信状态", PanelManager.CurrentCommStatus, this.CommStatusTree);
             // this.AddPageEntry("历史通信状态", PanelManager.HistoryCommStatus, this.CommStatusTree);
 
