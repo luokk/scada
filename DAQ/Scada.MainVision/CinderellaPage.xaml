@@ -15,12 +15,14 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
+        <!-->
         <Grid.Background>
             <ImageBrush ImageSource="Images/CinderellaBackground50.png" Stretch="Uniform"></ImageBrush>
         </Grid.Background>
         <Grid.ColumnDefinitions>
             
         </Grid.ColumnDefinitions>
+        <-->
         <Grid.RowDefinitions>
             <RowDefinition Height="100"></RowDefinition>
             <RowDefinition></RowDefinition>
@@ -40,7 +42,7 @@
                     <ColumnDefinition Width="80"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50"></RowDefinition>
+                    <RowDefinition Height="40"></RowDefinition>
                     <RowDefinition Height="40"></RowDefinition>
                     <RowDefinition Height="40"></RowDefinition>
                     <RowDefinition Height="40"></RowDefinition>
@@ -65,10 +67,10 @@
             <m:SmartDataPane x:Name="cinderellaPane" Title="特征核素识别系统" Canvas.Left="23" Canvas.Top="66">
             </m:SmartDataPane>
 
-            <m:SmartDataPane x:Name="hpgePane" Title="高纯锗谱仪" Canvas.Left="187" Canvas.Top="66">
+            <m:SmartDataPane x:Name="hpgePane" Title="高纯锗谱仪" Canvas.Left="344" Canvas.Top="66">
             </m:SmartDataPane>
 
-            <m:SmartDataPane x:Name="statusPane" Title="系统运行状态" Canvas.Left="387" Canvas.Top="66">
+            <m:SmartDataPane x:Name="statusPane" Title="系统运行状态" Canvas.Left="656" Canvas.Top="66">
             </m:SmartDataPane>
         </m:CanvasEx>
     </Grid>

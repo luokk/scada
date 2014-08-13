@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace Scada.Data.Client
 {
@@ -102,7 +103,7 @@ namespace Scada.Data.Client
             }
             catch (Exception e)
             {
-                this.NotifyEvent(this, NotifyEvents.EventMessage, new PacketBase() { Message = e.Message });
+               // this.NotifyEvent(this, NotifyEvents.EventMessage, new PacketBase() { Message = e.Message });
             }
         }
 
@@ -213,7 +214,7 @@ namespace Scada.Data.Client
                                     this.RemovePrefix(p.Path);
                                     // LogPath.GetDeviceLogFilePath("");
                                     string msg = string.Format("成功上传 {0}", this.GetRelFilePath(packet));
-                                    this.NotifyEvent(this, NotifyEvents.UploadFileOK, new PacketBase() { Message = msg });
+                                    //this.NotifyEvent(this, NotifyEvents.UploadFileOK, new PacketBase() { Message = msg });
                                 }
                                 else
                                 {
@@ -277,9 +278,10 @@ namespace Scada.Data.Client
             int e = filename.IndexOf(".");
             string time = filename.Substring(p + 1, e - p - 1);
             time = time.Replace('t', ' ');
-            time = time.Replace('_', ':');
+            
+            //time = time.Replace('_', ':');
 
-            DateTime dt = DateTime.ParseExact(time, "yyyy-MM-dd hh:mm:ss", null);
+            DateTime dt = DateTime.ParseExact(time, "yyyy_MM_dd HH_mm_ss", null);
 
             string[] lines = File.ReadAllLines(fileName);
 
@@ -291,7 +293,7 @@ namespace Scada.Data.Client
             {
                 if (b1)
                 {
-                    startTime = DateTime.ParseExact(line, "MM/dd/yyyy hh:mm:ss", null);
+                    startTime = DateTime.ParseExact(line, "MM/dd/yyyy HH:mm:ss", null);
                     
                     b1 = false;
                     continue;
@@ -326,7 +328,16 @@ namespace Scada.Data.Client
                 if (fileName.StartsWith("!"))
                 {
                     string dirName = Path.GetDirectoryName(p);
-                    File.Move(p, Path.Combine(dirName, fileName.Substring(1)));
+                    try
+                    {
+
+                        File.Move(p, Path.Combine(dirName, fileName.Substring(1)));
+                    }
+                    catch (IOException)
+                    {
+                        Thread.Sleep(1000);
+                        File.Move(p, Path.Combine(dirName, fileName.Substring(1)));
+                    }
                 }
             }
         }

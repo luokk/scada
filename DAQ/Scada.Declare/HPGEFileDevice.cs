@@ -138,23 +138,24 @@ namespace Scada.Declare
             foreach (string vFile in Directory.GetFiles(originPath))
             {
                 string filename = Path.GetFileName(vFile);
+                filename = filename.ToLower();
                 if (File.GetLastWriteTime(vFile) >= DateTime.Now.AddSeconds(-150000)) // 如果文件是在150秒内修改
                 {
-                    if (filename.Contains("QASpectra.spe"))
+                    if (filename.Contains("qaspectra.spe"))
                     {
-                        string NewSpecName = "QASpectra" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
+                        string NewSpecName = "qaspectra" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
                         File.Move(vFile, DES + "!" + NewSpecName);
 
                         this.Record(NewSpecName);
                     }
-                    else if (filename.Contains("QAReport.rpt"))
+                    else if (filename.Contains("qareport.rpt"))
                     {
-                        string NewReportName = "QAReport" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
+                        string NewReportName = "qareport" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
                         File.Move(vFile, DES + "!" + NewReportName);
 
                         this.Record(NewReportName);
                     }
-                    else if (filename.Contains("SampleSpectra2-"))
+                    else if (filename.Contains("samplespectra2-"))
                     {
                         int index = filename.LastIndexOf(".");
                         string newfilenameA = filename.Substring(0, index) + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
@@ -162,16 +163,16 @@ namespace Scada.Declare
 
                         this.Record(newfilenameA);
                     }
-                    else if (filename.Contains("SampleSpectra24.spe"))
+                    else if (filename.Contains("samplespectra24.spe"))
                     {
-                        string newfilenameB = "SampleSpectra24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
+                        string newfilenameB = "samplespectra24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
                         File.Move(vFile, DES + "!" + newfilenameB);
 
                         this.Record(newfilenameB);
                     }
-                    else if (filename.Contains("SampleReport24.rpt"))
+                    else if (filename.Contains("samplereport24.rpt"))
                     {
-                        string newfilenameC = "SampleReport24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".rpt";
+                        string newfilenameC = "samplereport24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".rpt";
                         File.Move(vFile, DES + "!" + newfilenameC);
 
                         this.Record(newfilenameC);

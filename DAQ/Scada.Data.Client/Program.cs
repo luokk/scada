@@ -22,10 +22,17 @@ namespace Scada.Data.Client
             {
                 if (createNew)
                 {
-                    Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(false);
-                    MainDataAgentWindow form = new MainDataAgentWindow();
-                    Application.Run(form);
+                    try
+                    {
+                        Application.EnableVisualStyles();
+                        Application.SetCompatibleTextRenderingDefault(false);
+                        MainDataAgentWindow form = new MainDataAgentWindow();
+                        Application.Run(form);
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message);
+                    }
                 }
                 else
                 {
