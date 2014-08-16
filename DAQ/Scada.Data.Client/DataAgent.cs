@@ -367,15 +367,19 @@ namespace Scada.Data.Client
                 if (fileName.StartsWith("!"))
                 {
                     string dirName = Path.GetDirectoryName(p);
-                    try
+                    int t = 0;
+                    while (t < 5)
                     {
-
-                        File.Move(p, Path.Combine(dirName, fileName.Substring(1)));
-                    }
-                    catch (IOException)
-                    {
-                        Thread.Sleep(1000);
-                        File.Move(p, Path.Combine(dirName, fileName.Substring(1)));
+                        try
+                        {
+                            File.Move(p, Path.Combine(dirName, fileName.Substring(1)));
+                            break;
+                        }
+                        catch (IOException)
+                        {
+                            t++;
+                            Thread.Sleep(1000);
+                        }
                     }
                 }
             }
