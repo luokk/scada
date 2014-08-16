@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace Scada.Data.Client
 {
-    public class Packet : PacketBase
+    public class Packet
     {
         // Const keys.
         public const string EntryKey = "entry";
@@ -58,6 +58,25 @@ namespace Scada.Data.Client
                 this.result = value;
                 this.hasResult = true;
             }
+        }
+
+        public string Id
+        {
+            get;
+            set;
+        }
+
+        public string Message
+        {
+            get;
+            set;
+        }
+
+
+        public string DeviceKey
+        {
+            get;
+            set;
         }
 
         private string GetProperty(string propertyName)

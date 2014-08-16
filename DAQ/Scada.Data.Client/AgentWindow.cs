@@ -370,7 +370,7 @@ namespace Scada.Data.Client
                 string errorMsg;
 
                 DateTime from = time.AddSeconds(-30);
-                ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, this.data, out errorMsg);
+                ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, RangeType.CloseOpen, this.data, out errorMsg);
                 if (d == ReadResult.ReadDataOK)
                 {
                     if (this.data.Count > 0)
@@ -608,12 +608,12 @@ namespace Scada.Data.Client
             this.agent.FetchCommands();
         }
 
-        private void OnNotify(DataAgent agent, NotifyEvents notifyEvent, PacketBase p)
+        private void OnNotify(DataAgent agent, NotifyEvents notifyEvent, Notify p)
         {
             this.SafeInvoke(() =>
-                {
-                    this.OnNotifyAtUIThread(agent, notifyEvent, p);
-                });
+            {
+                this.OnNotifyAtUIThread(agent, notifyEvent, p);
+            });
         }
 
         /// <summary>
@@ -622,36 +622,75 @@ namespace Scada.Data.Client
         /// <param name="agent"></param>
         /// <param name="notifyEvent"></param>
         /// <param name="msg"></param>
-        private void OnNotifyAtUIThread(DataAgent agent, NotifyEvents ne, PacketBase p)
+        private void OnNotifyAtUIThread(DataAgent agent, NotifyEvents ne, Notify p)
         {
-            this.SafeInvoke(() =>
+            string msg = string.Format("{0}: {1}", DateTime.Now, p.Message);
+            if (ne == NotifyEvents.UploadFileOK)
             {
-                string msg = string.Format("{0}: {1}", DateTime.Now, p.Message);
-                if (ne == NotifyEvents.UploadFileOK)
+                fileUploadInfoListBox.Items.Add(msg);
+            }
+            else if (ne == NotifyEvents.UploadFileFailed)
+            {
+                fileUploadInfoListBox.Items.Add(msg);
+            }
+            else if (ne == NotifyEvents.DebugMessage)
+            {
+                this.debugConsole.Text += string.Format("{0}\n", p.Message);
+            }
+            else if (ne == NotifyEvents.EventMessage)
+            {
+                mainListBox.Items.Add(msg);
+            }
+            else if (ne == NotifyEvents.SendDataOK)
+            {
+                this.UpdateSendDataRecord(p.DeviceKey, false);
+            }
+            else if (ne == NotifyEvents.SendDataFailed)
+            {
+                //this.UpdateSendDataRecord(p.DeviceKey, false);
+            }
+            else if (ne == NotifyEvents.HistoryData)
+            {
+                this.HandleHistoryData(p.Payload);
+            }
+        }
+
+        private void HandleHistoryData(Dictionary<string, string> payload)
+        {
+            string device = GetValue(payload, "device");
+            string start = GetValue(payload, "start");
+            string end = GetValue(payload, "end");
+            string timesStr = GetValue(payload, "times");
+            string[] timesArray = timesStr.Split(',');
+
+            if (timesArray != null && timesArray.Length > 0)
+            {
+                string deviceKey = "scada.hpic";
+                DateTime from = DateTime.Parse(start);
+                DateTime time = DateTime.Parse(end);
+                var data = new List<Dictionary<string, object>>();
+                string errorMsg;
+
+                if (this.MySqlCmd == null)
                 {
-                    fileUploadInfoListBox.Items.Add(msg);
+                    this.ConnectToMySQL();
                 }
-                else if (ne == NotifyEvents.UploadFileFailed)
+
+                ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, RangeType.CloseOpen, data, out errorMsg);
+                if (d == ReadResult.ReadDataOK)
                 {
-                    fileUploadInfoListBox.Items.Add(msg);
+
                 }
-                else if (ne == NotifyEvents.DebugMessage)
-                {
-                    this.debugConsole.Text += string.Format("{0}\n", p.Message);
-                }
-                else if (ne == NotifyEvents.EventMessage)
-                {
-                    mainListBox.Items.Add(msg);
-                }
-                else if (ne == NotifyEvents.SendDataOK)
-                {
-                    this.UpdateSendDataRecord(p.DeviceKey, false);
-                }
-                else if (ne == NotifyEvents.SendDataFailed)
-                {
-                    //this.UpdateSendDataRecord(p.DeviceKey, false);
-                }
-            });
+            }
+        }
+
+        private static string GetValue(Dictionary<string, string> payload, string key, string value = null)
+        {
+            if (payload.ContainsKey(key))
+            {
+                return payload[key];
+            }
+            return value;
         }
 
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)

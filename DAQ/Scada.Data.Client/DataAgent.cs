@@ -21,10 +21,13 @@ namespace Scada.Data.Client
         UploadFileOK,
         UploadFileFailed,
         SendDataOK,
-        SendDataFailed
+        SendDataFailed,
+        BadCommand,
+        HistoryData
     }
 
-    public delegate void OnNotifyEvent(DataAgent agent, NotifyEvents notifyEvent, PacketBase p);
+
+    public delegate void OnNotifyEvent(DataAgent agent, NotifyEvents notifyEvent, Notify p);
 
     /// <summary>
     /// 
@@ -69,7 +72,7 @@ namespace Scada.Data.Client
         /// </summary>
         internal void FetchCommands()
         {
-            Uri uri = new Uri(this.DataCenter.GetUrl("command/query"));
+            Uri uri = new Uri(this.DataCenter.GetUrl("command/query/" + Settings.Instance.Station));
             try
             {
                 WebClient wc = new WebClient();
@@ -77,12 +80,12 @@ namespace Scada.Data.Client
                     {
                         if (e.Error == null)
                         {
-                            this.NotifyEvent(this, NotifyEvents.EventMessage, new PacketBase() { Message = e.Result });
+                            this.NotifyEvent(this, NotifyEvents.EventMessage, new Notify() { Message = e.Result });
                             this.ParseCommand(e.Result);
                         }
                         else
                         {
-                            this.NotifyEvent(this, NotifyEvents.EventMessage, new PacketBase() { Message = e.Error.Message });
+                            this.NotifyEvent(this, NotifyEvents.EventMessage, new Notify() { Message = e.Error.Message });
                         }
 
                     };
@@ -98,12 +101,45 @@ namespace Scada.Data.Client
             try
             {
                 JObject json = JObject.Parse(cmd);
+                JToken res = json["results"];
+                JToken command = res["command"];
+
+                
+                JToken type = command["type"];
+                if (type == null)
+                    return;
+
+                if (type.Value<string>() == "history")
+                {
+                    string device = command["device"].Value<string>();
+                    JToken times =  command["times"];
+                    string timesStr = null;
+                    if (times != null)
+                    {
+                        timesStr = times.Value<string>();
+                    }
+
+                    string start = command["start"].Value<string>();
+                    string end = command["end"].Value<string>();
+                    this.HandleHistoryData(device, start, end, timesStr);
+                    
+                }
 
             }
             catch (Exception e)
             {
-                this.NotifyEvent(this, NotifyEvents.EventMessage, new PacketBase() { Message = e.Message });
+                this.NotifyEvent(this, NotifyEvents.BadCommand, new Notify() { Message = e.Message });
             }
+        }
+
+        private void HandleHistoryData(string device, string start, string end, string times)
+        {
+            Notify n = new Notify();
+            n.SetValue("device", device);
+            n.SetValue("start", start);
+            n.SetValue("end", end);
+            n.SetValue("times", times);
+            this.NotifyEvent(this, NotifyEvents.HistoryData, n);
         }
 
         /// <summary>
@@ -140,7 +176,7 @@ namespace Scada.Data.Client
                     {
                         if (e.Error != null)
                         {
-                            this.NotifyEvent(this, NotifyEvents.SendDataOK, new PacketBase() { DeviceKey = packet.DeviceKey, Message = e.Error.Message });
+                            this.NotifyEvent(this, NotifyEvents.SendDataOK, new Notify() { DeviceKey = packet.DeviceKey, Message = e.Error.Message });
                             this.HandleWebException(e.Error);
                             return;
                         }
@@ -152,7 +188,7 @@ namespace Scada.Data.Client
                             result = result.Trim();
                             if (!string.IsNullOrEmpty(result))
                             {
-                                this.NotifyEvent(this, NotifyEvents.SendDataOK, new PacketBase() { DeviceKey = packet.DeviceKey, Message = result });
+                                this.NotifyEvent(this, NotifyEvents.SendDataOK, new Notify() { DeviceKey = packet.DeviceKey, Message = result });
                             }
                         }
                     };
@@ -174,7 +210,7 @@ namespace Scada.Data.Client
         {
             if (string.IsNullOrEmpty(packet.Path) || !File.Exists(packet.Path))
             {
-                PacketBase msg = new PacketBase();
+                Notify msg = new Notify();
                 msg.Message = "No File Found";
                 this.NotifyEvent(this, NotifyEvents.EventMessage, msg);
                 return;
@@ -213,11 +249,11 @@ namespace Scada.Data.Client
                                     this.RemovePrefix(p.Path);
                                     // LogPath.GetDeviceLogFilePath("");
                                     string msg = string.Format("成功上传 {0}", this.GetRelFilePath(packet));
-                                    this.NotifyEvent(this, NotifyEvents.UploadFileOK, new PacketBase() { Message = msg });
+                                    this.NotifyEvent(this, NotifyEvents.UploadFileOK, new Notify() { Message = msg });
                                 }
                                 else
                                 {
-                                    this.NotifyEvent(this, NotifyEvents.UploadFileFailed, new PacketBase() { Message = e.Error.Message });
+                                    this.NotifyEvent(this, NotifyEvents.UploadFileFailed, new Notify() { Message = e.Error.Message });
                                 }
                             }
                         };

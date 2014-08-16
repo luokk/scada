@@ -23,6 +23,14 @@ namespace Scada.Data.Client
         ReadDataInvalidOperation,
     }
 
+    public enum RangeType
+    {
+        OpenClose,
+        CloseOpen,
+        OpenOpen,
+        CloseClose
+    }
+
     /// <summary>
     /// Each Device has a Listener.
     /// </summary>
@@ -75,17 +83,25 @@ namespace Scada.Data.Client
             return string.Format(format, tableName, time.ToString());
         }
 
-        private static string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
+        private static string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime, RangeType rangeType)
         {
-            // Get the recent <count> entries.
             string format = "select * from {0} where time>'{1}' and time<='{2}'";
+            if (rangeType == RangeType.CloseOpen)
+            {
+                // Default
+                format = "select * from {0} where time>'{1}' and time<='{2}'";
+            }
+            if (rangeType == RangeType.OpenClose)
+            {
+                format = "select * from {0} where time>='{1}' and time<'{2}'";
+            }
             string sql = string.Format(format, tableName, fromTime, toTime);
             return sql;
         }
 
         // Not care PolId in HTTP uploading.
         // SELECT * from <DEVICE TABLE> where time in (t1, t2]
-        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime time1, DateTime time2, List<Dictionary<string, object>> data, out string errorMsg)
+        public static ReadResult GetData(MySqlCommand command, string deviceKey, DateTime time1, DateTime time2, RangeType rangeType, List<Dictionary<string, object>> data, out string errorMsg)
         {
             errorMsg = string.Empty;
             string tableName = Settings.Instance.GetTableName(deviceKey);
@@ -96,7 +112,7 @@ namespace Scada.Data.Client
             }
             else
             {
-                command.CommandText = GetSelectStatement(tableName, time1, time2);
+                command.CommandText = GetSelectStatement(tableName, time1, time2, rangeType);
             }
 
             try
