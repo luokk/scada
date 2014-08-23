@@ -293,6 +293,13 @@ namespace Scada.MainVision
             {
             }
 
+            if (deviceKey == "scada.weather")
+            {
+                var d = new List<Dictionary<string, object>>();
+                d.Add(ret);
+                ReviseIfRainForWeather(cmd, d);
+                return d[0];
+            }
             return ret;
         }
 
@@ -343,7 +350,7 @@ namespace Scada.MainVision
                                 data.Add(key, string.Empty);
                             }
                         }
-                        catch (Exception)
+                        catch (Exception e)
                         {
                             break;
                             // No this field.
@@ -360,7 +367,35 @@ namespace Scada.MainVision
                 }
             }
 
+            if (deviceKey == "scada.weather")
+            {
+                ReviseIfRainForWeather(cmd, ret);
+            }
             return ret;
+        }
+
+        private void ReviseIfRainForWeather(MySqlCommand cmd, List<Dictionary<string, object>> ret)
+        {
+            foreach (var item in ret)
+            {
+                string time = (string)item["time"];
+                cmd.CommandText = this.GetSelectStatement("RDSampler_rec", time);
+
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        item["ifrain"] = reader.GetString("IfRain");
+                    }
+                }
+            }
+        }
+
+        private string GetSelectStatement(string tableName, string time)
+        {
+            // Get the recent <count> entries.
+            string format = "select * from {0} where time='{1}'";
+            return string.Format(format, tableName, time);
         }
 
         private string GetSelectStatement(string tableName, int count)

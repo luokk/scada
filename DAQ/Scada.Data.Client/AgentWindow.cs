@@ -662,6 +662,11 @@ namespace Scada.Data.Client
             string end = GetValue(payload, "end");
             string timesStr = GetValue(payload, "times");
             string[] timesArray = timesStr.Split(',');
+            Dictionary<long, bool> dict = new Dictionary<long, bool>();
+            foreach (var time in timesArray)
+            {
+                dict.Add(long.Parse(time), true);
+            }
 
             if (timesArray != null && timesArray.Length > 0)
             {
@@ -678,8 +683,50 @@ namespace Scada.Data.Client
 
                 ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, RangeType.CloseOpen, data, out errorMsg);
                 if (d == ReadResult.ReadDataOK)
-                {
+                {   
+                    // If have data!
+                    int len = data.Count;
+                    if (timesArray.Length > 0)
+                    {
+                        // 有请求的时间集合
+                        List<Dictionary<string, object>> group = new List<Dictionary<string, object>>();
+                        for (var i = 0; i < len; i++)
+                        {
+                            // !
+                            var item = data[i];
+                            long unixtime = Packet.GetUnixTime2((string)item["time"]);
+                            if (dict.ContainsKey(unixtime))
+                            {
+                                group.Add(item);
+                            }
 
+                            if (group.Count >= 20 || i + 1 == len)
+                            {
+                                Packet p = builder.GetPacket(deviceKey, group, true);
+                                p.DeviceKey = deviceKey;
+                                p.Id = "";
+                                p.setHistory();
+
+                                this.agent.SendPacket(p);
+
+                                group.Clear();
+                            }
+                        } // End for
+                    }
+                    else
+                    {
+                        // 没有明确的时间集合
+                        for (var i = 0; i < len; i += 20)
+                        {
+                            var part = data.GetRange(i, Math.Min(20, len - i));
+                            Packet p = builder.GetPacket(deviceKey, part, true);
+                            p.DeviceKey = deviceKey;
+                            p.Id = "";
+                            p.setHistory();
+
+                            this.agent.SendPacket(p);
+                        }
+                    }
                 }
             }
         }

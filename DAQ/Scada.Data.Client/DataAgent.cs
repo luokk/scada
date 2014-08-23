@@ -40,6 +40,8 @@ namespace Scada.Data.Client
         private const int Timeout = 5000;
 
         public event OnNotifyEvent NotifyEvent;
+
+        private WebClient commandClient;
         
         internal bool SendDataStarted
         {
@@ -73,24 +75,30 @@ namespace Scada.Data.Client
         /// </summary>
         internal void FetchCommands()
         {
+            // TODO: Maybe need a Lock?
             Uri uri = new Uri(this.DataCenter.GetUrl("command/query/" + Settings.Instance.Station));
             try
             {
-                WebClient wc = new WebClient();
-                wc.DownloadStringCompleted += (object sender, DownloadStringCompletedEventArgs e) =>
-                    {
-                        if (e.Error == null)
-                        {
-                            this.NotifyEvent(this, NotifyEvents.EventMessage, new Notify() { Message = e.Result });
-                            this.ParseCommand(e.Result);
-                        }
-                        else
-                        {
-                            this.NotifyEvent(this, NotifyEvents.EventMessage, new Notify() { Message = e.Error.Message });
-                        }
+                if (this.commandClient == null)
+                {
+                    this.commandClient = new WebClient();
 
-                    };
-                wc.DownloadStringAsync(uri);
+                    this.commandClient.DownloadStringCompleted += (object sender, DownloadStringCompletedEventArgs e) =>
+                        {
+                            if (e.Error == null)
+                            {
+                                this.NotifyEvent(this, NotifyEvents.EventMessage, new Notify() { Message = e.Result });
+                                this.ParseCommand(e.Result);
+                            }
+                            else
+                            {
+                                this.NotifyEvent(this, NotifyEvents.EventMessage, new Notify() { Message = e.Error.Message });
+                            }
+
+                        };
+                }
+
+                this.commandClient.DownloadStringAsync(uri);
             }
             catch (Exception)
             {
@@ -102,10 +110,9 @@ namespace Scada.Data.Client
             try
             {
                 JObject json = JObject.Parse(cmd);
-                JToken res = json["results"];
-                JToken command = res["command"];
 
-                
+                JToken command = json["results"];
+
                 JToken type = command["type"];
                 if (type == null)
                     return;
@@ -113,16 +120,22 @@ namespace Scada.Data.Client
                 if (type.Value<string>() == "history")
                 {
                     string device = command["device"].Value<string>();
-                    JToken times =  command["times"];
-                    string timesStr = null;
-                    if (times != null)
+
+                    JToken content = command["content"];
+                    if (content != null)
                     {
-                        timesStr = times.Value<string>();
+                        JToken times = content["times"];
+                        string timesStr = null;
+                        if (times != null)
+                        {
+                            timesStr = times.Value<string>();
+                        }
+
+                        string start = content["start"].Value<string>();
+                        string end = content["end"].Value<string>();
+                        this.HandleHistoryData(device, start, end, timesStr);
                     }
 
-                    string start = command["start"].Value<string>();
-                    string end = command["end"].Value<string>();
-                    this.HandleHistoryData(device, start, end, timesStr);
                     
                 }
 

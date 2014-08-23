@@ -231,6 +231,7 @@ namespace Scada.Device.Siemens
         {
             if (this.connected)
             {
+                this.beginTime = default(DateTime); // HERE, re-init
                 this.Write(new HandleCode(13, "2"));
                 this.start = true;
                 this.PutDeviceFile(true);
@@ -245,7 +246,7 @@ namespace Scada.Device.Siemens
             if (this.connected)
             {
                 this.PutDeviceFile(false);
-                this.MarkEndTime();
+                // this.MarkEndTime(); HERE 应该在真正停止后在update db
                 this.Write(new HandleCode(13, "4"));
                 this.stopping = true;
                 RecordManager.DoSystemEventRecord(this, string.Format("Stopping SID={0}", this.Sid), RecordType.Event, true);
@@ -332,6 +333,12 @@ namespace Scada.Device.Siemens
                         DeviceData deviceData = new DeviceData(this, data);
                         deviceData.InsertIntoCommand = this.insertSQL;
                         RecordManager.DoDataRecord(deviceData);
+
+                        // HERE
+                        if (this.start)
+                        {
+                            this.MarkEndTime(this.endTime);
+                        }
                     }
                 }
                 else
@@ -377,10 +384,10 @@ namespace Scada.Device.Siemens
             }
         }
 
-        private void MarkEndTime()
+        private void MarkEndTime(DateTime endTime)
         {
             DeviceData deviceData = new DeviceData(this, new object[]{});
-            deviceData.InsertIntoCommand = string.Format("update {0} set EndTime='{1}' where time='{2}'", this.tableName, this.latestTime, this.latestTime);
+            deviceData.InsertIntoCommand = string.Format("update {0} set EndTime='{1}' where time='{2}'", this.tableName, endTime, endTime);
             RecordManager.DoDataRecord(deviceData);
         }
 

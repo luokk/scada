@@ -105,6 +105,7 @@ namespace Scada.MainVision
             int[] data = this.GetNaICannelData(time, cmd);
             if (data.Length > 0)
             {
+                this.EnergyView.ClearPoints();
                 this.EnergyView.SetDataPoints(data);
                 // TODO: show the energy data in chart.
                 // TODO: Chart...

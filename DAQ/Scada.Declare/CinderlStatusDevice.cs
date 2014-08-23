@@ -3,8 +3,11 @@ using Scada.Config;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Xml;
 
 namespace Scada.Declare
 {
@@ -89,6 +92,7 @@ namespace Scada.Declare
                 {
                     counter = 0;
                     string c = WorkMode.ToString() + ";" + LoopMode.ToString() + ";" + Running_Process.ToString() + ";" + status.ToString();
+                    this.UpdateStatusToDataCenter(c);
                     Command.Send(Ports.MainVision, new Command("m", "mv", "cinderella.status", c));
                 }
                 counter++;
@@ -115,6 +119,54 @@ namespace Scada.Declare
                 return false;
             }
 
+        }
+
+        private void UpdateStatusToDataCenter(string status)
+        {
+            using (WebClient wc = new WebClient())
+            {
+                byte[] data = Encoding.UTF8.GetBytes(status);
+                string uri = this.GetUpdateStatusUri();
+                wc.UploadDataAsync(new Uri(uri), "POST", data, null);
+            }
+        }
+
+        private string GetAttribute(XmlNode node, string attr)
+        {
+            try
+            {
+                var xmlAttr = node.Attributes.GetNamedItem(attr);
+                return xmlAttr.Value;
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
+        }
+
+        private string GetUpdateStatusUri()
+        {
+            if (string.IsNullOrEmpty(this.DataCenterBaseUrl))
+            {
+                const string AgentXml = "agent.http.settings";
+                string settingFileName = ConfigPath.GetConfigFilePath(AgentXml);
+                XmlDocument doc = new XmlDocument();
+                if (File.Exists(settingFileName))
+                {
+                    doc.Load(settingFileName);
+                }
+
+                var datacenters = doc.SelectNodes("//datacenter2");
+                foreach (XmlNode dcn in datacenters)
+                {
+                    this.DataCenterBaseUrl = this.GetAttribute(dcn, "BaseUrl");
+                    break;
+                }
+
+                var siteNode = doc.SelectNodes("//site")[0];
+                this.StationId = this.GetAttribute(siteNode, "station");
+            }
+            return string.Format("{0}/command/cinderella/{1}", this.DataCenterBaseUrl, this.StationId);
         }
 
         private bool CheckStatus(int status)
@@ -579,5 +631,9 @@ namespace Scada.Declare
         {
             this.Write(action);
         }
+
+        public string DataCenterBaseUrl { get; set; }
+
+        public string StationId { get; set; }
     }
 }

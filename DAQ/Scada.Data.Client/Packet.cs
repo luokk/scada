@@ -118,6 +118,11 @@ namespace Scada.Data.Client
             }
         }
 
+        public void setHistory()
+        {
+            this.jobject["history"] = 1;
+        }
+
         public override string ToString()
         {
             if (this.hasResult)
@@ -215,17 +220,25 @@ namespace Scada.Data.Client
             return json;
         }
 
-        /* Move to ...
+        
         private static DateTime StartTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1, 0, 0, 0, 0));
 
-        private long GetUnixTime(string time)
+        public static long GetUnixTime(string time)
         {
             DateTime nowTime = DateTime.Now;
             DateTime dateTime = DateTime.Parse(time);
             long unixTime = (long)Math.Round((dateTime - StartTime).TotalMilliseconds, MidpointRounding.AwayFromZero);
             return unixTime;
         }
-        */
+
+        public static long GetUnixTime2(string time)
+        {
+            DateTime nowTime = DateTime.Now;
+            DateTime dateTime = DateTime.Parse(time);
+            long unixTime = (long)Math.Round((dateTime - StartTime).TotalMilliseconds, MidpointRounding.AwayFromZero);
+            return unixTime / 1000;
+        }
+        
 
         public string Path
         {
