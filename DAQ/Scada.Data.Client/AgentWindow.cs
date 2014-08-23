@@ -670,7 +670,7 @@ namespace Scada.Data.Client
 
             if (timesArray != null && timesArray.Length > 0)
             {
-                string deviceKey = "scada.hpic";
+                string deviceKey = this.GetDeviceKey(device);
                 DateTime from = DateTime.Parse(start);
                 DateTime time = DateTime.Parse(end);
                 var data = new List<Dictionary<string, object>>();
@@ -729,6 +729,36 @@ namespace Scada.Data.Client
                     }
                 }
             }
+        }
+
+        private string GetDeviceKey(string device)
+        {
+            device = device.ToLower();
+            if (device == "hpic")
+            {
+                return Devices.Hpic;
+            }
+            else if (device == "weather")
+            {
+                return Devices.Weather;
+            }
+            else if (device == "cinderella")
+            {
+                return Devices.CinderellaData;
+            }
+            else if (device == "labr")
+            {
+                return Devices.Labr;
+            }
+            else if (device == "hpge")
+            {
+                return Devices.HPGe;
+            }
+            else if (device == "environment")
+            {
+                return Devices.Shelter;
+            }
+            return string.Empty;
         }
 
         private static string GetValue(Dictionary<string, string> payload, string key, string value = null)
