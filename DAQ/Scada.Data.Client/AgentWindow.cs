@@ -395,7 +395,7 @@ namespace Scada.Data.Client
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
         {
-            if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
+            if (deviceKey.Equals(Devices.Labr, StringComparison.OrdinalIgnoreCase))
             {
                 int min = dt.Minute - 1;
                 DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
