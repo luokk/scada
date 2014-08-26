@@ -173,7 +173,7 @@ namespace Scada.Declare
                     else if (filename.Contains("samplereport24.rpt"))
                     {
                         string newfilenameC = "samplereport24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".rpt";
-                        File.Move(vFile, DES + "!" + newfilenameC);
+                        File.Copy(vFile, DES + "!" + newfilenameC, true);
 
                         this.Record(newfilenameC);
                     }
