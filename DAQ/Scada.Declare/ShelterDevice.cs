@@ -1,4 +1,5 @@
 ﻿using Scada.Config;
+using Scada.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,10 @@ namespace Scada.Declare
                 {
                     // Save
                     lastDoorState = (bool)dd.Data[7];
+
+                    // send door status to datacenter
+                    Command.Send(Ports.DataClient, string.Format("DOOR={0}", lastDoorState ? "1" : "0"));
+
                     this.SynchronizationContext.Post(this.DataReceived, dd);
                     return false;
                 }
@@ -43,9 +48,10 @@ namespace Scada.Declare
                     this.SynchronizationContext.Post(this.DataReceived, dd);
                     return false;
                 }
-                
+
+                return true;
             }
-            return true;
+            return false;
         }
     }
 }
