@@ -99,6 +99,7 @@
     <Compile Include="ScadaReader.cs" />
     <Compile Include="ShelterDevice.cs" />
     <Compile Include="StandardDevice.cs" />
+    <Compile Include="WeatherDevice.cs" />
     <Compile Include="WebFileDevice.cs" />
     <Compile Include="XmlExtensions.cs" />
   </ItemGroup>

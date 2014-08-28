@@ -301,6 +301,10 @@ namespace Scada.Main
             {
                 return new HPGEFileDevice(entry);
             }
+            else if (typeof(WeatherDevice).ToString() == className)
+            {
+                return new WeatherDevice(entry);
+            }
 
 			// Other Device defined in some Assemblies.
             if (entry[DeviceEntry.Assembly] != null)
