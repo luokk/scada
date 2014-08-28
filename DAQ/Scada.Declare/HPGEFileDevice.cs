@@ -116,7 +116,7 @@ namespace Scada.Declare
                 return;
             }
             
-            this.SID = File.ReadAllText(strSidPath);
+            this.SID = File.ReadAllText(strSidPath).Trim();
             if (this.SID == "")
             {
                 RecordManager.DoSystemEventRecord(this, "no date in SID file!", RecordType.Error);
@@ -172,13 +172,30 @@ namespace Scada.Declare
                     }
                     else if (filename.Contains("samplereport24.rpt"))
                     {
-                        string newfilenameC = "samplereport24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".rpt";
-                        File.Move(vFile, DES + "!" + newfilenameC);
+                        if (!this.ExistSampleReportFile(DES))
+                        {
+                            string newfilenameC = "samplereport24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".rpt";
+                            File.Copy(vFile, DES + "!" + newfilenameC, true);
 
-                        this.Record(newfilenameC);
+                            this.Record(newfilenameC);
+                        }
                     }
                 }
             }
+        }
+
+        private bool ExistSampleReportFile(string destPath)
+        {
+            var files = Directory.GetFiles(destPath);
+            foreach (var file in files)
+            {
+                string filename = Path.GetFileName(file).ToLower();
+                if (filename.IndexOf("samplereport24") >= 0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public override void Start(string address)
