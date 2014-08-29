@@ -398,6 +398,8 @@ namespace Scada.Data.Client
             if (deviceKey.Equals(Devices.Labr, StringComparison.OrdinalIgnoreCase))
             {
                 int min = dt.Minute - 1;
+                if (min < 0)
+                    min = 0;
                 DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
                 return ret;
             }
