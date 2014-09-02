@@ -266,7 +266,7 @@ namespace Scada.Data.Client
                 return;
             DateTime now = DateTime.Now;
             // For Upload File Devices.
-            if (!IsSendFileTimeOK(now))
+            if (IsSendFileTimeOK(now))
             {
                 Guid guid = Guid.NewGuid();
                 SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
