@@ -265,12 +265,12 @@ namespace Scada.Data.Client
             if (!this.isAutoData)
                 return;
             DateTime now = DateTime.Now;
-            // For Upload File Devices.
-            if (IsSendFileTimeOK(now))
-            {
-                Guid guid = Guid.NewGuid();
-                SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
-            }
+            //// For Upload File Devices.
+            //if (IsSendFileTimeOK(now))
+            //{
+            //    Guid guid = Guid.NewGuid();
+            //    SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
+            //}
 
             // For Upload Data Devices.
             if (IsSendDataTimeOK(now))
@@ -332,87 +332,84 @@ namespace Scada.Data.Client
 
         private Packet GetPacket(DateTime time, string deviceKey, string packetId)
         {
-            if (Settings.Instance.FileDeviceKeys.Contains(deviceKey))
+            //if (Settings.Instance.FileDeviceKeys.Contains(deviceKey))
+            //{
+            //    if (deviceKey.IndexOf("labr") >= 0)
+            //    {
+            //        Packet p = builder.GetFilePacket(DataSource.Instance.GetLabrDeviceFile(time), "labr");
+            //        if (p != null)
+            //        {
+            //            p.DeviceKey = deviceKey;
+            //            p.Id = packetId;
+            //            return p;
+            //        }
+            //    }
+            //    else if (deviceKey.IndexOf("hpge") >= 0)
+            //    {
+            //        string filePath = DataSource.Instance.GetNewHpGeFile();
+            //        if (!string.IsNullOrEmpty(filePath))
+            //        {
+            //            Packet p = builder.GetFilePacket(filePath, "hpge");
+            //            if (p != null)l a 
+            //            {
+            //                p.DeviceKey = deviceKey;
+            //                p.Id = packetId;
+            //                return p;
+            //            }
+            //        }
+            //    }
+            //    return null;
+            //}
+            if (this.MySqlCmd == null)
             {
-                if (deviceKey.IndexOf("labr") >= 0)
-                {
-                    Packet p = builder.GetFilePacket(DataSource.Instance.GetLabrDeviceFile(time), "labr");
-                    if (p != null)
-                    {
-                        p.DeviceKey = deviceKey;
-                        p.Id = packetId;
-                        return p;
-                    }
-                }
-                else if (deviceKey.IndexOf("hpge") >= 0)
-                {
-                    string filePath = DataSource.Instance.GetNewHpGeFile();
-                    if (!string.IsNullOrEmpty(filePath))
-                    {
-                        Packet p = builder.GetFilePacket(filePath, "hpge");
-                        if (p != null)
-                        {
-                            p.DeviceKey = deviceKey;
-                            p.Id = packetId;
-                            return p;
-                        }
-                    }
-                }
-                return null;
+                this.ConnectToMySQL();
             }
-            else
+
+            string errorMsg;
+
+            DateTime from = time.AddSeconds(-30);
+            ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, RangeType.CloseOpen, this.data, out errorMsg);
+            if (d == ReadResult.ReadDataOK)
             {
-                if (this.MySqlCmd == null)
+                if (this.data.Count > 0)
                 {
-                    this.ConnectToMySQL();
-                }
-
-                string errorMsg;
-
-                DateTime from = time.AddSeconds(-30);
-                ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, RangeType.CloseOpen, this.data, out errorMsg);
-                if (d == ReadResult.ReadDataOK)
-                {
-                    if (this.data.Count > 0)
-                    {
-                        Packet p = builder.GetPacket(deviceKey, this.data, true);
-                        p.DeviceKey = deviceKey;
-                        p.Id = packetId;
-                        return p;
-                    }
-                    else
-                    {
-                        return null;
-                    }
+                    Packet p = builder.GetPacket(deviceKey, this.data, true);
+                    p.DeviceKey = deviceKey;
+                    p.Id = packetId;
+                    return p;
                 }
                 else
                 {
-                    // TODO: errorMsg
                     return null;
                 }
             }
+            else
+            {
+                // TODO: errorMsg
+                return null;
+            }            
         }
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
         {
-            if (deviceKey.Equals(Devices.Labr, StringComparison.OrdinalIgnoreCase))
-            {
-                int min = dt.Minute - 1;
-                if (min < 0)
-                    min = 0;
-                DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
-                return ret;
-            }
-            else if (deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase))
-            {
-                return dt;
-            }
-            else
-            {
+            //if (deviceKey.Equals(Devices.Bai9125, StringComparison.OrdinalIgnoreCase))
+            //{
+            //    int min = dt.Minute - 1;
+            //    if (min < 0)
+            //        min = 0;
+            //    DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
+            //    return ret;
+            //}
+            //else if (deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    return dt;
+            //}
+            //else
+            //{
                 int second = dt.Second / 30 * 30;
                 DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, second);
                 return ret;
-            }
+            //}
         }
 
         private bool IsSendFileTimeOK(DateTime dt)
@@ -596,7 +593,7 @@ namespace Scada.Data.Client
             }
         }
 
-        private bool isAutoData = true;
+        private bool isAutoData = false;
 
         private void AutoDataToolStripMenuItemClick(object sender, EventArgs e)
         {
@@ -745,21 +742,21 @@ namespace Scada.Data.Client
             {
                 return Devices.Weather;
             }
-            else if (device == "cinderella")
+            else if (device == "mds")
             {
-                return Devices.CinderellaData;
+                return Devices.Mds;
             }
-            else if (device == "labr")
+            else if (device == "bai9125")
             {
-                return Devices.Labr;
+                return Devices.Bai9125;
             }
-            else if (device == "hpge")
+            else if (device == "bai9850")
             {
-                return Devices.HPGe;
+                return Devices.Bai9850;
             }
-            else if (device == "environment")
+            else if (device == "radeye")
             {
-                return Devices.Shelter;
+                return Devices.Radeye;
             }
             return string.Empty;
         }

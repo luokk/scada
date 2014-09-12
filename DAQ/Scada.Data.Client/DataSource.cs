@@ -210,7 +210,7 @@ namespace Scada.Data.Client
         {
             string fileName = this.GetLabrFileName(time);
             string datePath = GetDatePath(time);
-            string filePath = LogPath.GetDeviceLogFilePath(Devices.Labr, time) + "\\" + time.Day.ToString() + "\\" + fileName;
+            string filePath = LogPath.GetDeviceLogFilePath(Devices.Bai9125, time) + "\\" + time.Day.ToString() + "\\" + fileName;
             string content = string.Empty;
             if (File.Exists(filePath))
             {
