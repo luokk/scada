@@ -175,7 +175,7 @@ namespace Scada.Data.Client
                 return "cinderelladata";
             else if (deviceKey == Devices.CinderellaStatus)
                 return "cinderellastatus";
-            else;
+            else
                 return string.Empty;
         }
 
