@@ -5,11 +5,11 @@
     <!--
     <datacenter2 BaseUrl="http://127.0.0.1:8080" />
     -->
-    <datacenter2 BaseUrl="http://219.237.221.41:8080" />
+    <datacenter2 BaseUrl="http://192.168.1.104:8080" />
     
   </datacenters>
   <!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
-  <site sysname="" sysst="213213123213123213" adapter="" name="" station="128" sno="0313A08" mn="0313A080000000">
+  <site sysname="" sysst="213213123213123213" adapter="" name="" station="101" sno="0313A08" mn="0313A080000000">
   </site>
 
 
@@ -23,7 +23,7 @@
   <devices use-debug-data-time="true">
     <!-- NOTICE -->
     <!-- NOTICE -->
-    <device id="scada.hpic" table="HPIC_rec" eno="001001" debug-data-time="2014-07-02 20:26:30">
+    <device id="scada.hpic" table="HPIC_rec" eno="001001" debug-data-time="2014-05-14 10:27:00">
       <code field="doserate">0102060301</code>
       <code field="battery">0102069901</code>
       <code field="highvoltage">0102069902</code>
@@ -32,7 +32,7 @@
 
     <!-- NOTICE -->
     <!-- NOTICE -->
-    <device id="scada.weather" table="weather_rec" eno="002000" debug-data-time="2014-04-24 23:12:30">
+    <device id="scada.weather" table="weather_rec" eno="002000" debug-data-time="2014-01-21 16:25:00">
       <code field="Temperature">0901040101</code>
       <code field="Humidity">0901040102</code>
       <code field="Pressure">0901040103</code>
@@ -43,50 +43,49 @@
     </device>
 
     <!-- NOTICE -->
-    <!-- File Time -->
     <!-- NOTICE -->
-    <device id="Scada.LabrDevice" table="Labr_Rec" eno="010002" debug-data-time="2014-07-24 23:00:00">
-      <code field="file-content">0102060332</code>
-    </device>
-    <!-- NOTICE -->
-    <!-- NOTICE -->
-    <device id="Scada.Shelter" table="environment_rec" eno="999000" debug-data-time="2014-07-20 13:44:30">
-      <code field="IfMainPowerOff" type="bit">0102069909</code>
-      <code field="BatteryHours">0102069910</code>
-      <code field="IfDoorOpen" type="bit">0102069906</code>
-      <code field="Temperature">0102069907</code>
-      <code field="Humidity">0102069911</code>
-      <code field="IfSmoke" type="bit">0102069912</code>
-      <code field="IfWater" type="bit">0102069913</code>
+    <device id="Scada.bai9125" table="bai9125_rec" eno="010002" debug-data-time="2014-09-09 12:00:00">
+      <code field="gammalong">01000201</code>
+      <code field="gammacps">01000202</code>
+      <code field="emissionlong">01000203</code>
+      <code field="emissioncps">01000204</code>
+      <code field="betacps">01000205</code>
+      <code field="status">01000206</code>
+      <code field="valve1">01000207</code>
+      <code field="valve2">01000208</code>
+      <code field="valve2">01000209</code>
     </device>
 
     <!-- NOTICE -->
     <!-- NOTICE -->
-    <device id="Scada.Cinderella.Data" table="CinderellaData_Rec" 
-      eno="Scada.Cinderella.Data" debug-data-time="2014-07-16 16:38:30">
-      <code field="DeviceTime" type="str">01</code>
-      <code field="Sid" type="str">02</code>
-      <code field="barcode" type="str">03</code>
-      <code field="BeginTime" type="str">04</code>
-      <code field="WorkTime" type="str">05</code>
-      <code field="Flow">06</code>
-      <code field="FlowPerHour">07</code>
-      <code field="Pressure">08</code>
-      <code field="PressureDiff">09</code>
-      <code field="Temperature">0A</code>
+    <device id="Scada.bai9850" table="bai9850_rec" eno="999000" debug-data-time="2014-09-09 12:00:00">
+      <code field="alphaactivity">99900001</code>
+      <code field="alpha">99900002</code>
+      <code field="betaactivity">99900003</code>
+      <code field="beta">99900004</code>
+      <code field="i131activity">99900005</code>
+      <code field="i131">99900006</code>
+      <code field="doserate">99900007</code>
     </device>
 
     <!-- NOTICE -->
     <!-- NOTICE -->
-    <device id="Scada.Cinderella.Status" table="CinderellaStatus_Rec" 
-      eno="Scada.Cinderella.Data" debug-data-time="2014-04-27 10:18:33">
-      <code field="StateBits" type="str">01</code>
+    <device id="Scada.mds" table="mds_rec" eno="010003" debug-data-time="2014-09-09 12:00:00">
+      <code field="doserate">01000301</code>
+      <code field="lat">01000302</code>
+      <code field="lon">01000303</code>
+      <code field="speed">01000304</code>
+      <code field="height">01000305</code>
+      <code field="map">01000306</code>
+      <code field="doserateex">01000307</code>
+      <code field="ifatificial">01000308</code>
     </device>
 
     <!-- NOTICE -->
-    <device id="Scada.Hpge" table="Hpge_Rec" eno="Scada.Hpge" filepath="">
-      <code field="file-content">01</code>
-      <code field="file-content">02</code>
+    <!-- NOTICE -->
+    <device id="Scada.radeye" table="radeye_rec" 
+      eno="010004" debug-data-time="2014-09-09 12:00:00">
+      <code field="doserate">01000401</code>
     </device>
 
 
