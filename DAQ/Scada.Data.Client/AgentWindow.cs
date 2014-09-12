@@ -414,7 +414,8 @@ namespace Scada.Data.Client
 
         private bool IsSendFileTimeOK(DateTime dt)
         {
-            return (dt.Minute - 1) % 5 == 0;
+            return true;
+            //return (dt.Minute - 1) % 5 == 0;
         }
 
         private static bool IsSendDataTimeOK(DateTime dt)
