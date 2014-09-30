@@ -73,7 +73,7 @@ namespace Scada.Chart
         private CurveDataContext dataContext;
 
         private double centerX = 0.0;
-
+        
         private double centerY = 0.0;
 
         private Border valueBorder;
@@ -556,32 +556,16 @@ namespace Scada.Chart
         {
             const double Top = 12.0;
             SolidColorBrush labelBrush = new SolidColorBrush(Color.FromRgb(219, 219, 219));
-            /*
-            Border labelBorder = new Border();
-            labelBorder.CornerRadius = new CornerRadius(1.0);
-            labelBorder.Background = labelBrush;
-            labelBorder.BorderBrush = labelBrush;
-            labelBorder.Padding = new Thickness(4.0, 3.0, 4.0, 3.0);
-            labelBorder.BorderThickness = new Thickness(1);
-            // No need effect. 
-            // labelBorder.Effect = new DropShadowEffect() { Direction = 320.0, Opacity= 0.5};
 
-            labelBorder.SetValue(Canvas.RightProperty, 12.0);
-            labelBorder.SetValue(Canvas.TopProperty, 12.0);
-            */
             TextBlock displayLabel = new TextBlock();
             displayLabel.Text = displayName;
-            // displayLabel.Background = labelBrush;
             displayLabel.Foreground = Brushes.Black;
             displayLabel.SetValue(Canvas.RightProperty, 12.0);
             displayLabel.SetValue(Canvas.TopProperty, Top);
             this.CanvasView.Children.Add(displayLabel);
            
-
-
             // Value text Label.
             this.valueBorder = new Border();
-            // valueBorder.Background = labelBrush;
             valueBorder.CornerRadius = new CornerRadius(1.0);
             valueBorder.BorderBrush = labelBrush;
             valueBorder.Padding = new Thickness(4.0, 0.0, 4.0, 3.0);
@@ -594,7 +578,6 @@ namespace Scada.Chart
             valueBorder.Child = valueLabel;
             this.CanvasView.Children.Add(valueBorder);
         }
-
 
     }
 }

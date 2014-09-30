@@ -663,7 +663,6 @@ namespace Scada.Controls
                     sw.WriteLine(line);
                 }
 
-
                 // Window1 alert = new Window1("成功导出CSV文件。");
                 // alert.ShowDialog();
                 MainWindow.Status = "成功导出CSV文件。";

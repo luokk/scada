@@ -72,14 +72,9 @@ namespace Scada.Chart
             }
             double y = value;
             var p = new Point(x, y);
-            points.Add(p);
+            this.points.Add(p);
             UpdateResult result = this.UpdateCurve(p);
             return result;
-        }
-
-        public void AddValuePair(DateTime dateTime, double value)
-        {
-
         }
 
         public void Clear()

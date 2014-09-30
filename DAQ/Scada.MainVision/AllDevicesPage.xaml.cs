@@ -36,13 +36,13 @@ namespace Scada.MainVision
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            this.hpicPane.Initialize(new string[] { "时间", "剂量率"});
-            this.weatherPane.Initialize(new string[] { "时间", "温度", "湿度", "雨量", "风速", "风向", "气压" });
-            this.naiPane.Initialize(new string[] { "时间", "总剂量率" });
-            this.mdsPane.Initialize(new string[] { "时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
-            this.aisPane.Initialize(new string[] { "时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
-            this.dwdPane.Initialize(new string[] { "时间", "采样状态" });
-            this.shelterPane.Initialize(new string[] { "时间", "市电状态", "备电时间", "舱内温度" });
+            this.hpicPane.Initialize(new string[] { "最近采集时间", "剂量率"});
+            this.weatherPane.Initialize(new string[] { "最近采集时间", "温度", "湿度", "雨量", "风速", "风向", "气压" });
+            this.naiPane.Initialize(new string[] { "最近采集时间", "总剂量率" });
+            this.mdsPane.Initialize(new string[] { "最近采样时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
+            this.aisPane.Initialize(new string[] { "最近采样时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
+            this.dwdPane.Initialize(new string[] { "最近采集时间", "采样状态" });
+            this.shelterPane.Initialize(new string[] { "最近采集时间", "市电状态", "备电时间", "舱内温度" });
 
             this.dbConn = this.dataProvider.GetMySqlConnection();
 

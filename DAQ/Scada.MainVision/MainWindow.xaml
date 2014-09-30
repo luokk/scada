@@ -62,10 +62,11 @@
                 <MenuItem Header="日志管理" FontSize="14">
                     <MenuItem Header="实时日志管理器" FontSize="14"></MenuItem>
                 </MenuItem>
-                <!--3-->
+                <!--
                 <MenuItem Header="设置管理" FontSize="14">
                     <MenuItem Header="基本设置" FontSize="14"></MenuItem>
                 </MenuItem>
+                -->
                 <!--4-->
                 <MenuItem Header="帮助" FontSize="14">
                     <MenuItem Header="快速入门" FontSize="14"></MenuItem>

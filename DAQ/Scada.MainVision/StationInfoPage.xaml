@@ -16,15 +16,7 @@
         <Rectangle Canvas.Left="0" Canvas.Top="150" Fill="#aaa" VerticalAlignment="Top" Width="2000" Height="1"/>
         
         <Canvas Canvas.Left="24" Canvas.Top="160">
-            <StackPanel Canvas.Left="10" Canvas.Top="0" Orientation="Horizontal">
-                <Label FontSize="16" >数据采集管理器:</Label>
-                <Label FontSize="16" FontWeight="Bold" Foreground="Green">运行中</Label>
-            </StackPanel>
 
-            <StackPanel Canvas.Left="10" Canvas.Top="30" Orientation="Horizontal">
-                <Label FontSize="16" >数据采集管理器:</Label>
-                <Label FontSize="16" FontWeight="Bold" Foreground="Green">运行中</Label>
-            </StackPanel>
 
             <StackPanel Canvas.Left="10" Canvas.Top="60" Orientation="Horizontal" Visibility="Hidden">
                 <Label FontSize="16" >累计数据采集量:</Label>

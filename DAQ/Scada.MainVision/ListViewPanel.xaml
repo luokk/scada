@@ -16,15 +16,15 @@
     </UserControl.Resources>
 
     <Border CornerRadius="0" BorderThickness="1" BorderBrush="#302D30">
-    <!-- Content -->
-    <Grid Background="#EEEEEE">
-        
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        
-        <!--
+        <!-- Content -->
+        <Grid Background="#EEEEEE">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!--
         <Rectangle Name="Rect" Fill="Blue" Stroke="Gray" StrokeThickness="2"  RadiusX="0" RadiusY="0" Grid.RowSpan="2">
             <Rectangle.Effect>
                 <DropShadowEffect Direction="320" ShadowDepth="10" Opacity=".5"></DropShadowEffect>
@@ -32,178 +32,175 @@
         </Rectangle>
         -->
 
-        <!-- Header -->
-        <Grid Background="#404040" Grid.Row="0" >
+            <!-- Header -->
+            <Grid Background="#404040" Grid.Row="0" >
 
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="30"/>
-            </Grid.ColumnDefinitions>
-            
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+
                 <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Left">
                     <Image x:Name="Icon" Width="28" Height="14" Margin="5,0,0,0"></Image>
                     <TextBlock x:Name="Title" Grid.Row="0" Grid.Column="0" Margin="5,0,0,0" Height="20" 
                         FontSize="14" FontWeight="Bold" Foreground="White"></TextBlock>
                 </StackPanel>
-                
 
-            <Button x:Name="CloseButton" Width="18" Height="18" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
+
+                <Button x:Name="CloseButton" Width="18" Height="18" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
                     HorizontalAlignment="Right" VerticalAlignment="Top"
                     Template="{StaticResource CloseButtonTemplateKey}"/>
-        </Grid>
-            
+            </Grid>
 
-        
-        <!-- Row 1 -->
-        <Border Grid.Row="1" Background="#E5E5E5" BorderBrush="#282828" BorderThickness="0, 0, 0, 0" Margin="0, 4, 0, 0">
-            <TabControl x:Name="TabCtrl" Background="#F9F9F9" BorderBrush="#007ACC" BorderThickness="0,2,0, 0">
-            <!-- 实时列表 -->
-            <TabItem Header="实时列表" Width="80" Background="#F9F9F9" Style="{StaticResource TabItemKey}">
-                <ContentControl Grid.Row="1" Margin="0, 1, 0, 0" >
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="35"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                        </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
-                            <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" Style="{StaticResource ButtonKey}" Click="ExportDataList">导出</Button>
-                            <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" Style="{StaticResource ButtonKey}" Click="ShowChartView">显示曲线</Button>
-                        </StackPanel>
-                        <ContentControl Grid.Row="1" x:Name="ListViewContainer" Margin="-5"> 
+
+
+            <!-- Row 1 -->
+            <Border Grid.Row="1" Background="#E5E5E5" BorderBrush="#282828" BorderThickness="0, 0, 0, 0" Margin="0, 4, 0, 0">
+                <TabControl x:Name="TabCtrl" Background="#F9F9F9" BorderBrush="#007ACC" BorderThickness="0,2,0, 0">
+                    <!-- 实时列表 -->
+                    <TabItem Header="实时列表" Width="80" Background="#F9F9F9" Style="{StaticResource TabItemKey}">
+                        <ContentControl Grid.Row="1" Margin="0, 1, 0, 0" >
+                            <Grid>
+                                <Grid.RowDefinitions>
+
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
+
+                                <ContentControl Grid.Row="0" x:Name="ListViewContainer" Margin="-5">
+                                </ContentControl>
+
+                            </Grid>
                         </ContentControl>
+                    </TabItem>
 
-                    </Grid>
-                </ContentControl>
-            </TabItem>
-            
-            <!-- 查询列表 -->
-            <TabItem Header="查询列表" Width="80" Style="{StaticResource TabItemKey}">
-                <ContentControl Grid.Row="1" Margin="0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="35"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                        </Grid.RowDefinitions>
+                    <!-- 查询列表 -->
+                    <TabItem Header="查询列表" Width="80" Style="{StaticResource TabItemKey}">
+                        <ContentControl Grid.Row="1" Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="35"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
 
-                        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
+                                <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
 
-                            <Border>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBox x:Name="FromDateText" Width="110"  Height="22"></TextBox>
-                                <c:DatePicker x:Name="FromDate" Margin="0, 0, 5, 0" Height="25" Width="30"
+                                    <Border>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox x:Name="FromDateText" Width="110"  Height="22"></TextBox>
+                                            <c:DatePicker x:Name="FromDate" Margin="0, 0, 5, 0" Height="25" Width="30"
                                                 CalendarClosed="DatePickerCalendarClosed" BorderBrush="Transparent">
-                                </c:DatePicker>
-                            </StackPanel>
+                                            </c:DatePicker>
+                                        </StackPanel>
 
-                            </Border>
+                                    </Border>
 
-                            <Border>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBox x:Name="ToDateText" Width="110"  Height="22"></TextBox>
-                                    <c:DatePicker x:Name="ToDate" Margin="0, 0, 5, 0" Height="25" Width="30"
+                                    <Border>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox x:Name="ToDateText" Width="110"  Height="22"></TextBox>
+                                            <c:DatePicker x:Name="ToDate" Margin="0, 0, 5, 0" Height="25" Width="30"
                                         CalendarClosed="DatePickerCalendarClosed" BorderBrush="Transparent">
-                                    </c:DatePicker>
-                                </StackPanel>
+                                            </c:DatePicker>
+                                        </StackPanel>
 
-                            </Border>
+                                    </Border>
 
 
-                            <!--
+                                    <!--
                             <ComboBox x:Name="FrList" Width="100" Margin="5,0,5,0" Height="25" SelectedValue="每30秒" SelectionChanged="IntervalSelectionChanged"></ComboBox>
                             -->
-                            <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
+                                    <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
                                     Style="{StaticResource ButtonKey}" Click="SearchByDateRange">查询</Button>
-                            <!--
+                                    <!--
                             <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
                                     Style="{StaticResource ButtonKey}" Click="OnPrevButton">&lt;&lt;</Button>
                             <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
                                     Style="{StaticResource ButtonKey}" Click="OnNextButton">&gt;&gt;</Button>
                             -->
-                            <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
+                                    <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
                                     Style="{StaticResource ButtonKey}" Click="ExportSearchDataList">导出</Button>
-                            <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
+                                    <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
                                     Style="{StaticResource ButtonKey}" Click="ShowSearchChartView" 
                                     x:Name="ButtonShowChart" IsEnabled="False">显示曲线</Button>
-                        </StackPanel>
+                                </StackPanel>
 
-                        <!-- Contains ListView -->
-                        <ContentControl Grid.Row="1" x:Name="SearchViewContainer" Margin="-5">    
+                                <!-- Contains ListView -->
+                                <ContentControl Grid.Row="1" x:Name="SearchViewContainer" Margin="-5">
+                                </ContentControl>
+
+                            </Grid>
                         </ContentControl>
+                    </TabItem>
+                    <!-- 实时曲线 -->
+                    <TabItem Header="实时曲线" Width="80" x:Name="ChartViewTabItem" Style="{StaticResource TabItemKey}">
+                        <ContentControl Grid.Row="1" x:Name="GraphViewContainerOuter" Margin="5,5,5,5">
+                            <Grid>
 
-                    </Grid>
-                </ContentControl>
-            </TabItem>
-            <!-- 实时曲线 -->
-            <TabItem Header="实时曲线" Width="80" x:Name="ChartViewTabItem" Style="{StaticResource TabItemKey}">
-                <ContentControl Grid.Row="1" x:Name="GraphViewContainerOuter" Margin="5,5,5,5">
-                    <Grid>
-                        
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="35"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                        </Grid.RowDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="35"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
 
                                 <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
-                            <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" Style="{StaticResource ButtonKey}" Click="SaveChart">保存曲线</Button>
-                        </StackPanel>
+                                    <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" Style="{StaticResource ButtonKey}" Click="SaveChart">保存曲线</Button>
+                                </StackPanel>
 
-                        <ContentControl Grid.Row="1" x:Name="GraphViewContainer" Margin="-5">
+                                <ContentControl Grid.Row="1" x:Name="GraphViewContainer" Margin="-5">
+                                </ContentControl>
+
+                            </Grid>
                         </ContentControl>
-
-                    </Grid>
-                </ContentControl>
-            </TabItem>
-            <!-- 查询曲线 -->
-            <TabItem Header="查询曲线" Width="80" x:Name="SearchChartViewTabItem" Visibility="Collapsed"
-                     Style="{StaticResource TabItemKey}">
-                <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainerOuter" Margin="5,5,5,5" IsVisibleChanged="SearchChartViewTabItemIsVisibleChanged">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="35"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                        </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
-                            <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" Style="{StaticResource ButtonKey}" Click="SaveSearchChart">保存曲线</Button>
-                        </StackPanel>
-                        <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainer" Margin="-5">
-                        </ContentControl>
-                    </Grid>
-                </ContentControl>
-            </TabItem>
-            <!-- 控制面板 -->
-            <TabItem Header="控制面板" Width="80" x:Name="ControlPanelTabItem" Visibility="Collapsed" Style="{StaticResource TabItemKey}">
-                <ContentControl Grid.Row="1" x:Name="ControlPanelContainer" Margin="5,5,5,5"/>
-            </TabItem>
-            <!-- 控制面板 -->
-            <TabItem Header="能谱图" Width="80" x:Name="EnergyPanelTabItem" Visibility="Hidden" Style="{StaticResource TabItemKey}">
-                <ContentControl Grid.Row="1" Margin="0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"></RowDefinition>
-                        </Grid.RowDefinitions>
-                            <!-- Energy Container -->
-                        <Border BorderBrush="Yellow" BorderThickness="0" Grid.Row="0" >
-                            <ContentControl x:Name="EnergyPanelContainer" Margin="5,5,5,5"
-                                            VerticalContentAlignment="Top" VerticalAlignment="Top">
-                            </ContentControl>
-                        </Border>
-
-                    </Grid>
-                    </ContentControl>
                     </TabItem>
-            </TabControl>
-        </Border>
+                    <!-- 查询曲线 -->
+                    <TabItem Header="查询曲线" Width="80" x:Name="SearchChartViewTabItem" Visibility="Collapsed"
+                     Style="{StaticResource TabItemKey}">
+                        <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainerOuter" Margin="5,5,5,5" IsVisibleChanged="SearchChartViewTabItemIsVisibleChanged">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="35"></RowDefinition>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
+                                    <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" Style="{StaticResource ButtonKey}" Click="SaveSearchChart">保存曲线</Button>
+                                </StackPanel>
+                                <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainer" Margin="-5">
+                                </ContentControl>
+                            </Grid>
+                        </ContentControl>
+                    </TabItem>
+                    <!-- 控制面板 -->
+                    <TabItem Header="控制面板" Width="80" x:Name="ControlPanelTabItem" Visibility="Collapsed" Style="{StaticResource TabItemKey}">
+                        <ContentControl Grid.Row="1" x:Name="ControlPanelContainer" Margin="5,5,5,5"/>
+                    </TabItem>
+                    <!-- 控制面板 -->
+                    <TabItem Header="能谱图" Width="80" x:Name="EnergyPanelTabItem" Visibility="Hidden" Style="{StaticResource TabItemKey}">
+                        <ContentControl Grid.Row="1" Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <!-- Energy Container -->
+                                <Border BorderBrush="Yellow" BorderThickness="0" Grid.Row="0" >
+                                    <ContentControl x:Name="EnergyPanelContainer" Margin="5,5,5,5"
+                                            VerticalContentAlignment="Top" VerticalAlignment="Top">
+                                    </ContentControl>
+                                </Border>
+
+                            </Grid>
+                        </ContentControl>
+                    </TabItem>
+                </TabControl>
+            </Border>
 
             <!-- List View as Content -->
-        
 
-        <!-- Mask MUST after the content -->
-        <!--
+
+            <!-- Mask MUST after the content -->
+            <!--
         <Grid.OpacityMask>
             <VisualBrush Visual="{Binding ElementName=Rect}"/>
         </Grid.OpacityMask>
         -->
-    </Grid>
+        </Grid>
     </Border>
 </UserControl>
