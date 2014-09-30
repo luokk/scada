@@ -169,16 +169,7 @@ namespace Scada.Device.Siemens
                 int b = cmd.IndexOf("Sid=");
                 if (b > 0)
                 {
-                    int length = cmd.IndexOf(";", b) - b - 4;
-                    if (length > 0)
-                    {
-                        this.Sid = cmd.Substring(b + 4, length);
-                    }
-                    else
-                    {
-                        DateTime n = DateTime.Now;
-                        this.Sid = string.Format("SID-{0}", n.ToString("yyyyMMdd-HHmmss"));
-                    }
+                    this.Sid = cmd.Substring(b + 4);
                 }
                 else
                 {
@@ -291,6 +282,9 @@ namespace Scada.Device.Siemens
 
         private void OnDataTimer(object sender, EventArgs e)
         {
+            // init
+            this.endTime = default(DateTime);
+
             int[] handles = this.results.Select((r) => r.HandleServer).ToArray();
             OPCItemState[] states;
             if (this.group.SyncRead(OPCDATASOURCE.OPC_DS_DEVICE, handles, out states))
@@ -329,16 +323,60 @@ namespace Scada.Device.Siemens
                             this.PutDeviceFile(false);
                         }
                         byte statusb = (status == "1") ? (byte)1 : (byte)0;
-                        object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], values[5], statusb, 0, 0, 0 };
+
+                        // add alarm
+                        string alarm = values[9].ToString();
+                        if (alarm.Equals("False"))
+                        {
+                            values[9] = 0;
+                        }
+                        else
+                        {
+                            values[9] = 1;
+                        }
+
+                        alarm = values[10].ToString();
+                        if (alarm.Equals("False"))
+                        {
+                            values[10] = 0;
+                        }
+                        else
+                        {
+                            values[10] = 1;
+                        }
+
+                        alarm = values[16].ToString();
+                        if (alarm.Equals("False"))
+                        {
+                            values[16] = 0;
+                        }
+                        else
+                        {
+                            values[16] = 1;
+                        }
+
+                        object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], 
+                            values[5], statusb, values[9], values[10], values[16] };
                         DeviceData deviceData = new DeviceData(this, data);
                         deviceData.InsertIntoCommand = this.insertSQL;
+
+                        RecordManager.DoSystemEventRecord(this, this.insertSQL, RecordType.Event, true);
+
                         RecordManager.DoDataRecord(deviceData);
 
+<<<<<<< HEAD
+                        /*
+=======
+>>>>>>> 27f02ec85f52597aba683ba9fcca0ac50d98dd24
                         // HERE
                         if (this.start)
                         {
                             this.MarkEndTime(this.endTime);
                         }
+<<<<<<< HEAD
+                         * */
+=======
+>>>>>>> 27f02ec85f52597aba683ba9fcca0ac50d98dd24
                     }
                 }
                 else
