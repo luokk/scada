@@ -58,7 +58,7 @@ namespace Scada.Controls
 
         private const string Time = "time";
 
-        const int MaxCountPage = 300;
+        const int MaxCountPage = 2880;
 
         private const int MaxListCount = 26;
 
@@ -649,6 +649,12 @@ namespace Scada.Controls
             DateTime now = DateTime.Now;
             string fileName = string.Format("{0}-{1}-{2}-{3}.csv", now.Year, now.Month, now.Day, now.Ticks);
             string filePath = string.Format("./csv/{0}", fileName);
+
+            if (!Directory.Exists("./csv"))
+            {
+                Directory.CreateDirectory("./csv");
+            }
+
             using (StreamWriter sw = new StreamWriter(filePath))
             {
                 foreach (Dictionary<string, object> i in dataList)
