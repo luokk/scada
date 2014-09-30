@@ -145,6 +145,7 @@ namespace Scada.MainVision
             }
 
             string dataTime = (string)entry[TimeKey.ToLower()];
+            DateTime time = DateTime.Parse(dataTime);
             if (config == DataArrivalConfig.TimeNew)
             {
                 if (this.realTime)
@@ -165,7 +166,7 @@ namespace Scada.MainVision
                         this.baseTimeSet = true;
                     }
 
-                    this.AddTimePoint(i, entry);
+                    this.AddTimePoint(time, entry);
                     this.lastEntry = entry;
                     i++;
                 }
@@ -176,19 +177,18 @@ namespace Scada.MainVision
                 {
                     if (!this.baseTimeSet)
                     {
-                        DateTime baseTime = DateTime.Parse(dataTime);
-                        this.ChartView.UpdateTimeAxis(baseTime);
+                        this.ChartView.UpdateTimeAxis(time);
                         this.baseTimeSet = true;
                     }
 
-                    this.AddTimePoint(i, entry);
+                    this.AddTimePoint(time, entry);
                     i++;
                 }
             }
 
         }
 
-        private void AddTimePoint(int index, Dictionary<string, object> entry)
+        private void AddTimePoint(DateTime time, Dictionary<string, object> entry)
         {
             UpdateResult result = UpdateResult.None;
             foreach (string key in dataSources.Keys)
@@ -207,7 +207,7 @@ namespace Scada.MainVision
                     }
 
                     CurveDataContext dataContext = dataSources[key];
-                    result = dataContext.AddTimeValuePair(index * 5, r);
+                    result = dataContext.AddPoint(time, r, ChartView.Graduation);
                 }
             }
 
@@ -216,7 +216,6 @@ namespace Scada.MainVision
                 this.ChartView.UpdateTimeAxis(1);
             }
         }
-
 
         private void OnDataArrivalEnd(DataArrivalConfig config)
         {

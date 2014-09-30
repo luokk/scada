@@ -27,9 +27,7 @@
             <StackPanel x:Name="ChartContainer" 
                         Orientation="Vertical" VerticalAlignment="Bottom"
                         MouseMove="MainViewMouseMove"
-                        MouseLeftButtonDown="CanvasViewMouseLeftButtonEventHandler"
-                        MouseLeftButtonUp="CanvasViewMouseLeftButtonEventHandler" 
-                        MouseWheel="ZoomHandler" >
+                        >
             
             </StackPanel>
         </ScrollViewer>

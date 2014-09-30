@@ -248,17 +248,8 @@ namespace Scada.Chart
 
         private void MainViewMouseMove(object sender, MouseEventArgs e)
         {
-            if (this.pressed)
-            {
-                // Mouse.SetCursor(Cursors.ScrollWE);
-                // this.MoveCurveLines(e, true);
-            }
-            else
-            {
-                Mouse.SetCursor(Cursors.Arrow);
-                this.TrackTimeLine(e);
-                // this.MoveCurveLines(e, false);
-            }
+            Mouse.SetCursor(Cursors.Arrow);
+            this.TrackTimeLine(e);   
         }
 
 
@@ -331,67 +322,6 @@ namespace Scada.Chart
             }
         }
 
-        private void ZoomHandler(object sender, MouseWheelEventArgs e)
-        {
-            e.Handled = true;
-
-            int a = e.Delta;
-            if (a > 0)
-            {
-                this.scale += 0.1;
-                if (this.scale > 3.0)
-                {
-                    this.scale = 3.0;
-                }
-            }
-            else if (a < 0)
-            {
-                this.scale -= 0.1;
-                if (this.scale < 1.0)
-                {
-                    this.scale = 1.0;
-                }
-            }
-
-            this.ZoomChartView(this.scale);
-        }
-
-        private void ZoomChartView(double scale)
-        {
-            double centerX = 0.0;
-            foreach (var view in this.ChartContainer.Children)
-            {
-                CurveView curveView = (CurveView)view;
-                curveView.UpdateCurveScale(scale);
-                centerX = curveView.CenterX;
-            }
-            this.UpdateTimeAxisScale(scale, centerX);
-        }
-
-        private void UpdateTimeAxisScale(double scale, double centerX)
-        {
-            if (scale < 1.0 || scale > 3.0)
-            {
-                return;
-            }
-
-            // Update Time graduation lines.
-            foreach (var g in this.Graduations)
-            {
-                Line l = g.Value.Line;
-                l.X1 = l.X2 = (g.Value.Pos - centerX) * scale + centerX;
-            }
-
-            // Update Time Label
-            foreach (var t in this.GraduationTimes)
-            {
-                TextBlock b = t.Value.Text;
-                // double pos = (g.Value.Pos - centerY) * scale + centerY;
-                double pos = (t.Value.Pos - centerX) * scale + centerX;
-                b.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-            }
-        }
-
         private string GetFormatTime(DateTime baseTime, int index, int interval)
         {
             DateTime dt = baseTime.AddSeconds(index * interval);
@@ -437,12 +367,20 @@ namespace Scada.Chart
         }
 
 
-
-        public void SaveChart()
+        // Save CHART bitmap file.
+        public void SaveChart(string filePath = null)
         {
             DateTime now = DateTime.Now;
             string fileName = string.Format("{0}-{1}-{2}-{3}.bmp", now.Year, now.Month, now.Day, now.Ticks);
-            string filePath = string.Format("./captures/{0}", fileName);
+            if (string.IsNullOrEmpty(filePath))
+            {
+                filePath = string.Format("./captures/{0}", fileName);
+            }
+            else
+            {
+                filePath = string.Format("{0}/{1}", filePath, fileName);
+            }
+
             FileStream ms = new FileStream(filePath, FileMode.CreateNew);
             double width = this.MainView.ActualWidth;
             double height = this.MainView.ActualHeight;
@@ -452,21 +390,6 @@ namespace Scada.Chart
             encoder.Frames.Add(BitmapFrame.Create(bmp));
             encoder.Save(ms);
             ms.Close();
-        }
-
-
-        private bool pressed = false;
-
-        private void CanvasViewMouseLeftButtonEventHandler(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ButtonState == MouseButtonState.Pressed)
-            {
-                pressed = true;
-            }
-            else
-            {
-                pressed = false;
-            }
         }
     }
 }

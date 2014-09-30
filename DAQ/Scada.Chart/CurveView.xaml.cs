@@ -62,7 +62,9 @@ namespace Scada.Chart
 
         private Line timeLine = new Line();
 
-        private Polyline curve = null;
+        private Path curve = null;
+
+        private GeometryGroup lines = new GeometryGroup();
 
         //private double i = 0;
 
@@ -244,10 +246,12 @@ namespace Scada.Chart
 
         private void AddCurveLine()
         {
-            this.curve = new Polyline();
+            this.curve = new Path();
+            this.curve.Data = this.lines;
+
+            this.curve.StrokeThickness = 1;
             Color curveColor = Color.FromRgb(00, 0x7A, 0xCC);
             this.curve.Stroke = new SolidColorBrush(curveColor);
-            
             this.CanvasView.Children.Add(this.curve);
         }
 
@@ -255,7 +259,7 @@ namespace Scada.Chart
         {
             this.dataContext = new CurveDataContext(curveName);
             // Delegates
-            this.dataContext.UpdateView += this.UpdateViewHandler;
+            // this.dataContext.UpdateView += this.UpdateViewHandler;
             this.dataContext.AddCurvePoint += this.AddCurvePointHandler;
             this.dataContext.UpdateCurve += this.UpdateCurveHandler;
             this.dataContext.ClearCurve += this.ClearCurveHandler;
@@ -282,18 +286,13 @@ namespace Scada.Chart
             internal set;
         }
 
-        private void UpdateViewHandler()
-        {
-            TranslateTransform tt = new TranslateTransform(this.finalOffsetPos, 0);
-            curve.RenderTransform = tt;
-        }
-
         private void AddCurvePointHandler(DateTime time, double value)
         {
             dataList.Add(new KeyValuePair<DateTime, double>(time, value));
 
         }
 
+        private Point lastPoint = default(Point);
         /// <summary>
         /// 
         /// </summary>
@@ -301,36 +300,18 @@ namespace Scada.Chart
         private UpdateResult UpdateCurveHandler(Point point)
         {
             this.totalCount += 1;
-
-
-            if (this.totalCount <= MaxVisibleCount) 
+            if (lastPoint == default(Point))
             {
-                Point p;
-                this.Convert(point, out p);
-                
-                curve.Points.Add(p);
-
+                lastPoint = point;
                 return UpdateResult.None;
             }
-            else
-            {
-                // 结束缩放
-                this.timeLine.X1 = this.timeLine.X2 = 0;
-                this.UpdateCurveScale(1.0);
-
-                double offsetPos = (MaxVisibleCount - this.totalCount) * ChartView.Graduation * 5;
-                this.finalOffsetPos = offsetPos;
-                TranslateTransform tt = new TranslateTransform(offsetPos, 0);
-                curve.RenderTransform = tt;
-                // curve.Stroke = (this.totalCount % 2 == 0) ? Brushes.Black : Brushes.Green;
-                Point p;
-                this.Convert(point, out p);
-                curve.Points.Add(p);
-
-                // TODO: 
-                return UpdateResult.Overflow;
-            }
-
+            Point p1, p2;
+            this.Convert(this.lastPoint, out p1);
+            this.Convert(point, out p2);
+            LineGeometry line = new LineGeometry(p1, p2);
+            this.lines.Children.Add(line);
+            lastPoint = point;
+            return UpdateResult.None;
         }
 
         private void ClearCurveHandler()
@@ -338,59 +319,9 @@ namespace Scada.Chart
             if (this.curve != null)
             {
                 this.totalCount = 0;
-                this.curve.Points.Clear();
+                this.lines.Children.Clear();
                 // Do not need Remove the object. 
                 // this.CanvasView.Children.Remove(this.curve);
-            }
-        }
-
-        /// <summary>
-        /// Scale [1.0, 3.0]
-        /// </summary>
-        /// <param name="scale"></param>
-        public void UpdateCurveScale(double scale)
-        {
-            if (scale < 1.0 || scale > 3.0)
-            {
-                return;
-            }
-
-            if (Math.Abs(this.currentScale - scale) < double.Epsilon)
-            {
-                return;
-            }
-            this.currentScale = scale;
-
-            if (curve == null)
-            {
-                return;
-            }
-            this.centerX = timeLine.X1;
-            double y = double.NaN;
-            if (this.GetY(this.centerX, out y))
-            {
-                this.centerY = y;
-            }
-            else
-            {
-                this.centerY = this.Height / 2;
-            }
-            curve.RenderTransform = new ScaleTransform(scale, scale, this.centerX, this.centerY);
-            
-
-            //int i = 0;
-            foreach (var g in this.Graduations)
-            {
-                Line l = g.Value.Line;
-                l.Y1 = l.Y2 = (g.Value.Pos - centerY) * this.currentScale + centerY;
-            }
-
-            foreach (var g in this.GraduationTexts)
-            {
-                TextBlock l = g.Value.Text;
-                
-                double pos = (g.Value.Pos - centerY) * this.currentScale + centerY;
-                l.SetValue(Canvas.TopProperty, (double)pos);
             }
         }
 
@@ -491,7 +422,7 @@ namespace Scada.Chart
             Point a = default(Point);
             Point b = default(Point);
             bool found = false;
-            foreach (var p in curve.Points)
+            foreach (var p in this.dataContext.points)
             {
                 if (p.X > x)
                 {

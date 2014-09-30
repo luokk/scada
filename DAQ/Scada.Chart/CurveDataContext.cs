@@ -20,9 +20,10 @@ namespace Scada.Chart
 
     public delegate void ClearCurve();
 
+    // Class stands for DataSourcr
     public class CurveDataContext
     {
-        private List<Point> points = new List<Point>();
+        public List<Point> points = new List<Point>();
 
         public event UpdateView UpdateView;
 
@@ -54,22 +55,20 @@ namespace Scada.Chart
             this.UpdateView();
         }
 
-        public void AddTimeValuePair(DateTime time, double value)
+        public void SetDataSource(List<Dictionary<string, object>> data, string timeKey = "time")
         {
-            this.AddCurvePoint(time, value);
+            
         }
 
-        public UpdateResult AddTimeValuePair(int index, double value, double graduation = 0.0)
+        public void AppendData(Dictionary<string, object> item, string timeKey = "time")
         {
-            double x;
-            if (graduation == 0.0)
-            {
-                x = index * ChartView.Graduation;
-            }
-            else
-            {
-                x = index * graduation;
-            }
+
+        }
+
+        public UpdateResult AddPoint(DateTime time, double value, double graduation)
+        {
+            int index = this.GetIndexByTime(time);
+            double x = index * graduation;
             double y = value;
             var p = new Point(x, y);
             this.points.Add(p);
@@ -77,9 +76,16 @@ namespace Scada.Chart
             return result;
         }
 
+        private int i = 0;
+
+        private int GetIndexByTime(DateTime time)
+        {
+            return this.i++;
+        }
+
         public void Clear()
         {
-            points.Clear();
+            this.points.Clear();
             this.ClearCurve();
         }
     }

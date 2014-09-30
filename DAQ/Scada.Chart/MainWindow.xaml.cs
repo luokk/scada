@@ -64,7 +64,7 @@ namespace Scada.Chart
             double x = i;
             i += 2;
             double y = cpuPerformance.NextValue();
-            c1.AddTimeValuePair((int)x, y * 2 + 20, 3.0);
+            c1.AddPoint(DateTime.Now, y * 2 + 20, 3.0);
         }
     }
 }

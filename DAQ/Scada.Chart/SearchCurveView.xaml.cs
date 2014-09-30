@@ -64,7 +64,9 @@ namespace Scada.Chart
 
         private Line timeLine = new Line();
 
-        private Polyline curve = null;
+        private Path curve = null;
+
+        private GeometryGroup lines = new GeometryGroup();
 
         //private double i = 0;
 
@@ -251,11 +253,14 @@ namespace Scada.Chart
 
         private void AddCurveLine()
         {
-            this.curve = new Polyline();
+            this.curve = new Path();
+            this.curve.Data = this.lines;
+            
             this.curve.StrokeThickness = 1;
             Color curveColor = Color.FromRgb(00, 0x7A, 0xCC);
             this.curve.Stroke = new SolidColorBrush(curveColor);
             this.CanvasView.Children.Add(this.curve);
+            
         }
 
         public string CurveName
@@ -302,22 +307,28 @@ namespace Scada.Chart
 
         }
 
+        private Point lastPoint = default(Point);
         /// <summary>
         /// 
         /// </summary>
         /// <param name="point"></param>
         public void AddCurvePoint(Point point)
         {
-            this.totalCount += 1;
-
-            Point p;
-            this.Convert(point, out p);
-            this.curve.Points.Add(p);
+            if (lastPoint == default(Point))
+            {
+                lastPoint = point;
+                return;
+            }
+            Point p1, p2;
+            this.Convert(this.lastPoint, out p1);
+            this.Convert(point, out p2);
+            LineGeometry line = new LineGeometry(p1, p2);
+            this.lines.Children.Add(line);
         }
 
         internal void ClearPoints()
         {
-            this.curve.Points.Clear();
+            this.lines.Children.Clear();
         }
 
         private void ClearCurveHandler()
@@ -325,7 +336,7 @@ namespace Scada.Chart
             if (this.curve != null)
             {
                 this.totalCount = 0;
-                this.curve.Points.Clear();
+                this.lines.Children.Clear();
                 // Do not need Remove the object. 
                 // this.CanvasView.Children.Remove(this.curve);
             }
@@ -486,7 +497,7 @@ namespace Scada.Chart
             Point a = default(Point);
             Point b = default(Point);
             bool found = false;
-            foreach (var p in curve.Points)
+            foreach (var p in this.dataContext.points)
             {
                 if (p.X > x)
                 {

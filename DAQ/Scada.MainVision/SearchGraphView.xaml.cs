@@ -108,7 +108,7 @@ namespace Scada.MainVision
             this.dataSources.Add(lineName.ToLower(), dataContext);
         }
 
-        private void AddTimePoint(int index, Dictionary<string, object> entry)
+        private void AddTimePoint(DateTime time, Dictionary<string, object> entry)
         {
             UpdateResult result = UpdateResult.None;
             foreach (string key in dataSources.Keys)
@@ -127,7 +127,7 @@ namespace Scada.MainVision
                     }
 
                     CurveDataContext dataContext = dataSources[key];
-                    result = dataContext.AddTimeValuePair(index * 5, r);
+                    result = dataContext.AddPoint(time, r, ChartView.Graduation);
                 }
             }
 
