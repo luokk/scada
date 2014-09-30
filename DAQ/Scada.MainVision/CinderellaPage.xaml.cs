@@ -458,7 +458,7 @@ namespace Scada.MainVision
 
             var command = b.Name.Substring(1);
 
-            Command.Send(Ports.Main, new Command("mv", "main", "cinderella.hour", command));
+            Command.Send(Ports.Main, new Command("mv", "main", "cinderella", command));
         }
 
         private Dictionary<string, object> hpgeData = new Dictionary<string, object>();

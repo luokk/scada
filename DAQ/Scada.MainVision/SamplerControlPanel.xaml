@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="339" d:DesignWidth="665">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -15,7 +15,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     
-    <Grid IsVisibleChanged="IsVisibleChanged">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="200"></RowDefinition>
             <RowDefinition Height="50"></RowDefinition>
@@ -24,11 +24,16 @@
         <Grid.ColumnDefinitions>
             
         </Grid.ColumnDefinitions>
-
+        <GroupBox Margin="0,128,0,-77" Grid.RowSpan="2">
+            
+        </GroupBox>
         <GroupBox Grid.Row="0" Header=" 控制面板 ">
             <StackPanel Orientation="Vertical">
                 <TextBlock x:Name="StatusBox" Margin="5,5,5,5"></TextBlock>
-                <TextBox x:Name="SidText" Margin="5,5,5,5"></TextBox>
+                <StackPanel Orientation="Horizontal">
+                    <Label x:Name="Text1" Content="采样ID" Margin="0,0,20,0"/>
+                    <TextBox x:Name="SidText" Margin="0,5,5,5" Width="281"/>
+                </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Button Width="100" Height="30" Foreground="Black"
                             x:Name="ConnectButton" Click="OnConnectButton" 
