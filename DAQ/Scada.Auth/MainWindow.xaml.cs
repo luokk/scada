@@ -25,7 +25,7 @@ namespace Scada.Auth
 		{
 
 			InitializeComponent();
-            this.Title = "Nuclover-SCADA";
+            this.Title = "辐射环境自动监测站管理系统";
 		}
 
         // Move the window by mouse-press-down.
