@@ -24,6 +24,8 @@
 
             <Canvas x:Name="CanvasView" Background="#F8F8F8" Grid.Row="1" Grid.Column="1" 
                     MouseMove="CanvasViewMouseMove" 
+                    MouseLeftButtonDown="CanvasView_MouseLeftButtonDown"
+                    MouseLeftButtonUp="CanvasView_MouseLeftButtonUp"
                     
                     >
             </Canvas>

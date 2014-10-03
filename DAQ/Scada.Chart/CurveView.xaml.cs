@@ -66,17 +66,15 @@ namespace Scada.Chart
 
         private GeometryGroup lines = new GeometryGroup();
 
-        //private double i = 0;
-
-        private double currentScale = 1.0;
-
         private CurveDataContext dataContext;
 
         private double centerX = 0.0;
 
-        private double centerY = 0.0;
+        // private double centerY = 0.0;
 
         private Border valueBorder;
+
+        private Rectangle rangeSelectionRect;
 
         private TextBlock valueLabel;
 
@@ -84,9 +82,6 @@ namespace Scada.Chart
 
         const int MaxVisibleCount = 14;
 
-        private double finalOffsetPos = 0.0;
-
-        private int totalCount = 0;
 
 
         private List<KeyValuePair<DateTime, double>> dataList = new List<KeyValuePair<DateTime, double>>();
@@ -137,6 +132,7 @@ namespace Scada.Chart
             Color gridLineColor = Color.FromRgb(192, 192, 192);
             SolidColorBrush gridLineBrush = new SolidColorBrush(gridLineColor);
 
+            
             for (int i = 0; i < 20; i++)
             {
                 Line l = new Line();
@@ -175,7 +171,7 @@ namespace Scada.Chart
             double d = height / (this.Max - this.Min);
             // How many graduation?
             int dc = (int)height / 10;
-            // What's the value aach graduation 
+            // What's the value each graduation 
             double ev = (this.Max - this.Min) / dc;
 
             for (int i = 0; i < 60; i++)
@@ -188,7 +184,7 @@ namespace Scada.Chart
                 }
                 
                 Line l = new Line();
-                this.Graduations.Add(i, new GraduationLine() { Line = l, Pos = y});
+                this.Graduations.Add(i, new GraduationLine() { Line = l, Pos = y });
                 l.Y1 = l.Y2 = y;
                 l.X1 = (i % 5 != 0) ? scaleWidth - Charts.ScaleLength : scaleWidth - Charts.MainScaleLength;
                 l.X2 = scaleWidth;
@@ -241,7 +237,6 @@ namespace Scada.Chart
             this.AddCurveLine();
 
             this.SetDisplayName(this.DisplayName);
-
         }
 
         private void AddCurveLine()
@@ -255,14 +250,11 @@ namespace Scada.Chart
             this.CanvasView.Children.Add(this.curve);
         }
 
-        public CurveDataContext CreateDataContext(string curveName, string displayName)
+        public CurveDataContext AddCurveDataContext(string curveName, string displayName)
         {
             this.dataContext = new CurveDataContext(curveName);
-            // Delegates
-            // this.dataContext.UpdateView += this.UpdateViewHandler;
-            this.dataContext.AddCurvePoint += this.AddCurvePointHandler;
-            this.dataContext.UpdateCurve += this.UpdateCurveHandler;
-            this.dataContext.ClearCurve += this.ClearCurveHandler;
+            this.dataContext.AppendCurvePoint += this.AppendCurvePointHandler;
+            this.dataContext.ClearCurvePoints += this.ClearCurvePointsHandler;
 
             this.DisplayName = displayName;
             return this.dataContext;
@@ -289,36 +281,35 @@ namespace Scada.Chart
         private void AddCurvePointHandler(DateTime time, double value)
         {
             dataList.Add(new KeyValuePair<DateTime, double>(time, value));
-
         }
 
         private Point lastPoint = default(Point);
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="point"></param>
-        private UpdateResult UpdateCurveHandler(Point point)
+        private void AppendCurvePointHandler(Point point)
         {
-            this.totalCount += 1;
-            if (lastPoint == default(Point))
+            if (lastPoint == default(Point) || point == default(Point))
             {
                 lastPoint = point;
-                return UpdateResult.None;
+                return;
             }
             Point p1, p2;
             this.Convert(this.lastPoint, out p1);
             this.Convert(point, out p2);
+
             LineGeometry line = new LineGeometry(p1, p2);
             this.lines.Children.Add(line);
             lastPoint = point;
-            return UpdateResult.None;
+            return;
         }
 
-        private void ClearCurveHandler()
+        private void ClearCurvePointsHandler()
         {
             if (this.curve != null)
             {
-                this.totalCount = 0;
                 this.lines.Children.Clear();
                 // Do not need Remove the object. 
                 // this.CanvasView.Children.Remove(this.curve);
@@ -329,52 +320,31 @@ namespace Scada.Chart
         {
             timeLine.X1 = timeLine.X2 = point.X;
             // this.centerX = point.X;
-            this.UpdateValue(point, timeLabel);
-
-            
-        }
-
-        private bool beginMoved = false;
-
-        internal void MoveCurveLine(bool beginMoved)
-        {
-            this.beginMoved = beginMoved;
+            this.ShowValueTip(point, timeLabel);
         }
 
 
-        internal void MoveCurveLine(Point point, string timeLabel)
-        {
-            if (!this.beginMoved)
-            {
-                this.beginMoved = true;
-            }
-
-            double dragOffset = point.X - timeLine.X1;
-
-            int n = (int)(dragOffset / (ChartView.Graduation * 5));
-
-            double offsetPos = (n) * ChartView.Graduation * 5;
-            this.finalOffsetPos = offsetPos;
-            TranslateTransform tt = new TranslateTransform(offsetPos, 0);
-            curve.RenderTransform = tt;
-
-        }
-
-        private void UpdateValue(Point point, string timeLabel)
+        private void ShowValueTip(Point point, string timeLabel)
         {
             double x = point.X;
 
-            double xo = (x - this.centerX) / this.currentScale + this.centerX;
+            double xo = x;
 
             double y = double.NaN;
             if (this.GetY(xo, out y))
             {
-                double v = this.GetValue(y);
-                v = ConvertDouble(v, 4);
+                double v = ConvertDouble(y, 4);
 
                 this.valueBorder.Visibility = Visibility.Visible;
-                string t;
-                this.valueLabel.Text = string.Format("[{0}]     {1}", timeLabel, v);
+                
+                if (string.IsNullOrEmpty(timeLabel))
+                {
+                    this.valueLabel.Text = v.ToString();
+                }
+                else
+                {
+                    this.valueLabel.Text = string.Format("[{0}]  {1}", timeLabel, v);
+                }
             }
             else
             {
@@ -384,7 +354,8 @@ namespace Scada.Chart
 
         static double ConvertDouble(double d, int n)
         {
-            if (d == 0.0) return 0;
+            if (d == 0.0)
+                return 0;
             if (d > 1 || d < -1)
                 n = n - (int)Math.Log10(Math.Abs(d)) - 1;
             else
@@ -463,9 +434,7 @@ namespace Scada.Chart
             po = new Point(p.X, this.Convert(p.Y));
         }
 
-        private void CanvasViewMouseMove(object sender, MouseEventArgs e)
-        {
-        }
+
 
         public UIElement View
         {
@@ -491,19 +460,7 @@ namespace Scada.Chart
         {
             const double Top = 12.0;
             SolidColorBrush labelBrush = new SolidColorBrush(Color.FromRgb(219, 219, 219));
-            /*
-            Border labelBorder = new Border();
-            labelBorder.CornerRadius = new CornerRadius(1.0);
-            //labelBorder.Background = labelBrush;
-            labelBorder.BorderBrush = labelBrush;
-            labelBorder.Padding = new Thickness(4.0, 3.0, 4.0, 3.0);
-            labelBorder.BorderThickness = new Thickness(1);
-            // No need effect. 
-            // labelBorder.Effect = new DropShadowEffect() { Direction = 320.0, Opacity= 0.5};
-
-            labelBorder.SetValue(Canvas.RightProperty, 12.0);
-            labelBorder.SetValue(Canvas.TopProperty, 12.0);
-            */
+            
             TextBlock displayLabel = new TextBlock();
             displayLabel.Text = displayName;
             // displayLabel.Background = labelBrush;
@@ -513,8 +470,6 @@ namespace Scada.Chart
             displayLabel.SetValue(Canvas.TopProperty, Top);
             this.CanvasView.Children.Add(displayLabel);
             
-
-
             // Value text Label.
             this.valueBorder = new Border();
             // valueBorder.Background = labelBrush;
@@ -529,6 +484,71 @@ namespace Scada.Chart
 
             valueBorder.Child = valueLabel;
             this.CanvasView.Children.Add(valueBorder);
+        }
+
+        private bool mouseLeftButtonDown = false;
+
+        private Point selBeginPoint;
+
+        private Point selEndPoint;
+
+        private void CanvasView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.mouseLeftButtonDown = true;
+            this.selBeginPoint = e.GetPosition((UIElement)this.CanvasView);
+
+            if (this.rangeSelectionRect == null)
+            {
+                this.rangeSelectionRect = new Rectangle();
+                this.rangeSelectionRect.Fill = Brushes.LightBlue;
+                this.rangeSelectionRect.Opacity = 0.5;
+                this.CanvasView.Children.Add(this.rangeSelectionRect);
+            }
+
+            this.rangeSelectionRect.Height = 0;
+            this.rangeSelectionRect.Width = 0;
+
+            this.rangeSelectionRect.Visibility = Visibility.Visible;
+        }
+
+        private void CanvasView_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (this.mouseLeftButtonDown)
+            {
+                this.DoRenderUpdate();
+            }
+            this.mouseLeftButtonDown = false;
+            if (this.rangeSelectionRect != null)
+            {
+                this.rangeSelectionRect.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void CanvasViewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (this.mouseLeftButtonDown)
+            {
+                this.selEndPoint = e.GetPosition((UIElement)this.CanvasView);
+                this.DoRangeUpdate(this.selBeginPoint, this.selEndPoint);
+            }
+        }
+
+        private void DoRangeUpdate(Point selBeginPoint, Point selEndPoint)
+        {
+            double left = Math.Min(selBeginPoint.X, selEndPoint.X);
+            double top = Math.Min(selBeginPoint.Y, selEndPoint.Y);
+
+            this.rangeSelectionRect.SetValue(Canvas.LeftProperty, left);
+            this.rangeSelectionRect.SetValue(Canvas.TopProperty, top);
+
+            this.rangeSelectionRect.Width = Math.Abs(selBeginPoint.X - selEndPoint.X);
+            this.rangeSelectionRect.Height = Math.Abs(selBeginPoint.Y - selEndPoint.Y);
+
+        }
+
+        private void DoRenderUpdate()
+        {
+            
         }
 
     }

@@ -25,28 +25,18 @@ namespace Scada.MainVision
     {
         public const string TimeKey = "Time";
 
+        private CurveDataContext defaultDataContext;
+
         DateTime now = DateTime.Now;
-
-        // private DataListener dataListener;
-        //private List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
-
-        private bool realTime = true;
 
         static Color[] colors = { Colors.Green, Colors.Red, Colors.Blue, Colors.OrangeRed, Colors.Purple };
         
         private Dictionary<string, CurveDataContext> dataSources = new Dictionary<string, CurveDataContext>();
-        
-        // private DataArrivalConfig config;
-
-        // private Dictionary<string, object> lastEntry;
-
-        // private bool baseTimeSet = false;
 
         public SearchGraphView()
         {
             InitializeComponent();
-            this.realTime = false;
-            this.SearchChartView.RealTimeMode = realTime;
+
         }
 
         public void SetDataSource(List<Dictionary<string, object>> dataSource)
@@ -55,21 +45,8 @@ namespace Scada.MainVision
             {
                 return;
             }
-            this.SearchChartView.ClearPoints();
 
-            var entry0 = dataSource[0];
-            var entryf = dataSource.Last();
-            DateTime beginTime = DateTime.Parse((string)entry0["time"]);
-            DateTime finalTime = DateTime.Parse((string)entryf["time"]);
-
-            this.SearchChartView.UpdateTimeAxis(beginTime, finalTime, dataSource, dataSource.Count());
-            this.SearchChartView.SetDataPoints(dataSource);
-            /*
-            foreach (var e in dataSource)
-            {
-                this.SearchChartView.AddCurvesDataPoint(e);
-            }
-            */
+            this.defaultDataContext.SetDataSource(dataSource, "doserate");
         }
 
         public int Interval
@@ -98,19 +75,19 @@ namespace Scada.MainVision
 
             ConfigItem item = entry.GetConfigItem(lineName);
 
-            SearchCurveView curveView = this.SearchChartView.AddCurveView(lineName, displayName);
+            CurveView curveView = this.SearchChartView.AddCurveView(lineName, displayName);
             
             curveView.Max = item.Max;
             curveView.Min = item.Min;
             curveView.Height = item.Height;
-            CurveDataContext dataContext = curveView.CreateDataContext(lineName, displayName);
-
+            CurveDataContext dataContext = curveView.AddCurveDataContext(lineName, displayName);
+            dataContext.ChartView = this.SearchChartView;
+            this.defaultDataContext = dataContext;
             this.dataSources.Add(lineName.ToLower(), dataContext);
         }
 
         private void AddTimePoint(DateTime time, Dictionary<string, object> entry)
         {
-            UpdateResult result = UpdateResult.None;
             foreach (string key in dataSources.Keys)
             {
                 // 存在这条曲线
@@ -127,22 +104,9 @@ namespace Scada.MainVision
                     }
 
                     CurveDataContext dataContext = dataSources[key];
-                    result = dataContext.AddPoint(time, r, ChartView.Graduation);
+                    dataContext.AddPoint(time, r);
                 }
             }
-
-            if (UpdateResult.Overflow == result)
-            {
-                this.SearchChartView.UpdateTimeAxis(1);
-            }
-        }
-
-        private void ChartView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue) // Shown
-            {
-            }
-
         }
 
         internal void SaveChart()

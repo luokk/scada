@@ -75,7 +75,7 @@ namespace Scada.MainVision
                 {
                     panel.ListView = this.ShowListView(panel, dataListener);
                     panel.SearchView = this.ShowListView(panel, dataListener);
-                    panel.GraphView = this.ShowGraphView(panel, dataListener);
+                    //panel.GraphView = this.ShowGraphView(panel, dataListener);
                     panel.GraphSearchView = this.ShowSearchGraphView(panel, dataListener);
 
                     // Notice; Comment 4-7.

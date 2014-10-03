@@ -44,6 +44,7 @@ namespace Scada.MainVision
             this.dwdPane.Initialize(new string[] { "最近采集时间", "采样状态" });
             this.shelterPane.Initialize(new string[] { "最近采集时间", "市电状态", "备电时间", "舱内温度" });
 
+
             this.dbConn = this.dataProvider.GetMySqlConnection();
 
             MySqlCommand cmd = this.dbConn.CreateCommand();
@@ -150,14 +151,87 @@ namespace Scada.MainVision
             }
             
             // "温度", "湿度", "雨量", "风速", "风向" "气压"
+            // 风向换算
+            string strDirection = Get(d, "direction", "");
+            int direction = int.Parse(strDirection.Trim());
+            if ( 348 < direction && direction <= 360 )
+            {
+                strDirection += " (N)";
+            }
+            else if (direction <= 11)
+            {
+                strDirection += " (N)";
+            }
+            else if ( 11 < direction && direction <= 33 )
+            {
+                strDirection += " (NNE)";
+            }
+            else if (33 < direction && direction <= 56)
+            {
+                strDirection += " (NE)";
+            }
+            else if (56 < direction && direction <= 78)
+            {
+                strDirection += " (ENE)";
+            }
+            else if (78 < direction && direction <= 101)
+            {
+                strDirection += " (E)";
+            }
+            else if (101 < direction && direction <= 123)
+            {
+                strDirection += " (ESE)";
+            }
+            else if (123 < direction && direction <= 146)
+            {
+                strDirection += " (SE)";
+            }
+            else if (146 < direction && direction <= 168)
+            {
+                strDirection += " (SSE)";
+            }
+            else if (168 < direction && direction <= 191)
+            {
+                strDirection += " (S)";
+            }
+            else if (191 < direction && direction <= 213)
+            {
+                strDirection += " (SSW)";
+            }
+            else if (213 < direction && direction <= 236)
+            {
+                strDirection += " (SW)";
+            }
+            else if (236 < direction && direction <= 258)
+            {
+                strDirection += " (WSW)";
+            }
+            else if (258 < direction && direction <= 281)
+            {
+                strDirection += " (W)";
+            }
+            else if (281 < direction && direction <= 303)
+            {
+                strDirection += " (WNW)";
+            }
+            else if (303 < direction && direction <= 326)
+            {
+                strDirection += " (NW)";
+            }
+            else if (326 < direction && direction <= 348)
+            {
+                strDirection += " (NNW)";
+            }
+
+
             panel.SetData(
                 Get(d, "time", ""), 
                 Get(d, "Temperature", "℃"),
                 Get(d, "Humidity", "%"),
                 Get(d, "Raingauge", "mm"),
                 Get(d, "windspeed", "m/s"),
-                Get(d, "direction", ""),
-                Get(d, "pressure", "P"));
+                strDirection,
+                Get(d, "pressure", "Pa"));
         }
 
         // 4 采样状态（可用颜色表示）、累计采样体积（重要）、累计采样时间、瞬时采样流量、三种故障报警
@@ -187,8 +261,8 @@ namespace Scada.MainVision
             //"瞬时采样流量", "累计采样流量", "累积采样时间"
             panel.SetData(
                 Get(d, "time", ""), 
-                Get(d, "flow", "m³/h"),
-                Get(d, "volume", "m³"),
+                Get(d, "flow", "L/h"),
+                Get(d, "volume", "L"),
                 Get(d, "hours", "h"));
         }
         // 6 市电状态、备电时间、舱内温度、门禁报警、烟感报警、浸水报警

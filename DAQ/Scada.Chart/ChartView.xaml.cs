@@ -23,7 +23,7 @@ namespace Scada.Chart
     {
         public const double ViewGap = 10.0;
 
-        public const double Graduation = 8.0;
+        // public const double Graduation = 8.0;
 
         public const double Offset = 8.0;
 
@@ -57,13 +57,10 @@ namespace Scada.Chart
             }
         }
 
-        public bool RealTimeMode
-        {
-            get;
-            set;
-        }
 
-        private double scale = 1.0;
+        private double currentGraduation = 0.0;
+
+        private int currentGraduationCount = 0;
 
         private bool initialized = false;
 
@@ -88,22 +85,12 @@ namespace Scada.Chart
             this.GraduationTimes = new Dictionary<int, GraduationTime>();
         }
 
-        public static readonly DependencyProperty TimeScaleProperty =
-            DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
-
-        private void TimeAxisLoaded(object sender, RoutedEventArgs e)
-        {
-            if (this.initialized)
-            {
-                return;
-            }
-            this.initialized = true;
-
-            this.InitTimeAxis(DateTime.Now);
-        }
+        public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
 
         private DateTime GetBaseTime(DateTime startTime)
         {
+            return startTime;
+            /*
             // 目前只支持30秒 和 5分钟两种间隔
             Debug.Assert(this.Interval == 30 || this.Interval == 60 * 5 || this.Interval == 0);
 
@@ -119,81 +106,165 @@ namespace Scada.Chart
                 baseTime = new DateTime(startTime.Year, startTime.Month, startTime.Day, startTime.Hour, min, 0);
             }
             return baseTime;
+             * */
         }
 
-        private void InitTimeAxis(DateTime startTime)
+        private void UpdateTimeAxisGraduation(DateTime beginTime, DateTime endTime, int days, out double graduation, out int graduationCount)
         {
-            // Base Time;   
-            // this.currentBaseTime = this.GetBaseTime(startTime);
+            this.Graduations.Clear();
 
-            for (int i = 0; i < 100; i++)
+            graduation = 0.0;
+            graduationCount = 0;
+            if (days <= 1)
             {
-                // One interval per 5px
-                double x = i * Graduation;
-                Line scaleLine = new Line();
+                const double TimeLabelOffset = 9.0;
+                graduation = 4.0;
+                graduationCount = 12;
 
-                this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
-
-                bool isWholePoint = (i % 5 == 0);
-                scaleLine.X1 = scaleLine.X2 = x;
-                scaleLine.Y1 = 0;
-                scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
-                scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
-                this.TimeAxis.Children.Add(scaleLine);
-            }
-
-            this.UpdateTimeAxis(startTime);
-        }
-
-        public void UpdateTimeAxis(int offset)
-        {
-            var newDateTime = this.currentBaseTime.AddSeconds(offset * this.Interval);
-            this.UpdateTimeAxis(newDateTime);
-        }
-
-        public void UpdateTimeAxis(DateTime startTime)
-        {
-            DateTime baseTime = this.GetBaseTime(startTime);
-            if (this.currentBaseTime == baseTime)
-            {
-                return;
-            }
-            this.currentBaseTime = baseTime;
-
-            for (int i = 0; i < 20; i++)
-            {
-                TextBlock timeLabel = null;
-                if (this.GraduationTimes.ContainsKey(i))
+                this.Interval = 30;
+                for (int i = 0; i < 240; i++)
                 {
-                    timeLabel = this.GraduationTimes[i].Text;
-                }
-                else
-                {
-                    timeLabel = new TextBlock();
-                    timeLabel.Foreground = Brushes.Black;
-                    timeLabel.FontWeight = FontWeights.Light;
-                    timeLabel.FontSize = 9;
+                    // One interval per 5px
+                    double x = i * graduation;
+                    Line scaleLine = new Line();
 
-                    double pos = i * 5 * Graduation;
-                    GraduationTimes.Add(i, new GraduationTime()
+                    this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
+
+                    bool isWholePoint = (i % 10 == 0);
+                    scaleLine.X1 = scaleLine.X2 = x;
+                    scaleLine.Y1 = 0;
+                    scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
+                    scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
+                    this.TimeAxis.Children.Add(scaleLine);
+
+                    TextBlock timeLabel = null;
+                    if (this.GraduationTimes.ContainsKey(i))
                     {
-                        Text = timeLabel, Pos = pos
-                    });
+                        timeLabel = this.GraduationTimes[i].Text;
+                    }
+                    else
+                    {
+                        timeLabel = new TextBlock();
+                        timeLabel.Foreground = Brushes.Black;
+                        timeLabel.FontWeight = FontWeights.Light;
+                        timeLabel.FontSize = 9;
 
-                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
+                        double pos = i * graduation;
+                        GraduationTimes.Add(i, new GraduationTime()
+                        {
+                            Text = timeLabel,
+                            Pos = pos
+                        });
 
-                    this.TimeAxis.Children.Add(timeLabel);
+                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
+                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                        this.TimeAxis.Children.Add(timeLabel);
+                    }
+
+                    if (isWholePoint)
+                    {
+                        string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
+                        if (timeLabel != null)
+                        {
+                            timeLabel.Text = displayTime;
+                        }
+                    }
                 }
 
-                string displayTime = this.GetFormatTime(this.currentBaseTime, i, this.Interval);
-                if (timeLabel != null)
+                this.TimeAxis.UpdateLayout();
+            }
+            else if (days == 2)
+            {
+                graduation = 4.0;
+                graduationCount = 24;
+
+                this.Interval = 30;
+                for (int i = 0; i < 240; i++)
                 {
-                    timeLabel.Text = displayTime;
+                    // One interval per 5px
+                    double x = i * graduation;
+                    Line scaleLine = new Line();
+
+                    this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
+
+                    bool isWholePoint = (i % 10 == 0);
+                    scaleLine.X1 = scaleLine.X2 = x;
+                    scaleLine.Y1 = 0;
+                    scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
+                    scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
+                    this.TimeAxis.Children.Add(scaleLine);
+
+                    TextBlock timeLabel = null;
+                    if (this.GraduationTimes.ContainsKey(i))
+                    {
+                        timeLabel = this.GraduationTimes[i].Text;
+                    }
+                    else
+                    {
+                        timeLabel = new TextBlock();
+                        timeLabel.Foreground = Brushes.Black;
+                        timeLabel.FontWeight = FontWeights.Light;
+                        timeLabel.FontSize = 9;
+
+                        double pos = i * graduation;
+                        GraduationTimes.Add(i, new GraduationTime()
+                        {
+                            Text = timeLabel,
+                            Pos = pos
+                        });
+
+                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                        this.TimeAxis.Children.Add(timeLabel);
+                    }
+
+                    if (isWholePoint)
+                    {
+                        string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
+                        if (timeLabel != null)
+                        {
+                            timeLabel.Text = displayTime;
+                        }
+                    }
                 }
-                
             }
 
+
+            this.currentGraduation = graduation;
+            this.currentGraduationCount = graduationCount;
+            return;
+                /*
+            else if (days == 2)
+            {
+
+            }
+            else if (days == 3)
+            {
+
+            }
+            else if (days > 3)
+            {
+
+            }
+                 */
+
+            
+        }
+
+        public static int GetDays(DateTime beginTime, DateTime endTime)
+        {
+            long seconds = (endTime.Ticks - beginTime.Ticks) / 10000000;
+            return (int)(seconds / 3600 / 24);
+        }
+
+        public void UpdateTimeAxis(DateTime beginTime, DateTime endTime, out double graduation, out int graduationCount)
+        {
+            int days = GetDays(beginTime, endTime);
+            DateTime baseTime = this.GetBaseTime(beginTime);
+            this.currentBaseTime = baseTime;
+            this.UpdateTimeAxisGraduation(beginTime, endTime, days, out graduation, out graduationCount);
         }
 
         public CurveView AddCurveView(string curveViewName, string displayName, double height = 200.0)
@@ -203,11 +274,11 @@ namespace Scada.Chart
             curveView.TimeScale = this.TimeScale;
             curveView.Height = height + ChartView.ViewGap;
             this.ChartContainer.Children.Add(curveView);
-            this.AddCurveViewCheckItem(curveViewName, displayName);
+            this.AddCurveSelection(curveViewName, displayName);
             return curveView;
         }
 
-        private void AddCurveViewCheckItem(string curveViewName, string displayName)
+        private void AddCurveSelection(string curveViewName, string displayName)
         {
             CheckBox cb = new CheckBox();
             cb.IsChecked = true;
@@ -248,10 +319,8 @@ namespace Scada.Chart
 
         private void MainViewMouseMove(object sender, MouseEventArgs e)
         {
-            Mouse.SetCursor(Cursors.Arrow);
             this.TrackTimeLine(e);   
         }
-
 
         private void TrackTimeLine(MouseEventArgs e)
         {
@@ -260,15 +329,15 @@ namespace Scada.Chart
             foreach (var view in this.ChartContainer.Children)
             {
                 CurveView curveView = (CurveView)view;
+                if (curveView.Visibility != Visibility.Visible)
+                    continue;
 
                 Point point = e.GetPosition((UIElement)curveView.View);
                 double x = point.X;
                 double centerX = curveView.CenterX;
                 if (!timed && x >= 0)
                 {
-                    double v = (x - centerX) / scale + centerX;
-
-                    double index = v / Graduation / 5;
+                    double index = x * this.currentGraduationCount / this.currentGraduation;
                     timeLabel = this.GetFormatDateTime(this.currentBaseTime, (int)index, this.Interval);
                 }
 
@@ -276,38 +345,7 @@ namespace Scada.Chart
             }
         }
 
-        private void MoveCurveLines(MouseEventArgs e, bool moving)
-        {
-            bool timed = false;
-            string timeLabel = string.Empty;
-            foreach (var view in this.ChartContainer.Children)
-            {
-                CurveView curveView = (CurveView)view;
-
-                if (moving)
-                {
-
-                    Point point = e.GetPosition((UIElement)curveView.View);
-                    double x = point.X;
-                    double centerX = curveView.CenterX;
-                    if (!timed && x >= 0)
-                    {
-                        double v = (x - centerX) / scale + centerX;
-
-                        double index = v / Graduation / 5;
-                        timeLabel = this.GetFormatDateTime(this.currentBaseTime, (int)index, this.Interval);
-                    }
-
-                    curveView.MoveCurveLine(point, timeLabel);
-                }
-                else
-                {
-                    curveView.MoveCurveLine(false);
-                }
-            }
-        }
-
-
+        
 
         public long TimeScale
         {
@@ -333,7 +371,7 @@ namespace Scada.Chart
             {
                 if (dt.Minute == 0 && dt.Second == 0)
                 {
-                    return string.Format("{0:d2}:{1:d2}\n[{2:d2}时]", dt.Minute, dt.Second, dt.Hour);
+                    return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
                 }
                 else
                 {
@@ -391,5 +429,6 @@ namespace Scada.Chart
             encoder.Save(ms);
             ms.Close();
         }
+
     }
 }

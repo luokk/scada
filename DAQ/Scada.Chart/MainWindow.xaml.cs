@@ -42,11 +42,16 @@ namespace Scada.Chart
             this.view1 = ChartView.AddCurveView("a", "A");
             this.view1.Max = 150;
             this.view1.Min = 0;
-            c1 = this.view1.CreateDataContext("a", "Hello");
-            //view1.Height = 200;
+            c1 = this.view1.AddCurveDataContext("a", "Hello");
+            c1.ChartView = ChartView;
+
+
             this.view2 = ChartView.AddCurveView("b", "B");
+            this.view2.Max = 100;
+            this.view2.Min = -100;
             //this.view2.Background = new SolidColorBrush(Colors.Green);
-            c2 = this.view2.CreateDataContext("a", "World");
+            c2 = this.view2.AddCurveDataContext("a", "World");
+            c2.ChartView = ChartView;
 
             //view2.Height = 200;
             DispatcherTimer timer = new DispatcherTimer();
@@ -64,7 +69,33 @@ namespace Scada.Chart
             double x = i;
             i += 2;
             double y = cpuPerformance.NextValue();
-            c1.AddPoint(DateTime.Now, y * 2 + 20, 3.0);
+            // c1.AddPoint(DateTime.Now, y * 2 + 20);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            DateTime t = DateTime.Parse("2014-10-02");
+            List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
+            for (long i = 0; i <= 3600 * 48; i += 30)
+            {
+                if (i > 3600 * 4 && i < 3600 * 6)
+                {
+                    var item1 = new Dictionary<string, object>(3);
+                    item1.Add("time", t.AddSeconds(i).ToString());
+                    //item.Add("doserate", (double) (3600 * 24 - i) / 3600.0);
+                    item1.Add("doserate", null);
+                    data.Add(item1);
+                    continue;
+                }
+                var item = new Dictionary<string, object>(3);
+                item.Add("time", t.AddSeconds(i).ToString());
+                //item.Add("doserate", (double) (3600 * 24 - i) / 3600.0);
+                item.Add("doserate", (double)Math.Sin(3.14 / 288 * i / 30) * 100);
+                data.Add(item);
+            }
+
+            c2.SetDataSource(data, "doserate");
         }
     }
 }
+

@@ -58,7 +58,7 @@ namespace Scada.Controls
 
         private const string Time = "time";
 
-        const int MaxCountPage = 300;
+        const int MaxCountPage = 2880;
 
         private const int MaxListCount = 26;
 
@@ -145,7 +145,7 @@ namespace Scada.Controls
                 this.graphView = value;
                 if (this.graphView != null)
                 {
-                    this.GraphViewContainer.Content = this.graphView;
+                    //this.GraphViewContainer.Content = this.graphView;
                 }
             }
         }
@@ -265,6 +265,8 @@ namespace Scada.Controls
                 theSearchView.MouseRightButtonUp += OnSearchListViewMouseRightButton;
             }
         }
+
+
 
         void OnSearchListViewMouseRightButton(object sender, MouseButtonEventArgs e)
         {
@@ -499,10 +501,10 @@ namespace Scada.Controls
 
             if (this.searchData != null && this.searchData.Count > 0)
             {
-                // Show the searched data.
+
                 searchListView.ItemsSource = this.searchData;
-                // Enable the chart button.
-                this.ButtonShowChart.IsEnabled = true;
+                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData);
+                
             }
         }
 
@@ -617,22 +619,6 @@ namespace Scada.Controls
         }
         */
 
-        // Select the ChartView to show.
-        private void ShowChartView(object sender, RoutedEventArgs e)
-        {
-            this.ChartViewTabItem.Visibility = Visibility.Visible;
-            this.SearchChartViewTabItem.Visibility = Visibility.Collapsed;
-            this.TabCtrl.SelectedItem = this.ChartViewTabItem;
-            // this.ShowChartViewBySearch = false;
-        }
-
-        private void ShowSearchChartView(object sender, RoutedEventArgs e)
-        {
-            this.SearchChartViewTabItem.Visibility = Visibility.Visible;
-            this.ChartViewTabItem.Visibility = Visibility.Collapsed;
-            this.TabCtrl.SelectedItem = this.SearchChartViewTabItem;
-            // this.ShowChartViewBySearch = true;
-        }
 
         private void ExportDataList(object sender, RoutedEventArgs e)
         {
@@ -649,6 +635,12 @@ namespace Scada.Controls
             DateTime now = DateTime.Now;
             string fileName = string.Format("{0}-{1}-{2}-{3}.csv", now.Year, now.Month, now.Day, now.Ticks);
             string filePath = string.Format("./csv/{0}", fileName);
+
+            if (!Directory.Exists("./csv"))
+            {
+                Directory.CreateDirectory("./csv");
+            }
+
             using (StreamWriter sw = new StreamWriter(filePath))
             {
                 foreach (Dictionary<string, object> i in dataList)

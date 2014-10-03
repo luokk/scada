@@ -366,25 +366,6 @@ namespace Scada.Chart
             this.beginMoved = beginMoved;
         }
 
-
-        internal void MoveCurveLine(Point point, string timeLabel)
-        {
-            if (!this.beginMoved)
-            {
-                this.beginMoved = true;
-            }
-
-            double dragOffset = point.X - timeLine.X1;
-
-            int n = (int)(dragOffset / (ChartView.Graduation * 5));
-
-            double offsetPos = (n) * ChartView.Graduation * 5;
-            this.finalOffsetPos = offsetPos;
-            TranslateTransform tt = new TranslateTransform(offsetPos, 0);
-            curve.RenderTransform = tt;
-
-        }
-
         private void UpdateValue(Point point, string timeLabel)
         {
             double x = point.X;

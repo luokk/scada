@@ -48,8 +48,6 @@ namespace Scada.MainVision
         public GraphView()
         {
             InitializeComponent();
-            this.realTime = true;
-            this.ChartView.RealTimeMode = realTime;
         }
 
         public void AddDataListener(DataListener listener)
@@ -94,7 +92,7 @@ namespace Scada.MainVision
             curveView.Max = item.Max;
             curveView.Min = item.Min;
             curveView.Height = item.Height;
-            CurveDataContext dataContext = curveView.CreateDataContext(lineName, displayName);
+            CurveDataContext dataContext = curveView.AddCurveDataContext(lineName, displayName);
 
             this.dataSources.Add(lineName.ToLower(), dataContext);
         }
@@ -112,7 +110,6 @@ namespace Scada.MainVision
                         CurveDataContext dataContext = dataSources[key];
                         i = 0;
                         dataContext.Clear();
-                        dataContext.UpdateCurves();
                     }
 
                     // Reset the Base time.
@@ -162,7 +159,7 @@ namespace Scada.MainVision
                     if (!this.baseTimeSet)
                     {
                         DateTime baseTime = DateTime.Parse(dataTime);
-                        this.ChartView.UpdateTimeAxis(baseTime);
+                        //this.ChartView.UpdateTimeAxis(baseTime);
                         this.baseTimeSet = true;
                     }
 
@@ -177,7 +174,7 @@ namespace Scada.MainVision
                 {
                     if (!this.baseTimeSet)
                     {
-                        this.ChartView.UpdateTimeAxis(time);
+                        // this.ChartView.UpdateTimeAxis(time);
                         this.baseTimeSet = true;
                     }
 
@@ -190,7 +187,6 @@ namespace Scada.MainVision
 
         private void AddTimePoint(DateTime time, Dictionary<string, object> entry)
         {
-            UpdateResult result = UpdateResult.None;
             foreach (string key in dataSources.Keys)
             {
                 // 存在这条曲线
@@ -207,14 +203,10 @@ namespace Scada.MainVision
                     }
 
                     CurveDataContext dataContext = dataSources[key];
-                    result = dataContext.AddPoint(time, r, ChartView.Graduation);
+                    dataContext.AddPoint(time, r);
                 }
             }
 
-            if (UpdateResult.Overflow == result)
-            {
-                this.ChartView.UpdateTimeAxis(1);
-            }
         }
 
         private void OnDataArrivalEnd(DataArrivalConfig config)
@@ -231,7 +223,7 @@ namespace Scada.MainVision
                 foreach (string key in dataSources.Keys)
                 {
                     CurveDataContext dataContext = dataSources[key];
-                    dataContext.UpdateCurves();
+                    // dataContext.UpdateCurves();
                 }
             }
 
