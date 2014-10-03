@@ -5,13 +5,13 @@
         Title="MainWindow" Height="450" Width="525" Loaded="Window_Loaded_1">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="15"></RowDefinition>
+            <RowDefinition Height="25"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
         <Button Grid.Row="0" Click="Button_Click"></Button>
 
-        <m:ChartView Grid.Row="1" x:Name="ChartView" Width="1000" TimeScale="4">
+        <m:ChartView Grid.Row="1" x:Name="ChartView" Width="1000">
             
         </m:ChartView>
     </Grid>

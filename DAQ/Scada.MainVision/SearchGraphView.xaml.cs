@@ -15,17 +15,16 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Scada.Chart;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace Scada.MainVision
 {
     /// <summary>
     /// Interaction logic for GraphViewPanel.xaml in MainVision
     /// </summary>
-    public partial class SearchGraphView : UserControl
+    public partial class SearchGraphView : System.Windows.Controls.UserControl
     {
         public const string TimeKey = "Time";
-
-        private CurveDataContext defaultDataContext;
 
         DateTime now = DateTime.Now;
 
@@ -46,7 +45,7 @@ namespace Scada.MainVision
                 return;
             }
 
-            this.defaultDataContext.SetDataSource(dataSource, "doserate");
+            this.SearchChartView.SetDataSource(dataSource, "doserate");
         }
 
         public int Interval
@@ -74,16 +73,8 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
+            this.SearchChartView.SetValueRange(item.Min, item.Max);
 
-            CurveView curveView = this.SearchChartView.AddCurveView(lineName, displayName);
-            
-            curveView.Max = item.Max;
-            curveView.Min = item.Min;
-            curveView.Height = item.Height;
-            CurveDataContext dataContext = curveView.AddCurveDataContext(lineName, displayName);
-            dataContext.ChartView = this.SearchChartView;
-            this.defaultDataContext = dataContext;
-            this.dataSources.Add(lineName.ToLower(), dataContext);
         }
 
         private void AddTimePoint(DateTime time, Dictionary<string, object> entry)
@@ -103,15 +94,25 @@ namespace Scada.MainVision
                         }
                     }
 
-                    CurveDataContext dataContext = dataSources[key];
-                    dataContext.AddPoint(time, r);
+                    //this.CurveDataContext dataContext = dataSources[key];
+                    //dataContext.AddPoint(time, r);
                 }
             }
         }
 
         internal void SaveChart()
         {
-            this.SearchChartView.SaveChart();
+            string filePath = string.Empty;
+            System.Windows.Forms.OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.InitialDirectory = "C://";
+            fileDialog.Filter = "曲线图片 (*.bmp)|*.bmp|All files (*.*)|*.*";
+            fileDialog.FilterIndex = 1;
+            fileDialog.RestoreDirectory = true;
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                filePath = fileDialog.FileName;
+            }
+            this.SearchChartView.SaveChart(filePath);
         }
     }
 

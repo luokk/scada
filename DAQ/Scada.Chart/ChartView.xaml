@@ -14,22 +14,15 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="30"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="30"></RowDefinition>
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" VerticalAlignment="Center">
-                <StackPanel x:Name="SelectedItems1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10, 0, 0, 0"/>
-                <StackPanel x:Name="SelectedItems2" Orientation="Horizontal" VerticalAlignment="Center" Margin="10, 0, 0, 0" Visibility="Collapsed"/>
 
-            </StackPanel>
-            <StackPanel x:Name="ChartContainer" Height="220" Grid.Row="1" Grid.ColumnSpan="2"
-                        Orientation="Vertical" VerticalAlignment="Bottom"
-                        MouseMove="MainViewMouseMove"
-                        >
+            <local:CurveView x:Name="CurveView" Height="220" Grid.Row="0" Grid.ColumnSpan="2"
+                        MouseMove="MainViewMouseMove" Loaded="CurveViewLoaded">
 
-            </StackPanel>
-            <Canvas x:Name="TimeAxis" Grid.Column="1" Grid.Row="2" Background="#F8F8F8"></Canvas>
+            </local:CurveView>
+            <Canvas x:Name="TimeAxis" Grid.Column="1" Grid.Row="1" Background="#F8F8F8"></Canvas>
 
         </Grid>
     </Border>

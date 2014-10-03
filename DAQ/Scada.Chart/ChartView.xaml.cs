@@ -57,6 +57,7 @@ namespace Scada.Chart
             }
         }
 
+        private CurveView curveView;
 
         private double currentGraduation = 0.0;
 
@@ -86,6 +87,7 @@ namespace Scada.Chart
         }
 
         public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
+        private CurveDataContext curveDataContext;
 
         private DateTime GetBaseTime(DateTime startTime)
         {
@@ -267,55 +269,26 @@ namespace Scada.Chart
             this.UpdateTimeAxisGraduation(beginTime, endTime, days, out graduation, out graduationCount);
         }
 
-        public CurveView AddCurveView(string curveViewName, string displayName, double height = 200.0)
+        // TODO: Remove
+        public CurveView SetCurveView(string curveViewName, string displayName, double height = 200.0)
         {
-            CurveView curveView = new CurveView(this);
-            curveView.CurveViewName = curveViewName;
-            curveView.TimeScale = this.TimeScale;
-            curveView.Height = height + ChartView.ViewGap;
-            this.ChartContainer.Children.Add(curveView);
-            this.AddCurveSelection(curveViewName, displayName);
-            return curveView;
+            //this.CurveView.CurveViewName = curveViewName;
+            //this.CurveView.Height = height + ChartView.ViewGap;
+
+            return this.CurveView;
         }
 
-        private void AddCurveSelection(string curveViewName, string displayName)
+        public void SetValueRange(double min, double max)
         {
-            CheckBox cb = new CheckBox();
-            cb.IsChecked = true;
-            cb.Content = displayName;
-            cb.Margin = new Thickness(5, 0, 5, 0);
-            
-            cb.Checked += (object sender, RoutedEventArgs e) => 
-            {
-                this.OnItemChecked(curveViewName, true);
-            };
-            cb.Unchecked += (object sender, RoutedEventArgs e) =>
-            {
-                this.OnItemChecked(curveViewName, false);
-            };
-            if (this.SelectedItems1.Children.Count > 8)
-            {
-                this.SelectedItems2.Visibility = Visibility.Visible;
-                this.SelectedItems2.Children.Add(cb);
-            }
-            else
-            {
-                this.SelectedItems1.Children.Add(cb);
-            }
+            this.CurveView.Min = min;
+            this.CurveView.Max = max;
         }
 
-        private void OnItemChecked(string curveViewName, bool itemChecked)
+        public void SetCurveDisplayName(string displayName)
         {
-            foreach (var cv in this.ChartContainer.Children)
-            {
-                CurveView curveView = (CurveView)cv;
-                if (curveView.CurveViewName == curveViewName)
-                {
-                    curveView.Visibility = itemChecked ? Visibility.Visible : Visibility.Collapsed;
-                    break;
-                }
-            }
+            this.CurveView.DisplayName = displayName;
         }
+           
 
         private void MainViewMouseMove(object sender, MouseEventArgs e)
         {
@@ -326,38 +299,18 @@ namespace Scada.Chart
         {
             bool timed = false;
             string timeLabel = string.Empty;
-            foreach (var view in this.ChartContainer.Children)
+            CurveView curveView = (CurveView)this.CurveView;
+
+            Point point = e.GetPosition((UIElement)curveView.View);
+            double x = point.X;
+
+            if (!timed && x >= 0)
             {
-                CurveView curveView = (CurveView)view;
-                if (curveView.Visibility != Visibility.Visible)
-                    continue;
-
-                Point point = e.GetPosition((UIElement)curveView.View);
-                double x = point.X;
-                double centerX = curveView.CenterX;
-                if (!timed && x >= 0)
-                {
-                    double index = x * this.currentGraduationCount / this.currentGraduation;
-                    timeLabel = this.GetFormatDateTime(this.currentBaseTime, (int)index, this.Interval);
-                }
-
-                curveView.TrackTimeLine(point, timeLabel);
-            }
-        }
-
-        
-
-        public long TimeScale
-        {
-            get
-            {
-                return (long)this.GetValue(TimeScaleProperty);
+                double index = x * this.currentGraduationCount / this.currentGraduation;
+                timeLabel = this.GetFormatDateTime(this.currentBaseTime, (int)index, this.Interval);
             }
 
-            set
-            {
-                this.SetValue(TimeScaleProperty, (long)value);
-            }
+            curveView.TrackTimeLine(point, timeLabel);
         }
 
         private string GetFormatTime(DateTime baseTime, int index, int interval)
@@ -429,6 +382,23 @@ namespace Scada.Chart
             encoder.Save(ms);
             ms.Close();
         }
+
+        private void CurveViewLoaded(object sender, RoutedEventArgs e)
+        {
+            this.CurveView.ChartView = this;
+            this.curveDataContext = this.CurveView.AddCurveDataContext(this);
+        }
+
+        public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
+        {
+            this.curveDataContext.SetDataSource(data, valueKey, timeKey);
+        }
+
+        public void AddPoint(DateTime time, object value)
+        {
+            this.curveDataContext.AddPoint(time, value);
+        }
+
 
     }
 }

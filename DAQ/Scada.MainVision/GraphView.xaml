@@ -21,7 +21,7 @@
                        FontSize="15"/>
         </StackPanel>
 
-        <chart:ChartView x:Name="ChartView" Grid.Row="1" VerticalAlignment="Top" IsVisibleChanged="ChartView_IsVisibleChanged"></chart:ChartView>
+        <chart:ChartView x:Name="ChartView" Grid.Row="1" VerticalAlignment="Top"></chart:ChartView>
         
     </Grid>
 </UserControl>

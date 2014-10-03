@@ -78,21 +78,11 @@ namespace Scada.Chart
 
         private TextBlock valueLabel;
 
-        private ChartView chartView;
+
+        public ChartView ChartView { get; set; }
 
         const int MaxVisibleCount = 14;
 
-
-
-        private List<KeyValuePair<DateTime, double>> dataList = new List<KeyValuePair<DateTime, double>>();
-
-        public double CenterX
-        {
-            get
-            {
-                return this.centerX;
-            }
-        }
 
         private Dictionary<int, GraduationLine> Graduations
         {
@@ -106,10 +96,9 @@ namespace Scada.Chart
             set;
         }
 
-        public CurveView(ChartView chartView)
+        public CurveView()
         {
             InitializeComponent();
-            this.chartView = chartView;
             this.Graduations = new Dictionary<int, GraduationLine>();
             this.GraduationTexts = new Dictionary<int, GraduationText>();
         }
@@ -132,18 +121,6 @@ namespace Scada.Chart
             Color gridLineColor = Color.FromRgb(192, 192, 192);
             SolidColorBrush gridLineBrush = new SolidColorBrush(gridLineColor);
 
-            
-            for (int i = 0; i < 20; i++)
-            {
-                Line l = new Line();
-                l.X1 = l.X2 = i * 40;
-                l.Y1 = 0;
-                l.Y2 = GridViewHeight;
-                l.StrokeThickness = 0.5;
-
-                l.Stroke = gridLineBrush;
-                this.CanvasView.Children.Add(l);
-            }
 
             // Grid Line ---
             for (int i = 0; i < 20; i++)
@@ -250,13 +227,12 @@ namespace Scada.Chart
             this.CanvasView.Children.Add(this.curve);
         }
 
-        public CurveDataContext AddCurveDataContext(string curveName, string displayName)
+        public CurveDataContext AddCurveDataContext(ChartView chartView)
         {
-            this.dataContext = new CurveDataContext(curveName);
+            this.dataContext = new CurveDataContext(chartView);
             this.dataContext.AppendCurvePoint += this.AppendCurvePointHandler;
             this.dataContext.ClearCurvePoints += this.ClearCurvePointsHandler;
 
-            this.DisplayName = displayName;
             return this.dataContext;
         }
 
@@ -270,17 +246,6 @@ namespace Scada.Chart
         {
             get;
             set;
-        }
-
-        public long TimeScale
-        {
-            get;
-            internal set;
-        }
-
-        private void AddCurvePointHandler(DateTime time, double value)
-        {
-            dataList.Add(new KeyValuePair<DateTime, double>(time, value));
         }
 
         private Point lastPoint = default(Point);

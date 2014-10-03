@@ -676,7 +676,7 @@ namespace Scada.Controls
 
         private void SaveChart(object sender, RoutedEventArgs e)
         {
-            ((GraphView)this.GraphView).SaveChart();
+            ((SearchGraphView)this.GraphSearchView).SaveChart();
             MainWindow.Status = "成功保存曲线。";
             // Window1 alert = new Window1("成功保存曲线。");
             // alert.ShowDialog();

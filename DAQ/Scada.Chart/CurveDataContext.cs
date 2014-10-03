@@ -20,9 +20,13 @@ namespace Scada.Chart
 
         public event ClearCurvePoints ClearCurvePoints;
 
-        public CurveDataContext(string curveName)
+        public CurveDataContext()
         {
-            this.CurveName = curveName;
+        }
+
+        public CurveDataContext(ChartView chartView)
+        {
+            this.chartView = chartView;
         }
 
         public string CurveName
@@ -51,7 +55,7 @@ namespace Scada.Chart
 
         private string timeKey;
 
-        public ChartView ChartView { get; set; }
+        private ChartView chartView;
 
         public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
         {
@@ -93,18 +97,13 @@ namespace Scada.Chart
         {
             double graduation;
             int graduationCount;
-            this.ChartView.UpdateTimeAxis(beginTime, endTime, out graduation, out graduationCount);
+            this.chartView.UpdateTimeAxis(beginTime, endTime, out graduation, out graduationCount);
 
             this.Graduation = graduation;
             this.GraduationCount = graduationCount;
         }
 
-        public void AppendData(Dictionary<string, object> item)
-        {
-            this.data.Add(item);
-        }
-
-        public void AddPoint(DateTime time, object value)
+        internal void AddPoint(DateTime time, object value)
         {
             if (value == null)
             {
@@ -130,7 +129,6 @@ namespace Scada.Chart
             this.points.Add(p);
             this.AppendCurvePoint(p);
         }
-
 
         private int GetIndexByTime(DateTime time)
         {

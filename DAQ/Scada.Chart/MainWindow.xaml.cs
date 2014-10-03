@@ -22,12 +22,8 @@ namespace Scada.Chart
     /// </summary>
     public partial class MainWindow : Window
     {
-        private PerformanceCounter cpuPerformance = new PerformanceCounter();
 
-        CurveView view1;
         CurveView view2;
-
-        CurveDataContext c1;
         CurveDataContext c2;
 
         private double i = 0;
@@ -39,44 +35,20 @@ namespace Scada.Chart
 
         private void Window_Loaded_1(object sender, RoutedEventArgs e)
         {
-            this.view1 = ChartView.AddCurveView("a", "A");
-            this.view1.Max = 150;
-            this.view1.Min = 0;
-            c1 = this.view1.AddCurveDataContext("a", "Hello");
-            c1.ChartView = ChartView;
-
-
-            this.view2 = ChartView.AddCurveView("b", "B");
+            this.view2 = ChartView.SetCurveView("b", "B");
             this.view2.Max = 100;
             this.view2.Min = -100;
-            //this.view2.Background = new SolidColorBrush(Colors.Green);
-            c2 = this.view2.AddCurveDataContext("a", "World");
-            c2.ChartView = ChartView;
 
-            //view2.Height = 200;
-            DispatcherTimer timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(1);
-            timer.Tick += new EventHandler(AnimatedPlot);
-            timer.IsEnabled = true;
 
-            cpuPerformance.CategoryName = "Processor";
-            cpuPerformance.CounterName = "% Processor Time";
-            cpuPerformance.InstanceName = "_Total";
         }
 
-        void AnimatedPlot(object sender, EventArgs e)
-        {
-            double x = i;
-            i += 2;
-            double y = cpuPerformance.NextValue();
-            // c1.AddPoint(DateTime.Now, y * 2 + 20);
-        }
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             DateTime t = DateTime.Parse("2014-10-02");
             List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
-            for (long i = 0; i <= 3600 * 48; i += 30)
+            for (long i = 0; i <= 3600 * 22; i += 30)
             {
                 if (i > 3600 * 4 && i < 3600 * 6)
                 {
@@ -94,7 +66,7 @@ namespace Scada.Chart
                 data.Add(item);
             }
 
-            c2.SetDataSource(data, "doserate");
+            this.ChartView.SetDataSource(data, "doserate");
         }
     }
 }

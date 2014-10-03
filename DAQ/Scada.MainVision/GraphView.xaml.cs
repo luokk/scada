@@ -14,13 +14,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Scada.Chart;
+using System.Windows.Forms;
 
 namespace Scada.MainVision
 {
     /// <summary>
     /// Interaction logic for GraphViewPanel.xaml
     /// </summary>
-    public partial class GraphView : UserControl
+    public partial class GraphView : System.Windows.Controls.UserControl
     {
         public const string TimeKey = "Time";
 
@@ -86,15 +87,7 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
-
-            CurveView curveView = this.ChartView.AddCurveView(lineName, displayName);
-            
-            curveView.Max = item.Max;
-            curveView.Min = item.Min;
-            curveView.Height = item.Height;
-            CurveDataContext dataContext = curveView.AddCurveDataContext(lineName, displayName);
-
-            this.dataSources.Add(lineName.ToLower(), dataContext);
+            this.ChartView.SetValueRange(item.Min, item.Max);
         }
 
 
@@ -202,8 +195,8 @@ namespace Scada.MainVision
                         }
                     }
 
-                    CurveDataContext dataContext = dataSources[key];
-                    dataContext.AddPoint(time, r);
+                    //CurveDataContext dataContext = dataSources[key];
+                    //dataContext.AddPoint(time, r);
                 }
             }
 
@@ -216,23 +209,20 @@ namespace Scada.MainVision
             }
         }
 
-        private void ChartView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue) // Shown
-            {
-                foreach (string key in dataSources.Keys)
-                {
-                    CurveDataContext dataContext = dataSources[key];
-                    // dataContext.UpdateCurves();
-                }
-            }
-
-        }
-
-
+        // Save chart into BMP file
         internal void SaveChart()
         {
-            this.ChartView.SaveChart();
+            string filePath = string.Empty;
+            System.Windows.Forms.OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.InitialDirectory = "C://";
+            fileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            fileDialog.FilterIndex = 1;
+            fileDialog.RestoreDirectory = true;
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                filePath = fileDialog.FileName;
+            }
+            this.ChartView.SaveChart(filePath);
         }
     }
 

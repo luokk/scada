@@ -118,6 +118,9 @@
                                 
                                     <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0"
                                             Style="{StaticResource ButtonKey}" Click="SaveChart">保存曲线</Button>
+                                    <ComboBox x:Name="FieldSelect">
+                                        
+                                    </ComboBox>
                                 </StackPanel>
 
                                 <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainer" Margin="-5">
