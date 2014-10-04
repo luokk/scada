@@ -38,14 +38,14 @@ namespace Scada.MainVision
 
         }
 
-        public void SetDataSource(List<Dictionary<string, object>> dataSource)
+        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey)
         {
             if (dataSource == null || dataSource.Count == 0)
             {
                 return;
             }
 
-            this.SearchChartView.SetDataSource(dataSource, "doserate");
+            this.SearchChartView.SetDataSource(dataSource, valueKey);
         }
 
         public int Interval

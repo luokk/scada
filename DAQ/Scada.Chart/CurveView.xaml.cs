@@ -256,9 +256,9 @@ namespace Scada.Chart
         /// <param name="point"></param>
         private void AppendCurvePointHandler(Point point)
         {
-            if (lastPoint == default(Point) || point == default(Point))
+            if (this.lastPoint == default(Point) || point == default(Point))
             {
-                lastPoint = point;
+                this.lastPoint = point;
                 return;
             }
             Point p1, p2;
@@ -267,12 +267,13 @@ namespace Scada.Chart
 
             LineGeometry line = new LineGeometry(p1, p2);
             this.lines.Children.Add(line);
-            lastPoint = point;
+            this.lastPoint = point;
             return;
         }
 
         private void ClearCurvePointsHandler()
         {
+            this.lastPoint = default(Point);
             if (this.curve != null)
             {
                 this.lines.Children.Clear();
@@ -513,7 +514,12 @@ namespace Scada.Chart
 
         private void DoRenderUpdate()
         {
-            
+            double beginPointX = Math.Min(this.selBeginPoint.X, this.selEndPoint.X);
+            double endPointX = Math.Max(this.selBeginPoint.X, this.selEndPoint.X);
+            if (endPointX > beginPointX)
+            {
+                this.dataContext.UpdateRange(beginPointX, endPointX);
+            }
         }
 
     }

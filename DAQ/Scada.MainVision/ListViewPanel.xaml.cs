@@ -79,6 +79,10 @@ namespace Scada.Controls
             set;
         }
 
+        public bool HasSerachDataChart { get; set; }
+
+        public bool HasRealTimeChart { get; set; }
+
 
         /// <summary>
         /// 
@@ -93,6 +97,9 @@ namespace Scada.Controls
             this.dataProvider = dataProvider;
 
             this.dbConn = this.dataProvider.GetMySqlConnection();
+
+            this.HasSerachDataChart = false;
+            this.HasRealTimeChart = false;
 
             var dbCmd = this.dbConn.CreateCommand();
             var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
@@ -145,7 +152,7 @@ namespace Scada.Controls
                 this.graphView = value;
                 if (this.graphView != null)
                 {
-                    //this.GraphViewContainer.Content = this.graphView;
+                    this.GraphViewContainer.Content = this.graphView;
                 }
             }
         }
@@ -503,7 +510,7 @@ namespace Scada.Controls
             {
 
                 searchListView.ItemsSource = this.searchData;
-                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData);
+                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
                 
             }
         }
@@ -575,50 +582,6 @@ namespace Scada.Controls
             }
 
         }
-
-        /* Pages about.
-        private void OnPrevButton(object sender, RoutedEventArgs e)
-        {
-            this.OnNavigateTo(-1);
-        }
-
-        private void OnNextButton(object sender, RoutedEventArgs e)
-        {
-            this.OnNavigateTo(1);
-        }
-
-        private int currentPage = 0;
-
-        private void OnNavigateTo(int nav)
-        {
-            int pageCount = this.searchDataSource.Count / MaxCountPage + 1;
-            this.currentPage += nav;
-            if (this.currentPage < 0)
-            {
-                this.currentPage = 0;
-            }
-            else if (this.currentPage >= pageCount) 
-            {
-                this.currentPage = pageCount - 1;
-            }
-
-            this.searchData = this.Filter(this.searchDataSource, this.currentPage);
-
-            ListView searchListView = (ListView)this.SearchView;
-            searchListView.ItemsSource = null;
-
-            if (this.searchData != null && this.searchData.Count > 0)
-            {
-                // Show the searched data.
-                searchListView.ItemsSource = this.searchData;
-                // Enable the chart button.
-                this.ButtonShowChart.IsEnabled = true;
-            }
- 
-
-        }
-        */
-
 
         private void ExportDataList(object sender, RoutedEventArgs e)
         {
@@ -718,7 +681,7 @@ namespace Scada.Controls
         {
             if ((bool)e.NewValue)
             {
-                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData);
+                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
             }
 
         }
@@ -732,6 +695,8 @@ namespace Scada.Controls
         }
 
         private bool shown = false;
+        
+        public string selectedField;
 
         public bool Shown
         {
@@ -744,6 +709,32 @@ namespace Scada.Controls
                 this.shown = value;
                 // currentDeviceKey = this.deviceKey;
             }
+        }
+
+        private void SearchGraphViewContainer_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!this.HasSerachDataChart)
+            {
+                this.SearchChartRow.Height = new GridLength(0);
+            }
+        }
+
+        private void GraphViewContainer_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!this.HasRealTimeChart)
+            {
+                this.ChartRow.Height = new GridLength(0);
+            }
+        }
+
+        public void SetField(string field)
+        {
+            this.selectedField = field;
+        }
+
+        public void AddField(string field)
+        {
+            this.FieldSelect.Items.Add(field);
         }
     }
 }

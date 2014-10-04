@@ -63,11 +63,14 @@
                         <ContentControl Grid.Row="1" Margin="0, 1, 0, 0" >
                             <Grid>
                                 <Grid.RowDefinitions>
-
+                                    <RowDefinition Height="300" x:Name="ChartRow"></RowDefinition>
                                     <RowDefinition Height="*"></RowDefinition>
                                 </Grid.RowDefinitions>
 
-                                <ContentControl Grid.Row="0" x:Name="ListViewContainer" Margin="-5">
+
+                                <ContentControl Grid.Row="0" x:Name="GraphViewContainer" Margin="-5" Loaded="GraphViewContainer_Loaded">
+                                </ContentControl>
+                                <ContentControl Grid.Row="1" x:Name="ListViewContainer" Margin="-5">
                                 </ContentControl>
 
                             </Grid>
@@ -80,7 +83,7 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="35"></RowDefinition>
-                                    <RowDefinition Height="300"></RowDefinition>
+                                    <RowDefinition Height="300" x:Name="SearchChartRow"></RowDefinition>
                                     <RowDefinition Height="*"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
@@ -123,7 +126,7 @@
                                     </ComboBox>
                                 </StackPanel>
 
-                                <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainer" Margin="-5">
+                                <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainer" Margin="-5" Loaded="SearchGraphViewContainer_Loaded">
                                 </ContentControl>
                                 <!-- Contains ListView -->
                                 <ContentControl Grid.Row="2" x:Name="SearchViewContainer" Margin="-5">

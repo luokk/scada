@@ -75,12 +75,32 @@ namespace Scada.MainVision
                 {
                     panel.ListView = this.ShowListView(panel, dataListener);
                     panel.SearchView = this.ShowListView(panel, dataListener);
-                    //panel.GraphView = this.ShowGraphView(panel, dataListener);
-                    panel.GraphSearchView = this.ShowSearchGraphView(panel, dataListener);
 
-                    // Notice; Comment 4-7.
-                    // panel.ListRecentData();
-                    // 是否显示 控制面板
+                    if (deviceKey != DataProvider.DeviceKey_Dwd && deviceKey != DataProvider.DeviceKey_Shelter)
+                    {
+                        panel.HasSerachDataChart = true;
+                        panel.GraphSearchView = this.ShowSearchGraphView(panel, dataListener);
+                    }
+
+                    if (deviceKey == DataProvider.DeviceKey_MDS || deviceKey == DataProvider.DeviceKey_AIS)
+                    {
+                        panel.HasRealTimeChart = true;
+                        panel.GraphView = this.ShowGraphView(panel, dataListener);
+                    }
+
+                    if (deviceKey == DataProvider.DeviceKey_MDS || deviceKey == DataProvider.DeviceKey_AIS)
+                    {
+                        panel.selectedField = "flow";
+                    }
+                    else if (deviceKey == DataProvider.DeviceKey_Weather)
+                    {
+                        panel.selectedField = "temperature";
+                    }
+                    else if (deviceKey == DataProvider.DeviceKey_NaI || deviceKey == DataProvider.DeviceKey_Hpic)
+                    {
+                        panel.selectedField = "doserate";
+                    }
+
                     if (deviceKey == DataProvider.DeviceKey_MDS)
                     {
                         panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_MDS);
@@ -135,7 +155,7 @@ namespace Scada.MainVision
         {
             GraphView graphView = new GraphView();
             graphView.Interval = 30;
-            if (dataListener.DeviceKey == "scada.naidevice")
+            if (dataListener.DeviceKey == DataProvider.DeviceKey_NaI)
             {
                 graphView.Interval = 60 * 5;
             }
@@ -166,7 +186,7 @@ namespace Scada.MainVision
         {
             SearchGraphView graphView = new SearchGraphView();
             graphView.Interval = 30;
-            if (dataListener.DeviceKey == "scada.naidevice")
+            if (dataListener.DeviceKey == DataProvider.DeviceKey_NaI)
             {
                 graphView.Interval = 60 * 5;
             }

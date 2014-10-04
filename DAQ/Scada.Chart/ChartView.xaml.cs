@@ -91,8 +91,6 @@ namespace Scada.Chart
 
         private DateTime GetBaseTime(DateTime startTime)
         {
-            return startTime;
-            /*
             // 目前只支持30秒 和 5分钟两种间隔
             Debug.Assert(this.Interval == 30 || this.Interval == 60 * 5 || this.Interval == 0);
 
@@ -108,15 +106,82 @@ namespace Scada.Chart
                 baseTime = new DateTime(startTime.Year, startTime.Month, startTime.Day, startTime.Hour, min, 0);
             }
             return baseTime;
-             * */
         }
 
-        private void UpdateTimeAxisGraduation(DateTime beginTime, DateTime endTime, int days, out double graduation, out int graduationCount)
+        private void UpdateTimeAxisGraduation(DateTime beginTime, DateTime endTime, int days, bool completedDays, out double graduation, out int graduationCount)
         {
             this.Graduations.Clear();
-
+            this.GraduationTimes.Clear();
+            this.TimeAxis.Children.Clear();
             graduation = 0.0;
             graduationCount = 0;
+
+            if (!completedDays && days <= 1)
+            {
+                int hours = GetHours(beginTime, endTime);
+                hours += 2;
+                if (hours > 24) 
+                    hours = 24;
+                const double TimeLabelOffset = 9.0;
+                graduation = 4.0 * 24 / hours;
+                graduationCount = 12;
+
+                this.Interval = 30;
+                
+                for (int i = 0; i < hours * 10; i++)
+                {
+                    // One interval per 5px
+                    double x = i * graduation;
+                    Line scaleLine = new Line();
+
+                    this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
+
+                    bool isWholePoint = (i % 10 == 0);
+                    scaleLine.X1 = scaleLine.X2 = x;
+                    scaleLine.Y1 = 0;
+                    scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
+                    scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
+                    this.TimeAxis.Children.Add(scaleLine);
+
+                    TextBlock timeLabel = null;
+                    if (this.GraduationTimes.ContainsKey(i))
+                    {
+                        timeLabel = this.GraduationTimes[i].Text;
+                    }
+                    else
+                    {
+                        timeLabel = new TextBlock();
+                        timeLabel.Foreground = Brushes.Black;
+                        timeLabel.FontWeight = FontWeights.Light;
+                        timeLabel.FontSize = 9;
+
+                        double pos = i * graduation;
+                        GraduationTimes.Add(i, new GraduationTime()
+                        {
+                            Text = timeLabel,
+                            Pos = pos
+                        });
+
+                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
+                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                        this.TimeAxis.Children.Add(timeLabel);
+                    }
+
+                    if (isWholePoint)
+                    {
+                        string displayTime = this.GetFormatTime2(this.currentBaseTime, i * graduationCount, this.Interval);
+                        if (timeLabel != null)
+                        {
+                            timeLabel.Text = displayTime;
+                        }
+                    }
+                }
+
+
+                return;
+            }
+
             if (days <= 1)
             {
                 const double TimeLabelOffset = 9.0;
@@ -174,7 +239,6 @@ namespace Scada.Chart
                     }
                 }
 
-                this.TimeAxis.UpdateLayout();
             }
             else if (days == 2)
             {
@@ -261,12 +325,18 @@ namespace Scada.Chart
             return (int)(seconds / 3600 / 24);
         }
 
-        public void UpdateTimeAxis(DateTime beginTime, DateTime endTime, out double graduation, out int graduationCount)
+        public static int GetHours(DateTime beginTime, DateTime endTime)
+        {
+            long seconds = (endTime.Ticks - beginTime.Ticks) / 10000000;
+            return (int)(seconds / 3600);
+        }
+
+        public void UpdateTimeAxis(DateTime beginTime, DateTime endTime, bool completedDays, out double graduation, out int graduationCount)
         {
             int days = GetDays(beginTime, endTime);
             DateTime baseTime = this.GetBaseTime(beginTime);
             this.currentBaseTime = baseTime;
-            this.UpdateTimeAxisGraduation(beginTime, endTime, days, out graduation, out graduationCount);
+            this.UpdateTimeAxisGraduation(beginTime, endTime, days, completedDays, out graduation, out graduationCount);
         }
 
         // TODO: Remove
@@ -330,6 +400,20 @@ namespace Scada.Chart
                 {
                     return string.Format("{0:d2}:{1:d2}", dt.Minute, dt.Second);
                 }
+            }
+            return "";
+        }
+
+        private string GetFormatTime2(DateTime baseTime, int index, int interval)
+        {
+            DateTime dt = baseTime.AddSeconds(index * interval);
+            if (interval == 60 * 5)
+            {
+                return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+            }
+            else if (interval == 30)
+            {
+                return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
             }
             return "";
         }

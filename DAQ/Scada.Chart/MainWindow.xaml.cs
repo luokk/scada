@@ -42,7 +42,9 @@ namespace Scada.Chart
 
         }
 
-
+        private void ButtonReset(object sender, RoutedEventArgs e)
+        {
+        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {

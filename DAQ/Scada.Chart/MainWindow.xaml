@@ -8,10 +8,16 @@
             <RowDefinition Height="25"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
 
-        <Button Grid.Row="0" Click="Button_Click"></Button>
-
-        <m:ChartView Grid.Row="1" x:Name="ChartView" Width="1000">
+        <Button Grid.Row="0" Click="Button_Click">Show</Button>
+        <Button Grid.Row="0" Grid.Column="1" Click="ButtonReset">Reset</Button>
+        
+        <m:ChartView Grid.Row="1" x:Name="ChartView" Grid.ColumnSpan="2" Width="1000">
             
         </m:ChartView>
     </Grid>

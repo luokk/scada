@@ -57,6 +57,8 @@ namespace Scada.Chart
 
         private ChartView chartView;
 
+        private string currentValueKey;
+
         public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
         {
             this.data = data;
@@ -74,6 +76,7 @@ namespace Scada.Chart
                 return;
             }
 
+            this.currentValueKey = valueKey;
             this.UpdateTimeAxis(this.BeginTime, this.EndTime);
             this.RenderCurve(this.BeginTime, this.EndTime, valueKey);
             
@@ -81,7 +84,7 @@ namespace Scada.Chart
 
         private void RenderCurve(DateTime beginTime, DateTime endTime, string valueKey)
         {
-            
+            this.ClearCurvePoints();
             foreach (var item in this.data)
             {
                 DateTime t = DateTime.Parse((string)item[this.timeKey]);
@@ -93,11 +96,11 @@ namespace Scada.Chart
             }
         }
 
-        private void UpdateTimeAxis(DateTime beginTime, DateTime endTime)
+        private void UpdateTimeAxis(DateTime beginTime, DateTime endTime, bool completedDays = true)
         {
             double graduation;
             int graduationCount;
-            this.chartView.UpdateTimeAxis(beginTime, endTime, out graduation, out graduationCount);
+            this.chartView.UpdateTimeAxis(beginTime, endTime, completedDays, out graduation, out graduationCount);
 
             this.Graduation = graduation;
             this.GraduationCount = graduationCount;
@@ -142,6 +145,26 @@ namespace Scada.Chart
             this.ClearCurvePoints();
         }
 
-        
+        private DateTime GetTimeByX(double x)
+        {
+            if (this.Interval == 0)
+            {
+                this.Interval = 30;
+            }
+            double s = x * this.GraduationCount * this.Interval / this.Graduation;
+            return this.BeginTime.AddSeconds(s);
+        }
+
+        internal void UpdateRange(double beginPointX, double endPointX)
+        {
+            DateTime beginTime = this.GetTimeByX(beginPointX);
+            DateTime endTime = this.GetTimeByX(endPointX);
+
+            this.BeginTime = beginTime;
+            this.EndTime = endTime;
+            this.Clear();
+            this.UpdateTimeAxis(beginTime, endTime, false);
+            this.RenderCurve(beginTime, endTime, this.currentValueKey);
+        }
     }
 }
