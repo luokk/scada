@@ -35,11 +35,6 @@ namespace Scada.Chart
 
         private void Window_Loaded_1(object sender, RoutedEventArgs e)
         {
-            this.view2 = ChartView.SetCurveView("b", "B");
-            this.view2.Max = 100;
-            this.view2.Min = -100;
-
-
         }
 
         private void ButtonReset(object sender, RoutedEventArgs e)
@@ -48,11 +43,13 @@ namespace Scada.Chart
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            this.ChartView.SetValueRange(-110, 110);
+
             DateTime t = DateTime.Parse("2014-10-02");
             List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
             for (long i = 0; i <= 3600 * 22; i += 30)
             {
-                if (i > 3600 * 4 && i < 3600 * 6)
+                if (i > 3600 * 4.2 && i < 3600 * 6.3)
                 {
                     var item1 = new Dictionary<string, object>(3);
                     item1.Add("time", t.AddSeconds(i).ToString());

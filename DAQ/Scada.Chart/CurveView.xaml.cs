@@ -78,17 +78,18 @@ namespace Scada.Chart
 
         private TextBlock valueLabel;
 
+        public double Min { set; get; }
+
+        public double Max { set; get; }
+
+        private double paddingTop;
+
+        private double paddingMargin;
+
 
         public ChartView ChartView { get; set; }
 
         const int MaxVisibleCount = 14;
-
-
-        private Dictionary<int, GraduationLine> Graduations
-        {
-            get;
-            set;
-        }
 
         private Dictionary<int, GraduationText> GraduationTexts
         {
@@ -99,8 +100,9 @@ namespace Scada.Chart
         public CurveView()
         {
             InitializeComponent();
-            this.Graduations = new Dictionary<int, GraduationLine>();
-            this.GraduationTexts = new Dictionary<int, GraduationText>();
+            //this.GraduationTexts = new Dictionary<int, GraduationText>();
+            this.paddingTop = 2.0;
+            this.paddingMargin = 2.0;
         }
 
         private void CurveViewLoaded(object sender, RoutedEventArgs e)
@@ -161,7 +163,7 @@ namespace Scada.Chart
                 }
                 
                 Line l = new Line();
-                this.Graduations.Add(i, new GraduationLine() { Line = l, Pos = y });
+
                 l.Y1 = l.Y2 = y;
                 l.X1 = (i % 5 != 0) ? scaleWidth - Charts.ScaleLength : scaleWidth - Charts.MainScaleLength;
                 l.X2 = scaleWidth;
@@ -177,10 +179,12 @@ namespace Scada.Chart
                     t.Foreground = Brushes.Black;
                     t.FontSize = 9;
                     double pos = (double)y - 10;
+                    /*
                     this.GraduationTexts.Add(textCount, new GraduationText()
                     {
                         Text = t, Pos = pos
                     });
+                     */
 
                     if (this.Max > 10)
                     {
@@ -400,28 +404,6 @@ namespace Scada.Chart
             po = new Point(p.X, this.Convert(p.Y));
         }
 
-
-
-        public UIElement View
-        {
-            get
-            {
-                return (UIElement)this.CanvasView;
-            }
-        }
-
-        public double Min
-        {
-            set;
-            get;
-        }
-
-        public double Max
-        {
-            set;
-            get;
-        }
-
         private void SetDisplayName(string displayName)
         {
             const double Top = 12.0;
@@ -475,10 +457,14 @@ namespace Scada.Chart
             this.rangeSelectionRect.Width = 0;
 
             this.rangeSelectionRect.Visibility = Visibility.Visible;
+
+            var targetElement = e.Source as IInputElement;
+            targetElement.CaptureMouse();
         }
 
         private void CanvasView_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            Mouse.Capture(null);
             if (this.mouseLeftButtonDown)
             {
                 this.DoRenderUpdate();

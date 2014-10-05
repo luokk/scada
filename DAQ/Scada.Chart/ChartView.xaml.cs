@@ -27,6 +27,8 @@ namespace Scada.Chart
 
         public const double Offset = 8.0;
 
+        public const double CommonGraduation = 4.0;
+
         struct GraduationLine
         {
             public Line Line
@@ -119,16 +121,17 @@ namespace Scada.Chart
             if (!completedDays && days <= 1)
             {
                 int hours = GetHours(beginTime, endTime);
-                hours += 2;
+                
                 if (hours > 24) 
                     hours = 24;
                 const double TimeLabelOffset = 9.0;
-                graduation = 4.0 * 24 / hours;
-                graduationCount = 12;
+                graduation = 9.0 * 24 / hours;
+                graduationCount = 30;
 
                 this.Interval = 30;
                 
-                for (int i = 0; i < hours * 10; i++)
+
+                for (int i = 0; i <= hours * 4; i++)
                 {
                     // One interval per 5px
                     double x = i * graduation;
@@ -136,7 +139,7 @@ namespace Scada.Chart
 
                     this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
 
-                    bool isWholePoint = (i % 10 == 0);
+                    bool isWholePoint = (i % 4 == 0);
                     scaleLine.X1 = scaleLine.X2 = x;
                     scaleLine.Y1 = 0;
                     scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
@@ -185,11 +188,11 @@ namespace Scada.Chart
             if (days <= 1)
             {
                 const double TimeLabelOffset = 9.0;
-                graduation = 4.0;
-                graduationCount = 12;
+                graduation = 9.0; // 15 min
+                graduationCount = 30;
 
                 this.Interval = 30;
-                for (int i = 0; i < 240; i++)
+                for (int i = 0; i <= 24 * 4; i++)
                 {
                     // One interval per 5px
                     double x = i * graduation;
@@ -197,7 +200,7 @@ namespace Scada.Chart
 
                     this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
 
-                    bool isWholePoint = (i % 10 == 0);
+                    bool isWholePoint = (i % 4 == 0);
                     scaleLine.X1 = scaleLine.X2 = x;
                     scaleLine.Y1 = 0;
                     scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
@@ -246,7 +249,7 @@ namespace Scada.Chart
                 graduationCount = 24;
 
                 this.Interval = 30;
-                for (int i = 0; i < 240; i++)
+                for (int i = 0; i <= 240; i++)
                 {
                     // One interval per 5px
                     double x = i * graduation;
@@ -339,15 +342,6 @@ namespace Scada.Chart
             this.UpdateTimeAxisGraduation(beginTime, endTime, days, completedDays, out graduation, out graduationCount);
         }
 
-        // TODO: Remove
-        public CurveView SetCurveView(string curveViewName, string displayName, double height = 200.0)
-        {
-            //this.CurveView.CurveViewName = curveViewName;
-            //this.CurveView.Height = height + ChartView.ViewGap;
-
-            return this.CurveView;
-        }
-
         public void SetValueRange(double min, double max)
         {
             this.CurveView.Min = min;
@@ -371,7 +365,7 @@ namespace Scada.Chart
             string timeLabel = string.Empty;
             CurveView curveView = (CurveView)this.CurveView;
 
-            Point point = e.GetPosition((UIElement)curveView.View);
+            Point point = e.GetPosition((UIElement)curveView.CanvasView);
             double x = point.X;
 
             if (!timed && x >= 0)

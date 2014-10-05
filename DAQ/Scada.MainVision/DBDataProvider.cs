@@ -49,7 +49,7 @@ namespace Scada.MainVision
 
 
         // ?
-        private Dictionary<string, object> dataCache = new Dictionary<string, object>();
+        // private Dictionary<string, object> dataCache = new Dictionary<string, object>();
 
 
         // <DeviceKey, dict[data]>
@@ -92,7 +92,7 @@ namespace Scada.MainVision
             this.dataListeners = new Dictionary<string, DBDataCommonListerner>(30);
 
             // 192.168.1.24
-            this.timelineSource = new List<Dictionary<string, object>>();
+            // this.timelineSource = new List<Dictionary<string, object>>();
         }
 
         public MySqlConnection GetMySqlConnection()
@@ -157,11 +157,13 @@ namespace Scada.MainVision
             }
         }
 
+        /*
         public void RemoveFilters()
         {
             this.filters.Clear();
         }
 
+        
         public void SetFilter(string key, object value)
         {
             if (!this.filters.ContainsKey(key))
@@ -169,10 +171,10 @@ namespace Scada.MainVision
                 this.filters.Add(key, value);
             }
         }
+        */
 
-        // For Panels.
-        // Get Latest data,
-        // No Notify.
+        // For DevicePage.
+        // Get Latest data ( 1 Entry ),
         public void RefreshTimeNow(MySqlCommand cmd)
         {
             this.latestData.Clear();

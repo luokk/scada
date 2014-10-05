@@ -150,7 +150,7 @@ namespace Scada.MainVision
             return listView;
         }
 
-        // Real time graph
+        // RealTime GraphView (In f15 branch, only MDS and AIS has RealTime Graph...)
         public GraphView ShowGraphView(ListViewPanel panel, DataListener dataListener)
         {
             GraphView graphView = new GraphView();
@@ -166,10 +166,9 @@ namespace Scada.MainVision
 
             foreach (var columnInfo in columnInfoList)
             {
-                // Time would be deal as a Chart.
                 if (columnInfo.BindingName.ToLower() == "time")
                 {
-                    continue; // Do nothing would be OK.
+                    continue;
                 }
 
                 if (columnInfo.DisplayInChart)

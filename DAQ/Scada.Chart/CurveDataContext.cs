@@ -155,16 +155,21 @@ namespace Scada.Chart
             return this.BeginTime.AddSeconds(s);
         }
 
+        private DateTime GetRegularTime(DateTime t, int hours = 0)
+        {
+            return new DateTime(t.Year, t.Month, t.Day, t.Hour, 0, 0).AddHours(hours);
+        }
+
         internal void UpdateRange(double beginPointX, double endPointX)
         {
             DateTime beginTime = this.GetTimeByX(beginPointX);
             DateTime endTime = this.GetTimeByX(endPointX);
 
-            this.BeginTime = beginTime;
-            this.EndTime = endTime;
+            this.BeginTime = this.GetRegularTime(beginTime);
+            this.EndTime = this.GetRegularTime(endTime, 1);
             this.Clear();
-            this.UpdateTimeAxis(beginTime, endTime, false);
-            this.RenderCurve(beginTime, endTime, this.currentValueKey);
+            this.UpdateTimeAxis(this.BeginTime, this.EndTime, false);
+            this.RenderCurve(this.BeginTime, this.EndTime, this.currentValueKey);
         }
     }
 }
