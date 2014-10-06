@@ -82,39 +82,40 @@ namespace Scada.MainVision
                         panel.GraphSearchView = this.ShowSearchGraphView(panel, dataListener);
                     }
 
-                    if (deviceKey == DataProvider.DeviceKey_MDS || deviceKey == DataProvider.DeviceKey_AIS)
+                    if (deviceKey == DataProvider.DeviceKey_MDS)
                     {
                         panel.HasRealTimeChart = true;
                         panel.GraphView = this.ShowGraphView(panel, dataListener);
-                    }
-
-                    if (deviceKey == DataProvider.DeviceKey_MDS || deviceKey == DataProvider.DeviceKey_AIS)
-                    {
                         panel.selectedField = "flow";
-                    }
-                    else if (deviceKey == DataProvider.DeviceKey_Weather)
-                    {
-                        panel.selectedField = "temperature";
-                    }
-                    else if (deviceKey == DataProvider.DeviceKey_NaI || deviceKey == DataProvider.DeviceKey_Hpic)
-                    {
-                        panel.selectedField = "doserate";
-                    }
-
-                    if (deviceKey == DataProvider.DeviceKey_MDS)
-                    {
                         panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_MDS);
                     }
                     else if (deviceKey == DataProvider.DeviceKey_AIS)
                     {
+                        panel.HasRealTimeChart = true;
+                        panel.GraphView = this.ShowGraphView(panel, dataListener);
+                        panel.selectedField = "flow";
                         panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_AIS);
+                    }
+                    else if (deviceKey == DataProvider.DeviceKey_Weather)
+                    {
+                        panel.FieldSelect.Visibility = Visibility.Visible;
+                        panel.FieldSelect.SelectedIndex = 0;
+                        panel.selectedField = "temperature";
+                    }
+                    else if (deviceKey == DataProvider.DeviceKey_Hpic)
+                    {
+                        panel.IntervalSelect.Visibility = Visibility.Visible;
+                        panel.IntervalSelect.SelectedIndex = 0;
+                        panel.selectedField = "doserate";
                     }
                     else if (deviceKey == DataProvider.DeviceKey_NaI)
                     {
                         panel.SetupContextMenu((ListView)panel.ListView);
                         panel.SetupContextMenu((ListView)panel.SearchView);
                         panel.EnergyPanel = this.ShowEnergyView(DataProvider.DeviceKey_NaI);
+                        panel.selectedField = "doserate";
                     }
+
                 }
 
                 if (this.currentPanel != null)

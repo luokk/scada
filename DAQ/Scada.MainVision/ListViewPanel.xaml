@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:c="clr-namespace:Microsoft.Windows.Controls;assembly=WPFToolkit" 
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="600" Loaded="ContentLoaded" Margin="0,0,5,0">
+             d:DesignHeight="300" d:DesignWidth="700" Loaded="ContentLoaded" Margin="0,0,5,0">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -121,8 +121,20 @@
                                 
                                     <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0"
                                             Style="{StaticResource ButtonKey}" Click="SaveChart">保存曲线</Button>
-                                    <ComboBox x:Name="FieldSelect">
-                                        
+                                    <ComboBox x:Name="FieldSelect" Visibility="Collapsed">
+                                        <ComboBox.Items>
+                                            <Label>温度</Label>
+                                            <Label>气压</Label>
+                                            <Label>风速</Label>
+                                        </ComboBox.Items>
+                                    </ComboBox>
+
+                                    <ComboBox x:Name="IntervalSelect" Margin="5,0,5,0" Visibility="Collapsed">
+                                        <ComboBox.Items>
+                                            <Label>5分钟均值</Label>
+                                            <Label>1小时均值</Label>
+                                            <Label>日均值</Label>
+                                        </ComboBox.Items>
                                     </ComboBox>
                                 </StackPanel>
 
