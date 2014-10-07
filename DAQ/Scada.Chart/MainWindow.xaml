@@ -7,6 +7,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         
         <Grid.ColumnDefinitions>
@@ -18,7 +19,11 @@
         <Button Grid.Row="0" Grid.Column="1" Click="ButtonReset">Reset</Button>
         
         <m:ChartView Grid.Row="1" x:Name="ChartView" Grid.ColumnSpan="2" Width="1000">
-            
         </m:ChartView>
+
+        <m:EnergyChartView Grid.Row="2" x:Name="EnergyChartView"
+                           Grid.ColumnSpan="2" Background="Black"
+                           Width="1000">
+        </m:EnergyChartView>
     </Grid>
 </Window>

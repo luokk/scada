@@ -51,8 +51,9 @@ namespace Scada.MainVision
 
                     if (!data.ContainsKey(nuclideKey))
                     {
-                        data.Add(nuclideKey, doserate);
-                        data.Add(indicationKey, indication);
+                        // data.Add(nuclideKey, doserate);
+                        // data.Add(indicationKey, indication);
+                        data.Add(nuclideKey, string.Format("{0} ({1})", doserate, indication));
                     }
                     else
                     {

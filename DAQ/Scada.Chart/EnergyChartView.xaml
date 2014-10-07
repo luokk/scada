@@ -4,39 +4,29 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Scada.Chart"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="300"  MouseMove="MainViewMouseMove">
     <Border BorderBrush="LightGray"  BorderThickness="1, 1, 1, 1">
-    <Grid x:Name="MainView" Background="#F8F8F8">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="30"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"></RowDefinition>
-        </Grid.RowDefinitions>
-        
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                    Orientation="Vertical" VerticalAlignment="Top">
-                <Grid x:Name="ChartContainer"
-                    
+        <Grid x:Name="MainView">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <local:EnergyCurveView Grid.Row="0" Grid.Column="0"
+                    x:Name="CurveView"
                     HorizontalAlignment="Stretch" 
                     VerticalAlignment="Bottom"
                     MouseMove="MainViewMouseMove"
                     MouseLeftButtonDown="CanvasViewMouseLeftButtonEventHandler"
                     MouseLeftButtonUp="CanvasViewMouseLeftButtonEventHandler" 
-                    MouseWheel="ZoomHandler"
-                    >
-                    <local:EnergyCurveView x:Name="CurveView">
-                        
-                    </local:EnergyCurveView>
-                </Grid>
-            
-                <Canvas x:Name="PointAxis" Grid.Column="1" Grid.Row="2" Background="#F8F8F8" Loaded="PointAxisLoaded"></Canvas>
+                    MouseWheel="ZoomHandler">
 
-            </StackPanel>
-        <!-- -->
-        
-    </Grid>
+            </local:EnergyCurveView>
+
+
+        </Grid>
     </Border>
 </UserControl>

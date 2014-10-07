@@ -42,6 +42,7 @@ namespace Scada.MainVision
             this.mdsPane.Initialize(new string[] { "最近采样时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
             this.aisPane.Initialize(new string[] { "最近采样时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
             this.dwdPane.Initialize(new string[] { "最近采集时间", "采样状态" });
+            this.rainPane.Initialize(new string[] { "最近采集时间", "降雨状态" });
             this.shelterPane.Initialize(new string[] { "最近采集时间", "市电状态", "备电时间", "舱内温度" });
 
 
@@ -70,6 +71,7 @@ namespace Scada.MainVision
             UpdatePanel_AIS(this.aisPane);
             UpdatePanel_Shelter(this.shelterPane);
             UpdatePanel_DWD(this.dwdPane);
+            UpdatePanel_Rain(this.rainPane);
         }
 
         private void UpdatePanel_HPIC(SmartDataPane panel)
@@ -123,11 +125,10 @@ namespace Scada.MainVision
                 string nuclideKey = nuclide.ToLower();
                 if (d.ContainsKey(nuclideKey))
                 {
-                    string indicationKey = string.Format("Ind({0})", nuclideKey);
-                    string indication = (string)d[indicationKey];
-                    if (indication == "100")
+                    // string indicationKey = string.Format("Ind({0})", nuclideKey);
+                    string indication = (string)d[nuclideKey];
+                    if (indication.IndexOf("(100)") > 0)
                     {
-                        
                         nuclideMsgs[i / 3] += string.Format("{0}, ", nuclide);
                         i++;
                     }
@@ -330,6 +331,22 @@ namespace Scada.MainVision
             string isLidOpen = (string)d["islidopen"];
             string LidOpenMsg = (isLidOpen == "1") ? "雨水采集" : "沉降灰采集";
             panel.SetData(Get(d, "time", ""), LidOpenMsg);
+        }
+
+        private void UpdatePanel_Rain(SmartDataPane panel)
+        {
+            var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Dwd);
+            if (d == null)
+            {
+                return;
+            }
+            if (!d.ContainsKey("ifrain"))
+            {
+                return;
+            }
+            string ifRain = (string)d["ifrain"];
+            string ifRainStr = (ifRain == "1") ? "降雨" : "未降雨";
+            panel.SetData(Get(d, "time", ""), ifRainStr);
         }
 
         private static double ConvertDouble(double d, int n)

@@ -110,7 +110,8 @@ namespace Scada.Chart
             return baseTime;
         }
 
-        private void UpdateTimeAxisGraduation(DateTime beginTime, DateTime endTime, int days, bool completedDays, out double graduation, out int graduationCount)
+        // TOO LONG
+        private void UpdateTimeAxisGraduations(DateTime beginTime, DateTime endTime, int days, bool completedDays, out double graduation, out int graduationCount)
         {
             this.Graduations.Clear();
             this.GraduationTimes.Clear();
@@ -299,26 +300,66 @@ namespace Scada.Chart
                     }
                 }
             }
+            else if (days >= 3)
+            {
+                graduation = 9.0 / days;
+                graduationCount = 30;
+                this.Interval = 30;
+                int parts = days * 24 * 4;
+                for (int i = 0; i <= parts; i++)
+                {
+                    // One interval per 5px
+                    double x = i * graduation;
+                    Line scaleLine = new Line();
 
+                    this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
+
+                    bool isWholePoint = (i % 16 == 0);
+                    scaleLine.X1 = scaleLine.X2 = x;
+                    scaleLine.Y1 = 0;
+                    scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
+                    scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
+                    this.TimeAxis.Children.Add(scaleLine);
+
+                    TextBlock timeLabel = null;
+                    if (this.GraduationTimes.ContainsKey(i))
+                    {
+                        timeLabel = this.GraduationTimes[i].Text;
+                    }
+                    else
+                    {
+                        timeLabel = new TextBlock();
+                        timeLabel.Foreground = Brushes.Black;
+                        timeLabel.FontWeight = FontWeights.Light;
+                        timeLabel.FontSize = 9;
+
+                        double pos = i * graduation;
+                        GraduationTimes.Add(i, new GraduationTime()
+                        {
+                            Text = timeLabel,
+                            Pos = pos
+                        });
+
+                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                        this.TimeAxis.Children.Add(timeLabel);
+                    }
+
+                    if (isWholePoint)
+                    {
+                        string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
+                        if (timeLabel != null)
+                        {
+                            timeLabel.Text = displayTime;
+                        }
+                    }
+                }
+            }
 
             this.currentGraduation = graduation;
             this.currentGraduationCount = graduationCount;
             return;
-                /*
-            else if (days == 2)
-            {
-
-            }
-            else if (days == 3)
-            {
-
-            }
-            else if (days > 3)
-            {
-
-            }
-                 */
-
             
         }
 
@@ -339,7 +380,7 @@ namespace Scada.Chart
             int days = GetDays(beginTime, endTime);
             DateTime baseTime = this.GetBaseTime(beginTime);
             this.currentBaseTime = baseTime;
-            this.UpdateTimeAxisGraduation(beginTime, endTime, days, completedDays, out graduation, out graduationCount);
+            this.UpdateTimeAxisGraduations(beginTime, endTime, days, completedDays, out graduation, out graduationCount);
         }
 
         public void SetValueRange(double min, double max)
@@ -470,13 +511,34 @@ namespace Scada.Chart
         public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
         {
             this.curveDataContext.SetDataSource(data, valueKey, timeKey);
+            this.UpdateCurve();
         }
+
 
         public void AddPoint(DateTime time, object value)
         {
             this.curveDataContext.AddPoint(time, value);
         }
 
+        internal void UpdateCurve()
+        {
+            this.CurveView.UpdateCurve();
+        }
 
+        public void SetRealtime()
+        {
+            this.CurveView.RealTime = true;
+        }
+
+        public void HideTimeAxis()
+        {
+            this.TimeAxis.Visibility = Visibility.Collapsed;
+            this.TimeAxisRow.Height = new GridLength(0);
+        }
+
+        public void HideResetButton()
+        {
+            this.CurveView.HideResetButton();
+        }
     }
 }

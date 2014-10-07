@@ -60,6 +60,8 @@ namespace Scada.Chart
 
         private bool init = false;
 
+        public bool RealTime { get; set; }
+
         private Line timeLine = new Line();
 
         private Path curve = null;
@@ -100,7 +102,7 @@ namespace Scada.Chart
         public CurveView()
         {
             InitializeComponent();
-            //this.GraduationTexts = new Dictionary<int, GraduationText>();
+            this.RealTime = false;
             this.paddingTop = 2.0;
             this.paddingMargin = 2.0;
         }
@@ -223,7 +225,10 @@ namespace Scada.Chart
         private void AddCurveLine()
         {
             this.curve = new Path();
-            this.curve.Data = this.lines;
+            if (this.RealTime)
+            {
+                this.curve.Data = this.lines;
+            }
 
             this.curve.StrokeThickness = 1;
             Color curveColor = Color.FromRgb(00, 0x7A, 0xCC);
@@ -260,8 +265,22 @@ namespace Scada.Chart
         /// <param name="point"></param>
         private void AppendCurvePointHandler(Point point)
         {
-            if (this.lastPoint == default(Point) || point == default(Point))
+            if (this.lastPoint == default(Point))
             {
+                this.lastPoint = point;
+                return;
+            }
+
+            if (point == default(Point))
+            {
+                /*
+                if (this.lastPoint != default(Point))
+                {
+                    Point p;
+                    this.Convert(this.lastPoint, out p);
+                    LineGeometry pline = new LineGeometry(p, p);
+                    this.lines.Children.Add(pline);
+                }*/
                 this.lastPoint = point;
                 return;
             }
@@ -502,11 +521,27 @@ namespace Scada.Chart
         {
             double beginPointX = Math.Min(this.selBeginPoint.X, this.selEndPoint.X);
             double endPointX = Math.Max(this.selBeginPoint.X, this.selEndPoint.X);
-            if (endPointX > beginPointX)
+            if (endPointX - beginPointX > 10)
             {
                 this.dataContext.UpdateRange(beginPointX, endPointX);
             }
         }
 
+        internal void UpdateCurve()
+        {
+            this.curve.Data = this.lines;
+        }
+
+        protected void OnResetClick(object sender, RoutedEventArgs e)
+        {
+            this.dataContext.Reset();
+        }
+
+
+
+        internal void HideResetButton()
+        {
+            this.ResetButton.Visibility = System.Windows.Visibility.Hidden;
+        }
     }
 }

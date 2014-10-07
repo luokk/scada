@@ -40,6 +40,9 @@
         <m:SmartDataPane x:Name="naiPane" Title="NaI谱仪" Canvas.Left="345" Canvas.Top="35">
         </m:SmartDataPane>
 
+        <m:SmartDataPane x:Name="rainPane" Title="感雨器" Canvas.Left="345" Canvas.Top="235">
+        </m:SmartDataPane>
+        
         <m:SmartDataPane x:Name="mdsPane" Title="超大流量气溶胶采样器" Canvas.Left="680" Canvas.Top="35">
         </m:SmartDataPane>
 

@@ -227,10 +227,16 @@ namespace Scada.Controls
         public void SetupContextMenu(ListView listView)
         {
             ContextMenu cm = new ContextMenu();
-            MenuItem mi = new MenuItem();
-            mi.Header = "显示能谱图";
-            mi.Click += this.ShowMenuItemClick;
-            cm.Items.Add(mi);
+            MenuItem mi1 = new MenuItem();
+            mi1.Header = "显示能谱图";
+            mi1.Click += this.ShowMenuItemClick;
+            cm.Items.Add(mi1);
+
+            MenuItem mi2 = new MenuItem();
+            mi2.Header = "比较能谱图";
+            mi2.Click += this.CompareMenuItemClick;
+            cm.Items.Add(mi2);
+
             listView.ContextMenu = cm;
         }
 
@@ -249,6 +255,11 @@ namespace Scada.Controls
                     }
                 }
             }
+        }
+
+        void CompareMenuItemClick(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         void OnListViewMouseRightButton(object sender, MouseButtonEventArgs e)
@@ -510,8 +521,14 @@ namespace Scada.Controls
             {
 
                 searchListView.ItemsSource = this.searchData;
-                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
-                
+                if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+                {
+                    ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                }
+                else
+                {
+                    ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                }
             }
         }
 

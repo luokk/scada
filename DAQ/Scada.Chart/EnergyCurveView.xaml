@@ -4,32 +4,34 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="200"
+             d:DesignHeight="400" d:DesignWidth="600"
              Loaded="CurveViewLoaded" MouseMove="CanvasViewMouseMove">
     
         <Grid x:Name="MainView" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="6"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="4"></RowDefinition>
-            </Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
             
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="30"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <!-- Canvas -->
-            <Canvas x:Name="Graduation" Grid.Row="1" Grid.Column="0" Background="#F8F8F8">
+            <Canvas x:Name="Graduation" Grid.Row="1" Grid.Column="0" 
+                    Background="#F8F8F8">
             </Canvas>
 
-            <Border BorderBrush="Blue" BorderThickness="0"
-                    Grid.Row="1" Grid.Column="1" 
-                    VerticalAlignment="Bottom">
-                <Canvas x:Name="CanvasView" Background="#F8F8F8"
-                    MouseMove="CanvasViewMouseMove" VerticalAlignment="Bottom">
-                </Canvas>
-            </Border>
+            <Canvas x:Name="CanvasView" Grid.Row="1" Grid.Column="1"
+                    Background="#F8F8F8"
+                    MouseMove="CanvasViewMouseMove">
+            </Canvas>
 
-        </Grid>
+
+            <Canvas x:Name="PointsAxis" Grid.Row="2" Grid.ColumnSpan="2" 
+                    Background="#F8F8F8">
+            </Canvas>
+    </Grid>
     
 </UserControl>

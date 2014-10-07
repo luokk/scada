@@ -191,14 +191,14 @@ namespace Scada.Chart
         // !
         public EnergyCurveView AddCurveView(string curveViewName, string displayName)
         {
-            EnergyCurveView curveView = new EnergyCurveView(this);
-            curveView.CurveViewName = curveViewName;
-            curveView.PointAxisScale = this.PointAxisScale;
-            curveView.Height = 400;
+            //EnergyCurveView curveView = new EnergyCurveView(this);
+            this.CurveView.CurveViewName = curveViewName;
+            this.CurveView.PointAxisScale = this.PointAxisScale;
+            this.CurveView.Height = 400;
             
-            this.ChartContainer.Children.Add(curveView);
+            //this.ChartContainer.Children.Add(curveView);
             //this.ChartContainer.Height= 500;
-            return curveView;
+            return this.CurveView;
         }
 
         public void ClearPoints()

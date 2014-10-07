@@ -68,7 +68,7 @@ namespace Scada.Chart
 
         private double currentScale = 1.0;
 
-        private CurveDataContext dataContext;
+        //private CurveDataContext dataContext;
 
         private double centerX = 0.0;
 
@@ -84,8 +84,6 @@ namespace Scada.Chart
 
         private double ZeroOffset = 10.0;
 
-
-        private List<KeyValuePair<DateTime, double>> dataList = new List<KeyValuePair<DateTime, double>>();
 
         public double CenterX
         {

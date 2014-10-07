@@ -1,8 +1,20 @@
 ﻿
+using Scada.Controls.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 using Scada.Chart;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace Scada.MainVision
@@ -10,7 +22,7 @@ namespace Scada.MainVision
     /// <summary>
     /// Interaction logic for GraphViewPanel.xaml in MainVision
     /// </summary>
-    public partial class SearchGraphView : System.Windows.Controls.UserControl
+    public partial class SearchHpicGraphView : System.Windows.Controls.UserControl
     {
         public const string TimeKey = "Time";
 
@@ -20,7 +32,7 @@ namespace Scada.MainVision
         
         private Dictionary<string, CurveDataContext> dataSources = new Dictionary<string, CurveDataContext>();
 
-        public SearchGraphView()
+        public SearchHpicGraphView()
         {
             InitializeComponent();
 
@@ -62,7 +74,9 @@ namespace Scada.MainVision
 
             ConfigItem item = entry.GetConfigItem(lineName);
             this.SearchChartView.SetValueRange(item.Min, item.Max);
+            this.SearchChartView.HideTimeAxis();
 
+            this.SearchChartView2.HideResetButton();
         }
 
         private void AddTimePoint(DateTime time, Dictionary<string, object> entry)

@@ -47,7 +47,7 @@ namespace Scada.Chart
 
             DateTime t = DateTime.Parse("2014-10-02");
             List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
-            for (long i = 0; i <= 3600 * 22; i += 30)
+            for (long i = 0; i <= 3600 * 24 * 1; i += 30)
             {
                 if (i > 3600 * 4.2 && i < 3600 * 6.3)
                 {

@@ -79,7 +79,14 @@ namespace Scada.MainVision
                     if (deviceKey != DataProvider.DeviceKey_Dwd && deviceKey != DataProvider.DeviceKey_Shelter)
                     {
                         panel.HasSerachDataChart = true;
-                        panel.GraphSearchView = this.ShowSearchGraphView(panel, dataListener);
+                        if (deviceKey == DataProvider.DeviceKey_Hpic)
+                        {
+                            panel.GraphSearchView = this.ShowSearchHpicGraphView(panel, dataListener);
+                        }
+                        else
+                        {
+                            panel.GraphSearchView = this.ShowSearchGraphView(panel, dataListener);
+                        }
                     }
 
                     if (deviceKey == DataProvider.DeviceKey_MDS)
@@ -184,6 +191,7 @@ namespace Scada.MainVision
         // Search graph
         public SearchGraphView ShowSearchGraphView(ListViewPanel panel, DataListener dataListener)
         {
+
             SearchGraphView graphView = new SearchGraphView();
             graphView.Interval = 30;
             if (dataListener.DeviceKey == DataProvider.DeviceKey_NaI)
@@ -191,6 +199,31 @@ namespace Scada.MainVision
                 graphView.Interval = 60 * 5;
             }
             /// graphView.AddDataListener(dataListener);
+
+            var columnInfoList = dataListener.GetColumnsInfo();
+            string deviceKey = dataListener.DeviceKey;
+
+            foreach (var columnInfo in columnInfoList)
+            {
+                // Time would be deal as a Chart.
+                if (columnInfo.BindingName.ToLower() == "time")
+                {
+                    continue;
+                }
+
+                if (columnInfo.DisplayInChart)
+                {
+                    graphView.AddLineName(deviceKey, columnInfo.BindingName, columnInfo.Header);
+                }
+            }
+
+            return graphView;
+        }
+
+        public SearchHpicGraphView ShowSearchHpicGraphView(ListViewPanel panel, DataListener dataListener)
+        {
+            SearchHpicGraphView graphView = new SearchHpicGraphView();
+            graphView.Interval = 30;
 
             var columnInfoList = dataListener.GetColumnsInfo();
             string deviceKey = dataListener.DeviceKey;

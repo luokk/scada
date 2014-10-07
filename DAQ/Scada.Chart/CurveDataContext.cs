@@ -85,14 +85,20 @@ namespace Scada.Chart
         private void RenderCurve(DateTime beginTime, DateTime endTime, string valueKey)
         {
             this.ClearCurvePoints();
+            DateTime lastTime = default(DateTime);
             foreach (var item in this.data)
             {
                 DateTime t = DateTime.Parse((string)item[this.timeKey]);
                 if (t >= beginTime && t <= endTime)
                 {
+                    if (lastTime != default(DateTime) && (t.Ticks - lastTime.Ticks) / 10000000 != this.Interval)
+                    {
+                        this.AddPoint(t, null);
+                    }
                     object v = item[valueKey];
                     this.AddPoint(t, v);
                 }
+                lastTime = t;
             }
         }
 
@@ -101,7 +107,7 @@ namespace Scada.Chart
             double graduation;
             int graduationCount;
             this.chartView.UpdateTimeAxis(beginTime, endTime, completedDays, out graduation, out graduationCount);
-
+            this.Interval = this.chartView.Interval;
             this.Graduation = graduation;
             this.GraduationCount = graduationCount;
         }
@@ -152,7 +158,11 @@ namespace Scada.Chart
                 this.Interval = 30;
             }
             double s = x * this.GraduationCount * this.Interval / this.Graduation;
-            return this.BeginTime.AddSeconds(s);
+            if (!double.IsNaN(s))
+            {
+                return this.BeginTime.AddSeconds(s);
+            }
+            return this.BeginTime;
         }
 
         private DateTime GetRegularTime(DateTime t, int hours = 0)
@@ -170,6 +180,11 @@ namespace Scada.Chart
             this.Clear();
             this.UpdateTimeAxis(this.BeginTime, this.EndTime, false);
             this.RenderCurve(this.BeginTime, this.EndTime, this.currentValueKey);
+        }
+
+        internal void Reset()
+        {
+            this.SetDataSource(this.data, this.currentValueKey, this.timeKey);
         }
     }
 }

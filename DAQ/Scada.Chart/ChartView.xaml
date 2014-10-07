@@ -15,7 +15,7 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="30"></RowDefinition>
+                <RowDefinition Height="30" x:Name="TimeAxisRow"></RowDefinition>
             </Grid.RowDefinitions>
 
             <local:CurveView x:Name="CurveView" Height="220" Grid.Row="0" Grid.ColumnSpan="2"

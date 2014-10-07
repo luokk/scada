@@ -163,6 +163,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="SearchHpicGraphView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="SearchGraphView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -245,6 +249,9 @@
     <Compile Include="PanelManager.cs" />
     <Compile Include="SamplerControlPanel.xaml.cs">
       <DependentUpon>SamplerControlPanel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SearchHpicGraphView.xaml.cs">
+      <DependentUpon>SearchHpicGraphView.xaml</DependentUpon>
     </Compile>
     <Compile Include="SearchGraphView.xaml.cs">
       <DependentUpon>SearchGraphView.xaml</DependentUpon>
