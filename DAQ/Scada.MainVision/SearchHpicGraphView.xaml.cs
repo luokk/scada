@@ -46,6 +46,7 @@ namespace Scada.MainVision
             }
 
             this.SearchChartView.SetDataSource(dataSource, valueKey);
+            this.SearchChartView2.SetDataSource(dataSource, "ifrain");
         }
 
         public int Interval

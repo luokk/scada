@@ -55,8 +55,6 @@ namespace Scada.MainVision
         // <DeviceKey, dict[data]>
         private Dictionary<string, object> latestData = new Dictionary<string, object>();
 
-
-        private List<Dictionary<string, object>> timelineSource;
         /// <summary>
         /// 
         /// </summary>
@@ -251,7 +249,6 @@ namespace Scada.MainVision
 
         public Dictionary<string, object> RefreshTimeNow(string deviceKey, MySqlCommand cmd)
         {
-
             // Return values
             const int MaxItemCount = 20;
             var ret = new Dictionary<string, object>(MaxItemCount);
@@ -269,6 +266,11 @@ namespace Scada.MainVision
                     foreach (var i in entry.ConfigItems)
                     {
                         string key = i.Key.ToLower();
+                        if (deviceKey == DataProvider.DeviceKey_NaI && key.IndexOf('-') > 0)
+                        {
+                            continue;
+                        }
+
                         try
                         {
                             string v = reader.GetString(key);
@@ -341,6 +343,10 @@ namespace Scada.MainVision
                         string key = i.Key.ToLower();
                         try
                         {
+                            if (deviceKey == DataProvider.DeviceKey_NaI && key.IndexOf('-') > 0)
+                            {
+                                continue;
+                            }
                             string v = reader.GetString(key);
                             data.Add(key, v);
                         }
@@ -369,11 +375,44 @@ namespace Scada.MainVision
                 }
             }
 
-            if (deviceKey == "scada.weather")
+            if (deviceKey == DataProvider.DeviceKey_Weather)
             {
                 ReviseIfRainForWeather(cmd, ret);
             }
+            else if (deviceKey == DataProvider.DeviceKey_Hpic)
+            {
+                this.ReviseIfRainForHpic(cmd, ret, fromTime, toTime);
+            }
             return ret;
+        }
+
+        private void ReviseIfRainForHpic(MySqlCommand cmd, List<Dictionary<string, object>> ret, DateTime fromTime, DateTime toTime)
+        {
+            cmd.CommandText = this.GetSelectStatement("RDSampler_rec", fromTime, toTime);
+
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    string time = reader.GetString("time");
+                    string ifRain = reader.GetString("IfRain");
+
+                    this.AddRainStatus(ret, time, ifRain);
+                }
+            }
+        }
+
+        private void AddRainStatus(List<Dictionary<string, object>> ret, string time, string ifRain)
+        {
+            foreach (var i in ret)
+            {
+                if ((string)i["time"] == time)
+                {
+                    i.Add("ifrain", ifRain == "1");
+                    return;
+                }
+            }
+
         }
 
         private void ReviseIfRainForWeather(MySqlCommand cmd, List<Dictionary<string, object>> ret)
@@ -457,9 +496,9 @@ namespace Scada.MainVision
             return 1;
         }
 
-        public string GetNaIDeviceChannelData(DateTime time, MySqlCommand cmd)
+        public string GetNaIDeviceChannelData(DateTime time, MySqlCommand cmd, out double a, out double b, out double c)
         {
-            string sql = string.Format("select ChannelData from nai_rec where time='{0}'", time);
+            string sql = string.Format("select ChannelData, Coefficients from nai_rec where time='{0}'", time);
             cmd.CommandText = sql;
 
             using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -467,9 +506,17 @@ namespace Scada.MainVision
                 if (reader.Read())
                 {
                     string ret = reader.GetString(0);
+                    string co = reader.GetString(1);
+                    string[] d = co.Split(' ');
+                    c = double.Parse(d[0]);
+                    b = double.Parse(d[1]);
+                    a = double.Parse(d[2]);
                     return ret;
                 }
             }
+            a = 0.0;
+            b = 1.0;
+            c = 0.0;
             return string.Empty;
         }
     }

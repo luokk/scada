@@ -84,6 +84,9 @@ namespace Scada.Chart
 
         private void RenderCurve(DateTime beginTime, DateTime endTime, string valueKey)
         {
+            if (this.data == null)
+                return;
+
             this.ClearCurvePoints();
             DateTime lastTime = default(DateTime);
             foreach (var item in this.data)
@@ -95,8 +98,15 @@ namespace Scada.Chart
                     {
                         this.AddPoint(t, null);
                     }
-                    object v = item[valueKey];
-                    this.AddPoint(t, v);
+                    if (item.ContainsKey(valueKey))
+                    {
+                        object v = item[valueKey];
+                        this.AddPoint(t, v);
+                    }
+                    else
+                    {
+                        this.AddPoint(t, null);
+                    }
                 }
                 lastTime = t;
             }
@@ -129,6 +139,10 @@ namespace Scada.Chart
             if (value is string)
             {
                 y = double.Parse((string)value);
+            }
+            else if (value is bool)
+            {
+                y = (bool)value ? 1.0 : 0.0;
             }
             else
             {

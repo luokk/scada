@@ -537,8 +537,6 @@ namespace Scada.Chart
             this.dataContext.Reset();
         }
 
-
-
         internal void HideResetButton()
         {
             this.ResetButton.Visibility = System.Windows.Visibility.Hidden;
