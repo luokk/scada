@@ -364,19 +364,14 @@ namespace Scada.Device.Siemens
 
                         RecordManager.DoDataRecord(deviceData);
 
-<<<<<<< HEAD
                         /*
-=======
->>>>>>> 27f02ec85f52597aba683ba9fcca0ac50d98dd24
                         // HERE
                         if (this.start)
                         {
                             this.MarkEndTime(this.endTime);
                         }
-<<<<<<< HEAD
                          * */
-=======
->>>>>>> 27f02ec85f52597aba683ba9fcca0ac50d98dd24
+
                     }
                 }
                 else
