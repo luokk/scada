@@ -84,6 +84,7 @@ namespace Scada.Chart
 
         private double ZeroOffset = 30.0;
 
+        public int[] data { get; set; }
 
         public double CenterX
         {
@@ -93,32 +94,14 @@ namespace Scada.Chart
             }
         }
 
-        private Dictionary<int, GraduationLine> Graduations
-        {
-            get;
-            set;
-        }
-
-        private Dictionary<int, GraduationText> GraduationTexts
-        {
-            get;
-            set;
-        }
-
         public EnergyCurveView()
         {
             InitializeComponent();
-            
-            this.Graduations = new Dictionary<int, GraduationLine>();
-            this.GraduationTexts = new Dictionary<int, GraduationText>();
         }
 
         public EnergyCurveView(EnergyChartView chartView)
         {
             InitializeComponent();
-
-            this.Graduations = new Dictionary<int, GraduationLine>();
-            this.GraduationTexts = new Dictionary<int, GraduationText>();
         }
 
         private void CurveViewLoaded(object sender, RoutedEventArgs e)
@@ -190,9 +173,9 @@ namespace Scada.Chart
 
         private void InitPointAxis()
         {
+            this.PointAxis.Children.Clear();
             for (int i = 0; i <= 16; i++)
             {
-                // One interval per 5px
                 double x = i * Grad * 200;
                 Line scaleLine = new Line();
                 
@@ -213,6 +196,34 @@ namespace Scada.Chart
             }
 
         }
+
+        private double UpdatePointAxis(int from, int to)
+        {
+            this.PointAxis.Children.Clear();
+            double grad = Grad * 16 / (to - from);
+            for (int i = 0; i <= (to - from); i++)
+            {
+                double x = i * grad * 200;
+                Line scaleLine = new Line();
+
+                scaleLine.X1 = scaleLine.X2 = x;
+                scaleLine.Y1 = 0;
+                scaleLine.Y2 = Charts.ScaleLength;
+                scaleLine.Stroke = Brushes.Gray;
+                this.PointAxis.Children.Add(scaleLine);
+
+                TextBlock timeLabel = new TextBlock();
+                timeLabel.Foreground = Brushes.Black;
+                timeLabel.FontWeight = FontWeights.Light;
+                timeLabel.FontSize = 9;
+                timeLabel.Text = ((from + i) * 200).ToString();
+                timeLabel.SetValue(Canvas.LeftProperty, (double)x - 10);
+                timeLabel.SetValue(Canvas.TopProperty, (double)10);
+                this.PointAxis.Children.Add(timeLabel);
+            }
+            return grad;
+        }
+
 
         private void AddCurveLine()
         {
@@ -248,11 +259,10 @@ namespace Scada.Chart
             int dc = (int)CanvasHeight / 10;
             // What's the value aach graduation 
             double ev = (max - min) / dc;
-            this.Graduations.Clear();
-            this.GraduationTexts.Clear();
+
             for (int i = 0; i < 60; i++)
             {
-                double y = this.CanvasHeight - (ZeroOffset - 2) - i * 10;
+                double y = this.CanvasHeight - (ZeroOffset) - i * 12.0;
 
                 if (y < 0)
                 {
@@ -260,7 +270,7 @@ namespace Scada.Chart
                 }
 
                 Line l = new Line();
-                this.Graduations.Add(i, new GraduationLine() { Line = l, Pos = y });
+
                 l.Y1 = l.Y2 = y;
                 l.X1 = (i % 5 != 0) ? scaleWidth - Charts.ScaleLength : scaleWidth - Charts.MainScaleLength;
                 l.X2 = scaleWidth;
@@ -275,12 +285,7 @@ namespace Scada.Chart
                     TextBlock t = new TextBlock();
                     t.Foreground = Brushes.Black;
                     t.FontSize = 9;
-                    double pos = (double)y - 10;
-                    this.GraduationTexts.Add(textCount, new GraduationText()
-                    {
-                        Text = t,
-                        Pos = pos
-                    });
+                    double pos = (double)y - 6.0;
 
                     if (max > 10)
                     {
@@ -309,13 +314,14 @@ namespace Scada.Chart
         public void SetPoints(int[] data)
         {
             this.Initialize();
-
+            this.data = data;
             this.Max = data.Max() * 1.4;
             this.Min = 0;
+            this.InitPointAxis();
             this.UpdateValueAxis(this.Max, this.Min);
 
             int count = data.Length;
-
+            this.curve.Points.Clear();
             for (int i = 0; i < count; ++i)
             {
                 Point point = new Point(i * Grad, data[i]);
@@ -325,6 +331,17 @@ namespace Scada.Chart
             }
         }
 
+        public void UpdatePoints(int from, int to, double grad)
+        {
+            this.curve.Points.Clear();
+            for (int i = from; i < to; ++i)
+            {
+                Point point = new Point((i - from ) * grad, this.data[i]);
+                Point p;
+                this.Convert(point, out p);
+                curve.Points.Add(p);
+            }
+        }
 
         public void TrackTimeLine(Point point, string timeLabel)
         {
@@ -587,9 +604,12 @@ namespace Scada.Chart
 
         private void UpdateRange(double beginPointX, double endPointX)
         {
-            
+            int from = (int)(beginPointX / 200 / Grad);
+            int to = (int)(endPointX / 200 / Grad);
+            if (from == to)
+                to = from + 1;
+            double grad = this.UpdatePointAxis(from, to);
+            this.UpdatePoints(from * 200, to * 200, grad);
         }
-
-
     }
 }

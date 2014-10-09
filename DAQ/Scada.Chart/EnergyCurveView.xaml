@@ -6,34 +6,35 @@
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="600"
              Loaded="CurveViewLoaded" MouseMove="CanvasViewMouseMove">
-    
-        <Grid x:Name="MainView" >
-            <Grid.RowDefinitions>
-                <RowDefinition Height="6"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
+
+    <Grid x:Name="MainView" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="6"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
         </Grid.RowDefinitions>
-            
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="30"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <!-- Canvas -->
-            <Canvas x:Name="Graduation" Grid.Row="1" Grid.Column="0" 
-                    Background="#F8F8F8">
-            </Canvas>
 
-            <Canvas x:Name="CanvasView" Grid.Row="1" Grid.Column="1"
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <!-- Canvas -->
+        <Canvas x:Name="Graduation" Grid.Row="1" Grid.Column="0" 
+                    Background="#F8F8F8">
+        </Canvas>
+
+        <Canvas x:Name="CanvasView" Grid.Row="1" Grid.Column="1"
                     Background="#F8F8F8"
                     MouseMove="CanvasViewMouseMove" 
                     MouseLeftButtonDown="CanvasView_MouseLeftButtonDown"
                     MouseLeftButtonUp="CanvasView_MouseLeftButtonUp">
-            </Canvas>
+        </Canvas>
 
+        <Rectangle Grid.Row="2" Grid.Column="0" Fill="#F8F8EE"></Rectangle>
 
         <Canvas x:Name="PointAxis" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" 
-                    Background="#F8F8FA">
-            </Canvas>
+                    Background="#F8F8EE">
+        </Canvas>
     </Grid>
-    
+
 </UserControl>
