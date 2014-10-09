@@ -20,9 +20,8 @@
                     HorizontalAlignment="Stretch" 
                     VerticalAlignment="Bottom"
                     MouseMove="MainViewMouseMove"
-                    MouseLeftButtonDown="CanvasViewMouseLeftButtonEventHandler"
-                    MouseLeftButtonUp="CanvasViewMouseLeftButtonEventHandler" 
-                    MouseWheel="ZoomHandler">
+
+                   >
 
             </local:EnergyCurveView>
 

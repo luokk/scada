@@ -181,12 +181,6 @@ namespace Scada.Chart
                     t.Foreground = Brushes.Black;
                     t.FontSize = 9;
                     double pos = (double)y - 10;
-                    /*
-                    this.GraduationTexts.Add(textCount, new GraduationText()
-                    {
-                        Text = t, Pos = pos
-                    });
-                     */
 
                     if (this.Max > 10)
                     {
@@ -204,7 +198,7 @@ namespace Scada.Chart
                     }
 
                     t.SetValue(Canvas.RightProperty, (double)10.0);
-                    t.SetValue(Canvas.TopProperty, (double)pos);
+                    t.SetValue(Canvas.TopProperty, (double)pos - 10.0);
                     this.Graduation.Children.Add(t);
 
                     textCount++;
@@ -536,8 +530,6 @@ namespace Scada.Chart
         {
             this.dataContext.Reset();
         }
-
-
 
         internal void HideResetButton()
         {

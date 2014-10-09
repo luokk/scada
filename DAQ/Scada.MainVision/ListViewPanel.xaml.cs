@@ -103,15 +103,23 @@ namespace Scada.Controls
 
             var dbCmd = this.dbConn.CreateCommand();
             var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+
+            SynchronizationContext sc = SynchronizationContext.Current;
             dispatcherTimer.Tick += (s, evt) =>
             {
                 if (this.Shown && this.deviceKey != currentDeviceKey)
                 {
+                    dispatcherTimer.Stop();
                     currentDeviceKey = this.deviceKey;
-                    this.ListRecentData(dbCmd);
+                    sc.Post(new SendOrPostCallback((o)=>
+                    {
+                        this.ListRecentData(dbCmd);
+                    }), null);
+                    
                 }
+                
             };
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
             dispatcherTimer.Start();
 
         }
@@ -231,12 +239,12 @@ namespace Scada.Controls
             mi1.Header = "显示能谱图";
             mi1.Click += this.ShowMenuItemClick;
             cm.Items.Add(mi1);
-
+            /*
             MenuItem mi2 = new MenuItem();
             mi2.Header = "比较能谱图";
             mi2.Click += this.CompareMenuItemClick;
             cm.Items.Add(mi2);
-
+            */
             listView.ContextMenu = cm;
         }
 
