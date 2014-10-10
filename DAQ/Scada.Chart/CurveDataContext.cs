@@ -77,6 +77,7 @@ namespace Scada.Chart
             }
 
             this.currentValueKey = valueKey;
+            this.Interval = this.chartView.Interval;
             this.UpdateTimeAxis(this.BeginTime, this.EndTime);
             this.RenderCurve(this.BeginTime, this.EndTime, valueKey);
             
@@ -117,7 +118,6 @@ namespace Scada.Chart
             double graduation;
             int graduationCount;
             this.chartView.UpdateTimeAxis(beginTime, endTime, completedDays, out graduation, out graduationCount);
-            this.Interval = this.chartView.Interval;
             this.Graduation = graduation;
             this.GraduationCount = graduationCount;
         }
@@ -132,6 +132,10 @@ namespace Scada.Chart
                 return;
             }
             double d = this.Graduation / this.GraduationCount;
+            if (this.Interval == 300)
+            {
+                d *= 10;
+            }
             int index = this.GetIndexByTime(time);
             double x = index * d;
 
@@ -155,7 +159,7 @@ namespace Scada.Chart
 
         private int GetIndexByTime(DateTime time)
         {
-            int index = (int)((time.Ticks - this.BeginTime.Ticks) / 10000000 / 30);
+            int index = (int)((time.Ticks - this.BeginTime.Ticks) / 10000000 / this.Interval);
             return index;
         }
 
@@ -167,10 +171,7 @@ namespace Scada.Chart
 
         private DateTime GetTimeByX(double x)
         {
-            if (this.Interval == 0)
-            {
-                this.Interval = 30;
-            }
+            
             double s = x * this.GraduationCount * this.Interval / this.Graduation;
             if (!double.IsNaN(s))
             {

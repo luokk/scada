@@ -191,12 +191,14 @@ namespace Scada.MainVision
         // Search graph
         public SearchGraphView ShowSearchGraphView(ListViewPanel panel, DataListener dataListener)
         {
-
             SearchGraphView graphView = new SearchGraphView();
-            graphView.Interval = 30;
             if (dataListener.DeviceKey == DataProvider.DeviceKey_NaI)
             {
                 graphView.Interval = 60 * 5;
+            }
+            else
+            {
+                graphView.Interval = 30;
             }
             /// graphView.AddDataListener(dataListener);
 

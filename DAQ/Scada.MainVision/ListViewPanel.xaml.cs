@@ -119,7 +119,7 @@ namespace Scada.Controls
                 }
                 
             };
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
             dispatcherTimer.Start();
 
         }
