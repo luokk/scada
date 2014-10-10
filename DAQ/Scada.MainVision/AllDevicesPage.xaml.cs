@@ -48,15 +48,20 @@ namespace Scada.MainVision
 
             this.dbConn = this.dataProvider.GetMySqlConnection();
 
-            MySqlCommand cmd = this.dbConn.CreateCommand();
-            var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-            dispatcherTimer.Tick += (s, evt) => 
+            if (this.dbConn != null)
             {
+                MySqlCommand cmd = this.dbConn.CreateCommand();
+                var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+                dispatcherTimer.Tick += (s, evt) =>
+                {
+                    this.RefreshTick(cmd);
+                };
+                dispatcherTimer.Interval = new TimeSpan(0, 0, 15);
+                dispatcherTimer.Start();
                 this.RefreshTick(cmd);
-            };
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 15);
-            dispatcherTimer.Start();
-            this.RefreshTick(cmd);
+            }
+            else
+            { return; }
             
         }
 
