@@ -77,10 +77,13 @@ namespace Scada.MainVision
         private void UpdatePanel_HPIC(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Hpic);
-            if (d == null)
+
+            // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
+            if (d == null || d.Count == 0)
             {
                 return;
             }
+
             const string Doserate = "doserate";
             panel.SetData(Get(d, "time", ""), Get(d, Doserate, "nGy/h"));
         }
@@ -105,10 +108,13 @@ namespace Scada.MainVision
         private void UpdatePanel_NaI(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_NaI);
-            if (d == null)
+
+            // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
+            if (d == null || d.Count == 0)
             {
                 return;
             }
+
             const string Doserate = "doserate";
             if (!d.ContainsKey(Doserate))
             {
@@ -146,7 +152,9 @@ namespace Scada.MainVision
         private void UpdatePanel_Weather(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Weather);
-            if (d == null)
+
+            // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
+            if (d == null || d.Count == 0)
             {
                 return;
             }
@@ -239,7 +247,9 @@ namespace Scada.MainVision
         private void UpdatePanel_MDS(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_MDS);
-            if (d == null)
+
+            // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
+            if (d == null || d.Count == 0)
             {
                 return;
             }
@@ -255,10 +265,13 @@ namespace Scada.MainVision
         private void UpdatePanel_AIS(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_AIS);
-            if (d == null)
+
+            // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
+            if (d == null || d.Count == 0)
             {
                 return;
-            }            
+            }
+
             //"瞬时采样流量", "累计采样流量", "累积采样时间"
             panel.SetData(
                 Get(d, "time", ""), 
@@ -270,7 +283,9 @@ namespace Scada.MainVision
         private void UpdatePanel_Shelter(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Shelter);
-            if (d == null)
+
+            // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
+            if (d == null || d.Count == 0)
             {
                 return;
             }
@@ -336,10 +351,13 @@ namespace Scada.MainVision
         private void UpdatePanel_Rain(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Dwd);
-            if (d == null)
+
+            // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
+            if (d == null || d.Count == 0)
             {
                 return;
             }
+
             if (!d.ContainsKey("ifrain"))
             {
                 return;
