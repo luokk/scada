@@ -334,6 +334,8 @@ namespace Scada.Chart
         public void UpdatePoints(int from, int to, double grad)
         {
             this.curve.Points.Clear();
+            from = Math.Max(from, 0);
+            to = Math.Min(3200 - 1, to);
             for (int i = from; i < to; ++i)
             {
                 Point point = new Point((i - from ) * grad, this.data[i]);
@@ -604,8 +606,15 @@ namespace Scada.Chart
 
         private void UpdateRange(double beginPointX, double endPointX)
         {
+            if (this.data == null)
+                return;
             int from = (int)(beginPointX / 200 / Grad);
             int to = (int)(endPointX / 200 / Grad);
+
+            if (from < 0)
+                from = 0;
+            if (to > 32)
+                to = 32;
             if (from == to)
                 to = from + 1;
             double grad = this.UpdatePointAxis(from, to);

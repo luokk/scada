@@ -486,10 +486,6 @@ namespace Scada.Chart
             {
                 filePath = string.Format("./captures/{0}", fileName);
             }
-            else
-            {
-                filePath = string.Format("{0}/{1}", filePath, fileName);
-            }
 
             FileStream ms = new FileStream(filePath, FileMode.CreateNew);
             double width = this.MainView.ActualWidth;

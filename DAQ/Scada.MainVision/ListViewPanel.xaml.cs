@@ -761,5 +761,24 @@ namespace Scada.Controls
         {
             this.FieldSelect.Items.Add(field);
         }
+
+        private void FieldSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox s = (ComboBox)e.Source;
+            if (s.SelectedIndex == 0)
+            {
+                this.selectedField = "temperature";
+            }
+            if (s.SelectedIndex == 1)
+            {
+                this.selectedField = "pressure";
+            }
+            if (s.SelectedIndex == 2)
+            {
+                this.selectedField = "windspeed";
+            }
+            ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+
+        }
     }
 }

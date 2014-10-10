@@ -121,7 +121,7 @@
                                 
                                     <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0"
                                             Style="{StaticResource ButtonKey}" Click="SaveChart">保存曲线</Button>
-                                    <ComboBox x:Name="FieldSelect" Visibility="Collapsed">
+                                    <ComboBox x:Name="FieldSelect" Visibility="Collapsed" SelectionChanged="FieldSelect_SelectionChanged">
                                         <ComboBox.Items>
                                             <Label>温度</Label>
                                             <Label>气压</Label>
