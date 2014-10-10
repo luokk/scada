@@ -23,24 +23,19 @@ namespace Scada.Data.Client
         public string[] DeviceKeys = {
                                 Devices.Hpic, 
                                 Devices.Weather, 
-                                Devices.CinderellaData,
-                                Devices.CinderellaStatus,
-                                Devices.Shelter,
-                                Devices.HPGe,
-                                Devices.Labr
+                                Devices.Mds,
+                                Devices.Radeye,
+                                Devices.Bai9850,
+                                Devices.Bai9125
                                      };
 
         public string[] DataDeviceKeys = {
                                 Devices.Hpic, 
                                 Devices.Weather, 
-                                Devices.CinderellaData,
-                                Devices.CinderellaStatus,
-                                Devices.Shelter,
-                                     };
-
-        public string[] FileDeviceKeys = {
-                                Devices.HPGe,
-                                Devices.Labr 
+                                Devices.Mds,
+                                Devices.Radeye,
+                                Devices.Bai9850,
+                                Devices.Bai9125 
                                      };
 
 
@@ -198,10 +193,10 @@ namespace Scada.Data.Client
 
             // Load NaI device config.
             // TODO: 
-            string configLabrPath = ConfigPath.GetDeviceConfigFilePath(Devices.Labr, "0.9");
+            string configLabrPath = ConfigPath.GetDeviceConfigFilePath(Devices.Bai9125, "0.9");
             if (File.Exists(configLabrPath))
             {
-                DeviceEntry entry = LoadFromConfig(Devices.Labr, configLabrPath);
+                DeviceEntry entry = LoadFromConfig(Devices.Bai9125, configLabrPath);
 
                 this.NaIDeviceSn = (StringValue)entry["DeviceSn"];
                 this.MinuteAdjust = (StringValue)entry["MinuteAdjust"];
