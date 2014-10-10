@@ -78,6 +78,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BAI9125Device.cs" />
+    <Compile Include="BAI9850Device.cs" />
     <Compile Include="CinderlDataDevice.cs" />
     <Compile Include="CinderlStatusDevice.cs" />
     <Compile Include="DataParsers.cs" />
@@ -92,8 +94,10 @@
     <Compile Include="MainApplication.cs" />
     <Compile Include="Declare.cs" />
     <Compile Include="LogEvent.cs" />
+    <Compile Include="MDSDevice.cs" />
     <Compile Include="NuclideData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RadeyeDevice.cs" />
     <Compile Include="RecordManager.cs" />
     <Compile Include="Records.cs" />
     <Compile Include="ScadaReader.cs" />

@@ -42,7 +42,7 @@ namespace Scada.Config
         }
 
         public DBConnectionString()
-            :this("root", "123456", "scada")
+            :this("root", "root", "scada")
         {
         }
 

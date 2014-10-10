@@ -92,9 +92,8 @@ namespace Scada.Declare
             }
 
 			string line = RecordManager.PackDeviceData(deviceData);
-			
-            // remove temp by Kaikai
-            //RecordManager.WriteDataToLog(deviceData.Device, line, RecordType.Data);
+            // log
+            RecordManager.WriteDataToLog(deviceData.Device, line, RecordType.Data);
 
             // Record into MySQL:)
 			if (!RecordManager.mysql.DoRecord(deviceData))

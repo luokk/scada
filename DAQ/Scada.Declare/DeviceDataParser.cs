@@ -163,22 +163,18 @@ namespace Scada.Declare
 
     public class ShelterDataParser : DataParser
     {
-        private bool lastDoorStatus = false;
-
-        private bool isDoorStatusChanged = false;
-
         public ShelterDataParser()
-		{
-			// this.lineParser = new LineParser();
-		}
+        {
+            // this.lineParser = new LineParser();
+        }
 
         public override string[] Search(byte[] data, byte[] lastData)
-		{
+        {
             // [10:28:09] 2013-5-19 10:28:09;; 1827 2470 2698 1953 4095 4095 4095 4095 
-			string line = Encoding.ASCII.GetString(data);
-			int p = line.IndexOf('#');
-			line = line.Substring(p + 1);
-			string[] items = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            string line = Encoding.ASCII.GetString(data);
+            int p = line.IndexOf('#');
+            line = line.Substring(p + 1);
+            string[] items = line.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             // Temperature, Humidity, IfMainPowerOff, BatteryHours, IfSmoke, IfWater, IfDoorOpen, Alarm
             string[] ret = new string[8];
@@ -272,170 +268,22 @@ namespace Scada.Declare
             if (!string.IsNullOrEmpty(item))
             {
                 bool ifOpen = (item.Trim() == "0");
-                this.isDoorStatusChanged = (ifOpen != this.lastDoorStatus);
-                this.lastDoorStatus = ifOpen;
-
                 ret[6] = ifOpen ? "1" : "0";
-
-                                        // TODO: Refactor
-                if (this.isDoorStatusChanged)
-                {
-                    Command.Send(Ports.DataClient, string.Format("DOOR={0}", ifOpen ? "1" : "0"));
-                }
             }
 
             ret[7] = "";
 
             return ret;
-		}
+        }
 
-		public override byte[] GetLineBytes(byte[] data)
-		{
+        public override byte[] GetLineBytes(byte[] data)
+        {
             // Data in One Frame! And I don't known whether the line-parser is valid. 
-			//if (this.lineParser != null)
-			//{
-			//return this.lineParser.ContinueWith(data);
-			//}
-			return data;
-		}
-
-        public override bool IsChangedAtIndex(int p)
-        {
-            if (p == 6)
-            {
-                return this.isDoorStatusChanged;
-            }
-            return false;
-        }
-    }
-
-
-	public class WebFileDataParser : DataParser
-	{
-		public WebFileDataParser()
-		{		
-		}
-
-        public override string[] Search(byte[] data, byte[] lastData)
-		{
-			return new string[0] { };
-		}
-
-		public override byte[] GetLineBytes(byte[] data)
-		{
-			return data;
-		}
-	}
-
-    public class CinderlDataParser : DataParser
-    {
-        public static string CurrentSid
-        {
-            get;
-            set;
-        }
-
-        public CinderlDataParser()
-		{		
-		}
-
-        public override byte[] GetLineBytes(byte[] data)
-        {
+            //if (this.lineParser != null)
+            //{
+            //return this.lineParser.ContinueWith(data);
+            //}
             return data;
-        }
-
-        public override string[] Search(byte[] data, byte[] lastData)
-        {
-            bool start = false;
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < data.Length; ++i)
-            {
-                byte b = data[i];
-                if (!start && b == (byte)0x09)
-                {
-                    start = true;
-                    continue;
-                }
-                else if (b == (byte)0x2f)
-                {
-                    break;
-                }
-
-                if (start)
-                {
-                    if (b == (byte)0x09)
-                    {
-                        sb.Append(',');
-                    }
-                    else
-                    {
-                        sb.Append((char)b);
-                    }
-                }
-            }
-            string content = sb.ToString();
-            content = content.Trim(',');
-            
-            string[] ret = content.Split(',');
-
-            string sid = ret[0];
-            if (CurrentSid != sid)
-            {
-                CurrentSid = sid;
-            }
-            ret[2] = ParseTime(ret[2]);
-            ret[3] = ParseTime(ret[3]);
-            return ret;
-        }
-
-        private string ParseTime(string time)
-        {
-            try
-            {
-                DateTime d = DateTime.ParseExact(time, "dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                return d.ToString();
-            }
-            catch(Exception)
-            {
-                
-            }
-            return time;
-        }
-    }
-
-    // CinderlStatusDataParser
-    public class CinderlStatusDataParser : DataParser
-    {
-        public CinderlStatusDataParser()
-		{
-		}
-
-        public override byte[] GetLineBytes(byte[] data)
-        {
-            return data;
-        }
-
-        public override string[] Search(byte[] data, byte[] lastData)
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (byte b in data)
-            {
-                if (b >= 0x30 && b <= 0x39)
-                {
-                    sb.Append((char)b);
-                }
-            }
-
-            string record = sb.ToString();
-            int status = 0;
-            if (int.TryParse(record, out status))
-            {
-                string statusBin = "00000000" + Convert.ToString(status, 2);
-                statusBin = statusBin.Substring(statusBin.Length - 24);
-                return new string[] { statusBin };
-            }
-
-            return new string[] { "000000000000000000000000" };
         }
     }
 }

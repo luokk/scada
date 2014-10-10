@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SiemensOPCdotNETLib">
-      <HintPath>C:\Users\Healer\Documents\Visual Studio 2013\Projects\OpcDeviceTest\OpcDeviceTest\bin\Debug\SiemensOPCdotNETLib.dll</HintPath>
+      <HintPath>..\Bin\Libs\SiemensOPCdotNETLib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
