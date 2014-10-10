@@ -59,7 +59,7 @@ namespace Scada.Chart
             }
         }
 
-        private CurveView curveView;
+        // private CurveView curveView;
 
         private double currentGraduation = 0.0;
 
@@ -86,6 +86,8 @@ namespace Scada.Chart
             InitializeComponent();
             this.Graduations = new Dictionary<int, GraduationLine>();
             this.GraduationTimes = new Dictionary<int, GraduationTime>();
+
+            
         }
 
         public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
@@ -402,6 +404,11 @@ namespace Scada.Chart
 
         private void TrackTimeLine(MouseEventArgs e)
         {
+            if (this.disableTracking)
+            {
+                return;
+            }
+
             bool timed = false;
             string timeLabel = string.Empty;
             CurveView curveView = (CurveView)this.CurveView;
@@ -535,6 +542,18 @@ namespace Scada.Chart
         public void HideResetButton()
         {
             this.CurveView.HideResetButton();
+        }
+
+        private bool disableTracking = false;
+
+        public void DisableTrackingLine()
+        {
+            this.disableTracking = true;
+        }
+
+        public void SetCurveColor(Color color)
+        {
+            this.CurveView.CurveColor = color;
         }
     }
 }
