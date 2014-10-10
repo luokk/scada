@@ -268,7 +268,7 @@
             this.debugConsole.Name = "debugConsole";
             this.debugConsole.Size = new System.Drawing.Size(830, 318);
             this.debugConsole.TabIndex = 0;
-            this.debugConsole.TextChanged += new System.EventHandler(this.debugConsole_TextChanged);
+            //this.debugConsole.TextChanged += new System.EventHandler(this.debugConsole_TextChanged);
             // 
             // mainToolStrip
             // 

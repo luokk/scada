@@ -5,11 +5,11 @@
     <!--
     <datacenter2 BaseUrl="http://127.0.0.1:8080" />
     -->
-    <datacenter2 BaseUrl="http://192.168.1.104:8080" />
+    <datacenter2 BaseUrl="http://219.131.199.90:8701" />
 
   </datacenters>
   <!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
-  <site sysname="" sysst="213213123213123213" adapter="" name="" station="101" sno="0313A08" mn="0313A080000000">
+  <site sysname="" sysst="213213123213123213" adapter="" name="" station="103" sno="0313A08" mn="0313A080000000">
   </site>
 
 
@@ -44,7 +44,7 @@
 
     <!-- NOTICE -->
     <!-- NOTICE -->
-    <device id="Scada.bai9125" table="bai9125_rec" eno="010002" debug-data-time="2014-09-09 12:00:00">
+    <device id="Scada.bai9125" table="bai9125_rec" eno="010002" debug-data-time="2014-09-20 18:20:00">
       <code field="gammalong">01000201</code>
       <code field="gammacps">01000202</code>
       <code field="emissionlong">01000203</code>
@@ -79,6 +79,7 @@
       <code field="map">01000306</code>
       <code field="doserateex">01000307</code>
       <code field="ifatificial">01000308</code>
+      <code field="sid" type="str">01000309</code>
     </device>
 
     <!-- NOTICE -->

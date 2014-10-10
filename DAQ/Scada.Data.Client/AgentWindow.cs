@@ -66,7 +66,7 @@ namespace Scada.Data.Client
 
         private RealTimeForm detailForm;
 
-        private const int TimerInterval = 3500;
+        private const int TimerInterval = 4000;   //4秒查询一次
 
         private ToolStripLabel statusLabel = new ToolStripLabel();
 
@@ -300,15 +300,17 @@ namespace Scada.Data.Client
                         continue;
                     }
 
-                    this.lastDeviceSendData[deviceKey] = sendTime;
+                    //this.lastDeviceSendData[deviceKey] = sendTime;
                 }
 
                 Packet packet = this.GetPacket(sendTime, deviceKey, packetId);
                 if (packet != null)
                 {
                     this.agent.SendPacket(packet);
-                }
 
+                    this.lastDeviceSendData[deviceKey] = sendTime;
+                }
+                
                 //if (packet != null)
                 //{
                     //packets.Add(packet);
@@ -420,10 +422,10 @@ namespace Scada.Data.Client
 
         private static bool IsSendDataTimeOK(DateTime dt)
         {
-            // 5 < current.second < 15 OR
-            // 35 < current.second < 45
+            // 5 < current.second < 30 OR
+            // 35 < current.second < 60
             int sec = dt.Second - 5;
-            if ((sec >= 0 && sec <= 10) || ((sec >= 30) && sec <= 40))
+            if ((sec >= 0 && sec < 25) || ((sec >= 30) && sec < 55))
             {
                 return true;
             }
@@ -475,10 +477,11 @@ namespace Scada.Data.Client
         private void InitDetailsListView()
         {
             this.InitDeviceColumn("scada.hpic", "高压电离室");
-            this.InitDeviceColumn("scada.cinderella.data", "Cinderella数据");
-            this.InitDeviceColumn("scada.cinderella.status", "Cinderella状态");
             this.InitDeviceColumn("scada.weather", "气象站");
-            this.InitDeviceColumn("scada.shelter", "环境与安防监控");
+            this.InitDeviceColumn("scada.bai9850", "bai9850");
+            this.InitDeviceColumn("scada.bai9125", "bai9125");
+            this.InitDeviceColumn("scada.mds", "mds");
+            this.InitDeviceColumn("scada.radeye", "radeye");
         }
 
         private static string FormatTime(DateTime time)
@@ -593,7 +596,7 @@ namespace Scada.Data.Client
             }
         }
 
-        private bool isAutoData = false;
+        private bool isAutoData = true;
 
         private void AutoDataToolStripMenuItemClick(object sender, EventArgs e)
         {
