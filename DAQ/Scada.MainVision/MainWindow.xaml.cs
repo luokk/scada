@@ -109,7 +109,7 @@ namespace Scada.MainVision
             // this.AddPageEntry("数据分析", this.CounterTree);
 
 
-            this.ShowDataViewPanel("scada.naidevice");
+            this.ShowDataViewPanel("scada.hpic");
             // this.OnDeviceItemClicked(null, null);
             this.loaded = true;
             // Max when startup;

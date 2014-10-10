@@ -78,6 +78,9 @@ namespace Scada.MainVision
             this.SearchChartView.HideTimeAxis();
 
             this.SearchChartView2.HideResetButton();
+            this.SearchChartView2.DisableTrackingLine();
+            // 方波颜色
+            this.SearchChartView2.SetCurveColor(Color.FromRgb(0x00, 0x00, 0xCC));
         }
 
         private void AddTimePoint(DateTime time, Dictionary<string, object> entry)

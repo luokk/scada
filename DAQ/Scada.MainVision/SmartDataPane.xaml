@@ -12,7 +12,7 @@
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         
-        <Grid Grid.Row="0" Grid.RowSpan="2" Background="AliceBlue" Opacity=".5">
+        <Grid Grid.Row="0" Grid.RowSpan="2" Background="AliceBlue" Opacity=".5" Cursor="Cross">
             
         </Grid>
         

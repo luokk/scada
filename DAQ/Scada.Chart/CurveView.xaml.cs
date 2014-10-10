@@ -226,8 +226,15 @@ namespace Scada.Chart
 
             this.curve.StrokeThickness = 1;
             Color curveColor = Color.FromRgb(00, 0x7A, 0xCC);
+
             this.curve.Stroke = new SolidColorBrush(curveColor);
             this.CanvasView.Children.Add(this.curve);
+        }
+
+        public Color CurveColor
+        {
+            get;
+            set;
         }
 
         public CurveDataContext AddCurveDataContext(ChartView chartView)
@@ -267,14 +274,6 @@ namespace Scada.Chart
 
             if (point == default(Point))
             {
-                /*
-                if (this.lastPoint != default(Point))
-                {
-                    Point p;
-                    this.Convert(this.lastPoint, out p);
-                    LineGeometry pline = new LineGeometry(p, p);
-                    this.lines.Children.Add(pline);
-                }*/
                 this.lastPoint = point;
                 return;
             }
@@ -523,6 +522,11 @@ namespace Scada.Chart
 
         internal void UpdateCurve()
         {
+            if (this.CurveColor == default(Color))
+            {
+                this.CurveColor = Color.FromRgb(00, 0x7A, 0xCC);
+            }
+            this.curve.Stroke = new SolidColorBrush(this.CurveColor);
             this.curve.Data = this.lines;
         }
 
