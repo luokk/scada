@@ -75,19 +75,10 @@ namespace Scada.Chart
             set;
         }
 
-        private Dictionary<int, GraduationTime> GraduationTimes
-        {
-            get;
-            set;
-        }
-
         public ChartView()
         {
             InitializeComponent();
-            this.Graduations = new Dictionary<int, GraduationLine>();
-            this.GraduationTimes = new Dictionary<int, GraduationTime>();
-
-            
+            this.Graduations = new Dictionary<int, GraduationLine>();       
         }
 
         public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
@@ -116,7 +107,6 @@ namespace Scada.Chart
         private void UpdateTimeAxisGraduations(DateTime beginTime, DateTime endTime, int days, bool completedDays, out double graduation, out int graduationCount)
         {
             this.Graduations.Clear();
-            this.GraduationTimes.Clear();
             this.TimeAxis.Children.Clear();
             graduation = 0.0;
             graduationCount = 0;
@@ -130,9 +120,6 @@ namespace Scada.Chart
                 const double TimeLabelOffset = 9.0;
                 graduation = 9.0 * 24 / hours;
                 graduationCount = 30;
-
-                this.Interval = 30;
-                
 
                 for (int i = 0; i <= hours * 4; i++)
                 {
@@ -150,29 +137,17 @@ namespace Scada.Chart
                     this.TimeAxis.Children.Add(scaleLine);
 
                     TextBlock timeLabel = null;
-                    if (this.GraduationTimes.ContainsKey(i))
-                    {
-                        timeLabel = this.GraduationTimes[i].Text;
-                    }
-                    else
-                    {
-                        timeLabel = new TextBlock();
-                        timeLabel.Foreground = Brushes.Black;
-                        timeLabel.FontWeight = FontWeights.Light;
-                        timeLabel.FontSize = 9;
+                    timeLabel = new TextBlock();
+                    timeLabel.Foreground = Brushes.Black;
+                    timeLabel.FontWeight = FontWeights.Light;
+                    timeLabel.FontSize = 9;
 
-                        double pos = i * graduation;
-                        GraduationTimes.Add(i, new GraduationTime()
-                        {
-                            Text = timeLabel,
-                            Pos = pos
-                        });
+                    double pos = i * graduation;
 
-                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
-                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
+                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
 
-                        this.TimeAxis.Children.Add(timeLabel);
-                    }
+                    this.TimeAxis.Children.Add(timeLabel);
 
                     if (isWholePoint)
                     {
@@ -194,7 +169,6 @@ namespace Scada.Chart
                 graduation = 9.0; // 15 min
                 graduationCount = 30;
 
-                this.Interval = 30;
                 for (int i = 0; i <= 24 * 4; i++)
                 {
                     // One interval per 5px
@@ -211,29 +185,17 @@ namespace Scada.Chart
                     this.TimeAxis.Children.Add(scaleLine);
 
                     TextBlock timeLabel = null;
-                    if (this.GraduationTimes.ContainsKey(i))
-                    {
-                        timeLabel = this.GraduationTimes[i].Text;
-                    }
-                    else
-                    {
-                        timeLabel = new TextBlock();
-                        timeLabel.Foreground = Brushes.Black;
-                        timeLabel.FontWeight = FontWeights.Light;
-                        timeLabel.FontSize = 9;
+                    timeLabel = new TextBlock();
+                    timeLabel.Foreground = Brushes.Black;
+                    timeLabel.FontWeight = FontWeights.Light;
+                    timeLabel.FontSize = 9;
 
-                        double pos = i * graduation;
-                        GraduationTimes.Add(i, new GraduationTime()
-                        {
-                            Text = timeLabel,
-                            Pos = pos
-                        });
+                    double pos = i * graduation;
 
-                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
-                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
+                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
 
-                        this.TimeAxis.Children.Add(timeLabel);
-                    }
+                    this.TimeAxis.Children.Add(timeLabel);
 
                     if (isWholePoint)
                     {
@@ -251,7 +213,6 @@ namespace Scada.Chart
                 graduation = 4.0;
                 graduationCount = 24;
 
-                this.Interval = 30;
                 for (int i = 0; i <= 240; i++)
                 {
                     // One interval per 5px
@@ -268,29 +229,17 @@ namespace Scada.Chart
                     this.TimeAxis.Children.Add(scaleLine);
 
                     TextBlock timeLabel = null;
-                    if (this.GraduationTimes.ContainsKey(i))
-                    {
-                        timeLabel = this.GraduationTimes[i].Text;
-                    }
-                    else
-                    {
-                        timeLabel = new TextBlock();
-                        timeLabel.Foreground = Brushes.Black;
-                        timeLabel.FontWeight = FontWeights.Light;
-                        timeLabel.FontSize = 9;
+                    timeLabel = new TextBlock();
+                    timeLabel.Foreground = Brushes.Black;
+                    timeLabel.FontWeight = FontWeights.Light;
+                    timeLabel.FontSize = 9;
 
-                        double pos = i * graduation;
-                        GraduationTimes.Add(i, new GraduationTime()
-                        {
-                            Text = timeLabel,
-                            Pos = pos
-                        });
+                    double pos = i * graduation;
 
-                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
 
-                        this.TimeAxis.Children.Add(timeLabel);
-                    }
+                    this.TimeAxis.Children.Add(timeLabel);
 
                     if (isWholePoint)
                     {
@@ -306,7 +255,7 @@ namespace Scada.Chart
             {
                 graduation = 9.0 / days;
                 graduationCount = 30;
-                this.Interval = 30;
+
                 int parts = days * 24 * 4;
                 for (int i = 0; i <= parts; i++)
                 {
@@ -324,29 +273,17 @@ namespace Scada.Chart
                     this.TimeAxis.Children.Add(scaleLine);
 
                     TextBlock timeLabel = null;
-                    if (this.GraduationTimes.ContainsKey(i))
-                    {
-                        timeLabel = this.GraduationTimes[i].Text;
-                    }
-                    else
-                    {
-                        timeLabel = new TextBlock();
-                        timeLabel.Foreground = Brushes.Black;
-                        timeLabel.FontWeight = FontWeights.Light;
-                        timeLabel.FontSize = 9;
+                    timeLabel = new TextBlock();
+                    timeLabel.Foreground = Brushes.Black;
+                    timeLabel.FontWeight = FontWeights.Light;
+                    timeLabel.FontSize = 9;
 
-                        double pos = i * graduation;
-                        GraduationTimes.Add(i, new GraduationTime()
-                        {
-                            Text = timeLabel,
-                            Pos = pos
-                        });
+                    double pos = i * graduation;
 
-                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
 
-                        this.TimeAxis.Children.Add(timeLabel);
-                    }
+                    this.TimeAxis.Children.Add(timeLabel);
 
                     if (isWholePoint)
                     {
@@ -427,20 +364,29 @@ namespace Scada.Chart
 
         private string GetFormatTime(DateTime baseTime, int index, int interval)
         {
-            DateTime dt = baseTime.AddSeconds(index * interval);
+            
             if (interval == 60 * 5)
             {
-                return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
-            }
-            else if (interval == 30)
-            {
-                if (dt.Minute == 0 && dt.Second == 0)
+                DateTime dt = baseTime.AddSeconds(index * interval / 10);
+                if (dt.Minute == 0 && dt.Hour == 0)
                 {
-                    return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
                 }
                 else
                 {
-                    return string.Format("{0:d2}:{1:d2}", dt.Minute, dt.Second);
+                    return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                }
+            }
+            else if (interval == 30)
+            {
+                DateTime dt = baseTime.AddSeconds(index * interval);
+                if (dt.Minute == 0 && dt.Hour == 0)
+                {
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
+                }
+                else
+                {
+                    return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
                 }
             }
             return "";
@@ -516,7 +462,6 @@ namespace Scada.Chart
             this.curveDataContext.SetDataSource(data, valueKey, timeKey);
             this.UpdateCurve();
         }
-
 
         public void AddPoint(DateTime time, object value)
         {

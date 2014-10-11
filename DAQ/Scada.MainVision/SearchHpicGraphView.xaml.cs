@@ -77,6 +77,7 @@ namespace Scada.MainVision
             this.SearchChartView.SetValueRange(item.Min, item.Max);
             this.SearchChartView.HideTimeAxis();
 
+            this.SearchChartView2.Interval = 30;
             this.SearchChartView2.HideResetButton();
             this.SearchChartView2.DisableTrackingLine();
             // 方波颜色

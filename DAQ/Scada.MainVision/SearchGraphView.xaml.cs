@@ -52,7 +52,7 @@ namespace Scada.MainVision
         public void AddLineName(string deviceKey, string lineName, string displayName)
         {
             // TODO:
-            if (lineName.IndexOf("Doserate") >= 0)
+            if (lineName.IndexOf("DoseRate") >= 0)
             {
                 displayName = displayName.Replace("μSv/h", "nSv/h");
             }

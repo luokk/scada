@@ -101,31 +101,26 @@ namespace Scada.Controls
             this.HasSerachDataChart = false;
             this.HasRealTimeChart = false;
 
-            if (this.dbConn != null)
+            var dbCmd = this.dbConn.CreateCommand();
+            var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+
+            SynchronizationContext sc = SynchronizationContext.Current;
+            dispatcherTimer.Tick += (s, evt) =>
             {
-                var dbCmd = this.dbConn.CreateCommand();
-                var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-
-                SynchronizationContext sc = SynchronizationContext.Current;
-                dispatcherTimer.Tick += (s, evt) =>
+                if (this.Shown && this.deviceKey != currentDeviceKey)
                 {
-                    if (this.Shown && this.deviceKey != currentDeviceKey)
+                    dispatcherTimer.Stop();
+                    currentDeviceKey = this.deviceKey;
+                    sc.Post(new SendOrPostCallback((o)=>
                     {
-                        dispatcherTimer.Stop();
-                        currentDeviceKey = this.deviceKey;
-                        sc.Post(new SendOrPostCallback((o) =>
-                        {
-                            this.ListRecentData(dbCmd);
-                        }), null);
-
-                    }
-
-                };
-                dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
-                dispatcherTimer.Start();
-            }
-            else
-            { return; }
+                        this.ListRecentData(dbCmd);
+                    }), null);
+                    
+                }
+                
+            };
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
+            dispatcherTimer.Start();
 
         }
 
