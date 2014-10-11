@@ -620,13 +620,20 @@ namespace Scada.Controls
 
         private void ExportDataListToFile(List<Dictionary<string, object>> dataList)
         {
-            DateTime now = DateTime.Now;
-            string fileName = string.Format("{0}-{1}-{2}-{3}.csv", now.Year, now.Month, now.Day, now.Ticks);
-            string filePath = string.Format("./csv/{0}", fileName);
-
             if (!Directory.Exists("./csv"))
             {
                 Directory.CreateDirectory("./csv");
+            }
+
+            string filePath = string.Empty;
+            System.Windows.Forms.SaveFileDialog fileDialog = new System.Windows.Forms.SaveFileDialog();
+            fileDialog.InitialDirectory = "./csv";
+            fileDialog.Filter = "CSV (*.csv)|*.csv|All files (*.*)|*.*";
+            fileDialog.FilterIndex = 1;
+            fileDialog.RestoreDirectory = true;
+            if (fileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                filePath = fileDialog.FileName;
             }
 
             using (StreamWriter sw = new StreamWriter(filePath))
