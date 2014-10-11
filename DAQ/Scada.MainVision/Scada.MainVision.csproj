@@ -237,6 +237,7 @@
     <Compile Include="GraphView.xaml.cs">
       <DependentUpon>GraphView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GroupValue.cs" />
     <Compile Include="ListViewPanel.xaml.cs">
       <DependentUpon>ListViewPanel.xaml</DependentUpon>
     </Compile>

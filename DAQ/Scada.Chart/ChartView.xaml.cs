@@ -78,7 +78,8 @@ namespace Scada.Chart
         public ChartView()
         {
             InitializeComponent();
-            this.Graduations = new Dictionary<int, GraduationLine>();       
+            this.Graduations = new Dictionary<int, GraduationLine>();
+            this.CurveView.ChartView = this;
         }
 
         public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
@@ -87,7 +88,7 @@ namespace Scada.Chart
         private DateTime GetBaseTime(DateTime startTime)
         {
             // 目前只支持30秒 和 5分钟两种间隔
-            Debug.Assert(this.Interval == 30 || this.Interval == 60 * 5 || this.Interval == 0);
+            // Debug.Assert(this.Interval == 30 || this.Interval == 60 * 5 || this.Interval == 0);
 
             DateTime baseTime = default(DateTime);
             if (this.Interval == 30)
@@ -99,6 +100,10 @@ namespace Scada.Chart
             {
                 int min = startTime.Minute / 5 * 5;
                 baseTime = new DateTime(startTime.Year, startTime.Month, startTime.Day, startTime.Hour, min, 0);
+            }
+            else if (this.Interval == 3600)
+            {
+                baseTime = new DateTime(startTime.Year, startTime.Month, startTime.Day, startTime.Hour, 0, 0);
             }
             return baseTime;
         }
@@ -364,7 +369,6 @@ namespace Scada.Chart
 
         private string GetFormatTime(DateTime baseTime, int index, int interval)
         {
-            
             if (interval == 60 * 5)
             {
                 DateTime dt = baseTime.AddSeconds(index * interval / 10);
@@ -453,7 +457,6 @@ namespace Scada.Chart
 
         private void CurveViewLoaded(object sender, RoutedEventArgs e)
         {
-            this.CurveView.ChartView = this;
             this.curveDataContext = this.CurveView.AddCurveDataContext(this);
         }
 
@@ -491,9 +494,16 @@ namespace Scada.Chart
 
         private bool disableTracking = false;
 
+        internal bool disableGridLine = false;
+
         public void DisableTrackingLine()
         {
             this.disableTracking = true;
+        }
+
+        public void DisableGridLine()
+        {
+            this.disableGridLine = true;
         }
 
         public void SetCurveColor(Color color)

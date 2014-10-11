@@ -136,6 +136,10 @@ namespace Scada.Chart
             {
                 d *= 10;
             }
+            else if (this.Interval == 3600)
+            {
+                d *= 120;
+            }
             int index = this.GetIndexByTime(time);
             double x = index * d;
 
@@ -146,7 +150,7 @@ namespace Scada.Chart
             }
             else if (value is bool)
             {
-                y = (bool)value ? 1.0 : 0.0;
+                y = (bool)value ? 0.8 : 0.4;
             }
             else
             {

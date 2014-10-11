@@ -721,6 +721,8 @@ namespace Scada.Controls
         }
 
         private bool shown = false;
+
+        public int selectedInterval = 30;
         
         public string selectedField;
 
@@ -761,6 +763,78 @@ namespace Scada.Controls
         public void AddField(string field)
         {
             this.FieldSelect.Items.Add(field);
+        }
+
+        private List<Dictionary<string, object>> GetDataByInterval(List<Dictionary<string, object>> data, int interval)
+        {
+            int count = interval / 30;
+            List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
+
+            var first = data[0];
+            string beginTimeStr = (string)first["time"];
+            DateTime beginTime = DateTime.Parse(beginTimeStr);
+            DateTime endTime = beginTime.AddSeconds(interval);
+
+            GroupValue gv = new GroupValue();
+            for (int i = 0; i < data.Count; i++)
+            {
+                string time = (string)data[i]["time"];
+                DateTime itemTime = DateTime.Parse(time);
+
+                if (itemTime >= beginTime && itemTime < endTime)
+                {
+                    gv.AddValue(data[i], "doserate");
+                }
+                else
+                {
+                    Dictionary<string, object> newItem = gv.GetValue("doserate");
+                    newItem.Add("time", beginTime.ToString());
+                    ret.Add(newItem);
+                    gv.Clear();
+
+                    beginTime = endTime;
+                    endTime = endTime.AddSeconds(interval);
+                }
+            }
+
+            return ret;
+        }
+
+        // Only for HPIC
+        private void IntervalSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox s = (ComboBox)e.Source;
+            if (this.searchData == null)
+            {
+                s.SelectedIndex = 0;
+                return;
+            }
+
+            List<Dictionary<string, object>> data = null;
+            if (s.SelectedIndex == 0)
+            {
+                this.selectedInterval = 30;
+                data = this.searchData;
+            }
+            else if (s.SelectedIndex == 1)
+            {
+                this.selectedInterval = 300;
+                data = this.GetDataByInterval(this.searchData, this.selectedInterval);
+            }
+            else if (s.SelectedIndex == 2)
+            {
+                this.selectedInterval = 3600;
+                data = this.GetDataByInterval(this.searchData, this.selectedInterval);
+            }
+            else if (s.SelectedIndex == 2)
+            {
+                this.selectedInterval = 3600 * 24;
+                data = this.GetDataByInterval(this.searchData, this.selectedInterval);
+            }
+
+
+            ((SearchHpicGraphView)this.graphSearchView).Interval = this.selectedInterval;
+            ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField);
         }
 
         private void FieldSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)

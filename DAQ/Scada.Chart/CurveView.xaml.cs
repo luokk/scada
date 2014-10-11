@@ -155,53 +155,56 @@ namespace Scada.Chart
             // What's the value each graduation 
             double ev = (this.Max - this.Min) / dc;
 
-            for (int i = 0; i < 60; i++)
+            if (!this.ChartView.disableGridLine)
             {
-                double y = height - i * 10;
-
-                if (y < 0)
+                for (int i = 0; i < 60; i++)
                 {
-                    break;
-                }
-                
-                Line l = new Line();
+                    double y = height - i * 10;
 
-                l.Y1 = l.Y2 = y;
-                l.X1 = (i % 5 != 0) ? scaleWidth - Charts.ScaleLength : scaleWidth - Charts.MainScaleLength;
-                l.X2 = scaleWidth;
-
-                l.Stroke = new SolidColorBrush(Colors.Gray);
-                this.Graduation.Children.Add(l);
-
-                double value = this.Min + i * ev;
-
-                if (i % 5 == 0)
-                {
-                    TextBlock t = new TextBlock();
-                    t.Foreground = Brushes.Black;
-                    t.FontSize = 9;
-                    double pos = (double)y - 10;
-
-                    if (this.Max > 10)
+                    if (y < 0)
                     {
-                        t.Text = string.Format("{0}", (int)value);
-                    }
-                    else if (this.Max > 1)
-                    {
-                        double dv = ConvertDouble(value, 1);
-                        t.Text = string.Format("{0:f1}", (double)dv);
-                    }
-                    else
-                    {
-                        double dv = ConvertDouble(value, 2);
-                        t.Text = string.Format("{0:f2}", (double)dv);
+                        break;
                     }
 
-                    t.SetValue(Canvas.RightProperty, (double)10.0);
-                    t.SetValue(Canvas.TopProperty, (double)pos - 10.0);
-                    this.Graduation.Children.Add(t);
+                    Line l = new Line();
 
-                    textCount++;
+                    l.Y1 = l.Y2 = y;
+                    l.X1 = (i % 5 != 0) ? scaleWidth - Charts.ScaleLength : scaleWidth - Charts.MainScaleLength;
+                    l.X2 = scaleWidth;
+
+                    l.Stroke = new SolidColorBrush(Colors.Gray);
+                    this.Graduation.Children.Add(l);
+
+                    double value = this.Min + i * ev;
+
+                    if (i % 5 == 0)
+                    {
+                        TextBlock t = new TextBlock();
+                        t.Foreground = Brushes.Black;
+                        t.FontSize = 9;
+                        double pos = (double)y - 10;
+
+                        if (this.Max > 10)
+                        {
+                            t.Text = string.Format("{0}", (int)value);
+                        }
+                        else if (this.Max > 1)
+                        {
+                            double dv = ConvertDouble(value, 1);
+                            t.Text = string.Format("{0:f1}", (double)dv);
+                        }
+                        else
+                        {
+                            double dv = ConvertDouble(value, 2);
+                            t.Text = string.Format("{0:f2}", (double)dv);
+                        }
+
+                        t.SetValue(Canvas.RightProperty, (double)10.0);
+                        t.SetValue(Canvas.TopProperty, (double)pos - 10.0);
+                        this.Graduation.Children.Add(t);
+
+                        textCount++;
+                    }
                 }
             }
 
