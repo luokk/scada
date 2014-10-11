@@ -38,14 +38,65 @@ namespace Scada.MainVision
 
         }
 
-        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey)
+        private List<Dictionary<string, object>> GetDataByInterval(List<Dictionary<string, object>> data, int interval)
+        {
+            int count = interval / 30;
+            List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
+
+            var first = data[0];
+            string beginTimeStr = (string)first["time"];
+            DateTime beginTime = DateTime.Parse(beginTimeStr);
+            DateTime endTime = beginTime.AddSeconds(interval);
+
+            GroupValue gv = new GroupValue();
+            for (int i = 0; i < data.Count; i++)
+            {
+                string time = (string)data[i]["time"];
+                DateTime itemTime = DateTime.Parse(time);
+
+                if (itemTime >= beginTime && itemTime < endTime)
+                {
+                    gv.AddValue(data[i], "doserate");
+                }
+                else
+                {
+                    Dictionary<string, object> newItem = gv.GetValue("doserate");
+                    if (newItem != null)
+                    {
+                        newItem.Add("time", beginTime.ToString());
+                        ret.Add(newItem);
+                        gv.Clear();
+
+                        beginTime = endTime;
+                        endTime = endTime.AddSeconds(interval);
+                    }
+                }
+            }
+
+            return ret;
+        }
+
+        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval)
         {
             if (dataSource == null || dataSource.Count == 0)
             {
                 return;
             }
 
-            this.SearchChartView.SetDataSource(dataSource, valueKey);
+            List<Dictionary<string, object>> data = null;
+            if (interval == 30)
+            {
+                data = dataSource;
+            }
+            else
+            {
+                data = this.GetDataByInterval(dataSource, interval);
+            }
+            this.SearchChartView.SetDataSource(data, valueKey);
+            this.SearchChartView.SetUpdateRangeHandler((begin, end) => 
+            {
+                this.SearchChartView2.UpdateRange(begin, end);
+            });
             this.SearchChartView2.SetDataSource(dataSource, "ifrain");
         }
 

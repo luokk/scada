@@ -43,6 +43,8 @@ namespace Scada.MainVision
 
         internal Dictionary<string, object> GetValue(params string[] keys)
         {
+            if (this.value == null || this.value.Count == 0)
+                return null;
             Dictionary<string, object> ret = new Dictionary<string, object>();
 
             foreach (var key in keys)

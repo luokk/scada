@@ -199,6 +199,11 @@ namespace Scada.Chart
             this.Clear();
             this.UpdateTimeAxis(this.BeginTime, this.EndTime, false);
             this.RenderCurve(this.BeginTime, this.EndTime, this.currentValueKey);
+
+            if (this.chartView.action != null)
+            {
+                this.chartView.action(beginPointX, endPointX);
+            }
         }
 
         internal void Reset()

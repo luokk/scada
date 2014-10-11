@@ -510,5 +510,19 @@ namespace Scada.Chart
         {
             this.CurveView.CurveColor = color;
         }
+
+
+        public void SetUpdateRangeHandler(Action<double, double> action)
+        {
+            this.action = action;    
+        }
+    
+        public  Action<double,double> action { get; set; }
+
+
+        public void UpdateRange(double begin, double end)
+        {
+            this.curveDataContext.UpdateRange(begin, end);
+        }
     }
 }
