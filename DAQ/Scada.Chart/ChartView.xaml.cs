@@ -514,15 +514,27 @@ namespace Scada.Chart
 
         public void SetUpdateRangeHandler(Action<double, double> action)
         {
-            this.action = action;    
+            this.updateRangeAction = action;    
         }
-    
-        public  Action<double,double> action { get; set; }
+
+        public void SetResetHandler(Action action)
+        {
+            this.resetAction = action;
+        }
+
+        public Action<double,double> updateRangeAction { get; set; }
+
+        public Action resetAction { get; set; }
 
 
         public void UpdateRange(double begin, double end)
         {
             this.curveDataContext.UpdateRange(begin, end);
+        }
+
+        public void Reset()
+        {
+            this.curveDataContext.Reset();
         }
     }
 }

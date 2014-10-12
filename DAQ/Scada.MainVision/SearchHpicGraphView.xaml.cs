@@ -97,6 +97,10 @@ namespace Scada.MainVision
             {
                 this.SearchChartView2.UpdateRange(begin, end);
             });
+            this.SearchChartView.SetResetHandler(() =>
+            {
+                this.SearchChartView2.Reset();
+            });
             this.SearchChartView2.SetDataSource(dataSource, "ifrain");
         }
 
@@ -125,10 +129,12 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
+            this.SearchChartView.SetCurveDisplayName("剂量率");
             this.SearchChartView.SetValueRange(item.Min, item.Max);
             this.SearchChartView.HideTimeAxis();
 
             this.SearchChartView2.Interval = 30;
+            this.SearchChartView2.SetCurveDisplayName("感雨");
             this.SearchChartView2.SetValueRange(0, 0.5);
             this.SearchChartView2.HideResetButton();
             this.SearchChartView2.DisableTrackingLine();

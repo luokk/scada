@@ -99,8 +99,8 @@ namespace Scada.MainVision
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
                 filePath = fileDialog.FileName;
-            }
-            this.SearchChartView.SaveChart(filePath);
+                this.SearchChartView.SaveChart(filePath);
+            }            
         }
     }
 

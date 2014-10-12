@@ -200,15 +200,19 @@ namespace Scada.Chart
             this.UpdateTimeAxis(this.BeginTime, this.EndTime, false);
             this.RenderCurve(this.BeginTime, this.EndTime, this.currentValueKey);
 
-            if (this.chartView.action != null)
+            if (this.chartView.updateRangeAction != null)
             {
-                this.chartView.action(beginPointX, endPointX);
+                this.chartView.updateRangeAction(beginPointX, endPointX);
             }
         }
 
         internal void Reset()
         {
             this.SetDataSource(this.data, this.currentValueKey, this.timeKey);
+            if (this.chartView.resetAction != null)
+            {
+                this.chartView.resetAction();
+            }
         }
     }
 }

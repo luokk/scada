@@ -109,7 +109,7 @@ namespace Scada.Controls
             {
                 if (this.Shown && this.deviceKey != currentDeviceKey)
                 {
-                    dispatcherTimer.Stop();
+                    dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
                     currentDeviceKey = this.deviceKey;
                     sc.Post(new SendOrPostCallback((o)=>
                     {
@@ -119,7 +119,7 @@ namespace Scada.Controls
                 }
                 
             };
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
             dispatcherTimer.Start();
 
         }
@@ -291,8 +291,6 @@ namespace Scada.Controls
                 theSearchView.MouseRightButtonUp += OnSearchListViewMouseRightButton;
             }
         }
-
-
 
         void OnSearchListViewMouseRightButton(object sender, MouseButtonEventArgs e)
         {
@@ -518,6 +516,12 @@ namespace Scada.Controls
             using (var cmd = this.dbConn.CreateCommand())
             {
                 this.searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, cmd);
+
+                if (this.searchDataSource.Count == 0)
+                {
+                    MessageBox.Show("没有找到数据");
+                    return;
+                }
             }
             // int interval = this.currentInterval;
             this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
@@ -535,7 +539,10 @@ namespace Scada.Controls
                 }
                 else
                 {
-                    ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                    if (this.graphSearchView != null)
+                    {
+                        ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                    }
                 }
             }
         }
@@ -634,6 +641,10 @@ namespace Scada.Controls
             if (fileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 filePath = fileDialog.FileName;
+            }
+            else
+            {
+                return;
             }
 
             using (StreamWriter sw = new StreamWriter(filePath))
