@@ -700,27 +700,6 @@ namespace Scada.Controls
 
         public int currentInterval { get; set; }
 
-        private void IntervalSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            /*
-            switch (this.FrList.SelectedIndex)
-            {
-                case 0:
-                    this.currentInterval = 30;
-                    break;
-                case 1:
-                    this.currentInterval = 60 * 5;
-                    break;
-                case 2:
-                    this.currentInterval = 60 * 60;
-                    break;
-                default:
-                    this.currentInterval = 30;
-                    break;
-            }   
-            */
-        }
-
         private void SearchChartViewTabItemIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if ((bool)e.NewValue)

@@ -32,7 +32,18 @@ namespace Scada.MainVision
             {
                 return;
             }
-
+            if (valueKey == "temperature")
+            {
+                this.SearchChartView.SetCurveDisplayName("温度");
+            }
+            else if (valueKey == "pressure")
+            {
+                this.SearchChartView.SetCurveDisplayName("气压");
+            }
+            else if (valueKey == "windspeed")
+            {
+                this.SearchChartView.SetCurveDisplayName("风速");
+            }
             this.SearchChartView.SetDataSource(dataSource, valueKey);
         }
 
@@ -61,6 +72,18 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
+            if (deviceKey == DataProvider.DeviceKey_AIS || deviceKey == DataProvider.DeviceKey_MDS)
+            {
+                this.SearchChartView.SetCurveDisplayName("瞬时流量");
+            }
+            else if (deviceKey == DataProvider.DeviceKey_NaI)
+            {
+                this.SearchChartView.SetCurveDisplayName("剂量率");
+            }
+            else if (deviceKey == DataProvider.DeviceKey_Weather)
+            {
+                this.SearchChartView.SetCurveDisplayName("温度");
+            }
             this.SearchChartView.SetValueRange(item.Min, item.Max);
 
         }

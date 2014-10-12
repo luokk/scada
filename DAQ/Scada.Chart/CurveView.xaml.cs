@@ -255,10 +255,19 @@ namespace Scada.Chart
             set;
         }
 
+        private string displayName;
+
         public string DisplayName
         {
-            get;
-            set;
+            get
+            {
+                return this.displayName;
+            }
+            set
+            {
+                this.displayName = value;
+                this.UpdateDisplayName(value);
+            }
         }
 
         private Point lastPoint = default(Point);
@@ -425,6 +434,7 @@ namespace Scada.Chart
             SolidColorBrush labelBrush = new SolidColorBrush(Color.FromRgb(219, 219, 219));
             
             TextBlock displayLabel = new TextBlock();
+            this.displayNameLabel = displayLabel;
             displayLabel.Text = displayName;
             // displayLabel.Background = labelBrush;
             
@@ -447,6 +457,12 @@ namespace Scada.Chart
 
             valueBorder.Child = valueLabel;
             this.CanvasView.Children.Add(valueBorder);
+        }
+
+        private void UpdateDisplayName(string displayName)
+        {
+            if (this.displayNameLabel != null)
+                this.displayNameLabel.Text = displayName;
         }
 
         private bool mouseLeftButtonDown = false;
@@ -543,5 +559,7 @@ namespace Scada.Chart
         {
             this.ResetButton.Visibility = System.Windows.Visibility.Hidden;
         }
+
+        public TextBlock displayNameLabel { get; set; }
     }
 }
