@@ -179,6 +179,14 @@ namespace Scada.Chart
             double s = x * this.GraduationCount * this.Interval / this.Graduation;
             if (!double.IsNaN(s))
             {
+                if (this.Interval == 300)
+                {
+                    s /= 10;
+                }
+                if (this.Interval == 3600)
+                {
+                    s /= 120;
+                }
                 return this.BeginTime.AddSeconds(s);
             }
             return this.BeginTime;
