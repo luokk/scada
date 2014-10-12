@@ -482,6 +482,7 @@ namespace Scada.Chart
             Mouse.Capture(null);
             if (this.mouseLeftButtonDown)
             {
+                this.selEndPoint = e.GetPosition((UIElement)this.CanvasView);
                 this.DoRenderUpdate();
             }
             this.mouseLeftButtonDown = false;
