@@ -10,6 +10,7 @@ namespace Scada.Controls.Data
         TimeNew,
         TimeRecent,
         TimeRange,
+        TimeCurrent
     }
 
 	public delegate void OnDataArrivalBegin(DataArrivalConfig config);

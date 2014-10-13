@@ -129,11 +129,12 @@
                                         </ComboBox.Items>
                                     </ComboBox>
 
-                                    <ComboBox x:Name="IntervalSelect" Margin="5,0,5,0" Visibility="Collapsed">
+                                    <ComboBox x:Name="IntervalSelect" Margin="5,0,5,0" Visibility="Collapsed" SelectionChanged="IntervalSelect_SelectionChanged">
                                         <ComboBox.Items>
+                                            <Label>30秒</Label>
                                             <Label>5分钟均值</Label>
                                             <Label>1小时均值</Label>
-                                            <Label>日均值</Label>
+                                            <Label Visibility="Collapsed">日均值</Label>
                                         </ComboBox.Items>
                                     </ComboBox>
                                 </StackPanel>

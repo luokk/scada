@@ -109,7 +109,7 @@ namespace Scada.Controls
             {
                 if (this.Shown && this.deviceKey != currentDeviceKey)
                 {
-                    dispatcherTimer.Stop();
+                    dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
                     currentDeviceKey = this.deviceKey;
                     sc.Post(new SendOrPostCallback((o)=>
                     {
@@ -291,8 +291,6 @@ namespace Scada.Controls
                 theSearchView.MouseRightButtonUp += OnSearchListViewMouseRightButton;
             }
         }
-
-
 
         void OnSearchListViewMouseRightButton(object sender, MouseButtonEventArgs e)
         {
@@ -518,6 +516,12 @@ namespace Scada.Controls
             using (var cmd = this.dbConn.CreateCommand())
             {
                 this.searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, cmd);
+
+                if (this.searchDataSource.Count == 0)
+                {
+                    MessageBox.Show("没有找到数据");
+                    return;
+                }
             }
             // int interval = this.currentInterval;
             this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
@@ -531,11 +535,14 @@ namespace Scada.Controls
                 searchListView.ItemsSource = this.searchData;
                 if (this.deviceKey == DataProvider.DeviceKey_Hpic)
                 {
-                    ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                    ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30);
                 }
                 else
                 {
-                    ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                    if (this.graphSearchView != null)
+                    {
+                        ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                    }
                 }
             }
         }
@@ -620,13 +627,24 @@ namespace Scada.Controls
 
         private void ExportDataListToFile(List<Dictionary<string, object>> dataList)
         {
-            DateTime now = DateTime.Now;
-            string fileName = string.Format("{0}-{1}-{2}-{3}.csv", now.Year, now.Month, now.Day, now.Ticks);
-            string filePath = string.Format("./csv/{0}", fileName);
-
             if (!Directory.Exists("./csv"))
             {
                 Directory.CreateDirectory("./csv");
+            }
+
+            string filePath = string.Empty;
+            System.Windows.Forms.SaveFileDialog fileDialog = new System.Windows.Forms.SaveFileDialog();
+            fileDialog.InitialDirectory = "./csv";
+            fileDialog.Filter = "CSV (*.csv)|*.csv|All files (*.*)|*.*";
+            fileDialog.FilterIndex = 1;
+            fileDialog.RestoreDirectory = true;
+            if (fileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                filePath = fileDialog.FileName;
+            }
+            else
+            {
+                return;
             }
 
             using (StreamWriter sw = new StreamWriter(filePath))
@@ -682,27 +700,6 @@ namespace Scada.Controls
 
         public int currentInterval { get; set; }
 
-        private void IntervalSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            /*
-            switch (this.FrList.SelectedIndex)
-            {
-                case 0:
-                    this.currentInterval = 30;
-                    break;
-                case 1:
-                    this.currentInterval = 60 * 5;
-                    break;
-                case 2:
-                    this.currentInterval = 60 * 60;
-                    break;
-                default:
-                    this.currentInterval = 30;
-                    break;
-            }   
-            */
-        }
-
         private void SearchChartViewTabItemIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if ((bool)e.NewValue)
@@ -721,6 +718,8 @@ namespace Scada.Controls
         }
 
         private bool shown = false;
+
+        public int selectedInterval = 30;
         
         public string selectedField;
 
@@ -761,6 +760,37 @@ namespace Scada.Controls
         public void AddField(string field)
         {
             this.FieldSelect.Items.Add(field);
+        }
+
+        // Only for HPIC
+        private void IntervalSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox s = (ComboBox)e.Source;
+            if (this.searchData == null)
+            {
+                s.SelectedIndex = 0;
+                return;
+            }
+
+            if (s.SelectedIndex == 0)
+            {
+                this.selectedInterval = 30;
+            }
+            else if (s.SelectedIndex == 1)
+            {
+                this.selectedInterval = 300;
+            }
+            else if (s.SelectedIndex == 2)
+            {
+                this.selectedInterval = 3600;
+            }
+            else if (s.SelectedIndex == 2)
+            {
+                this.selectedInterval = 3600 * 24;
+            }
+
+            ((SearchHpicGraphView)this.graphSearchView).Interval = this.selectedInterval;
+            ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.selectedInterval);
         }
 
         private void FieldSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)

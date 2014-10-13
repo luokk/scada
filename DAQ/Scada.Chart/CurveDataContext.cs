@@ -136,6 +136,10 @@ namespace Scada.Chart
             {
                 d *= 10;
             }
+            else if (this.Interval == 3600)
+            {
+                d *= 120;
+            }
             int index = this.GetIndexByTime(time);
             double x = index * d;
 
@@ -146,7 +150,7 @@ namespace Scada.Chart
             }
             else if (value is bool)
             {
-                y = (bool)value ? 1.0 : 0.0;
+                y = (bool)value ? 0.8 : 0.4;
             }
             else
             {
@@ -175,6 +179,14 @@ namespace Scada.Chart
             double s = x * this.GraduationCount * this.Interval / this.Graduation;
             if (!double.IsNaN(s))
             {
+                if (this.Interval == 300)
+                {
+                    s /= 10;
+                }
+                if (this.Interval == 3600)
+                {
+                    s /= 120;
+                }
                 return this.BeginTime.AddSeconds(s);
             }
             return this.BeginTime;
@@ -195,11 +207,20 @@ namespace Scada.Chart
             this.Clear();
             this.UpdateTimeAxis(this.BeginTime, this.EndTime, false);
             this.RenderCurve(this.BeginTime, this.EndTime, this.currentValueKey);
+
+            if (this.chartView.updateRangeAction != null)
+            {
+                this.chartView.updateRangeAction(beginPointX, endPointX);
+            }
         }
 
         internal void Reset()
         {
             this.SetDataSource(this.data, this.currentValueKey, this.timeKey);
+            if (this.chartView.resetAction != null)
+            {
+                this.chartView.resetAction();
+            }
         }
     }
 }
