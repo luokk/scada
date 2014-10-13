@@ -367,7 +367,7 @@ namespace Scada.MainVision
                         }
                         catch (Exception e)
                         {
-                            break;
+                            // break;
                             // No this field.
                         }
                     }

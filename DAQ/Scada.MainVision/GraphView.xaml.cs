@@ -134,11 +134,11 @@ namespace Scada.MainVision
             var dbCmd = dbConn.CreateCommand();
             dispatcherTimer.Tick += (s, evt) =>
             {
-                dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
+                dispatcherTimer.Interval = new TimeSpan(0, 0, 8);
                 DateTime fromTime = DateTime.Now.AddHours(-2);
                 var data = DBDataProvider.Instance.RefreshTimeRange(this.DeviceKey, fromTime, DateTime.Now, dbCmd);
 
-                this.ChartView.SetDataSource(data, "flow");
+                this.ChartView.SetDataSource2(data, "flow");
             };
             dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
             dispatcherTimer.Start();
