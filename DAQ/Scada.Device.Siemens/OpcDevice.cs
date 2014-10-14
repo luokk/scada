@@ -300,8 +300,6 @@ namespace Scada.Device.Siemens
                             return;
                         }
 
-                        this.lastRecordTime = time;
-
                         if (this.beginTime == default(DateTime))
                         {
                             this.beginTime = time;
@@ -325,44 +323,18 @@ namespace Scada.Device.Siemens
                         byte statusb = (status == "1") ? (byte)1 : (byte)0;
 
                         // add alarm
-                        string alarm = values[9].ToString();
-                        if (alarm.Equals("False"))
-                        {
-                            values[9] = 0;
-                        }
-                        else
-                        {
-                            values[9] = 1;
-                        }
-
-                        alarm = values[10].ToString();
-                        if (alarm.Equals("False"))
-                        {
-                            values[10] = 0;
-                        }
-                        else
-                        {
-                            values[10] = 1;
-                        }
-
-                        alarm = values[16].ToString();
-                        if (alarm.Equals("False"))
-                        {
-                            values[16] = 0;
-                        }
-                        else
-                        {
-                            values[16] = 1;
-                        }
+                        bool filter_alarm = (values[10].ToString().Contains("True")) ? true : false;
+                        bool flow_alarm = (values[9].ToString().Contains("True")) ? true : false;
+                        bool mainpower_alarm = (values[16].ToString().Contains("True")) ? true : false;
 
                         object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], 
-                            values[5], statusb, values[9], values[10], values[16] };
+                            values[5], statusb, filter_alarm, flow_alarm, mainpower_alarm };
                         DeviceData deviceData = new DeviceData(this, data);
                         deviceData.InsertIntoCommand = this.insertSQL;
-
-                        RecordManager.DoSystemEventRecord(this, this.insertSQL, RecordType.Event, true);
-
                         RecordManager.DoDataRecord(deviceData);
+                        
+                        // 成功记录后，再给lastRecordTime赋值
+                        this.lastRecordTime = time;
 
                         /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         if (this.start)
