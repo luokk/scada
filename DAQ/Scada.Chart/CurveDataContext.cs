@@ -83,6 +83,30 @@ namespace Scada.Chart
             
         }
 
+        public void SetDataSource2(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
+        {
+            this.data = data;
+            this.timeKey = timeKey;
+
+            try
+            {
+                DateTime b = DateTime.Parse((string)data[0][timeKey]);
+                DateTime e = DateTime.Parse((string)data[data.Count - 1][timeKey]);
+                this.BeginTime = new DateTime(b.Year, b.Month, b.Day, b.Hour, b.Minute, b.Second / 30 * 30);
+                this.EndTime = e;
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            this.currentValueKey = valueKey;
+            this.Interval = this.chartView.Interval;
+            this.UpdateTimeAxis(this.BeginTime, this.EndTime);
+            this.RenderCurve(this.BeginTime, this.EndTime, valueKey);
+
+        }
+
         private void RenderCurve(DateTime beginTime, DateTime endTime, string valueKey)
         {
             if (this.data == null)

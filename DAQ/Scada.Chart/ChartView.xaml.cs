@@ -466,6 +466,12 @@ namespace Scada.Chart
             this.UpdateCurve();
         }
 
+        public void SetDataSource2(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
+        {
+            this.curveDataContext.SetDataSource2(data, valueKey, timeKey);
+            this.UpdateCurve();
+        }
+
         public void AddPoint(DateTime time, object value)
         {
             this.curveDataContext.AddPoint(time, value);
