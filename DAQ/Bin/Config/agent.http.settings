@@ -38,7 +38,7 @@
       <code field="Pressure">0901040103</code>
       <code field="Windspeed">0901040106</code>
       <code field="Direction">0901040105</code>
-      <code field="Raingauge">0901040104</code>
+      <code field="Rainspeed">0901040104</code>
       <code field="IfRain">0901040107</code>
     </device>
 
