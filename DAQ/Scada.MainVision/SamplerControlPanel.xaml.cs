@@ -33,6 +33,10 @@ namespace Scada.MainVision
         {
             InitializeComponent();
             this.DeviceKey = deviceKey;
+
+            DateTime dt = DateTime.Now;
+            string strDt = dt.ToString("SID-yyyyMMdd-HHmmss", null);
+            this.SidText.Text = strDt;
         }
 
         private bool CheckDeviceFile()
@@ -117,10 +121,6 @@ namespace Scada.MainVision
         {
             get;
             set;
-        }
-
-        private void IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
         }
 
         private bool IsStarted()

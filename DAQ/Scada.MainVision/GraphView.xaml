@@ -8,20 +8,24 @@
              xmlns:chart="clr-namespace:Scada.Chart;assembly=Scada.Chart"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="500">
-
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources.xaml"/>
+                <ResourceDictionary Source="ListViewRes.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0"/>
+            <RowDefinition Height="34"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal">
-            <TextBlock Margin="20,10,0,0"
-                       FontSize="15" FontWeight="Bold"/>
-            <TextBlock x:Name="cpuUsageText" Margin="10,10,0,0"
-                       FontSize="15"/>
+        <StackPanel Orientation="Horizontal" Margin="2">
+            <Button Style="{StaticResource ButtonKey}" Click="Button_Click">启动实时曲线</Button>
         </StackPanel>
 
-        <chart:ChartView x:Name="ChartView" Grid.Row="1" VerticalAlignment="Top" IsVisibleChanged="ChartView_IsVisibleChanged"></chart:ChartView>
+        <chart:ChartView x:Name="ChartView" Grid.Row="1" VerticalAlignment="Top"></chart:ChartView>
         
     </Grid>
 </UserControl>

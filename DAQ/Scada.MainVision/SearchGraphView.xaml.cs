@@ -1,75 +1,50 @@
 ﻿
-using Scada.Controls.Data;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Scada.Chart;
-using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace Scada.MainVision
 {
     /// <summary>
     /// Interaction logic for GraphViewPanel.xaml in MainVision
     /// </summary>
-    public partial class SearchGraphView : UserControl
+    public partial class SearchGraphView : System.Windows.Controls.UserControl
     {
         public const string TimeKey = "Time";
 
         DateTime now = DateTime.Now;
 
-        // private DataListener dataListener;
-        //private List<Dictionary<string, object>> dataList = new List<Dictionary<string, object>>();
-
-        private bool realTime = true;
-
         static Color[] colors = { Colors.Green, Colors.Red, Colors.Blue, Colors.OrangeRed, Colors.Purple };
         
         private Dictionary<string, CurveDataContext> dataSources = new Dictionary<string, CurveDataContext>();
-        
-        // private DataArrivalConfig config;
-
-        // private Dictionary<string, object> lastEntry;
-
-        // private bool baseTimeSet = false;
 
         public SearchGraphView()
         {
             InitializeComponent();
-            this.realTime = false;
-            this.SearchChartView.RealTimeMode = realTime;
+
         }
 
-        public void SetDataSource(List<Dictionary<string, object>> dataSource)
+        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey)
         {
             if (dataSource == null || dataSource.Count == 0)
             {
                 return;
             }
-            this.SearchChartView.ClearPoints();
-
-            var entry0 = dataSource[0];
-            var entryf = dataSource.Last();
-            DateTime beginTime = DateTime.Parse((string)entry0["time"]);
-            DateTime finalTime = DateTime.Parse((string)entryf["time"]);
-
-            this.SearchChartView.UpdateTimeAxis(beginTime, finalTime, dataSource, dataSource.Count());
-            this.SearchChartView.SetDataPoints(dataSource);
-            /*
-            foreach (var e in dataSource)
+            if (valueKey == "temperature")
             {
-                this.SearchChartView.AddCurvesDataPoint(e);
+                this.SearchChartView.SetCurveDisplayName("温度");
             }
-            */
+            else if (valueKey == "pressure")
+            {
+                this.SearchChartView.SetCurveDisplayName("气压");
+            }
+            else if (valueKey == "windspeed")
+            {
+                this.SearchChartView.SetCurveDisplayName("风速");
+            }
+            this.SearchChartView.SetDataSource(dataSource, valueKey);
         }
 
         public int Interval
@@ -88,7 +63,7 @@ namespace Scada.MainVision
         public void AddLineName(string deviceKey, string lineName, string displayName)
         {
             // TODO:
-            if (lineName.IndexOf("Doserate") >= 0)
+            if (lineName.IndexOf("DoseRate") >= 0)
             {
                 displayName = displayName.Replace("μSv/h", "nSv/h");
             }
@@ -97,20 +72,24 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
+            if (deviceKey == DataProvider.DeviceKey_AIS || deviceKey == DataProvider.DeviceKey_MDS)
+            {
+                this.SearchChartView.SetCurveDisplayName("瞬时流量");
+            }
+            else if (deviceKey == DataProvider.DeviceKey_NaI)
+            {
+                this.SearchChartView.SetCurveDisplayName("剂量率");
+            }
+            else if (deviceKey == DataProvider.DeviceKey_Weather)
+            {
+                this.SearchChartView.SetCurveDisplayName("温度");
+            }
+            this.SearchChartView.SetValueRange(item.Min, item.Max);
 
-            SearchCurveView curveView = this.SearchChartView.AddCurveView(lineName, displayName);
-            
-            curveView.Max = item.Max;
-            curveView.Min = item.Min;
-            curveView.Height = item.Height;
-            CurveDataContext dataContext = curveView.CreateDataContext(lineName, displayName);
-
-            this.dataSources.Add(lineName.ToLower(), dataContext);
         }
 
-        private void AddTimePoint(int index, Dictionary<string, object> entry)
+        private void AddTimePoint(DateTime time, Dictionary<string, object> entry)
         {
-            UpdateResult result = UpdateResult.None;
             foreach (string key in dataSources.Keys)
             {
                 // 存在这条曲线
@@ -126,28 +105,25 @@ namespace Scada.MainVision
                         }
                     }
 
-                    CurveDataContext dataContext = dataSources[key];
-                    result = dataContext.AddTimeValuePair(index * 5, r);
+                    //this.CurveDataContext dataContext = dataSources[key];
+                    //dataContext.AddPoint(time, r);
                 }
             }
-
-            if (UpdateResult.Overflow == result)
-            {
-                this.SearchChartView.UpdateTimeAxis(1);
-            }
-        }
-
-        private void ChartView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if ((bool)e.NewValue) // Shown
-            {
-            }
-
         }
 
         internal void SaveChart()
         {
-            this.SearchChartView.SaveChart();
+            string filePath = string.Empty;
+            System.Windows.Forms.SaveFileDialog fileDialog = new SaveFileDialog();
+            fileDialog.InitialDirectory = "C://";
+            fileDialog.Filter = "曲线图片 (*.bmp)|*.bmp|All files (*.*)|*.*";
+            fileDialog.FilterIndex = 1;
+            fileDialog.RestoreDirectory = true;
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                filePath = fileDialog.FileName;
+                this.SearchChartView.SaveChart(filePath);
+            }            
         }
     }
 

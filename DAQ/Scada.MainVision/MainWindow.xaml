@@ -62,10 +62,11 @@
                 <MenuItem Header="日志管理" FontSize="14">
                     <MenuItem Header="实时日志管理器" FontSize="14"></MenuItem>
                 </MenuItem>
-                <!--3-->
+                <!--
                 <MenuItem Header="设置管理" FontSize="14">
                     <MenuItem Header="基本设置" FontSize="14"></MenuItem>
                 </MenuItem>
+                -->
                 <!--4-->
                 <MenuItem Header="帮助" FontSize="14">
                     <MenuItem Header="快速入门" FontSize="14"></MenuItem>
@@ -79,7 +80,7 @@
             <!-- Background="#535353"
             <Image Source="Images/logo.png" Stretch="None" HorizontalAlignment="Left" Margin="5, 0, 0, 0"></Image>
             -->
-            <TextBlock FontFamily="微软雅黑" FontSize="16" Margin="15, 8, 0, 2">Nuclover - SCADA</TextBlock>
+            <TextBlock FontFamily="微软雅黑" FontSize="16" Margin="15, 8, 0, 2">辐射环境自动监测站管理系统</TextBlock>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
                 <Button BorderThickness="0" BorderBrush="Transparent" Click="OnMinButton"
                         Style="{StaticResource SystemButton}" Opacity="0.4" Width="34" Height="30">

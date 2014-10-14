@@ -9,7 +9,7 @@
 
     <m:CanvasEx AllowDragging="True">
         <m:CanvasEx.Background>
-            <ImageBrush ImageSource="Images/background.png" Stretch="UniformToFill"></ImageBrush>
+            <ImageBrush ImageSource="Images/background.png" Stretch="Uniform"></ImageBrush>
         </m:CanvasEx.Background>
         <!--
         <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold">高压电离室</Label>
@@ -34,12 +34,15 @@
         <m:SmartDataPane x:Name="hpicPane" Title="高压电离室" Canvas.Left="44" Canvas.Top="35">
         </m:SmartDataPane>
 
-        <m:SmartDataPane x:Name="weatherPane" Title="气象站" Canvas.Left="220" Canvas.Top="178">
+        <m:SmartDataPane x:Name="weatherPane" Title="气象站" Canvas.Left="44" Canvas.Top="354">
         </m:SmartDataPane>
 
-        <m:SmartDataPane x:Name="naiPane" Title="NaI谱仪" Canvas.Left="273" Canvas.Top="49">
+        <m:SmartDataPane x:Name="naiPane" Title="NaI谱仪" Canvas.Left="345" Canvas.Top="35">
         </m:SmartDataPane>
 
+        <m:SmartDataPane x:Name="rainPane" Title="感雨器" Canvas.Left="345" Canvas.Top="235">
+        </m:SmartDataPane>
+        
         <m:SmartDataPane x:Name="mdsPane" Title="超大流量气溶胶采样器" Canvas.Left="680" Canvas.Top="35">
         </m:SmartDataPane>
 

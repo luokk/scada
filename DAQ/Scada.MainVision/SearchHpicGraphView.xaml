@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Scada.MainVision.SearchGraphView"
+﻿<UserControl x:Class="Scada.MainVision.SearchHpicGraphView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,11 +7,12 @@
              xmlns:local="clr-namespace:Scada.MainVision"
              xmlns:chart="clr-namespace:Scada.Chart;assembly=Scada.Chart"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="500">
+             d:DesignHeight="400" d:DesignWidth="500">
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="110"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
@@ -19,10 +20,14 @@
         </Grid.ColumnDefinitions>
         <chart:ChartView x:Name="SearchChartView" 
                          Grid.Row="0" 
+                         Grid.Column="0" Background="Black"
+                         VerticalAlignment="Bottom">
+        </chart:ChartView>
+        <chart:ChartView x:Name="SearchChartView2" 
+                         Grid.Row="1" 
                          Grid.Column="0" 
                          VerticalAlignment="Top">
-            
+
         </chart:ChartView>
-        
     </Grid>
 </UserControl>

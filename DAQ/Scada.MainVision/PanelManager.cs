@@ -75,26 +75,54 @@ namespace Scada.MainVision
                 {
                     panel.ListView = this.ShowListView(panel, dataListener);
                     panel.SearchView = this.ShowListView(panel, dataListener);
-                    panel.GraphView = this.ShowGraphView(panel, dataListener);
-                    panel.GraphSearchView = this.ShowSearchGraphView(panel, dataListener);
 
-                    // Notice; Comment 4-7.
-                    // panel.ListRecentData();
-                    // 是否显示 控制面板
+                    if (deviceKey != DataProvider.DeviceKey_Dwd && deviceKey != DataProvider.DeviceKey_Shelter)
+                    {
+                        panel.HasSerachDataChart = true;
+                        if (deviceKey == DataProvider.DeviceKey_Hpic)
+                        {
+                            panel.GraphSearchView = this.ShowSearchHpicGraphView(panel, dataListener);
+                        }
+                        else
+                        {
+                            panel.GraphSearchView = this.ShowSearchGraphView(panel, dataListener);
+                        }
+                    }
+
                     if (deviceKey == DataProvider.DeviceKey_MDS)
                     {
+                        panel.HasRealTimeChart = true;
+                        panel.GraphView = this.ShowGraphView(panel, dataListener);
+                        panel.selectedField = "flow";
                         panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_MDS);
                     }
                     else if (deviceKey == DataProvider.DeviceKey_AIS)
                     {
+                        panel.HasRealTimeChart = true;
+                        panel.GraphView = this.ShowGraphView(panel, dataListener);
+                        panel.selectedField = "flow";
                         panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_AIS);
+                    }
+                    else if (deviceKey == DataProvider.DeviceKey_Weather)
+                    {
+                        panel.FieldSelect.Visibility = Visibility.Visible;
+                        panel.FieldSelect.SelectedIndex = 0;
+                        panel.selectedField = "temperature";
+                    }
+                    else if (deviceKey == DataProvider.DeviceKey_Hpic)
+                    {
+                        panel.IntervalSelect.Visibility = Visibility.Visible;
+                        panel.IntervalSelect.SelectedIndex = 0;
+                        panel.selectedField = "doserate";
                     }
                     else if (deviceKey == DataProvider.DeviceKey_NaI)
                     {
                         panel.SetupContextMenu((ListView)panel.ListView);
                         panel.SetupContextMenu((ListView)panel.SearchView);
                         panel.EnergyPanel = this.ShowEnergyView(DataProvider.DeviceKey_NaI);
+                        panel.selectedField = "doserate";
                     }
+
                 }
 
                 if (this.currentPanel != null)
@@ -130,15 +158,12 @@ namespace Scada.MainVision
             return listView;
         }
 
-        // Real time graph
+        // RealTime GraphView (In f15 branch, only MDS and AIS has RealTime Graph...)
         public GraphView ShowGraphView(ListViewPanel panel, DataListener dataListener)
         {
             GraphView graphView = new GraphView();
             graphView.Interval = 30;
-            if (dataListener.DeviceKey == "scada.naidevice")
-            {
-                graphView.Interval = 60 * 5;
-            }
+
             graphView.AddDataListener(dataListener);
 
             var columnInfoList = dataListener.GetColumnsInfo();
@@ -146,10 +171,9 @@ namespace Scada.MainVision
 
             foreach (var columnInfo in columnInfoList)
             {
-                // Time would be deal as a Chart.
                 if (columnInfo.BindingName.ToLower() == "time")
                 {
-                    continue; // Do nothing would be OK.
+                    continue;
                 }
 
                 if (columnInfo.DisplayInChart)
@@ -165,12 +189,40 @@ namespace Scada.MainVision
         public SearchGraphView ShowSearchGraphView(ListViewPanel panel, DataListener dataListener)
         {
             SearchGraphView graphView = new SearchGraphView();
-            graphView.Interval = 30;
-            if (dataListener.DeviceKey == "scada.naidevice")
+            if (dataListener.DeviceKey == DataProvider.DeviceKey_NaI)
             {
                 graphView.Interval = 60 * 5;
             }
+            else
+            {
+                graphView.Interval = 30;
+            }
             /// graphView.AddDataListener(dataListener);
+
+            var columnInfoList = dataListener.GetColumnsInfo();
+            string deviceKey = dataListener.DeviceKey;
+
+            foreach (var columnInfo in columnInfoList)
+            {
+                // Time would be deal as a Chart.
+                if (columnInfo.BindingName.ToLower() == "time")
+                {
+                    continue;
+                }
+
+                if (columnInfo.DisplayInChart)
+                {
+                    graphView.AddLineName(deviceKey, columnInfo.BindingName, columnInfo.Header);
+                }
+            }
+
+            return graphView;
+        }
+
+        public SearchHpicGraphView ShowSearchHpicGraphView(ListViewPanel panel, DataListener dataListener)
+        {
+            SearchHpicGraphView graphView = new SearchHpicGraphView();
+            graphView.Interval = 30;
 
             var columnInfoList = dataListener.GetColumnsInfo();
             string deviceKey = dataListener.DeviceKey;
