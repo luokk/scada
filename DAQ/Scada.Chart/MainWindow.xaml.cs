@@ -68,9 +68,9 @@ namespace Scada.Chart
         {
             this.ChartView.SetValueRange(-110, 110);
 
-            DateTime t = DateTime.Parse("2014-10-02");
+            DateTime t = DateTime.Parse("2014-10-02 13:34:00");
             List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
-            for (long i = 0; i <= 3600 * 24 * 1; i += 30)
+            for (long i = 0; i < 3600 * 0.8; i += 30)
             {
                 if (i > 3600 * 4.2 && i < 3600 * 6.3)
                 {
@@ -87,8 +87,8 @@ namespace Scada.Chart
                 item.Add("doserate", (double)Math.Sin(3.14 / 288 * i / 30) * 100);
                 data.Add(item);
             }
-
-            this.ChartView.SetDataSource(data, "doserate");
+            this.ChartView.Interval = 30;
+            this.ChartView.SetDataSource2(data, "doserate");
         }
     }
 }

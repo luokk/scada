@@ -65,6 +65,8 @@ namespace Scada.MainVision
             ConfigItem item = entry.GetConfigItem(lineName);
             this.ChartView.SetCurveDisplayName("瞬时流量");
             this.ChartView.SetValueRange(item.Min, item.Max);
+            this.ChartView.HideResetButton();
+            this.StartRealTimeChart();
         }
 
 
@@ -124,24 +126,29 @@ namespace Scada.MainVision
 
         public DateTime lastTime { get; set; }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void StartRealTimeChart()
         {
-            if (this.dispatcherTimer != null)
-                return;
-
             this.dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             var dbConn = DBDataProvider.Instance.GetMySqlConnection();
             var dbCmd = dbConn.CreateCommand();
             dispatcherTimer.Tick += (s, evt) =>
             {
                 dispatcherTimer.Interval = new TimeSpan(0, 0, 8);
-                DateTime fromTime = DateTime.Now.AddHours(-2);
+                DateTime fromTime = DateTime.Now.AddMinutes(-48);
                 var data = DBDataProvider.Instance.RefreshTimeRange(this.DeviceKey, fromTime, DateTime.Now, dbCmd);
 
                 this.ChartView.SetDataSource2(data, "flow");
             };
             dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
             dispatcherTimer.Start();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.dispatcherTimer != null)
+                return;
+
+            this.StartRealTimeChart();
             this.StartChart = true;
         }
 

@@ -66,11 +66,6 @@ namespace Scada.Controls
 
         // private bool ShowChartViewBySearch = true;
 
-        // Must Use the <Full Name>
-        private System.Windows.Forms.Timer refreshDataTimer;
-
-        private Thread fetchDataThread;
-
         private MySqlConnection dbConn;
 
         private SynchronizationContext SynchronizationContext
@@ -119,7 +114,7 @@ namespace Scada.Controls
                 }
                 
             };
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
             dispatcherTimer.Start();
 
         }
