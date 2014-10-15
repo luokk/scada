@@ -163,9 +163,16 @@ namespace Scada.Device.Siemens
             string cmd = Encoding.UTF8.GetString(action);
             RecordManager.DoSystemEventRecord(this, string.Format("CMD={0}", cmd), RecordType.Event, true);
 
-            if (cmd.IndexOf("connect") >= 0)
-            {   
-                this.Connect();
+            if (cmd.Contains("connect"))
+            {
+                // 取设定的流量、时间
+                string strTemp = cmd.Substring(cmd.IndexOf(",") + 1, cmd.Length - cmd.IndexOf(",") - 1);
+                string strFlow = strTemp.Substring(0, strTemp.IndexOf(","));
+                string strTime = strTemp.Substring(strTemp.IndexOf(",") + 1, strTemp.Length - strTemp.IndexOf(",") - 1);
+
+                RecordManager.DoSystemEventRecord(this, string.Format("Flow={0}, Time={1}", strFlow, strTime), RecordType.Event, true);
+
+                this.Connect(strFlow, strTime);
             }
             else if (cmd.IndexOf("disconnect") >= 0)
             {
@@ -198,7 +205,7 @@ namespace Scada.Device.Siemens
             
         }
 
-        private void Connect()
+        private void Connect(string flow, string time)
         {
             try
             {
@@ -210,7 +217,7 @@ namespace Scada.Device.Siemens
 
                 this.OnConnect();
 
-                this.Write(new HandleCode(1, this.Flow), new HandleCode(2, this.Hours));
+                this.Write(new HandleCode(1, flow), new HandleCode(2, time));
                 this.connected = true;
 
                 this.timer = new System.Windows.Forms.Timer();
@@ -229,11 +236,9 @@ namespace Scada.Device.Siemens
         {
             if (this.connected)
             {
-                // this.beginTime = default(DateTime); // HERE, re-init
                 this.Write(new HandleCode(13, "2"));
                 this.starting = true;
-                // this.start = true;
-                this.PutDeviceFile(true);
+
                 RecordManager.DoSystemEventRecord(this, string.Format("Start SID={0}", this.Sid), RecordType.Event, true);
             }
         }
@@ -242,7 +247,6 @@ namespace Scada.Device.Siemens
         {
             if (this.connected)
             {
-                this.PutDeviceFile(false);
                 this.Write(new HandleCode(13, "4"));
                 this.stopping = true;
                 RecordManager.DoSystemEventRecord(this, string.Format("Stopping SID={0}", this.Sid), RecordType.Event, true);
@@ -299,7 +303,7 @@ namespace Scada.Device.Siemens
 
                     // 得到运行状态
                     string status = values[6].ToString();
-                    RecordManager.DoSystemEventRecord(this, string.Format("status={0}", status), RecordType.Event, true);
+                    //RecordManager.DoSystemEventRecord(this, string.Format("status={0}", status), RecordType.Event, true);
 
                     if (this.start)
                     {
@@ -338,17 +342,32 @@ namespace Scada.Device.Siemens
                             bool mainpower_alarm = (values[16].ToString().Contains("True")) ? true : false;
 
                             // 如果流量是负值，也是主电源报警
-                            int flow = int.Parse(values[3].ToString().Trim());
-                            if (flow < 0)
+                            try
                             {
-                                mainpower_alarm = true;
-                                values[3] = 0;
+                                // 瞬时流量
+                                float flow = float.Parse(values[3].ToString().Trim());
+                                if (flow < 0)
+                                {
+                                    mainpower_alarm = true;
+                                    values[3] = "0";
+                                }
+                                else if (flow == 0 && this.index > 1)
+                                {
+                                    mainpower_alarm = true;
+                                }
+                                else { }
+
+                                float volume = float.Parse(values[4].ToString().Trim());
+                                if (volume < 0)
+                                {
+                                    values[4] = "0";
+                                }
                             }
-                            else if (flow == 0 && this.index > 1)
+                            catch (Exception e2)
                             {
-                                mainpower_alarm = true;
+                                RecordManager.DoSystemEventRecord(this, string.Format("Flow={0}, Volume={1}",
+                                    values[3].ToString().Trim(), values[4].ToString().Trim()), RecordType.Error, true);
                             }
-                            else { }
 
                             object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], 
                             values[5], statusb, filter_alarm, flow_alarm, mainpower_alarm };
@@ -387,6 +406,7 @@ namespace Scada.Device.Siemens
                             {
                                 this.Sid = string.Format("SID-{0}", this.beginTime.ToString("yyyyMMdd-HHmmss"));
                             }
+                            this.PutDeviceFile(true);
                         }
                     }
                 }

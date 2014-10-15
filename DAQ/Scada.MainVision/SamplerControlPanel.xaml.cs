@@ -72,8 +72,10 @@ namespace Scada.MainVision
         {
             string strFlowSetting = this.FlowSettingText.Text;
             string strTimeSetting = this.TimeSettingText.Text;
+            string strCmd = string.Format("connect,{0},{1}", strFlowSetting, strTimeSetting);   
 
-            Command.Send(Ports.Main, GetRemoteCommand(string.Format("connect,{0},{1}", strFlowSetting, strTimeSetting)));
+            Command.Send(Ports.Main, GetRemoteCommand(strCmd));
+
             this.ConnectButton.IsEnabled = false;
             this.DisconnectButton.IsEnabled = true;
 
@@ -111,7 +113,18 @@ namespace Scada.MainVision
 
         private void OnStartButton(object sender, RoutedEventArgs e)
         {
-            string cmd = string.Format("start:Sid={0}", this.SidText.Text);
+            string sid = "";
+
+            if (this.SidText.Text == "")
+            {
+                sid = string.Format("SID-{0}", DateTime.Now.ToString("yyyyMMdd-HHmmss"));
+            }
+            else
+            {
+                sid = this.SidText.Text;
+            }
+
+            string cmd = string.Format("start:Sid={0}", sid);
             Command.Send(Ports.Main, GetRemoteCommand(cmd));
 
             this.StartButton.IsEnabled = false;
