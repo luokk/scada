@@ -163,7 +163,7 @@ namespace Scada.Device.Siemens
             string cmd = Encoding.UTF8.GetString(action);
             RecordManager.DoSystemEventRecord(this, string.Format("CMD={0}", cmd), RecordType.Event, true);
 
-            if (cmd.Contains("connect"))
+            if (cmd.StartsWith("connect"))
             {
                 // 取设定的流量、时间
                 string strTemp = cmd.Substring(cmd.IndexOf(",") + 1, cmd.Length - cmd.IndexOf(",") - 1);
@@ -174,11 +174,11 @@ namespace Scada.Device.Siemens
 
                 this.Connect(strFlow, strTime);
             }
-            else if (cmd.IndexOf("disconnect") >= 0)
+            else if (cmd == "disconnect")
             {
                 this.Disconnect();
             }
-            else if (cmd.IndexOf("start") >= 0)
+            else if (cmd == "start")
             {
                 int b = cmd.IndexOf("Sid=");
                 if (b > 0)
@@ -194,7 +194,7 @@ namespace Scada.Device.Siemens
 
                 this.Start();
             }
-            else if (cmd.IndexOf("stop") >= 0)
+            else if (cmd == "stop")
             {
                 this.StopDevice();
             }
