@@ -45,6 +45,9 @@ namespace Scada.Device.Siemens
 
         private DateTime lastRecordTime;
 
+        // 采样开始后的循环记录次数
+        private int index = 0;
+
         private string Flow
         {
             get;
@@ -289,6 +292,12 @@ namespace Scada.Device.Siemens
             OPCItemState[] states;
             if (this.group.SyncRead(OPCDATASOURCE.OPC_DS_DEVICE, handles, out states))
             {
+                object[] values = states.Select((s) => s.DataValue).ToArray();
+                string valueLine = string.Join(", ", values);
+
+                // 得到运行状态
+                string status = values[6].ToString();
+
                 if (this.start)
                 {
                     // Start
@@ -304,15 +313,13 @@ namespace Scada.Device.Siemens
                         {
                             this.beginTime = time;
                         }
-
-                        object[] values = states.Select((s) => s.DataValue).ToArray();
-                        string valueLine = string.Join(", ", values);
-                        RecordManager.DoSystemEventRecord(this, valueLine, RecordType.Origin, true);
-
                         this.latestTime = time;
-                        string status = values[6].ToString();
-                        RecordManager.DoSystemEventRecord(this, string.Format("STATUS:{0}", status), RecordType.Event, true);
-                        if (this.stopping && status == "0")
+
+                        // RecordManager.DoSystemEventRecord(this, valueLine, RecordType.Origin, true);
+                        // RecordManager.DoSystemEventRecord(this, string.Format("STATUS:{0}", status), RecordType.Event, true);
+
+                        // status ==0时，采样器即为停止
+                        if (status == "0")
                         {
                             this.endTime = time;
                             this.stopping = false;
@@ -327,6 +334,25 @@ namespace Scada.Device.Siemens
                         bool flow_alarm = (values[9].ToString().Contains("True")) ? true : false;
                         bool mainpower_alarm = (values[16].ToString().Contains("True")) ? true : false;
 
+                        // 如果流量是负值，也是主电源报警
+                        if (values[3] is int)
+                        {
+                            if ((int)values[3] < 0)
+                            {
+                                mainpower_alarm = true;
+                                values[3] = 0;
+                            }
+                            else if ((int)values[3] == 0 && this.index > 1)
+                            {
+                                mainpower_alarm = true;
+                            }
+                            else { }
+                        }
+                        else
+                        {
+                            RecordManager.DoSystemEventRecord(this, "values[3] is not int type", RecordType.Error, true);
+                        }
+
                         object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], 
                             values[5], statusb, filter_alarm, flow_alarm, mainpower_alarm };
                         DeviceData deviceData = new DeviceData(this, data);
@@ -335,6 +361,8 @@ namespace Scada.Device.Siemens
                         
                         // 成功记录后，再给lastRecordTime赋值
                         this.lastRecordTime = time;
+                        this.index++;
+
 
                         /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                         if (this.start)
@@ -347,8 +375,6 @@ namespace Scada.Device.Siemens
                 else
                 {
                     // Not start
-                    object[] values = states.Select((s) => s.DataValue).ToArray();
-                    string status = values[6].ToString();
                     if (status == "0")
                     {
                         this.start = false;
