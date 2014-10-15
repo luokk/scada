@@ -34,9 +34,19 @@ namespace Scada.MainVision
             InitializeComponent();
             this.DeviceKey = deviceKey;
 
-            DateTime dt = DateTime.Now;
-            string strDt = dt.ToString("SID-yyyyMMdd-HHmmss", null);
-            this.SidText.Text = strDt;
+            if (this.DeviceKey.Equals("scada.mds"))
+            {
+                this.Text6.Content = "(立方米/小时)";
+                this.TimeSettingText.Text = "12";
+                this.FlowSettingText.Text = "600";
+            }
+            else if (this.DeviceKey.Equals("scada.ais"))
+            {
+                this.Text6.Content = "（升/小时）";
+                this.TimeSettingText.Text = "12";
+                this.FlowSettingText.Text = "2400";
+            }
+            else { }
         }
 
         private bool CheckDeviceFile()
@@ -60,7 +70,10 @@ namespace Scada.MainVision
 
         private void OnConnectButton(object sender, RoutedEventArgs e)
         {
-            Command.Send(Ports.Main, GetRemoteCommand("connect"));
+            string strFlowSetting = this.FlowSettingText.Text;
+            string strTimeSetting = this.TimeSettingText.Text;
+
+            Command.Send(Ports.Main, GetRemoteCommand(string.Format("connect,{0},{1}", strFlowSetting, strTimeSetting)));
             this.ConnectButton.IsEnabled = false;
             this.DisconnectButton.IsEnabled = true;
 

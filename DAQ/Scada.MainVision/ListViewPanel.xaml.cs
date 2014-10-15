@@ -92,6 +92,10 @@ namespace Scada.Controls
             this.dataProvider = dataProvider;
 
             this.dbConn = this.dataProvider.GetMySqlConnection();
+            if (dbConn == null)
+            {
+                return;
+            }
 
             this.HasSerachDataChart = false;
             this.HasRealTimeChart = false;

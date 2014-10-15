@@ -68,13 +68,17 @@ namespace Scada.Device.Siemens
 
         private string insertSQL;
 
-        private DateTime beginTime;
+        private DateTime beginTime = default(DateTime);
 
-        private DateTime endTime;
+        private DateTime endTime = default(DateTime);
 
-        private DateTime latestTime;
+        private DateTime latestTime = default(DateTime);
 
         private string tableName;
+
+        // mv中启动、关闭
+        private bool stopping = false;
+        private bool starting = false;
 
         public OpcDevice(DeviceEntry entry)
         {
@@ -210,7 +214,7 @@ namespace Scada.Device.Siemens
                 this.connected = true;
 
                 this.timer = new System.Windows.Forms.Timer();
-                this.timer.Interval = 3000;
+                this.timer.Interval = 5000;
                 this.timer.Tick += this.OnDataTimer;
                 this.timer.Start();
             }
@@ -225,22 +229,20 @@ namespace Scada.Device.Siemens
         {
             if (this.connected)
             {
-                this.beginTime = default(DateTime); // HERE, re-init
+                // this.beginTime = default(DateTime); // HERE, re-init
                 this.Write(new HandleCode(13, "2"));
-                this.start = true;
+                this.starting = true;
+                // this.start = true;
                 this.PutDeviceFile(true);
                 RecordManager.DoSystemEventRecord(this, string.Format("Start SID={0}", this.Sid), RecordType.Event, true);
             }
         }
-
-        private bool stopping = false;
 
         private void StopDevice()
         {
             if (this.connected)
             {
                 this.PutDeviceFile(false);
-                // this.MarkEndTime(); HERE 应该在真正停止后在update db
                 this.Write(new HandleCode(13, "4"));
                 this.stopping = true;
                 RecordManager.DoSystemEventRecord(this, string.Format("Stopping SID={0}", this.Sid), RecordType.Event, true);
@@ -283,111 +285,119 @@ namespace Scada.Device.Siemens
             }
         }
 
+        // 每5s循环一次
         private void OnDataTimer(object sender, EventArgs e)
         {
-            // init
-            this.endTime = default(DateTime);
-
-            int[] handles = this.results.Select((r) => r.HandleServer).ToArray();
-            OPCItemState[] states;
-            if (this.group.SyncRead(OPCDATASOURCE.OPC_DS_DEVICE, handles, out states))
+            try
             {
-                object[] values = states.Select((s) => s.DataValue).ToArray();
-                string valueLine = string.Join(", ", values);
-
-                // 得到运行状态
-                string status = values[6].ToString();
-
-                if (this.start)
+                int[] handles = this.results.Select((r) => r.HandleServer).ToArray();
+                OPCItemState[] states;
+                if (this.group.SyncRead(OPCDATASOURCE.OPC_DS_DEVICE, handles, out states))
                 {
-                    // Start
-                    DateTime time;
-                    if (this.OnRightTime(out time))
+                    object[] values = states.Select((s) => s.DataValue).ToArray();
+                    string valueLine = string.Join(", ", values);
+
+                    // 得到运行状态
+                    string status = values[6].ToString();
+                    RecordManager.DoSystemEventRecord(this, string.Format("status={0}", status), RecordType.Event, true);
+
+                    if (this.start)
                     {
-                        if (time == this.lastRecordTime)
+                        // Start
+                        DateTime time;
+                        if (this.OnRightTime(out time))
                         {
-                            return;
-                        }
+                            if (time == this.lastRecordTime)
+                            {
+                                return;
+                            }
 
-                        if (this.beginTime == default(DateTime))
-                        {
-                            this.beginTime = time;
-                        }
-                        this.latestTime = time;
+                            this.latestTime = time;
 
-                        // RecordManager.DoSystemEventRecord(this, valueLine, RecordType.Origin, true);
-                        // RecordManager.DoSystemEventRecord(this, string.Format("STATUS:{0}", status), RecordType.Event, true);
+                            // RecordManager.DoSystemEventRecord(this, valueLine, RecordType.Origin, true);
+                            // RecordManager.DoSystemEventRecord(this, string.Format("STATUS:{0}", status), RecordType.Event, true);
 
-                        // status ==0时，采样器即为停止
-                        if (status == "0")
-                        {
-                            this.endTime = time;
-                            this.stopping = false;
-                            this.start = false;
-                            RecordManager.DoSystemEventRecord(this, string.Format("Stopped SID={0}", this.Sid), RecordType.Event, true);
-                            this.PutDeviceFile(false);
-                        }
-                        byte statusb = (status == "1") ? (byte)1 : (byte)0;
+                            // status ==0时，采样器即为停止
+                            if (status == "0")
+                            {
+                                this.endTime = DateTime.Now;
 
-                        // add alarm
-                        bool filter_alarm = (values[10].ToString().Contains("True")) ? true : false;
-                        bool flow_alarm = (values[9].ToString().Contains("True")) ? true : false;
-                        bool mainpower_alarm = (values[16].ToString().Contains("True")) ? true : false;
+                                // 表示收到了mv的停止指令
+                                if (this.stopping)
+                                { this.stopping = false; }
+                                
+                                this.start = false;
+                                RecordManager.DoSystemEventRecord(this, string.Format("Stopped SID={0}", this.Sid), RecordType.Event, true);
+                                this.PutDeviceFile(false);
+                            }
+                            byte statusb = (status == "1") ? (byte)1 : (byte)0;
 
-                        // 如果流量是负值，也是主电源报警
-                        if (values[3] is int)
-                        {
-                            if ((int)values[3] < 0)
+                            // add alarm
+                            bool filter_alarm = (values[10].ToString().Contains("True")) ? true : false;
+                            bool flow_alarm = (values[9].ToString().Contains("True")) ? true : false;
+                            bool mainpower_alarm = (values[16].ToString().Contains("True")) ? true : false;
+
+                            // 如果流量是负值，也是主电源报警
+                            int flow = int.Parse(values[3].ToString().Trim());
+                            if (flow < 0)
                             {
                                 mainpower_alarm = true;
                                 values[3] = 0;
                             }
-                            else if ((int)values[3] == 0 && this.index > 1)
+                            else if (flow == 0 && this.index > 1)
                             {
                                 mainpower_alarm = true;
                             }
                             else { }
-                        }
-                        else
-                        {
-                            RecordManager.DoSystemEventRecord(this, "values[3] is not int type", RecordType.Error, true);
-                        }
 
-                        object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], 
+                            object[] data = new object[] { time, this.Sid, this.beginTime, this.endTime, values[3], values[4], 
                             values[5], statusb, filter_alarm, flow_alarm, mainpower_alarm };
-                        DeviceData deviceData = new DeviceData(this, data);
-                        deviceData.InsertIntoCommand = this.insertSQL;
-                        RecordManager.DoDataRecord(deviceData);
-                        
-                        // 成功记录后，再给lastRecordTime赋值
-                        this.lastRecordTime = time;
-                        this.index++;
+                            DeviceData deviceData = new DeviceData(this, data);
+                            deviceData.InsertIntoCommand = this.insertSQL;
+                            RecordManager.DoDataRecord(deviceData);
 
-
-                        /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                        if (this.start)
-                        {
-                            this.MarkEndTime(this.endTime);
+                            // 成功记录后，再给lastRecordTime赋值
+                            this.lastRecordTime = time;
+                            this.index++;
                         }
-                        */
+                    }
+                    else
+                    {
+                        // Not start
+                        if (status == "0")
+                        {
+                            this.start = false;
+                            this.beginTime = default(DateTime);
+                            this.Sid = null;
+                            this.index = 0;
+                        }
+                        else if (status == "1")
+                        {
+                            this.start = true;
+                            this.beginTime = DateTime.Now;
+                            this.endTime = default(DateTime);
+                            this.index = 1;
+
+                            // 表示收到了mv的启动指令
+                            if (this.starting)
+                            { this.starting = false; }
+
+                            // 直接从设备端启动
+                            if (this.Sid == null)
+                            {
+                                this.Sid = string.Format("SID-{0}", this.beginTime.ToString("yyyyMMdd-HHmmss"));
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    // Not start
-                    if (status == "0")
-                    {
-                        this.start = false;
-                    }
-                    else if (status == "1")
-                    {
-                        this.start = true;
-                    }
+                    RecordManager.DoSystemEventRecord(this, "Read Faild", RecordType.Error, true);
                 }
             }
-            else
+            catch (Exception e1)
             {
-                RecordManager.DoSystemEventRecord(this, "Read Faild", RecordType.Event, true);
+                RecordManager.DoSystemEventRecord(this, string.Format("OnDataTimer Error: {0}", e1.Message), RecordType.Error, true);
             }
         }
 
