@@ -130,6 +130,11 @@ namespace Scada.MainVision
         {
             this.dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             var dbConn = DBDataProvider.Instance.GetMySqlConnection();
+            if (dbConn == null)
+            {
+                return;
+            }
+
             var dbCmd = dbConn.CreateCommand();
             dispatcherTimer.Tick += (s, evt) =>
             {
