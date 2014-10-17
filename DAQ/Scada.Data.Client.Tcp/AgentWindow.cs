@@ -626,12 +626,16 @@ namespace Scada.Data.Client.Tcp
                     int count = this.connectionHistory.Count;
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.ConnectedTime = DateTime.Now;
+
+                    this.agent.StopConnectCountryCenter(true);
                 }
                 else if (NotifyEvents.Disconnect == notify)
                 {
                     int count = this.connectionHistory.Count;
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.DisconnectedTime = DateTime.Now;
+
+                    this.agent.StartConnectCountryCenter(true);
                 }
                 else if (NotifyEvents.HandleEvent == notify)
                 {
