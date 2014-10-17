@@ -137,65 +137,55 @@ namespace Scada.Declare
 
             foreach (string vFile in Directory.GetFiles(originPath))
             {
-                string filename = Path.GetFileName(vFile);
-                filename = filename.ToLower();
-                if (File.GetLastWriteTime(vFile) >= DateTime.Now.AddSeconds(-150000)) // 如果文件是在150秒内修改
+                try
                 {
-                    if (filename.Contains("qaspectra.spe"))
+                    string filename = Path.GetFileName(vFile);
+                    filename = filename.ToLower();
+                    if (File.GetLastWriteTime(vFile) >= DateTime.Now.AddSeconds(-120)) // 如果文件是在2分钟内修改
                     {
-                        string NewSpecName = "qaspectra" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
-                        File.Move(vFile, DES + "!" + NewSpecName);
+                        if (filename.Contains("qaspectra.spe"))
+                        {
+                            string NewSpecName = "qaspectra" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
+                            File.Move(vFile, DES + "!" + NewSpecName);
+                            
+                            this.Record(NewSpecName);
+                        }
+                        else if (filename.Contains("qareport.rpt"))
+                        {
+                            string NewReportName = "qareport" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
+                            File.Move(vFile, DES + "!" + NewReportName);
 
-                        this.Record(NewSpecName);
-                    }
-                    else if (filename.Contains("qareport.rpt"))
-                    {
-                        string NewReportName = "qareport" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
-                        File.Move(vFile, DES + "!" + NewReportName);
+                            this.Record(NewReportName);
+                        }
+                        else if (filename.Contains("samplespectra2-"))
+                        {
+                            int index = filename.LastIndexOf(".");
+                            string newfilenameA = filename.Substring(0, index) + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
+                            File.Move(vFile, DES + "!" + newfilenameA);
 
-                        this.Record(NewReportName);
-                    }
-                    else if (filename.Contains("samplespectra2-"))
-                    {
-                        int index = filename.LastIndexOf(".");
-                        string newfilenameA = filename.Substring(0, index) + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
-                        File.Move(vFile, DES + "!" + newfilenameA);
+                            this.Record(newfilenameA);
+                        }
+                        else if (filename.Contains("samplespectra24.spe"))
+                        {
+                            string newfilenameB = "samplespectra24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
+                            File.Move(vFile, DES + "!" + newfilenameB);
 
-                        this.Record(newfilenameA);
-                    }
-                    else if (filename.Contains("samplespectra24.spe"))
-                    {
-                        string newfilenameB = "samplespectra24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
-                        File.Move(vFile, DES + "!" + newfilenameB);
-
-                        this.Record(newfilenameB);
-                    }
-                    else if (filename.Contains("samplereport24.rpt"))
-                    {
-                        if (!this.ExistSampleReportFile(DES))
+                            this.Record(newfilenameB);
+                        }
+                        else if (filename.Contains("samplereport24.rpt"))
                         {
                             string newfilenameC = "samplereport24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".rpt";
-                            File.Copy(vFile, DES + "!" + newfilenameC, true);
-
+                            File.Move(vFile, DES + "!" + newfilenameC);
+                            
                             this.Record(newfilenameC);
                         }
                     }
                 }
-            }
-        }
-
-        private bool ExistSampleReportFile(string destPath)
-        {
-            var files = Directory.GetFiles(destPath);
-            foreach (var file in files)
-            {
-                string filename = Path.GetFileName(file).ToLower();
-                if (filename.IndexOf("samplereport24") >= 0)
+                catch (Exception e)
                 {
-                    return true;
+                    return;
                 }
             }
-            return false;
         }
 
         public override void Start(string address)
