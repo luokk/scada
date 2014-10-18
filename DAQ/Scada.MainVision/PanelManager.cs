@@ -170,7 +170,7 @@ namespace Scada.MainVision
             GraphView graphView = new GraphView();
             graphView.Interval = 30;
 
-            graphView.AddDataListener(dataListener);
+            // graphView.AddDataListener(dataListener);
 
             var columnInfoList = dataListener.GetColumnsInfo();
             string deviceKey = dataListener.DeviceKey;

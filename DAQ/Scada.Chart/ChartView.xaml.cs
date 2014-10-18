@@ -525,6 +525,8 @@ namespace Scada.Chart
 
         public void SetDataSource2(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
         {
+            if (data.Count == 0)
+                return;
             this.curveDataContext.SetDataSource2(data, valueKey, timeKey);
             this.UpdateCurve();
         }

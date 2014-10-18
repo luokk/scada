@@ -155,30 +155,6 @@ namespace Scada.MainVision
             }
         }
 
-        // No use now.
-        public void RefreshCurrentTime(MySqlCommand cmd)
-        {
-            foreach (var item in new string[] { DataProvider.DeviceKey_MDS, DataProvider.DeviceKey_AIS })
-            {
-                string deviceKey = item.ToLower();
-                // Would use listener to notify, panel would get the lastest data.
-                var data = this.RefreshTimeNow(deviceKey, cmd);
-                if (data != null)
-                {
-                    this.latestData.Add(deviceKey, data);
-
-                    if (this.dataListeners.ContainsKey(deviceKey))
-                    {
-                        DBDataCommonListerner listener = this.dataListeners[deviceKey];
-                        if (listener != null)
-                        {
-                            listener.OnDataArrival(DataArrivalConfig.TimeCurrent, data);
-                        }
-                    }
-                }
-            }
-        }
-
         // For DevicePage.
         // Get Latest data ( 1 Entry ),
         public void RefreshTimeNow(MySqlCommand cmd)
@@ -240,6 +216,22 @@ namespace Scada.MainVision
         // Get time-range data,
         // Notify with all the result.
         public List<Dictionary<string, object>> RefreshTimeRange(string deviceKey, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
+        {
+            try
+            {
+                var result = this.Refresh(deviceKey, false, -1, fromTime, toTime, cmd);
+                result.Reverse();
+                return result;
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return new List<Dictionary<string, object>>();
+        }
+
+        public List<Dictionary<string, object>> RefreshTimeRange2(string deviceKey, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
         {
             try
             {
