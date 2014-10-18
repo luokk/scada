@@ -21,6 +21,11 @@ namespace Scada.Controls.Data
 
     public class ColumnInfo
     {
+        public ColumnInfo()
+        {
+            this.Width = 160;
+        }
+
         public string Header
         {
             get;

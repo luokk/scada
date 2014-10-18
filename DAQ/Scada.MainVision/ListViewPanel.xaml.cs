@@ -35,6 +35,10 @@ namespace Scada.Controls
 
         private Control ctrlView = null;
 
+        private Control doorView = null;
+
+        private Control sttView = null;
+
         private Control energyView = null;
 
         private DataListener dataListener;
@@ -195,6 +199,42 @@ namespace Scada.Controls
                 {
                     this.ControlPanelTabItem.Visibility = Visibility.Visible;
                     this.ControlPanelContainer.Content = this.ctrlView;
+                }
+            }
+        }
+
+        public Control DoorPanel
+        {
+            get
+            {
+                return this.doorView;
+            }
+
+            set
+            {
+                this.doorView = value;
+                if (this.doorView != null)
+                {
+                    this.DoorPanelTabItem.Visibility = Visibility.Visible;
+                    this.DoorPanelContainer.Content = this.doorView;
+                }
+            }
+        }
+
+        public Control SttPanel
+        {
+            get
+            {
+                return this.sttView;
+            }
+
+            set
+            {
+                this.sttView = value;
+                if (this.sttView != null)
+                {
+                    this.SttPanelTabItem.Visibility = Visibility.Visible;
+                    this.SttPanelContainer.Content = this.sttView;
                 }
             }
         }
