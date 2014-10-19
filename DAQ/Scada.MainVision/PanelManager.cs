@@ -95,6 +95,7 @@ namespace Scada.MainVision
                         panel.GraphView = this.ShowGraphView(panel, dataListener);
                         panel.selectedField = "flow";
                         panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_MDS);
+                        panel.SttPanel = this.ShowSttView(DataProvider.DeviceKey_MDS);
                     }
                     else if (deviceKey == DataProvider.DeviceKey_AIS)
                     {
@@ -102,6 +103,7 @@ namespace Scada.MainVision
                         panel.GraphView = this.ShowGraphView(panel, dataListener);
                         panel.selectedField = "flow";
                         panel.ControlPanel = this.ShowControlView(DataProvider.DeviceKey_AIS);
+                        panel.SttPanel = this.ShowSttView(DataProvider.DeviceKey_AIS);
                     }
                     else if (deviceKey == DataProvider.DeviceKey_Weather)
                     {
@@ -121,6 +123,10 @@ namespace Scada.MainVision
                         panel.SetupContextMenu((ListView)panel.SearchView);
                         panel.EnergyPanel = this.ShowEnergyView(DataProvider.DeviceKey_NaI);
                         panel.selectedField = "doserate";
+                    }
+                    else if (deviceKey == DataProvider.DeviceKey_Shelter)
+                    {
+                        panel.DoorPanel = this.ShowDoorView();
                     }
 
                 }
@@ -164,7 +170,7 @@ namespace Scada.MainVision
             GraphView graphView = new GraphView();
             graphView.Interval = 30;
 
-            graphView.AddDataListener(dataListener);
+            // graphView.AddDataListener(dataListener);
 
             var columnInfoList = dataListener.GetColumnsInfo();
             string deviceKey = dataListener.DeviceKey;
@@ -247,6 +253,18 @@ namespace Scada.MainVision
         private Control ShowControlView(string deviceKey)
         {
             SamplerControlPanel panel = new SamplerControlPanel(deviceKey);
+            return panel;
+        }
+
+        private Control ShowSttView(string deviceKey)
+        {
+            SttPanel panel = new SttPanel(deviceKey);
+            return panel;
+        }
+
+        private Control ShowDoorView()
+        {
+            DoorPanel panel = new DoorPanel();
             return panel;
         }
 

@@ -35,6 +35,10 @@ namespace Scada.Controls
 
         private Control ctrlView = null;
 
+        private Control doorView = null;
+
+        private Control sttView = null;
+
         private Control energyView = null;
 
         private DataListener dataListener;
@@ -42,8 +46,6 @@ namespace Scada.Controls
         private DBDataProvider dataProvider;
 
         private string deviceKey;
-
-        private static string currentDeviceKey;
 
         private List<Dictionary<string, object>> dataSource;
 
@@ -63,10 +65,6 @@ namespace Scada.Controls
         private const int MaxListCount = 26;
 
         private object currentSelectedItem;
-
-        // private bool ShowChartViewBySearch = true;
-
-        private MySqlConnection dbConn;
 
         private SynchronizationContext SynchronizationContext
         {
@@ -91,41 +89,8 @@ namespace Scada.Controls
             this.DisplayName = entry.DisplayName;
             this.dataProvider = dataProvider;
 
-            this.dbConn = this.dataProvider.GetMySqlConnection();
-            if (dbConn == null)
-            {
-                return;
-            }
-
             this.HasSerachDataChart = false;
             this.HasRealTimeChart = false;
-
-            var dbCmd = this.dbConn.CreateCommand();
-            var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-
-            SynchronizationContext sc = SynchronizationContext.Current;
-            dispatcherTimer.Tick += (s, evt) =>
-            {
-                if (this.Shown && this.deviceKey != currentDeviceKey)
-                {
-                    dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
-                    currentDeviceKey = this.deviceKey;
-                    sc.Post(new SendOrPostCallback((o)=>
-                    {
-                        this.ListRecentData(dbCmd);
-                    }), null);
-                    
-                }
-                
-            };
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 1);
-            dispatcherTimer.Start();
-
-        }
-
-        internal void ListRecentData(MySqlCommand dbCmd)
-        {
-            this.dataProvider.RefreshTimeline(this.deviceKey, dbCmd);
         }
 
         public Control ListView
@@ -195,6 +160,42 @@ namespace Scada.Controls
                 {
                     this.ControlPanelTabItem.Visibility = Visibility.Visible;
                     this.ControlPanelContainer.Content = this.ctrlView;
+                }
+            }
+        }
+
+        public Control DoorPanel
+        {
+            get
+            {
+                return this.doorView;
+            }
+
+            set
+            {
+                this.doorView = value;
+                if (this.doorView != null)
+                {
+                    this.DoorPanelTabItem.Visibility = Visibility.Visible;
+                    this.DoorPanelContainer.Content = this.doorView;
+                }
+            }
+        }
+
+        public Control SttPanel
+        {
+            get
+            {
+                return this.sttView;
+            }
+
+            set
+            {
+                this.sttView = value;
+                if (this.sttView != null)
+                {
+                    this.SttPanelTabItem.Visibility = Visibility.Visible;
+                    this.SttPanelContainer.Content = this.sttView;
                 }
             }
         }
@@ -512,16 +513,20 @@ namespace Scada.Controls
             var dt1 = DateTime.Parse(this.FromDateText.Text);
             var dt2 = DateTime.Parse(this.ToDateText.Text);
 
-            using (var cmd = this.dbConn.CreateCommand())
+            using (var conn = DBDataProvider.Instance.GetMySqlConnection())
             {
-                this.searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, cmd);
-
-                if (this.searchDataSource.Count == 0)
+                using (var cmd = conn.CreateCommand())
                 {
-                    MessageBox.Show("没有找到数据");
-                    return;
+                    this.searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, cmd);
+
+                    if (this.searchDataSource.Count == 0)
+                    {
+                        MessageBox.Show("没有找到数据");
+                        return;
+                    }
                 }
             }
+
             // int interval = this.currentInterval;
             this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
 
@@ -672,11 +677,13 @@ namespace Scada.Controls
             this.TabCtrl.SelectedItem = this.EnergyPanelTabItem;
             EnergyPanel energyPanel = (EnergyPanel)this.EnergyPanel;
 
-            using (var cmd = this.dbConn.CreateCommand())
+            using (var conn = DBDataProvider.Instance.GetMySqlConnection())
             {
-                energyPanel.UpdateEnergyGraphByTime(time, cmd);
+                using (var cmd = conn.CreateCommand())
+                {
+                    energyPanel.UpdateEnergyGraphByTime(time, cmd);
+                }
             }
-
         }
 
         private void SaveChart(object sender, RoutedEventArgs e)
@@ -721,6 +728,7 @@ namespace Scada.Controls
         public int selectedInterval = 30;
         
         public string selectedField;
+        private MySqlConnection realTimeDbConn;
 
         public bool Shown
         {
@@ -748,7 +756,47 @@ namespace Scada.Controls
             if (!this.HasRealTimeChart)
             {
                 this.ChartRow.Height = new GridLength(0);
+                return;
             }
+
+            this.InitRealTimeDataTick();
+        }
+
+        private void InitRealTimeDataTick()
+        {
+            var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            this.realTimeDbConn = DBDataProvider.Instance.GetMySqlConnection();
+            if (realTimeDbConn == null)
+            {
+                return;
+            }
+
+            dispatcherTimer.Tick += (s, evt) =>
+            {
+                DateTime fromTime = DateTime.Now.AddMinutes(-48);
+
+                using (var dbCmd = realTimeDbConn.CreateCommand())
+                {
+                    var data = DBDataProvider.Instance.RefreshTimeRange2(this.deviceKey, fromTime, DateTime.Now, dbCmd);
+                    if (data.Count == 0)
+                    {
+                        dispatcherTimer.Interval = new TimeSpan(0, 1, 30);
+                    }
+                    else
+                    {
+                        dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
+                    }
+                    GraphView v = (GraphView)this.GraphView;
+                    v.SetDataSource2(data, "flow");
+
+                    ListView l = (ListView)this.ListView;
+                    l.ItemsSource = null;
+                    data.Reverse();
+                    l.ItemsSource = data;
+                }
+            };
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
+            dispatcherTimer.Start();
         }
 
         public void SetField(string field)

@@ -131,6 +131,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="SttPanel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="EnergyPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -158,6 +162,10 @@
     <Page Include="Resources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DoorPanel.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="SamplerControlPanel.xaml">
       <SubType>Designer</SubType>
@@ -230,6 +238,9 @@
     <Compile Include="DeviceListPanel.xaml.cs">
       <DependentUpon>DeviceListPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SttPanel.xaml.cs">
+      <DependentUpon>SttPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EnergyPanel.xaml.cs">
       <DependentUpon>EnergyPanel.xaml</DependentUpon>
     </Compile>
@@ -248,6 +259,9 @@
       <DependentUpon>NaviLabel.xaml</DependentUpon>
     </Compile>
     <Compile Include="PanelManager.cs" />
+    <Compile Include="DoorPanel.xaml.cs">
+      <DependentUpon>DoorPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SamplerControlPanel.xaml.cs">
       <DependentUpon>SamplerControlPanel.xaml</DependentUpon>
     </Compile>

@@ -188,6 +188,12 @@
                     <TabItem Header="控制面板" Width="80" x:Name="ControlPanelTabItem" Visibility="Collapsed" Style="{StaticResource TabItemKey}">
                         <ContentControl Grid.Row="1" x:Name="ControlPanelContainer" Margin="5,5,5,5"/>
                     </TabItem>
+                    <TabItem Header="门禁状态" Width="80" x:Name="DoorPanelTabItem" Visibility="Collapsed" Style="{StaticResource TabItemKey}">
+                        <ContentControl Grid.Row="1" x:Name="DoorPanelContainer" Margin="5,5,5,5"/>
+                    </TabItem>
+                    <TabItem Header="采样统计" Width="80" x:Name="SttPanelTabItem" Visibility="Collapsed" Style="{StaticResource TabItemKey}">
+                        <ContentControl Grid.Row="0" x:Name="SttPanelContainer" Margin="5,5,5,5" Background="Black"/>
+                    </TabItem>
                     <!-- 控制面板 -->
                     <TabItem Header="能谱图" Width="80" x:Name="EnergyPanelTabItem" Visibility="Collapsed" Style="{StaticResource TabItemKey}">
                         <ContentControl Grid.Row="1" Margin="0">
