@@ -146,14 +146,14 @@ namespace Scada.Declare
                         if (filename.Contains("qaspectra.spe"))
                         {
                             string NewSpecName = "qaspectra" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
-                            File.Move(vFile, DES + "!" + NewSpecName);
+                            File.Move(vFile, DES + NewSpecName);
                             
                             this.Record(NewSpecName);
                         }
                         else if (filename.Contains("qareport.rpt"))
                         {
                             string NewReportName = "qareport" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
-                            File.Move(vFile, DES + "!" + NewReportName);
+                            File.Move(vFile, DES + NewReportName);
 
                             this.Record(NewReportName);
                         }
@@ -161,21 +161,21 @@ namespace Scada.Declare
                         {
                             int index = filename.LastIndexOf(".");
                             string newfilenameA = filename.Substring(0, index) + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
-                            File.Move(vFile, DES + "!" + newfilenameA);
+                            File.Move(vFile, DES + newfilenameA);
 
                             this.Record(newfilenameA);
                         }
                         else if (filename.Contains("samplespectra24.spe"))
                         {
                             string newfilenameB = "samplespectra24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".spe";
-                            File.Move(vFile, DES + "!" + newfilenameB);
+                            File.Move(vFile, DES + newfilenameB);
 
                             this.Record(newfilenameB);
                         }
                         else if (filename.Contains("samplereport24.rpt"))
                         {
                             string newfilenameC = "samplereport24" + DateTime.Now.ToString("_yyyy_MM_ddTHH_mm_ss") + ".rpt";
-                            File.Move(vFile, DES + "!" + newfilenameC);
+                            File.Move(vFile, DES + newfilenameC);
                             
                             this.Record(newfilenameC);
                         }

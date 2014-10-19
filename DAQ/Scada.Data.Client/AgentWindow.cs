@@ -78,6 +78,8 @@ namespace Scada.Data.Client
 
         private ToolStripLabel pingLabel = new ToolStripLabel();
 
+        private bool IsDBEnable = false;
+
         public bool CancelQuit { get; set; }
 
         public MySqlConnection MySqlConnection { get; set; }
@@ -195,18 +197,35 @@ namespace Scada.Data.Client
 
         private void Start()
         {
-            if (this.InitializeAgent())
-            {
-                this.InitializeTimer();
-
-                string line = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
-                Log.GetLogFile(Program.DataClient).Log(line);
-            }
-            else
+            if (!this.InitializeAgent())
             {
                 this.CancelQuit = false;
                 Application.Exit();
             }
+
+            // 初始化时检查数据库是否启动
+            if (this.ConnectToMySQL() != true)
+            {
+                this.IsDBEnable = false;
+                this.statusLabel.Text = "数据库未启动";
+                this.statusLabel.ForeColor = Color.Red;
+                this.DBTestStripButton.Enabled = true;
+                this.StartUpdateStripButton.Enabled = false;
+                return;
+            }
+            else
+            {
+                this.statusLabel.Text = "正常";
+                this.statusLabel.ForeColor = Color.Black;
+                this.DBTestStripButton.Enabled = false;
+                this.StartUpdateStripButton.Enabled = false;
+            }
+
+            // 开始执行
+            this.InitializeTimer();
+
+            string line = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
+            Log.GetLogFile(Program.DataClient).Log(line);
         }
 
         private bool InitializeAgent()
@@ -225,26 +244,44 @@ namespace Scada.Data.Client
             this.agent.NotifyEvent += this.OnNotify;
             this.agent.DoAuth();
 
+            this.IsDBEnable = true;
             this.statusLabel.Text = string.Format("开始:[{0}]", DateTime.Now);
+            this.DBTestStripButton.Enabled = false;
+            
             this.addressLabel.Text = string.Format("已连接{0}", dc.BaseUrl);
             this.counterLabel.Text = string.Format("已发送: 0");
             this.uploadLabel.Text = string.Format("实时数据最后上传时间: {0}", FormatTime(DateTime.Now));
+
             return true;
         }
 
-        private void ConnectToMySQL()
+        private bool ConnectToMySQL()
         {
             this.MySqlConnection = DataSource.Instance.GetDBConnection();
-            this.MySqlCmd = this.MySqlConnection.CreateCommand();
+
+            if (this.MySqlConnection != null)
+            {
+                this.MySqlCmd = this.MySqlConnection.CreateCommand();
+                if (this.MySqlCmd != null)
+                {
+                    return true;
+                }
+                else
+                { return false; }
+            }
+            else
+            { return false; }
         }
 
         private void InitializeTimer()
         {
+            // 定期往数据中心发数据
             this.sendDataTimer = new Timer();
             this.sendDataTimer.Interval = TimerInterval;
             this.sendDataTimer.Tick += this.HttpSendDataTick;
             this.sendDataTimer.Start();
 
+            // 每20s从数据中心取一次数据
             this.recvDataTimer = new Timer();
             this.recvDataTimer.Interval = 20 * 1000;
             this.recvDataTimer.Tick += this.HttpRecvDataTick;
@@ -286,6 +323,7 @@ namespace Scada.Data.Client
             List<Packet> packets = new List<Packet>();
             foreach (var deviceKey in deviceKeys)
             {
+                // 得到设备需要发送的时间间隔
                 DateTime sendTime = GetDeviceSendTime(now, deviceKey);
 
                 if (this.CheckLastSendTime)
@@ -299,25 +337,18 @@ namespace Scada.Data.Client
                     {
                         continue;
                     }
-
-                    this.lastDeviceSendData[deviceKey] = sendTime;
                 }
 
                 Packet packet = this.GetPacket(sendTime, deviceKey, packetId);
                 if (packet != null)
                 {
-                    this.agent.SendPacket(packet);
+                    if (this.agent.SendPacket(packet))
+                    {
+                        // 当发送成功后，才记录已发送的时间
+                        this.lastDeviceSendData[deviceKey] = sendTime;
+                    }
                 }
-
-                //if (packet != null)
-                //{
-                    //packets.Add(packet);
-                //}
             }
-
-            // Send ...
-            //packets = this.builder.CombinePackets(packets);
-            //this.SendPackets(packets);
         }
 
         private void SendPackets(List<Packet> packets)
@@ -395,18 +426,23 @@ namespace Scada.Data.Client
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
         {
+            // Labr设备，每5分钟发送一次
             if (deviceKey.Equals(Devices.Labr, StringComparison.OrdinalIgnoreCase))
             {
-                int min = dt.Minute - 1;
-                if (min < 0)
-                    min = 0;
+                int min = dt.Minute / 5 * 5;
                 DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
                 return ret;
             }
+
+            /*
+            // Cinderella.Status设备无固定发送频率，只要有数据立即发送
             else if (deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase))
             {
                 return dt;
             }
+             * */
+
+            // 其余设备每30s发送一次
             else
             {
                 int second = dt.Second / 30 * 30;
@@ -423,10 +459,10 @@ namespace Scada.Data.Client
 
         private static bool IsSendDataTimeOK(DateTime dt)
         {
-            // 5 < current.second < 15 OR
-            // 35 < current.second < 45
+            // 5 < current.second < 30 OR
+            // 35 < current.second < 60
             int sec = dt.Second - 5;
-            if ((sec >= 0 && sec <= 10) || ((sec >= 30) && sec <= 40))
+            if ((sec >= 0 && sec < 25) || ((sec >= 30) && sec < 55))
             {
                 return true;
             }
@@ -546,22 +582,6 @@ namespace Scada.Data.Client
                 item.SubItems[1].Text = details.SendDataCount.ToString();
                 item.SubItems[2].Text = FormatTime(details.LatestSendDataTime);
                 item.SubItems[3].Text = FormatTime(details.LatestSendHistoryDataTime);
-            }
-        }
-
-        private void testToolStripButton_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                IPAddress localIp = IPAddress.Parse("127.0.0.1");
-                IPEndPoint localIpEndPoint = new IPEndPoint(localIp, 3000);
-                var receiveUpdClient = new UdpClient();
-                receiveUpdClient.Connect(localIpEndPoint);
-                int a = receiveUpdClient.Send(Encoding.ASCII.GetBytes("Hello"), 5);
-            }
-            catch (Exception ex)
-            {
-
             }
         }
 
@@ -776,6 +796,48 @@ namespace Scada.Data.Client
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.PerformQuitByUser();
+        }
+
+        private void DBTestStripButton_Click(object sender, EventArgs e)
+        {
+            if (this.ConnectToMySQL() != true)
+            {
+                this.IsDBEnable = false;
+                this.statusLabel.Text = "数据库未启动";
+                this.statusLabel.ForeColor = Color.Red;
+                this.DBTestStripButton.Enabled = true;
+                this.StartUpdateStripButton.Enabled = false;
+            }
+            else
+            {
+                this.IsDBEnable = true;
+                this.statusLabel.Text = "正常";
+                this.statusLabel.ForeColor = Color.Black;
+                this.DBTestStripButton.Enabled = false;
+                this.StartUpdateStripButton.Enabled = true;
+            }
+        }
+
+        private void StartUpdateStripButton_Click(object sender, EventArgs e)
+        {
+            this.InitializeTimer();
+            this.StartUpdateStripButton.Enabled = false;
+        }
+
+        private void SendSycnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IPAddress localIp = IPAddress.Parse("127.0.0.1");
+                IPEndPoint localIpEndPoint = new IPEndPoint(localIp, 3000);
+                var receiveUpdClient = new UdpClient();
+                receiveUpdClient.Connect(localIpEndPoint);
+                int a = receiveUpdClient.Send(Encoding.ASCII.GetBytes("Hello"), 5);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
     }
 }
