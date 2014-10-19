@@ -323,7 +323,7 @@ namespace Scada.Data.Client
             List<Packet> packets = new List<Packet>();
             foreach (var deviceKey in deviceKeys)
             {
-                // 得到设备需要发送的时间间隔
+                // 归一化时间
                 DateTime sendTime = GetDeviceSendTime(now, deviceKey);
 
                 if (this.CheckLastSendTime)
@@ -351,6 +351,7 @@ namespace Scada.Data.Client
             }
         }
 
+        /* 未使用
         private void SendPackets(List<Packet> packets)
         {
             foreach (var packet in packets)
@@ -358,6 +359,7 @@ namespace Scada.Data.Client
                 this.agent.SendPacket(packet);
             }
         }
+         * */
 
         private List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
 
