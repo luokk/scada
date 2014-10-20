@@ -153,6 +153,12 @@ namespace Scada.Data.Client.Tcp
             set;
         }
 
+        internal bool SendDataDirectlyStartedByError
+        {
+            get;
+            set;
+        }
+
         public Agent(string serverAddress, int serverPort)
         {
             this.ServerAddress = serverAddress;
@@ -655,18 +661,22 @@ namespace Scada.Data.Client.Tcp
             return this.Send(Encoding.ASCII.GetBytes(s));
         }
 
-        internal void StartConnectCountryCenter()
+        internal void StartConnectCountryCenter(bool sendDataDirectlyStartedByError = false)
         {
             this.SendDataDirectlyStarted = true;
+            this.SendDataDirectlyStartedByError = sendDataDirectlyStartedByError;
             string msg = string.Format("启动到国家数据中心的连接!");
             this.NotifyEvent(this, NotifyEvents.ConnectToCountryCenter, msg, null);
         }
 
-        internal void StopConnectCountryCenter()
+        internal void StopConnectCountryCenter(bool sendDataDirectlyStartedByError = false)
         {
-            this.SendDataDirectlyStarted = false;
-            string msg = string.Format("国家数据中心连接已断开");
-            this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg, null);
+            if (this.SendDataDirectlyStartedByError == sendDataDirectlyStartedByError)
+            {
+                this.SendDataDirectlyStarted = false;
+                string msg = string.Format("国家数据中心连接已断开");
+                this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg, null);
+            }
         }
 
         public ThreadMashaller UIThreadMashaller

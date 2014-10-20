@@ -51,7 +51,8 @@
             this.mainToolStrip = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.testToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.DBTestStripButton = new System.Windows.Forms.ToolStripButton();
+            this.StartUpdateStripButton = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.SendHpicToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SendWeatherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -67,6 +68,7 @@
             this.操作ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autoDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FetchCmdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SendSycnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -276,11 +278,12 @@
             this.mainToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
             this.toolStripSeparator1,
-            this.testToolStripButton,
+            this.DBTestStripButton,
+            this.StartUpdateStripButton,
             this.toolStripDropDownButton1});
             this.mainToolStrip.Location = new System.Drawing.Point(3, 0);
             this.mainToolStrip.Name = "mainToolStrip";
-            this.mainToolStrip.Size = new System.Drawing.Size(179, 25);
+            this.mainToolStrip.Size = new System.Drawing.Size(327, 25);
             this.mainToolStrip.TabIndex = 0;
             // 
             // toolStripLabel1
@@ -293,14 +296,23 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
-            // testToolStripButton
+            // DBTestStripButton
             // 
-            this.testToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("testToolStripButton.Image")));
-            this.testToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.testToolStripButton.Name = "testToolStripButton";
-            this.testToolStripButton.Size = new System.Drawing.Size(52, 22);
-            this.testToolStripButton.Text = "同步";
-            this.testToolStripButton.Click += new System.EventHandler(this.testToolStripButton_Click);
+            this.DBTestStripButton.Image = ((System.Drawing.Image)(resources.GetObject("DBTestStripButton.Image")));
+            this.DBTestStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.DBTestStripButton.Name = "DBTestStripButton";
+            this.DBTestStripButton.Size = new System.Drawing.Size(100, 22);
+            this.DBTestStripButton.Text = "连接到数据库";
+            this.DBTestStripButton.Click += new System.EventHandler(this.DBTestStripButton_Click);
+            // 
+            // StartUpdateStripButton
+            // 
+            this.StartUpdateStripButton.Image = ((System.Drawing.Image)(resources.GetObject("StartUpdateStripButton.Image")));
+            this.StartUpdateStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.StartUpdateStripButton.Name = "StartUpdateStripButton";
+            this.StartUpdateStripButton.Size = new System.Drawing.Size(100, 22);
+            this.StartUpdateStripButton.Text = "启动数据上传";
+            this.StartUpdateStripButton.Click += new System.EventHandler(this.StartUpdateStripButton_Click);
             // 
             // toolStripDropDownButton1
             // 
@@ -311,7 +323,8 @@
             this.SendHPGeToolStripMenuItem,
             this.SendCinderellaDataToolStripMenuItem,
             this.SendCinderellaStatusModuleToolStripMenuItem,
-            this.SendShelterToolStripMenuItem});
+            this.SendShelterToolStripMenuItem,
+            this.SendSycnToolStripMenuItem});
             this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
@@ -432,6 +445,13 @@
             this.FetchCmdToolStripMenuItem.Text = "获取最新命令";
             this.FetchCmdToolStripMenuItem.Click += new System.EventHandler(this.FetchCmdToolStripMenuItem_Click);
             // 
+            // SendSycnToolStripMenuItem
+            // 
+            this.SendSycnToolStripMenuItem.Name = "SendSycnToolStripMenuItem";
+            this.SendSycnToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.SendSycnToolStripMenuItem.Text = "进程同步测试";
+            this.SendSycnToolStripMenuItem.Click += new System.EventHandler(this.SendSycnToolStripMenuItem_Click);
+            // 
             // MainDataAgentWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -489,7 +509,6 @@
         private System.Windows.Forms.ColumnHeader countHeader;
         private System.Windows.Forms.ColumnHeader percentHeader;
         private System.Windows.Forms.ColumnHeader historyLatestHeader;
-        private System.Windows.Forms.ToolStripButton testToolStripButton;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private System.Windows.Forms.ToolStripMenuItem SendHpicToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SendWeatherToolStripMenuItem;
@@ -508,6 +527,9 @@
         private System.Windows.Forms.ToolStripMenuItem QuitToolStripMenuItem;
         private System.Windows.Forms.TabPage fileUploadTabPage;
         private System.Windows.Forms.ListBox fileUploadInfoListBox;
+        private System.Windows.Forms.ToolStripButton DBTestStripButton;
+        private System.Windows.Forms.ToolStripButton StartUpdateStripButton;
+        private System.Windows.Forms.ToolStripMenuItem SendSycnToolStripMenuItem;
 
     }
 }

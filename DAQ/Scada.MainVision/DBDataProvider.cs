@@ -155,29 +155,6 @@ namespace Scada.MainVision
             }
         }
 
-        public void RefreshCurrentTime(MySqlCommand cmd)
-        {
-            foreach (var item in new string[] { DataProvider.DeviceKey_MDS, DataProvider.DeviceKey_AIS })
-            {
-                string deviceKey = item.ToLower();
-                // Would use listener to notify, panel would get the lastest data.
-                var data = this.RefreshTimeNow(deviceKey, cmd);
-                if (data != null)
-                {
-                    this.latestData.Add(deviceKey, data);
-
-                    if (this.dataListeners.ContainsKey(deviceKey))
-                    {
-                        DBDataCommonListerner listener = this.dataListeners[deviceKey];
-                        if (listener != null)
-                        {
-                            listener.OnDataArrival(DataArrivalConfig.TimeCurrent, data);
-                        }
-                    }
-                }
-            }
-        }
-
         // For DevicePage.
         // Get Latest data ( 1 Entry ),
         public void RefreshTimeNow(MySqlCommand cmd)
@@ -239,6 +216,22 @@ namespace Scada.MainVision
         // Get time-range data,
         // Notify with all the result.
         public List<Dictionary<string, object>> RefreshTimeRange(string deviceKey, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
+        {
+            try
+            {
+                var result = this.Refresh(deviceKey, false, -1, fromTime, toTime, cmd);
+                result.Reverse();
+                return result;
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return new List<Dictionary<string, object>>();
+        }
+
+        public List<Dictionary<string, object>> RefreshTimeRange2(string deviceKey, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
         {
             try
             {
@@ -525,6 +518,88 @@ namespace Scada.MainVision
             b = 1.0;
             c = 0.0;
             return string.Empty;
+        }
+
+        internal List<Dictionary<string, object>> GetSidData(string p, DateTime dt1, DateTime dt2)
+        {
+            List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
+            using (var conn = this.GetMySqlConnection())
+            {
+                using (var cmd = conn.CreateCommand())
+                {
+                    string tableName = (p == DataProvider.DeviceKey_MDS) ? "mds_rec" : "ais_rec";
+                    
+                    string sql = string.Format("select * from {0} where time>'{1}' and time<'{2}' and status=0", tableName, dt1, dt2);
+                    cmd.CommandText = sql;
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        var data = new Dictionary<string, object>();
+                        while (reader.Read())
+                        {
+                            data.Add("sid", reader.GetString("Sid"));
+                            data.Add("begintime", reader.GetString("begintime"));
+                            data.Add("endtime", reader.GetString("endtime"));
+                            data.Add("volume", reader.GetString("volume"));
+                            data.Add("hours", reader.GetString("hours"));
+                        }
+
+                        ret.Add(data);
+                    }
+                }
+            }
+            return ret;
+        }
+
+
+
+        internal List<Dictionary<string, object>> GetDoorStatus(DateTime dt1, DateTime dt2)
+        {
+            List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
+            using (var conn = this.GetMySqlConnection())
+            {
+                using (var cmd = conn.CreateCommand())
+                {
+                    int ifOpen = 1;
+
+                    string beginTime = dt1.ToString();
+                    string endTime = string.Empty;
+                    while (true)
+                    {
+                        string sql = string.Format("select * from environment_rec where time>'{0}' and time<'{1}' and ifDoorOpen={2} limit 1", beginTime, dt2, ifOpen);
+                        cmd.CommandText = sql;
+
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            var data = new Dictionary<string, object>();
+                            if (!reader.Read())
+                            {
+                                break;
+                            }
+
+
+                            if (ifOpen == 0)
+                            {
+                                ifOpen = 1;
+                                endTime = reader.GetString("Time");
+                                ret.Add(new Dictionary<string, object>() 
+                                {
+                                    {"begintime", beginTime}, {"endtime", endTime}
+                                }
+                                );
+                                beginTime = endTime;
+                            }
+                            else
+                            {
+                                ifOpen = 0;
+                                beginTime = reader.GetString("Time");
+                            }
+                        }
+                    }
+
+                }
+            }
+            return ret;
         }
     }
 }

@@ -102,7 +102,7 @@ namespace Scada.Chart
 
             this.currentValueKey = valueKey;
             this.Interval = this.chartView.Interval;
-            this.UpdateTimeAxis(this.BeginTime, this.EndTime);
+            this.UpdateTimeAxis(this.BeginTime, this.EndTime, false);
             this.RenderCurve(this.BeginTime, this.EndTime, valueKey);
 
         }

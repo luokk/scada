@@ -70,11 +70,8 @@ namespace Scada.Declare
 
         private byte[] lastLine;
 
-        // Serial port sleep 200 ms as default before read
-        private int bufferSleep = 200;
-
-        // init status for first start (第一次重启时需要重置设备，以后每天重置一次)
-        private bool initStatus = false;
+        // Serial port sleep 400 ms as default before read
+        private int bufferSleep = 400;
 
 		public WeatherDevice(DeviceEntry entry)
 		{
@@ -234,7 +231,7 @@ namespace Scada.Declare
 
         private void StartSenderTimer(int interval)
         {
-            // timer 每2s一次
+            // timer 每4s一次
             int minInterval = 2;
             if (MainApplication.TimerCreator != null)
             {
@@ -481,35 +478,29 @@ namespace Scada.Declare
 
             try
             {
+                // 归一化时间
+                DateTime rightTime = default(DateTime);
+                if (!this.recordTimePolicy.NowAtRightTime(out rightTime) ||
+                    this.currentRecordTime == rightTime)
+                {
+                    return;
+                }
+                this.currentRecordTime = rightTime;
+
+                // 记录当前值
                 if (this.IsRealDevice)
                 {
-                    // 每次重启时，重置探测器
-                    if (!this.initStatus)
-                    {
-                        this.serialPort.Write(this.actionSend2, 0, this.actionSend2.Length);
-                        this.initStatus = true;
-
-                        RecordManager.DoSystemEventRecord(this, "Reset weather station - Initial", RecordType.Event);
-                        return;
-                    }
-
-                    // 归一化时间
-                    DateTime rightTime = default(DateTime);
-                    if (!this.recordTimePolicy.NowAtRightTime(out rightTime) ||
-                        this.currentRecordTime == rightTime)
-                    {
-                        return;
-                    }
-                    this.currentRecordTime = rightTime;
-
-                    // 记录当前值
                     this.serialPort.Write(this.actionSend1, 0, this.actionSend1.Length);
+                }
+                
+                // 23:59:30时重置气象探测器
+                if (this.currentRecordTime.ToString("HH:mm:ss").Equals("23:59:30"))
+                {
+                    // 等待2s，再发送重置命令
+                    Thread.Sleep(2000);
 
-                    // 23:59:30时重置气象探测器
-                    if (this.currentRecordTime.ToString("HH:mm:ss").Equals("23:59:30"))
+                    if (this.IsRealDevice)
                     {
-                        // 等待2s，再发送重置命令
-                        Thread.Sleep(2000);
                         this.serialPort.Write(this.actionSend2, 0, this.actionSend2.Length);
                     }
                 }
@@ -517,15 +508,6 @@ namespace Scada.Declare
                 #region Virtual-Device
                 else
                 {
-                    // 归一化时间
-                    DateTime rightTime = default(DateTime);
-                    if (!this.recordTimePolicy.NowAtRightTime(out rightTime) ||
-                        this.currentRecordTime == rightTime)
-                    {
-                        return;
-                    }
-                    this.currentRecordTime = rightTime;
-
                     this.OnSendDataToVirtualDevice(this.actionSend1);
                 }
                 #endregion

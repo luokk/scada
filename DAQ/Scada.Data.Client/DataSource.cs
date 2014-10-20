@@ -67,8 +67,16 @@ namespace Scada.Data.Client
         {
             string connectionString = new DBConnectionString().ToString();
             var conn = new MySqlConnection(connectionString);
-            conn.Open();
-            return conn;
+
+            try
+            {
+                conn.Open();
+                return conn;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         Packet GetDataPacket(string deviceKey, DateTime time)
@@ -278,14 +286,18 @@ namespace Scada.Data.Client
 
             string currentFilePath = Path.Combine(path, sid);
 
-            string[] files = Directory.GetFiles(currentFilePath);
-            foreach (var file in files)
+            if (Directory.Exists(currentFilePath))
             {
-                string fileName = Path.GetFileName(file);
-                if (fileName.StartsWith("!"))
-                    return file;
+                string[] files = Directory.GetFiles(currentFilePath);
+                foreach (var file in files)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (!fileName.StartsWith("!"))
+                        return file;
+                }
+                return string.Empty;
             }
-            return string.Empty;
+            else { return string.Empty; }
         }
     }
 }

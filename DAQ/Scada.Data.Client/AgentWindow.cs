@@ -66,7 +66,7 @@ namespace Scada.Data.Client
 
         private RealTimeForm detailForm;
 
-        private const int TimerInterval = 4000;   //4秒查询一次
+        private const int TimerInterval = 3500;
 
         private ToolStripLabel statusLabel = new ToolStripLabel();
 
@@ -77,6 +77,8 @@ namespace Scada.Data.Client
         private ToolStripLabel counterLabel = new ToolStripLabel();
 
         private ToolStripLabel pingLabel = new ToolStripLabel();
+
+        private bool IsDBEnable = false;
 
         public bool CancelQuit { get; set; }
 
@@ -195,18 +197,35 @@ namespace Scada.Data.Client
 
         private void Start()
         {
-            if (this.InitializeAgent())
-            {
-                this.InitializeTimer();
-
-                string line = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
-                Log.GetLogFile(Program.DataClient).Log(line);
-            }
-            else
+            if (!this.InitializeAgent())
             {
                 this.CancelQuit = false;
                 Application.Exit();
             }
+
+            // 初始化时检查数据库是否启动
+            if (this.ConnectToMySQL() != true)
+            {
+                this.IsDBEnable = false;
+                this.statusLabel.Text = "数据库未启动";
+                this.statusLabel.ForeColor = Color.Red;
+                this.DBTestStripButton.Enabled = true;
+                this.StartUpdateStripButton.Enabled = false;
+                return;
+            }
+            else
+            {
+                this.statusLabel.Text = "正常";
+                this.statusLabel.ForeColor = Color.Black;
+                this.DBTestStripButton.Enabled = false;
+                this.StartUpdateStripButton.Enabled = false;
+            }
+
+            // 开始执行
+            this.InitializeTimer();
+
+            string line = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
+            Log.GetLogFile(Program.DataClient).Log(line);
         }
 
         private bool InitializeAgent()
@@ -225,26 +244,44 @@ namespace Scada.Data.Client
             this.agent.NotifyEvent += this.OnNotify;
             this.agent.DoAuth();
 
+            this.IsDBEnable = true;
             this.statusLabel.Text = string.Format("开始:[{0}]", DateTime.Now);
+            this.DBTestStripButton.Enabled = false;
+            
             this.addressLabel.Text = string.Format("已连接{0}", dc.BaseUrl);
             this.counterLabel.Text = string.Format("已发送: 0");
             this.uploadLabel.Text = string.Format("实时数据最后上传时间: {0}", FormatTime(DateTime.Now));
+
             return true;
         }
 
-        private void ConnectToMySQL()
+        private bool ConnectToMySQL()
         {
             this.MySqlConnection = DataSource.Instance.GetDBConnection();
-            this.MySqlCmd = this.MySqlConnection.CreateCommand();
+
+            if (this.MySqlConnection != null)
+            {
+                this.MySqlCmd = this.MySqlConnection.CreateCommand();
+                if (this.MySqlCmd != null)
+                {
+                    return true;
+                }
+                else
+                { return false; }
+            }
+            else
+            { return false; }
         }
 
         private void InitializeTimer()
         {
+            // 定期往数据中心发数据
             this.sendDataTimer = new Timer();
             this.sendDataTimer.Interval = TimerInterval;
             this.sendDataTimer.Tick += this.HttpSendDataTick;
             this.sendDataTimer.Start();
 
+            // 每20s从数据中心取一次数据
             this.recvDataTimer = new Timer();
             this.recvDataTimer.Interval = 20 * 1000;
             this.recvDataTimer.Tick += this.HttpRecvDataTick;
@@ -265,12 +302,12 @@ namespace Scada.Data.Client
             if (!this.isAutoData)
                 return;
             DateTime now = DateTime.Now;
-            //// For Upload File Devices.
-            //if (IsSendFileTimeOK(now))
-            //{
-            //    Guid guid = Guid.NewGuid();
-            //    SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
-            //}
+            // For Upload File Devices.
+            if (IsSendFileTimeOK(now))
+            {
+                Guid guid = Guid.NewGuid();
+                SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
+            }
 
             // For Upload Data Devices.
             if (IsSendDataTimeOK(now))
@@ -286,6 +323,7 @@ namespace Scada.Data.Client
             List<Packet> packets = new List<Packet>();
             foreach (var deviceKey in deviceKeys)
             {
+                // 归一化时间
                 DateTime sendTime = GetDeviceSendTime(now, deviceKey);
 
                 if (this.CheckLastSendTime)
@@ -299,29 +337,21 @@ namespace Scada.Data.Client
                     {
                         continue;
                     }
-
-                    //this.lastDeviceSendData[deviceKey] = sendTime;
                 }
 
                 Packet packet = this.GetPacket(sendTime, deviceKey, packetId);
                 if (packet != null)
                 {
-                    this.agent.SendPacket(packet);
-
-                    this.lastDeviceSendData[deviceKey] = sendTime;
+                    if (this.agent.SendPacket(packet))
+                    {
+                        // 当发送成功后，才记录已发送的时间
+                        this.lastDeviceSendData[deviceKey] = sendTime;
+                    }
                 }
-                
-                //if (packet != null)
-                //{
-                    //packets.Add(packet);
-                //}
             }
-
-            // Send ...
-            //packets = this.builder.CombinePackets(packets);
-            //this.SendPackets(packets);
         }
 
+        /* 未使用
         private void SendPackets(List<Packet> packets)
         {
             foreach (var packet in packets)
@@ -329,89 +359,98 @@ namespace Scada.Data.Client
                 this.agent.SendPacket(packet);
             }
         }
+         * */
 
         private List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
 
         private Packet GetPacket(DateTime time, string deviceKey, string packetId)
         {
-            //if (Settings.Instance.FileDeviceKeys.Contains(deviceKey))
-            //{
-            //    if (deviceKey.IndexOf("labr") >= 0)
-            //    {
-            //        Packet p = builder.GetFilePacket(DataSource.Instance.GetLabrDeviceFile(time), "labr");
-            //        if (p != null)
-            //        {
-            //            p.DeviceKey = deviceKey;
-            //            p.Id = packetId;
-            //            return p;
-            //        }
-            //    }
-            //    else if (deviceKey.IndexOf("hpge") >= 0)
-            //    {
-            //        string filePath = DataSource.Instance.GetNewHpGeFile();
-            //        if (!string.IsNullOrEmpty(filePath))
-            //        {
-            //            Packet p = builder.GetFilePacket(filePath, "hpge");
-            //            if (p != null)l a 
-            //            {
-            //                p.DeviceKey = deviceKey;
-            //                p.Id = packetId;
-            //                return p;
-            //            }
-            //        }
-            //    }
-            //    return null;
-            //}
-            if (this.MySqlCmd == null)
+            if (Settings.Instance.FileDeviceKeys.Contains(deviceKey))
             {
-                this.ConnectToMySQL();
-            }
-
-            string errorMsg;
-
-            DateTime from = time.AddSeconds(-30);
-            ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, RangeType.CloseOpen, this.data, out errorMsg);
-            if (d == ReadResult.ReadDataOK)
-            {
-                if (this.data.Count > 0)
+                if (deviceKey.IndexOf("labr") >= 0)
                 {
-                    Packet p = builder.GetPacket(deviceKey, this.data, true);
-                    p.DeviceKey = deviceKey;
-                    p.Id = packetId;
-                    return p;
+                    Packet p = builder.GetFilePacket(DataSource.Instance.GetLabrDeviceFile(time), "labr");
+                    if (p != null)
+                    {
+                        p.DeviceKey = deviceKey;
+                        p.Id = packetId;
+                        return p;
+                    }
                 }
-                else
+                else if (deviceKey.IndexOf("hpge") >= 0)
                 {
-                    return null;
+                    string filePath = DataSource.Instance.GetNewHpGeFile();
+                    if (!string.IsNullOrEmpty(filePath))
+                    {
+                        Packet p = builder.GetFilePacket(filePath, "hpge");
+                        if (p != null)
+                        {
+                            p.DeviceKey = deviceKey;
+                            p.Id = packetId;
+                            return p;
+                        }
+                    }
                 }
+                return null;
             }
             else
             {
-                // TODO: errorMsg
-                return null;
-            }            
+                if (this.MySqlCmd == null)
+                {
+                    this.ConnectToMySQL();
+                }
+
+                string errorMsg;
+
+                DateTime from = time.AddSeconds(-30);
+                ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, RangeType.CloseOpen, this.data, out errorMsg);
+                if (d == ReadResult.ReadDataOK)
+                {
+                    if (this.data.Count > 0)
+                    {
+                        Packet p = builder.GetPacket(deviceKey, this.data, true);
+                        p.DeviceKey = deviceKey;
+                        p.Id = packetId;
+                        return p;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    // TODO: errorMsg
+                    return null;
+                }
+            }
         }
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
         {
-            //if (deviceKey.Equals(Devices.Bai9125, StringComparison.OrdinalIgnoreCase))
-            //{
-            //    int min = dt.Minute - 1;
-            //    if (min < 0)
-            //        min = 0;
-            //    DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
-            //    return ret;
-            //}
-            //else if (deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase))
-            //{
-            //    return dt;
-            //}
-            //else
-            //{
+            // Labr设备，每5分钟发送一次
+            if (deviceKey.Equals(Devices.Labr, StringComparison.OrdinalIgnoreCase))
+            {
+                int min = dt.Minute / 5 * 5;
+                DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
+                return ret;
+            }
+
+            /*
+            // Cinderella.Status设备无固定发送频率，只要有数据立即发送
+            else if (deviceKey.Equals("Scada.Cinderella.Status", StringComparison.OrdinalIgnoreCase))
+            {
+                return dt;
+            }
+             * */
+
+            // 其余设备每30s发送一次
+            else
+            {
                 int second = dt.Second / 30 * 30;
                 DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, second);
                 return ret;
-            //}
+            }
         }
 
         private bool IsSendFileTimeOK(DateTime dt)
@@ -477,11 +516,10 @@ namespace Scada.Data.Client
         private void InitDetailsListView()
         {
             this.InitDeviceColumn("scada.hpic", "高压电离室");
+            this.InitDeviceColumn("scada.cinderella.data", "Cinderella数据");
+            this.InitDeviceColumn("scada.cinderella.status", "Cinderella状态");
             this.InitDeviceColumn("scada.weather", "气象站");
-            this.InitDeviceColumn("scada.bai9850", "bai9850");
-            this.InitDeviceColumn("scada.bai9125", "bai9125");
-            this.InitDeviceColumn("scada.mds", "mds");
-            this.InitDeviceColumn("scada.radeye", "radeye");
+            this.InitDeviceColumn("scada.shelter", "环境与安防监控");
         }
 
         private static string FormatTime(DateTime time)
@@ -546,22 +584,6 @@ namespace Scada.Data.Client
                 item.SubItems[1].Text = details.SendDataCount.ToString();
                 item.SubItems[2].Text = FormatTime(details.LatestSendDataTime);
                 item.SubItems[3].Text = FormatTime(details.LatestSendHistoryDataTime);
-            }
-        }
-
-        private void testToolStripButton_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                IPAddress localIp = IPAddress.Parse("127.0.0.1");
-                IPEndPoint localIpEndPoint = new IPEndPoint(localIp, 3000);
-                var receiveUpdClient = new UdpClient();
-                receiveUpdClient.Connect(localIpEndPoint);
-                int a = receiveUpdClient.Send(Encoding.ASCII.GetBytes("Hello"), 5);
-            }
-            catch (Exception ex)
-            {
-
             }
         }
 
@@ -745,21 +767,21 @@ namespace Scada.Data.Client
             {
                 return Devices.Weather;
             }
-            else if (device == "mds")
+            else if (device == "cinderella")
             {
-                return Devices.Mds;
+                return Devices.CinderellaData;
             }
-            else if (device == "bai9125")
+            else if (device == "labr")
             {
-                return Devices.Bai9125;
+                return Devices.Labr;
             }
-            else if (device == "bai9850")
+            else if (device == "hpge")
             {
-                return Devices.Bai9850;
+                return Devices.HPGe;
             }
-            else if (device == "radeye")
+            else if (device == "environment")
             {
-                return Devices.Radeye;
+                return Devices.Shelter;
             }
             return string.Empty;
         }
@@ -776,6 +798,48 @@ namespace Scada.Data.Client
         private void QuitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.PerformQuitByUser();
+        }
+
+        private void DBTestStripButton_Click(object sender, EventArgs e)
+        {
+            if (this.ConnectToMySQL() != true)
+            {
+                this.IsDBEnable = false;
+                this.statusLabel.Text = "数据库未启动";
+                this.statusLabel.ForeColor = Color.Red;
+                this.DBTestStripButton.Enabled = true;
+                this.StartUpdateStripButton.Enabled = false;
+            }
+            else
+            {
+                this.IsDBEnable = true;
+                this.statusLabel.Text = "正常";
+                this.statusLabel.ForeColor = Color.Black;
+                this.DBTestStripButton.Enabled = false;
+                this.StartUpdateStripButton.Enabled = true;
+            }
+        }
+
+        private void StartUpdateStripButton_Click(object sender, EventArgs e)
+        {
+            this.InitializeTimer();
+            this.StartUpdateStripButton.Enabled = false;
+        }
+
+        private void SendSycnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IPAddress localIp = IPAddress.Parse("127.0.0.1");
+                IPEndPoint localIpEndPoint = new IPEndPoint(localIp, 3000);
+                var receiveUpdClient = new UdpClient();
+                receiveUpdClient.Connect(localIpEndPoint);
+                int a = receiveUpdClient.Send(Encoding.ASCII.GetBytes("Hello"), 5);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
     }
 }

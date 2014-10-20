@@ -32,17 +32,6 @@ namespace Scada.MainVision
             InitializeComponent();
         }
 
-        public void AddDataListener(DataListener listener)
-        {
-            this.dataListener = listener;
-            if (this.dataListener != null)
-            {
-                this.dataListener.OnDataArrivalBegin += this.OnDataArrivalBegin;
-                this.dataListener.OnDataArrival += this.OnDataArrival;
-                this.dataListener.OnDataArrivalEnd += this.OnDataArrivalEnd;
-            }
-        }
-
         public int Interval
         {
             get
@@ -65,44 +54,8 @@ namespace Scada.MainVision
             ConfigItem item = entry.GetConfigItem(lineName);
             this.ChartView.SetCurveDisplayName("瞬时流量");
             this.ChartView.SetValueRange(item.Min, item.Max);
-        }
-
-
-        private void OnDataArrivalBegin(DataArrivalConfig config)
-        {
-        }
-
-        private void OnDataArrival(DataArrivalConfig config, Dictionary<string, object> entry)
-        {
-            if (!entry.ContainsKey("time"))
-            {
-                return;
-            }
-
-            string dataTime = (string)entry["time"];
-            DateTime time = DateTime.Parse(dataTime);
-            if (config == DataArrivalConfig.TimeRecent && time != this.lastTime)
-            {
-                if ((DateTime.Now.Ticks - time.Ticks) / 10000000 < 15)
-                {
-                    this.lastTime = time;
-                    // this.AddTimePoint(time, entry);
-                }
-            }
-            
-        }
-
-        private void AddTimePoint(DateTime time, Dictionary<string, object> entry)
-        {
-
-            this.ChartView.AddPoint(time, entry["flow"]);
-        }
-
-        private void OnDataArrivalEnd(DataArrivalConfig config)
-        {
-            if (config == DataArrivalConfig.TimeRange)
-            {
-            }
+            this.ChartView.HideResetButton();
+            this.StartRealTimeChart();
         }
 
         // Save chart into BMP file
@@ -124,24 +77,45 @@ namespace Scada.MainVision
 
         public DateTime lastTime { get; set; }
 
+        private void StartRealTimeChart()
+        {
+            /*
+            this.dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            var dbConn = DBDataProvider.Instance.GetMySqlConnection();
+            if (dbConn == null)
+            {
+                return;
+            }
+
+            dispatcherTimer.Tick += (s, evt) =>
+            {
+                DateTime fromTime = DateTime.Now.AddMinutes(-48);
+
+                using (var dbCmd = dbConn.CreateCommand())
+                {
+                    var data = DBDataProvider.Instance.RefreshTimeRange2(this.DeviceKey, fromTime, DateTime.Now, dbCmd);
+                    if (data.Count == 0)
+                    {
+                        dispatcherTimer.Interval = new TimeSpan(0, 1, 30);
+                    }
+                    else
+                    {
+                        dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
+                    }
+                    this.ChartView.SetDataSource2(data, "flow");
+                }
+            };
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
+            dispatcherTimer.Start();
+            */
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             if (this.dispatcherTimer != null)
                 return;
 
-            this.dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-            var dbConn = DBDataProvider.Instance.GetMySqlConnection();
-            var dbCmd = dbConn.CreateCommand();
-            dispatcherTimer.Tick += (s, evt) =>
-            {
-                dispatcherTimer.Interval = new TimeSpan(0, 0, 8);
-                DateTime fromTime = DateTime.Now.AddHours(-2);
-                var data = DBDataProvider.Instance.RefreshTimeRange(this.DeviceKey, fromTime, DateTime.Now, dbCmd);
-
-                this.ChartView.SetDataSource2(data, "flow");
-            };
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
-            dispatcherTimer.Start();
+            this.StartRealTimeChart();
             this.StartChart = true;
         }
 
@@ -150,6 +124,11 @@ namespace Scada.MainVision
         public string DeviceKey { get; set; }
 
         public System.Windows.Threading.DispatcherTimer dispatcherTimer { get; set; }
+
+        internal void SetDataSource2(List<Dictionary<string, object>> data, string p)
+        {
+            this.ChartView.SetDataSource2(data, p);
+        }
     }
 
 }

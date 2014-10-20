@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0"?>
 <settings>
-  <application title="辐射环境自动监测站管理系统" station="北京辐射安全中心全自动站" status="正式运行" stationId="0102A07" pos="GPS LAT: LON:" usercomp="****环保局" admincomp="****环保局" buildcomp="北京中检维康技术有限公司">
+  <application title="辐射环境自动监测站管理系统" station="*****自动站" status="正式运行" stationId="0102A07" pos="GPS坐标 经度: 纬度:" usercomp="用户单位：****环保局" admincomp="运营单位：****环保局" buildcomp="承建单位：北京中检维康技术有限公司">
     
   </application>
  </settings>
