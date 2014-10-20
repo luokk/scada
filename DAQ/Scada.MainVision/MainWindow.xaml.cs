@@ -109,7 +109,8 @@ namespace Scada.MainVision
             // this.AddPageEntry("数据分析", this.CounterTree);
 
 
-            this.ShowDataViewPanel("scada.naidevice");
+            // this.ShowDataViewPanel("scada.naidevice");
+            this.ShowStatusPane();
             // this.OnDeviceItemClicked(null, null);
             this.loaded = true;
             // Max when startup;
@@ -266,6 +267,18 @@ namespace Scada.MainVision
 			this.panelManager.CloseListViewPanel(panel);
 		}
 
+        private void ShowStatusPane()
+        {
+            string name = "Devices-Run-Status";
+            System.Windows.Controls.UserControl page = this.panelManager.GetPage(name);
+            if (page == null)
+            {
+                page = this.panelManager.CreatePage(name, this.dataProvider);
+            }
+            this.panelManager.SetPage(name, page);
+        }
+
+        /*
         void OnNaviItemClicked(object sender, EventArgs e)
         {
             NaviLabel nv = (NaviLabel)sender;
@@ -276,7 +289,7 @@ namespace Scada.MainVision
                 page = this.panelManager.CreatePage(name, this.dataProvider);
             }
             this.panelManager.SetPage(name, page);
-        }
+        }*/
 
         void OnDeviceItemClicked(object sender, EventArgs e)
         {
