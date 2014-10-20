@@ -632,6 +632,7 @@ namespace Scada.Data.Client.Tcp
                     cr.ConnectedTime = DateTime.Now;
 
                     this.agent.StopConnectCountryCenter(true);
+                    this.SubConnStatusLabel.Text = "省中心连接状态: 上传中";
                 }
                 else if (NotifyEvents.Disconnect == notify)
                 {
@@ -640,6 +641,7 @@ namespace Scada.Data.Client.Tcp
                     cr.DisconnectedTime = DateTime.Now;
 
                     this.agent.StartConnectCountryCenter(true);
+                    this.SubConnStatusLabel.Text = "省中心连接状态: 已断开";
                 }
                 else if (NotifyEvents.HandleEvent == notify)
                 {
@@ -658,22 +660,22 @@ namespace Scada.Data.Client.Tcp
                 {
                     /// 国家数据中心相关
                     this.StartConnectCountryCenter();
-                    this.AddListItem(msg1);
+                    this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
                 }
                 else if (NotifyEvents.DisconnectToCountryCenter == notify)
                 {
                     /// 国家数据中心相关
                     this.StopConnectCountryCenter();
-                    this.AddListItem(msg1);
+                    this.SubConnStatusLabel.Text = "国家中心连接状态: 已断开";
                 }
             });
         }
 
         private void AddListItem(string line)
         {
-            if (this.mainListBox.Items.Count > 200)
+            if (this.mainListBox.Items.Count > 10)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < this.mainListBox.Items.Count - 10; i++)
                 {
                     this.mainListBox.Items.RemoveAt(0);
                 }

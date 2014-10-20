@@ -169,7 +169,7 @@ namespace Scada.MainVision
         internal void SaveChart()
         {
             string filePath = string.Empty;
-            System.Windows.Forms.OpenFileDialog fileDialog = new OpenFileDialog();
+            System.Windows.Forms.SaveFileDialog fileDialog = new SaveFileDialog();
             fileDialog.InitialDirectory = "C://";
             fileDialog.Filter = "曲线图片 (*.bmp)|*.bmp|All files (*.*)|*.*";
             fileDialog.FilterIndex = 1;
@@ -177,8 +177,8 @@ namespace Scada.MainVision
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
                 filePath = fileDialog.FileName;
-            }
-            this.SearchChartView.SaveChart(filePath);
+                this.SearchChartView.SaveChart(filePath);
+            } 
         }
     }
 
