@@ -141,11 +141,14 @@ namespace Scada.Data.Client.Tcp
             this.MakeWindowShownFront();
             this.ShowInTaskbar = false;
             this.SetExceptionToolStripMenuItem.Checked = false;
+
+            /*
             this.statusStrip.Items.Add(this.GetConnetionString());
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add("MS: " + Settings.Instance.Mn);
             this.statusStrip.Items.Add(new ToolStripSeparator());
             // this.statusStrip.Items.Add("数据中心IP:");
+             * */
 
             this.cmdReceiver = new CommandReceiver(Ports.DataClient);
             cmdReceiver.Start(this.OnLocalCommand);
@@ -299,6 +302,7 @@ namespace Scada.Data.Client.Tcp
         {
             Agent agent = new Agent(serverAddress, serverPort);
             agent.Type = Type.Country;
+            // ?
             agent.Wireless = false;
             agent.NotifyEvent += this.OnNotifyEvent;
             return agent;
@@ -614,7 +618,7 @@ namespace Scada.Data.Client.Tcp
                 return;
             this.SafeInvoke(() =>
             {
-                this.statusStrip.Items[0].Text = this.GetConnetionString();
+                //this.statusStrip.Items[0].Text = this.GetConnetionString();
 
                 if (NotifyEvents.Connecting == notify)
                 {

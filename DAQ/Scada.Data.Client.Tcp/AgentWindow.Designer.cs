@@ -48,6 +48,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.OpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.StartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.setTimeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.SetExceptionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.QuitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,11 +59,13 @@
             this.startStripButton = new System.Windows.Forms.ToolStripButton();
             this.loggerStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.setTimeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.MainConnStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.SubConnStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.panel1.SuspendLayout();
             this.mainTabCtrl.SuspendLayout();
             this.connPage.SuspendLayout();
@@ -97,12 +100,15 @@
             // 
             // toolStripContainer1.TopToolStripPanel
             // 
-            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.menuStrip1);
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.toolStrip1);
+            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this.menuStrip1);
             // 
             // statusStrip
             // 
             this.statusStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MainConnStatusLabel,
+            this.SubConnStatusLabel});
             this.statusStrip.Location = new System.Drawing.Point(0, 0);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(520, 22);
@@ -167,7 +173,7 @@
             this.historyPage.Location = new System.Drawing.Point(4, 22);
             this.historyPage.Name = "historyPage";
             this.historyPage.Padding = new System.Windows.Forms.Padding(3);
-            this.historyPage.Size = new System.Drawing.Size(512, 330);
+            this.historyPage.Size = new System.Drawing.Size(512, 325);
             this.historyPage.TabIndex = 1;
             this.historyPage.Text = "连接历史";
             this.historyPage.UseVisualStyleBackColor = true;
@@ -179,7 +185,7 @@
             this.connHistoryList.ItemHeight = 12;
             this.connHistoryList.Location = new System.Drawing.Point(3, 3);
             this.connHistoryList.Name = "connHistoryList";
-            this.connHistoryList.Size = new System.Drawing.Size(506, 324);
+            this.connHistoryList.Size = new System.Drawing.Size(506, 319);
             this.connHistoryList.TabIndex = 0;
             // 
             // dataPage
@@ -188,7 +194,7 @@
             this.dataPage.Location = new System.Drawing.Point(4, 22);
             this.dataPage.Name = "dataPage";
             this.dataPage.Padding = new System.Windows.Forms.Padding(3);
-            this.dataPage.Size = new System.Drawing.Size(512, 330);
+            this.dataPage.Size = new System.Drawing.Size(512, 325);
             this.dataPage.TabIndex = 2;
             this.dataPage.Text = "数据上传";
             this.dataPage.UseVisualStyleBackColor = true;
@@ -206,7 +212,7 @@
             this.detailsListView.Location = new System.Drawing.Point(3, 3);
             this.detailsListView.MultiSelect = false;
             this.detailsListView.Name = "detailsListView";
-            this.detailsListView.Size = new System.Drawing.Size(506, 324);
+            this.detailsListView.Size = new System.Drawing.Size(506, 319);
             this.detailsListView.TabIndex = 0;
             this.detailsListView.UseCompatibleStateImageBehavior = false;
             this.detailsListView.View = System.Windows.Forms.View.Details;
@@ -258,27 +264,35 @@
             // StartToolStripMenuItem
             // 
             this.StartToolStripMenuItem.Name = "StartToolStripMenuItem";
-            this.StartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.StartToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.StartToolStripMenuItem.Text = "启动";
             this.StartToolStripMenuItem.Click += new System.EventHandler(this.StartToolStripMenuItem_Click);
+            // 
+            // setTimeToolStripMenuItem1
+            // 
+            this.setTimeToolStripMenuItem1.CheckOnClick = true;
+            this.setTimeToolStripMenuItem1.Name = "setTimeToolStripMenuItem1";
+            this.setTimeToolStripMenuItem1.Size = new System.Drawing.Size(124, 22);
+            this.setTimeToolStripMenuItem1.Text = "处理校时";
+            this.setTimeToolStripMenuItem1.Click += new System.EventHandler(this.SetTimeToolStripMenuItemClick);
             // 
             // SetExceptionToolStripMenuItem
             // 
             this.SetExceptionToolStripMenuItem.CheckOnClick = true;
             this.SetExceptionToolStripMenuItem.Name = "SetExceptionToolStripMenuItem";
-            this.SetExceptionToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.SetExceptionToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.SetExceptionToolStripMenuItem.Text = "异常模拟";
             this.SetExceptionToolStripMenuItem.Click += new System.EventHandler(this.SetExceptionToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(121, 6);
             // 
             // QuitToolStripMenuItem
             // 
             this.QuitToolStripMenuItem.Name = "QuitToolStripMenuItem";
-            this.QuitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.QuitToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.QuitToolStripMenuItem.Text = "退出";
             this.QuitToolStripMenuItem.Click += new System.EventHandler(this.QuitToolStripMenuItem_Click);
             // 
@@ -294,14 +308,14 @@
             // LoggerToolStripMenuItem
             // 
             this.LoggerToolStripMenuItem.Name = "LoggerToolStripMenuItem";
-            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.LoggerToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.LoggerToolStripMenuItem.Text = "日志";
             this.LoggerToolStripMenuItem.Click += new System.EventHandler(this.LoggerToolStripMenuItem_Click);
             // 
             // ClsToolStripMenuItem1
             // 
             this.ClsToolStripMenuItem1.Name = "ClsToolStripMenuItem1";
-            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.ClsToolStripMenuItem1.Size = new System.Drawing.Size(100, 22);
             this.ClsToolStripMenuItem1.Text = "清屏";
             // 
             // toolStrip1
@@ -340,13 +354,17 @@
             this.sysNotifyIcon.Text = "数据上传";
             this.sysNotifyIcon.Visible = true;
             // 
-            // setTimeToolStripMenuItem1
+            // MainConnStatusLabel
             // 
-            this.setTimeToolStripMenuItem1.CheckOnClick = true;
-            this.setTimeToolStripMenuItem1.Name = "setTimeToolStripMenuItem1";
-            this.setTimeToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
-            this.setTimeToolStripMenuItem1.Text = "处理校时";
-            this.setTimeToolStripMenuItem1.Click += new System.EventHandler(this.SetTimeToolStripMenuItemClick);
+            this.MainConnStatusLabel.Name = "MainConnStatusLabel";
+            this.MainConnStatusLabel.Size = new System.Drawing.Size(104, 17);
+            this.MainConnStatusLabel.Text = "省中心连接状态：";
+            // 
+            // SubConnStatusLabel
+            // 
+            this.SubConnStatusLabel.Name = "SubConnStatusLabel";
+            this.SubConnStatusLabel.Size = new System.Drawing.Size(116, 17);
+            this.SubConnStatusLabel.Text = "数据中心连接状态：";
             // 
             // AgentWindow
             // 
@@ -369,6 +387,8 @@
             this.toolStripContainer1.TopToolStripPanel.PerformLayout();
             this.toolStripContainer1.ResumeLayout(false);
             this.toolStripContainer1.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.mainTabCtrl.ResumeLayout(false);
             this.connPage.ResumeLayout(false);
@@ -413,6 +433,8 @@
         private System.Windows.Forms.ListBox connHistoryList;
         private System.Windows.Forms.ColumnHeader countCol;
         private System.Windows.Forms.ToolStripMenuItem setTimeToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripStatusLabel MainConnStatusLabel;
+        private System.Windows.Forms.ToolStripStatusLabel SubConnStatusLabel;
 
     }
 }
