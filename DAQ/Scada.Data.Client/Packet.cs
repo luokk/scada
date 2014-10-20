@@ -38,7 +38,6 @@ namespace Scada.Data.Client
 
         public Packet()
         {
-
         }
 
         public Packet(string token)
