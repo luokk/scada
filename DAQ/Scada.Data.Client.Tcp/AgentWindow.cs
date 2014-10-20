@@ -632,7 +632,7 @@ namespace Scada.Data.Client.Tcp
                     cr.ConnectedTime = DateTime.Now;
 
                     this.agent.StopConnectCountryCenter(true);
-                    this.SubConnStatusLabel.Text = "省中心连接状态: 上传中";
+                    this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
                 }
                 else if (NotifyEvents.Disconnect == notify)
                 {
@@ -641,7 +641,7 @@ namespace Scada.Data.Client.Tcp
                     cr.DisconnectedTime = DateTime.Now;
 
                     this.agent.StartConnectCountryCenter(true);
-                    this.SubConnStatusLabel.Text = "省中心连接状态: 已断开";
+                    this.MainConnStatusLabel.Text = "省中心连接状态: 已断开";
                 }
                 else if (NotifyEvents.HandleEvent == notify)
                 {
