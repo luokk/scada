@@ -54,6 +54,7 @@ namespace Scada.Data.Client.Tcp
         Connecting,
         Connected,
         Disconnect,
+        Disconnect2,
         BeginRead,
         EndRead,
         Received,
@@ -291,7 +292,7 @@ namespace Scada.Data.Client.Tcp
         private void OnConnectionException(Exception e)
         {
             this.Disconnect();
-            this.TryToPing();
+            // this.TryToPing();
         }
 
         private IPStatus GetPingResult(string serverIpAddress)
@@ -411,7 +412,7 @@ namespace Scada.Data.Client.Tcp
             {
                 string msg = string.Format("Disconnect from {0} Failed => {1}", this.ToString(), e.Message);
                 this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
+                this.NotifyEvent(this, NotifyEvents.Disconnect2, msg, null);
             }
             this.Stream = null;
             this.client = null;

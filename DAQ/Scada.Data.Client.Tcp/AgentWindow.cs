@@ -80,7 +80,7 @@ namespace Scada.Data.Client.Tcp
                 else
                 {
                     // Not connected
-                    return string.Format("<{0}> 正在连接...", this.ConnectingTime);
+                    return "";  // string.Format("<{0}> 正在连接...", this.ConnectingTime);
                 }
             }
 
@@ -129,6 +129,7 @@ namespace Scada.Data.Client.Tcp
         public AgentWindow()
         {
             this.StartState = false;
+            this.retryCount = 0;
             InitializeComponent();
         }
 
@@ -634,13 +635,17 @@ namespace Scada.Data.Client.Tcp
                     this.agent.StopConnectCountryCenter(true);
                     this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
                 }
-                else if (NotifyEvents.Disconnect == notify)
+                else if (NotifyEvents.Disconnect == notify || NotifyEvents.Disconnect2 == notify)
                 {
                     int count = this.connectionHistory.Count;
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.DisconnectedTime = DateTime.Now;
 
-                    this.agent.StartConnectCountryCenter(true);
+                    if (NotifyEvents.Disconnect == notify && this.retryCount % 4 == 0)
+                    {
+                        this.retryCount++;
+                        this.agent.StartConnectCountryCenter(true);
+                    }
                     this.MainConnStatusLabel.Text = "省中心连接状态: 已断开";
                 }
                 else if (NotifyEvents.HandleEvent == notify)
@@ -812,7 +817,11 @@ namespace Scada.Data.Client.Tcp
             {
                 foreach (var cr in this.connectionHistory)
                 {
-                    this.connHistoryList.Items.Insert(0, cr.ToString());
+                    string historyItem = cr.ToString();
+                    if (!string.IsNullOrEmpty(historyItem))
+                    {
+                        this.connHistoryList.Items.Insert(0, cr.ToString());
+                    }
                 }
             }
             else if (this.mainTabCtrl.SelectedIndex == 2)
@@ -822,6 +831,7 @@ namespace Scada.Data.Client.Tcp
         }
 
         private Dictionary<string, DeviceDataDetails> detailsDict = new Dictionary<string, DeviceDataDetails>();
+        private int retryCount;
 
         private void InitDetailsListView()
         {
