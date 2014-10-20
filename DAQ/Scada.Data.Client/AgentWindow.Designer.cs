@@ -270,7 +270,6 @@
             this.debugConsole.Name = "debugConsole";
             this.debugConsole.Size = new System.Drawing.Size(830, 318);
             this.debugConsole.TabIndex = 0;
-            //this.debugConsole.TextChanged += new System.EventHandler(this.debugConsole_TextChanged);
             // 
             // mainToolStrip
             // 
@@ -351,42 +350,40 @@
             // 
             this.SendLabrToolStripMenuItem.Name = "SendLabrToolStripMenuItem";
             this.SendLabrToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.SendLabrToolStripMenuItem.Tag = "scada.bai9850";
-            this.SendLabrToolStripMenuItem.Text = "bai9850";
+            this.SendLabrToolStripMenuItem.Tag = "scada.labrdevice";
+            this.SendLabrToolStripMenuItem.Text = "Labr谱仪";
             this.SendLabrToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
             // SendHPGeToolStripMenuItem
             // 
             this.SendHPGeToolStripMenuItem.Name = "SendHPGeToolStripMenuItem";
             this.SendHPGeToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.SendHPGeToolStripMenuItem.Tag = "scada.bai9125";
-            this.SendHPGeToolStripMenuItem.Text = "bai9125";
+            this.SendHPGeToolStripMenuItem.Tag = "scada.hpge";
+            this.SendHPGeToolStripMenuItem.Text = "高纯锗";
             this.SendHPGeToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
             // SendCinderellaDataToolStripMenuItem
             // 
             this.SendCinderellaDataToolStripMenuItem.Name = "SendCinderellaDataToolStripMenuItem";
             this.SendCinderellaDataToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.SendCinderellaDataToolStripMenuItem.Tag = "scada.mds";
-            this.SendCinderellaDataToolStripMenuItem.Text = "mds";
+            this.SendCinderellaDataToolStripMenuItem.Tag = "scada.cinderella.data";
+            this.SendCinderellaDataToolStripMenuItem.Text = "Cinderella数据";
             this.SendCinderellaDataToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
             // SendCinderellaStatusModuleToolStripMenuItem
             // 
             this.SendCinderellaStatusModuleToolStripMenuItem.Name = "SendCinderellaStatusModuleToolStripMenuItem";
             this.SendCinderellaStatusModuleToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.SendCinderellaStatusModuleToolStripMenuItem.Tag = "scada.radeye";
-            this.SendCinderellaStatusModuleToolStripMenuItem.Text = "radeye";
+            this.SendCinderellaStatusModuleToolStripMenuItem.Tag = "scada.cinderella.status";
+            this.SendCinderellaStatusModuleToolStripMenuItem.Text = "Cinderella状态";
             this.SendCinderellaStatusModuleToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
             // SendShelterToolStripMenuItem
             // 
-            this.SendShelterToolStripMenuItem.Enabled = false;
             this.SendShelterToolStripMenuItem.Name = "SendShelterToolStripMenuItem";
             this.SendShelterToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.SendShelterToolStripMenuItem.Tag = "scada.shelter";
             this.SendShelterToolStripMenuItem.Text = "环境与安防监控";
-            this.SendShelterToolStripMenuItem.Visible = false;
             this.SendShelterToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
             // sysNotifyIcon
