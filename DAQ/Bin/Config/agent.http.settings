@@ -1,7 +1,3 @@
-<?xml version="1.0"?>
-<settings>
-  <!-- Default Port is 6000 and 7000 -->
-  <datacenters>
     
     <datacenter2 BaseUrl="http://211.103.184.100:8080" />
     
