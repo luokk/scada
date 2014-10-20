@@ -162,16 +162,18 @@ namespace Scada.Data.Client
         {
             if (deviceKey == Devices.Hpic)
                 return "hpic";
+            else if (deviceKey == Devices.Shelter)
+                return "environment";
             else if (deviceKey == Devices.Weather)
                 return "weather";
-            else if (deviceKey == Devices.Bai9125)
-                return "bai9125";
-            else if (deviceKey == Devices.Bai9850)
-                return "bai9850";
-            else if (deviceKey == Devices.Mds)
-                return "mds";
-            else if (deviceKey == Devices.Radeye)
-                return "radeye";
+            else if (deviceKey == Devices.Labr)
+                return "labr";
+            else if (deviceKey == Devices.HPGe)
+                return "hpge";
+            else if (deviceKey == Devices.CinderellaData)
+                return "cinderelladata";
+            else if (deviceKey == Devices.CinderellaStatus)
+                return "cinderellastatus";
             else
                 return string.Empty;
         }

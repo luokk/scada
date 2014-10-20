@@ -13,12 +13,14 @@ namespace Scada.Data.Client
 
         public const string Weather = Prefix + "weather";
 
-        public const string Bai9125 = Prefix + "bai9125";
+        public const string Labr = Prefix + "labrdevice";
 
-        public const string Bai9850 = Prefix + "bai9850";
+        public const string HPGe = Prefix + "hpge";
 
-        public const string Mds = Prefix + "mds";
+        public const string CinderellaData = Prefix + "cinderella.data";
 
-        public const string Radeye = Prefix + "radeye";
+        public const string CinderellaStatus = Prefix + "cinderella.status";
+
+        public const string Shelter = Prefix + "shelter";
     }
 }
