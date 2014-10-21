@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json.Linq;
 using Scada.Common;
 using Scada.Config;
 using Scada.DataCenterAgent.Properties;
@@ -191,6 +192,22 @@ namespace Scada.Data.Client.Tcp
                     {
                         this.WindowState = FormWindowState.Minimized;
                         this.ShowAtTaskBar(false);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        JObject json = JObject.Parse(msg);
+                        string type = json["type"].ToString().Trim('"');
+                        string commandLine = json["content"].ToString().Trim('"');
+                        if (type == "show")
+                        {
+                            this.MakeWindowShownFront();
+                        }
+                    }
+                    catch (Exception)
+                    {
                     }
                 }
             });
