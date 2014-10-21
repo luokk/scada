@@ -534,17 +534,19 @@ namespace Scada.MainVision
 
                     using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
-                        var data = new Dictionary<string, object>();
+                        
                         while (reader.Read())
                         {
+                            var data = new Dictionary<string, object>();
                             data.Add("sid", reader.GetString("Sid"));
                             data.Add("begintime", reader.GetString("begintime"));
                             data.Add("endtime", reader.GetString("endtime"));
                             data.Add("volume", reader.GetString("volume"));
                             data.Add("hours", reader.GetString("hours"));
+                            ret.Add(data);
                         }
 
-                        ret.Add(data);
+                        
                     }
                 }
             }
