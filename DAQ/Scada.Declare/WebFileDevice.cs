@@ -245,7 +245,9 @@ namespace Scada.Declare
             this.SynchronizationContext.Post(this.DataReceived, dd);
             foreach (var nd in set.sets)
             {
-                if (nd.Indication == "100")
+                int ind = 0;
+                int.TryParse(nd.Indication, out ind);
+                if (ind > 0 && ind <= 100)
                 {
                     var dd2 = this.ParseNuclideData(nd, time);
                     this.SynchronizationContext.Post(this.DataReceived, dd2);
