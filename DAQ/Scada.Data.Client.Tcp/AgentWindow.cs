@@ -931,5 +931,10 @@ namespace Scada.Data.Client.Tcp
                 }
             }
         }
+
+        private void SubConnStatusLabel_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
