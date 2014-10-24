@@ -513,6 +513,7 @@ namespace Scada.Controls
             var dt1 = DateTime.Parse(this.FromDateText.Text);
             var dt2 = DateTime.Parse(this.ToDateText.Text);
 
+            DateTime t1 = DateTime.Now;
             using (var conn = DBDataProvider.Instance.GetMySqlConnection())
             {
                 using (var cmd = conn.CreateCommand())
@@ -527,8 +528,11 @@ namespace Scada.Controls
                 }
             }
 
+            DateTime t2 = DateTime.Now;
+            MessageBox.Show("找到数据" + (t2 - t1));
             // int interval = this.currentInterval;
-            this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
+            this.searchData = this.searchDataSource;
+            //this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
 
             ListView searchListView = (ListView)this.SearchView;
             searchListView.ItemsSource = null;
@@ -536,7 +540,6 @@ namespace Scada.Controls
             if (this.searchData != null && this.searchData.Count > 0)
             {
 
-                searchListView.ItemsSource = this.searchData;
                 if (this.deviceKey == DataProvider.DeviceKey_Hpic)
                 {
                     ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30);
@@ -548,6 +551,9 @@ namespace Scada.Controls
                         ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
                     }
                 }
+
+
+                //searchListView.ItemsSource = this.searchData;
             }
         }
 

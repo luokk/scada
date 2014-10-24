@@ -335,18 +335,32 @@ namespace Scada.MainVision
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
                 int index = 0;
+
+                List<string> keys = new List<string>();
+                foreach (var i in entry.ConfigItems)
+                {
+                    string key = i.Key.ToLower();
+                    if (deviceKey == DataProvider.DeviceKey_NaI && key.IndexOf('-') > 0)
+                    {
+                        continue;
+                    }
+                    
+                    keys.Add(key);
+                }
+
+                string[] keyArray = keys.ToArray();
+
+                Dictionary<string, object> data = null;// new Dictionary<string, object>(10);
+                int counter = 0;
                 while (reader.Read())
                 {
-                    Dictionary<string, object> data = new Dictionary<string, object>(10);
-                    foreach (var i in entry.ConfigItems)
+
+
+                    data = new Dictionary<string, object>(keyArray.Length);
+                    foreach (var key in keyArray)
                     {
-                        string key = i.Key.ToLower();
                         try
                         {
-                            if (deviceKey == DataProvider.DeviceKey_NaI && key.IndexOf('-') > 0)
-                            {
-                                continue;
-                            }
                             string v = reader.GetString(key);
                             data.Add(key, v);
                         }
@@ -375,13 +389,15 @@ namespace Scada.MainVision
                 }
             }
 
+            // No Need!! Left join instead.
             if (deviceKey == DataProvider.DeviceKey_Weather)
             {
-                ReviseIfRainForWeather(cmd, ret);
+                // ReviseIfRainForWeather(cmd, ret);
             }
             else if (deviceKey == DataProvider.DeviceKey_Hpic)
             {
-                this.ReviseIfRainForHpic(cmd, ret, fromTime, toTime);
+                
+                // this.ReviseIfRainForHpic(cmd, ret, fromTime, toTime);
             }
             return ret;
         }
@@ -448,10 +464,25 @@ namespace Scada.MainVision
 
         private string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
         {
-            // Get the recent <count> entries.
-            string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
-            string sql = string.Format(format, tableName, toTime, fromTime);
-            return sql;
+            if (tableName.ToLower().IndexOf("hpic") >= 0)
+            {
+                string format = "select a.time, a.doserate, a.Highvoltage, a.Temperature, a.Battery, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
+                string sql = string.Format(format, tableName, toTime, fromTime);
+                return sql;
+            }
+            if (tableName.ToLower().IndexOf("weather") >= 0)
+            {
+                string format = "select a.time, a.Windspeed, a.Direction, a.Temperature, a.Humidity, a.Pressure, a.Raingauge, a.Rainspeed, a.Dewpoint, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
+                string sql = string.Format(format, tableName, toTime, fromTime);
+                return sql;
+            }
+            else
+            {
+                // Get the recent <count> entries.
+                string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                string sql = string.Format(format, tableName, toTime, fromTime);
+                return sql;
+            }
         }
 
         private DataListener GetDataListenerByTableName(string tableName)
