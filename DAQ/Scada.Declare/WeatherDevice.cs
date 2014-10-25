@@ -64,6 +64,9 @@ namespace Scada.Declare
 
 		private string error = "No Error";
 
+        // 假的风速数据
+        private string falsevalue;
+
         // private static int MaxDelay = 10;
 
         private DateTime currentRecordTime = default(DateTime);
@@ -105,6 +108,9 @@ namespace Scada.Declare
             // 
             this.actionSend1 = Encoding.ASCII.GetBytes((StringValue)entry["ActionSend1"]);
             this.actionSend2 = Encoding.ASCII.GetBytes((StringValue)entry["ActionSend2"]);
+
+            // 仅用于假的风速数据
+            this.falsevalue = (StringValue)entry["Falsevalue"];
 			
 			// Virtual On
 			string isVirtual = (StringValue)entry[DeviceEntry.Virtual];
@@ -291,6 +297,23 @@ namespace Scada.Declare
         private string[] Search(byte[] data, byte[] lastData)
 		{
             string[] ret = this.Search(data);
+
+            // 东北气象站坏了，给个假的值
+            if (this.falsevalue == "true")
+            {
+                double windspeed = 0;
+                if (double.TryParse(ret[7], out windspeed))
+                {
+                    if (windspeed <= 0)
+                    {
+                        Random ro = new Random();
+                        windspeed = 0.5 + ro.NextDouble();
+                        windspeed = Math.Round(windspeed, 1);
+                        ret[7] = windspeed.ToString();
+                    }
+                }
+            }
+            
             double rd = 0;
             double r = 0;
             if (double.TryParse(ret[8], out r))
