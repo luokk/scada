@@ -508,52 +508,91 @@ namespace Scada.Controls
                 return;
             }
 
+            if (this.inSearch)
+                return;
+
             this.FromDateText.Background = Brushes.White;
             this.ToDateText.Background = Brushes.White;
             var dt1 = DateTime.Parse(this.FromDateText.Text);
             var dt2 = DateTime.Parse(this.ToDateText.Text);
 
-            DateTime t1 = DateTime.Now;
-            using (var conn = DBDataProvider.Instance.GetMySqlConnection())
-            {
-                using (var cmd = conn.CreateCommand())
-                {
-                    this.searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, cmd);
+            SynchronizationContext sc = SynchronizationContext.Current;
 
-                    if (this.searchDataSource.Count == 0)
+            Thread thread = new Thread(new ParameterizedThreadStart((o) => 
+            {
+                
+                using (var conn = DBDataProvider.Instance.GetMySqlConnection())
+                {
+                    using (var cmd = conn.CreateCommand())
                     {
-                        MessageBox.Show("没有找到数据");
-                        return;
+                        DateTime t1 = dt1;
+                        DateTime t2 = dt1.AddDays(1).AddSeconds(-2);
+                        int index = 0;
+                        this.inSearch = true;
+                        while (t2 < dt2)
+                        {
+                            // Get Daily data;
+                            var searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, t1, t2, cmd);
+
+                            if (searchDataSource.Count > 0)
+                            {
+                                sc.Post(new SendOrPostCallback((data) =>
+                                {
+                                    this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2);
+                                    index++;
+                                }), searchDataSource);
+                                
+                            }
+                            t1 = t1.AddDays(1);
+                            t2 = t1.AddDays(1).AddSeconds(-2);
+                            // Thread.Sleep(20);
+                        }
+                        this.inSearch = false;
                     }
                 }
-            }
 
-            DateTime t2 = DateTime.Now;
-            MessageBox.Show("找到数据" + (t2 - t1));
-            // int interval = this.currentInterval;
-            this.searchData = this.searchDataSource;
+
+            }));
+            thread.Start(null);
+
             //this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
+        }
 
+        private void UpdateSearchData(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime)
+        {
             ListView searchListView = (ListView)this.SearchView;
             searchListView.ItemsSource = null;
 
-            if (this.searchData != null && this.searchData.Count > 0)
+            if (data != null && data.Count > 0)
             {
-
-                if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+                if (index == 0)
                 {
-                    ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30);
+                    if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+                    {
+                        ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, 30, index, beginTime, endTime);
+                    }
+                    else
+                    {
+                        if (this.graphSearchView != null)
+                        {
+                            ((SearchGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, index, beginTime, endTime);
+                        }
+                    }
                 }
                 else
                 {
-                    if (this.graphSearchView != null)
+                    if (this.deviceKey == DataProvider.DeviceKey_Hpic)
                     {
-                        ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                        ((SearchHpicGraphView)this.graphSearchView).AppendDataSource(data, this.selectedField, 30, index);
+                    }
+                    else
+                    {
+                        if (this.graphSearchView != null)
+                        {
+                            ((SearchGraphView)this.graphSearchView).AppendDataSource(data, this.selectedField, index);
+                        }
                     }
                 }
-
-
-                //searchListView.ItemsSource = this.searchData;
             }
         }
 
@@ -724,7 +763,7 @@ namespace Scada.Controls
         {
             if ((bool)e.NewValue)
             {
-                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 0, this.BeginTime, this.EndTime);
             }
 
         }
@@ -743,6 +782,7 @@ namespace Scada.Controls
         
         public string selectedField;
         private MySqlConnection realTimeDbConn;
+        private bool inSearch;
 
         public bool Shown
         {
@@ -851,7 +891,7 @@ namespace Scada.Controls
             }
 
             ((SearchHpicGraphView)this.graphSearchView).Interval = this.selectedInterval;
-            ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.selectedInterval);
+            ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.selectedInterval, 0, this.BeginTime, this.EndTime);
         }
 
         private void FieldSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -869,8 +909,12 @@ namespace Scada.Controls
             {
                 this.selectedField = "windspeed";
             }
-            ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+            ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 0, this.BeginTime, this.EndTime);
 
         }
+
+        public DateTime BeginTime { get; set; }
+
+        public DateTime EndTime { get; set; }
     }
 }

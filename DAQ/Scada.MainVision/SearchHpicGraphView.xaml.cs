@@ -76,7 +76,7 @@ namespace Scada.MainVision
             return ret;
         }
 
-        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval)
+        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int index, DateTime beginTime, DateTime endTime)
         {
             if (dataSource == null || dataSource.Count == 0)
             {
@@ -92,7 +92,7 @@ namespace Scada.MainVision
             {
                 data = this.GetDataByInterval(dataSource, interval);
             }
-            this.SearchChartView.SetDataSource(data, valueKey);
+            this.SearchChartView.SetDataSource(data, valueKey, beginTime, endTime);
             this.SearchChartView.SetUpdateRangeHandler((begin, end) => 
             {
                 this.SearchChartView2.UpdateRange(begin, end);
@@ -101,7 +101,28 @@ namespace Scada.MainVision
             {
                 this.SearchChartView2.Reset();
             });
-            this.SearchChartView2.SetDataSource(dataSource, "ifrain");
+            this.SearchChartView2.SetDataSource(dataSource, "ifrain", beginTime, endTime);
+        }
+
+        public void AppendDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int index)
+        {
+            if (dataSource == null || dataSource.Count == 0)
+            {
+                return;
+            }
+
+            List<Dictionary<string, object>> data = null;
+            if (interval == 30)
+            {
+                data = dataSource;
+            }
+            else
+            {
+                data = this.GetDataByInterval(dataSource, interval);
+            }
+
+            this.SearchChartView.AppendDataSource(data, valueKey);
+            this.SearchChartView2.AppendDataSource(dataSource, "ifrain");
         }
 
         public int Interval

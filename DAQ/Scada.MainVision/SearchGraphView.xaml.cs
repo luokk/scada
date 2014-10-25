@@ -26,7 +26,7 @@ namespace Scada.MainVision
 
         }
 
-        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey)
+        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int index, DateTime beginTime, DateTime endTime)
         {
             if (dataSource == null || dataSource.Count == 0)
             {
@@ -44,7 +44,28 @@ namespace Scada.MainVision
             {
                 this.SearchChartView.SetCurveDisplayName("风速");
             }
-            this.SearchChartView.SetDataSource(dataSource, valueKey);
+            this.SearchChartView.SetDataSource(dataSource, valueKey, beginTime, endTime);
+        }
+
+        public void AppendDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int index)
+        {
+            if (dataSource == null || dataSource.Count == 0)
+            {
+                return;
+            }
+            if (valueKey == "temperature")
+            {
+                this.SearchChartView.SetCurveDisplayName("温度");
+            }
+            else if (valueKey == "pressure")
+            {
+                this.SearchChartView.SetCurveDisplayName("气压");
+            }
+            else if (valueKey == "windspeed")
+            {
+                this.SearchChartView.SetCurveDisplayName("风速");
+            }
+            this.SearchChartView.AppendDataSource(dataSource, valueKey);
         }
 
         public int Interval

@@ -351,11 +351,8 @@ namespace Scada.MainVision
                 string[] keyArray = keys.ToArray();
 
                 Dictionary<string, object> data = null;// new Dictionary<string, object>(10);
-                int counter = 0;
                 while (reader.Read())
                 {
-
-
                     data = new Dictionary<string, object>(keyArray.Length);
                     foreach (var key in keyArray)
                     {

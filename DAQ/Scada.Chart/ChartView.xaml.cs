@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Scada.Chart
 {
@@ -80,6 +81,11 @@ namespace Scada.Chart
             InitializeComponent();
             this.Graduations = new Dictionary<int, GraduationLine>();
             this.CurveView.ChartView = this;
+
+            this.trackingTimer = new DispatcherTimer();
+            this.trackingTimer.Interval = TimeSpan.FromMilliseconds(800);
+            this.trackingTimer.Start();
+            this.trackingTimer.Tick += trackingTimerTick;
         }
 
         public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
@@ -388,34 +394,47 @@ namespace Scada.Chart
         {
             this.CurveView.DisplayName = displayName;
         }
-           
+
+        DispatcherTimer trackingTimer = new DispatcherTimer();
+
+        private MouseEventArgs currentMouseEvent;
+
 
         private void MainViewMouseMove(object sender, MouseEventArgs e)
         {
-            this.TrackTimeLine(e);   
+            this.currentMouseEvent = e;
+            this.TrackTimeLine(e, false); 
         }
 
-        private void TrackTimeLine(MouseEventArgs e)
+        void trackingTimerTick(object sender, EventArgs e)
+        {
+            if (this.currentMouseEvent != null)
+            {
+                this.TrackTimeLine(this.currentMouseEvent, true);
+                this.currentMouseEvent = null;
+            }
+        }
+
+        private void TrackTimeLine(MouseEventArgs e, bool calculation)
         {
             if (this.disableTracking)
             {
                 return;
             }
 
-            bool timed = false;
             string timeLabel = string.Empty;
             CurveView curveView = (CurveView)this.CurveView;
 
             Point point = e.GetPosition((UIElement)curveView.CanvasView);
             double x = point.X;
 
-            if (!timed && x >= 0)
+            if (calculation && x >= 0)
             {
                 double index = x * this.currentGraduationCount / this.currentGraduation;
                 timeLabel = this.GetFormatDateTime(this.currentBaseTime, (int)index, this.Interval);
             }
 
-            curveView.TrackTimeLine(point, timeLabel);
+            curveView.TrackTimeLine(point, timeLabel, calculation);
         }
 
         private string GetFormatTime(DateTime baseTime, int index, int interval)
@@ -517,10 +536,16 @@ namespace Scada.Chart
             this.curveDataContext = this.CurveView.AddCurveDataContext(this);
         }
 
-        public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
+        public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, DateTime beginTime, DateTime endTime, string timeKey = "time")
         {
-            this.curveDataContext.SetDataSource(data, valueKey, timeKey);
+            this.curveDataContext.SetDataSource(data, valueKey, beginTime, endTime, timeKey);
             this.UpdateCurve();
+        }
+
+        public void AppendDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
+        {
+            this.curveDataContext.AppendDataSource(data, valueKey, timeKey);
+            // this.UpdateCurve();
         }
 
         public void SetDataSource2(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")

@@ -62,7 +62,7 @@ namespace Scada.Chart
 
         public bool RealTime { get; set; }
 
-        private Line timeLine = new Line();
+        public Line timeLine = new Line();
 
         private Path curve = null;
 
@@ -292,7 +292,8 @@ namespace Scada.Chart
             Point p1, p2;
             this.Convert(this.lastPoint, out p1);
             this.Convert(point, out p2);
-
+            
+            
             LineGeometry line = new LineGeometry(p1, p2);
             this.lines.Children.Add(line);
             this.lastPoint = point;
@@ -310,11 +311,14 @@ namespace Scada.Chart
             }
         }
 
-        public void TrackTimeLine(Point point, string timeLabel)
+        public void TrackTimeLine(Point point, string timeLabel, bool calculation)
         {
             timeLine.X1 = timeLine.X2 = point.X;
             // this.centerX = point.X;
-            this.ShowValueTip(point, timeLabel);
+            if (calculation)
+            {
+                this.ShowValueTip(point, timeLabel);
+            }
         }
 
 
@@ -387,6 +391,39 @@ namespace Scada.Chart
             Point a = default(Point);
             Point b = default(Point);
             bool found = false;
+
+            int c = this.dataContext.points.Count;
+            if (c == 0)
+            {
+                y = double.NaN;
+                return false;
+            }
+            int l = 0;
+            int h = c - 1;
+
+            while (l <= h)
+            {
+                int m = (l + h) / 2;
+                Point p = this.dataContext.points[m];
+                if (Math.Abs(p.X - x) < 0.1)
+                {
+                    found = true;
+                    a = this.dataContext.points[m - 1];
+                    b = p;
+                    break;
+                }
+                else if (p.X > x)
+                {
+                    h = m - 1;
+                }
+                else
+                {
+                    l = m + 1;
+                }
+
+            }
+
+            /*
             foreach (var p in this.dataContext.points)
             {
                 if (p.X > x)
@@ -396,7 +433,7 @@ namespace Scada.Chart
                     break;
                 }
                 a = p;
-            }
+            }*/
 
             if (found)
             {
