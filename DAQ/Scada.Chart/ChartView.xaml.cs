@@ -486,14 +486,29 @@ namespace Scada.Chart
 
         private string GetFormatTime2(DateTime baseTime, int index, int interval)
         {
-            DateTime dt = baseTime.AddSeconds(index * interval);
             if (interval == 60 * 5)
             {
-                return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                DateTime dt = baseTime.AddSeconds(index * interval);
+                if (dt.Minute == 0 && dt.Hour == 0)
+                {
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
+                }
+                else
+                {
+                    return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                }
             }
             else if (interval == 30)
             {
-                return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                DateTime dt = baseTime.AddSeconds(index * interval);
+                if (dt.Minute == 0 && dt.Hour == 0)
+                {
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
+                }
+                else
+                {
+                    return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                }
             }
             return "";
         }

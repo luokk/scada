@@ -45,6 +45,8 @@ namespace Scada.Chart
 
         public DateTime EndTime { get; set; }
 
+        public DateTime CurrentBaseTime { get; set; }
+
         public double Graduation { get; set; }
 
         public int GraduationCount { get; set; }
@@ -83,6 +85,7 @@ namespace Scada.Chart
 
             this.currentValueKey = valueKey;
             this.Interval = this.chartView.Interval;
+            this.CurrentBaseTime = this.BeginTime;
             this.UpdateTimeAxis(this.BeginTime, this.EndTime);
             this.ClearCurvePoints();
             this.RenderCurve(data, dataBeginTime, dataEndTime, valueKey);
@@ -109,6 +112,7 @@ namespace Scada.Chart
 
             //this.UpdateTimeAxis(beginTime, endTime);
             // this.UpdateTimeAxis(this.BeginTime, this.EndTime);
+            this.CurrentBaseTime = beginTime;
             this.RenderCurve(data, beginTime, endTime, valueKey);
         }
 
@@ -217,7 +221,7 @@ namespace Scada.Chart
 
         private int GetIndexByTime(DateTime time)
         {
-            int index = (int)((time.Ticks - this.BeginTime.Ticks) / 10000000 / this.Interval);
+            int index = (int)((time.Ticks - this.CurrentBaseTime.Ticks) / 10000000 / this.Interval);
             return index;
         }
 
@@ -256,16 +260,20 @@ namespace Scada.Chart
             DateTime beginTime = this.GetTimeByX(beginPointX);
             DateTime endTime = this.GetTimeByX(endPointX);
 
-            this.BeginTime = this.GetRegularTime(beginTime);
-            this.EndTime = this.GetRegularTime(endTime, 1);
+            beginTime = this.GetRegularTime(beginTime);
+            endTime = this.GetRegularTime(endTime, 1);
             this.Clear();
-            this.UpdateTimeAxis(this.BeginTime, this.EndTime, false);
-            this.RenderCurve(this.data, this.BeginTime, this.EndTime, this.currentValueKey);
+
+            this.CurrentBaseTime = beginTime;
+            this.UpdateTimeAxis(beginTime, endTime, false);
+            this.RenderCurve(this.data, beginTime, endTime, this.currentValueKey);
 
             if (this.chartView.updateRangeAction != null)
             {
                 this.chartView.updateRangeAction(beginPointX, endPointX);
             }
+
+            this.chartView.UpdateCurve();
         }
 
         internal void Reset()

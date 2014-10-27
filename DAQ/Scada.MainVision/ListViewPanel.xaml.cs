@@ -338,11 +338,6 @@ namespace Scada.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-
-            DateTime now = DateTime.Now;
-            this.FromDate.SelectedDate = now.AddDays(-2);
-            this.ToDate.SelectedDate = now.AddDays(-1);
-            // Can NOT Find Element in Template;
         }
 
         private void ContentLoaded(object sender, RoutedEventArgs e)
