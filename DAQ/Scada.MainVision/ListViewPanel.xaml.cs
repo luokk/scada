@@ -515,7 +515,7 @@ namespace Scada.Controls
             this.ToDateText.Background = Brushes.White;
             var dt1 = DateTime.Parse(this.FromDateText.Text);
             var dt2 = DateTime.Parse(this.ToDateText.Text);
-
+            int days = (dt2 - dt1).Days;
             SynchronizationContext sc = SynchronizationContext.Current;
 
             Thread thread = new Thread(new ParameterizedThreadStart((o) => 
@@ -527,24 +527,34 @@ namespace Scada.Controls
                     {
                         DateTime t1 = dt1;
                         DateTime t2 = dt1.AddDays(1).AddSeconds(-2);
+                        
                         int index = 0;
                         this.inSearch = true;
-                        while (t2 < dt2)
+                        if (true || t2 < dt2)
                         {
                             // Get Daily data;
-                            var searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, t1, t2, cmd);
+                            var searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, t1, t2, cmd);
 
                             if (searchDataSource.Count > 0)
                             {
                                 sc.Post(new SendOrPostCallback((data) =>
                                 {
-                                    this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2);
+                                    this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
                                     index++;
                                 }), searchDataSource);
                                 
                             }
+                            /*
                             t1 = t1.AddDays(1);
-                            t2 = t1.AddDays(1).AddSeconds(-2);
+                            if (days <= 2)
+                            {
+                                t2 = t1.AddDays(1).AddSeconds(-2);
+                            }
+                            else
+                            {
+                                t2 = dt2;
+                            }
+                            */
                             // Thread.Sleep(20);
                         }
                         this.inSearch = false;
@@ -558,10 +568,24 @@ namespace Scada.Controls
             //this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
         }
 
-        private void UpdateSearchData(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime)
+        private void UpdateSearchData(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime, int days)
         {
             ListView searchListView = (ListView)this.SearchView;
             searchListView.ItemsSource = null;
+
+            int interval = 30;
+            if (days <= 2)
+            {
+                interval = 30;
+            }
+            else if (days > 2 && days <= 7)
+            {
+                interval = 300;
+            }
+            else
+            {
+                interval = 3600;
+            }
 
             if (data != null && data.Count > 0)
             {
@@ -569,13 +593,13 @@ namespace Scada.Controls
                 {
                     if (this.deviceKey == DataProvider.DeviceKey_Hpic)
                     {
-                        ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, 30, index, beginTime, endTime);
+                        ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
                     }
                     else
                     {
                         if (this.graphSearchView != null)
                         {
-                            ((SearchGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, index, beginTime, endTime);
+                            ((SearchGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
                         }
                     }
                 }
@@ -763,7 +787,7 @@ namespace Scada.Controls
         {
             if ((bool)e.NewValue)
             {
-                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 0, this.BeginTime, this.EndTime);
+                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30, 0, this.BeginTime, this.EndTime);
             }
 
         }
@@ -909,7 +933,7 @@ namespace Scada.Controls
             {
                 this.selectedField = "windspeed";
             }
-            ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 0, this.BeginTime, this.EndTime);
+            ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30,  0, this.BeginTime, this.EndTime);
 
         }
 

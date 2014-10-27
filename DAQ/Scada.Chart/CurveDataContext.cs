@@ -61,10 +61,7 @@ namespace Scada.Chart
 
         public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, DateTime beginTime, DateTime endTime, string timeKey = "time")
         {
-            if (this.data != null)
-            {
-                this.data.Clear();
-            }
+
             this.data = data;
             this.timeKey = timeKey;
             this.BeginTime = beginTime;
@@ -202,7 +199,8 @@ namespace Scada.Chart
             double y = 0.0;
             if (value is string)
             {
-                y = double.Parse((string)value);
+                string v = (string)value;
+                double.TryParse(v, out y);
             }
             else if (value is bool)
             {

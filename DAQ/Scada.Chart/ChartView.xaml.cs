@@ -327,28 +327,40 @@ namespace Scada.Chart
 
                     this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
 
-                    bool isWholePoint = (i % 16 == 0);
+                    bool isWholePoint = false;
+                    if (days < 6)
+                    {
+                        isWholePoint = (i % 16 == 0);
+                    }
+                    else if (days >= 7 && days < 16)
+                    {
+                        isWholePoint = (i % 48 == 0);
+                    }
+                    else if (days >= 16)
+                    {
+                        isWholePoint = (i % 96 == 0);
+                    }
                     scaleLine.X1 = scaleLine.X2 = x;
                     scaleLine.Y1 = 0;
                     scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
                     scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
                     this.TimeAxis.Children.Add(scaleLine);
 
-                    TextBlock timeLabel = null;
-                    timeLabel = new TextBlock();
-                    timeLabel.Foreground = Brushes.Black;
-                    timeLabel.FontWeight = FontWeights.Light;
-                    timeLabel.FontSize = 9;
-
-                    double pos = i * graduation;
-
-                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
-
-                    this.TimeAxis.Children.Add(timeLabel);
-
                     if (isWholePoint)
                     {
+                        TextBlock timeLabel = null;
+                        timeLabel = new TextBlock();
+                        timeLabel.Foreground = Brushes.Black;
+                        timeLabel.FontWeight = FontWeights.Light;
+                        timeLabel.FontSize = 9;
+
+                        double pos = i * graduation;
+
+                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                        this.TimeAxis.Children.Add(timeLabel);
+
                         string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
                         if (timeLabel != null)
                         {
@@ -366,14 +378,20 @@ namespace Scada.Chart
 
         public static int GetDays(DateTime beginTime, DateTime endTime)
         {
-            long seconds = (endTime.Ticks - beginTime.Ticks) / 10000000;
-            return (int)(seconds / 3600 / 24);
+            if (endTime.Second == 59)
+            {
+                endTime = endTime.AddSeconds(1);
+            }
+            return (endTime - beginTime).Days;
         }
 
         public static int GetHours(DateTime beginTime, DateTime endTime)
         {
-            long seconds = (endTime.Ticks - beginTime.Ticks) / 10000000;
-            return (int)(seconds / 3600);
+            if (endTime.Second == 59)
+            {
+                endTime = endTime.AddSeconds(1);
+            }
+            return (endTime - beginTime).Hours;
         }
 
         public void UpdateTimeAxis(DateTime beginTime, DateTime endTime, bool completedDays, out double graduation, out int graduationCount)
