@@ -56,6 +56,8 @@ namespace Scada.Data.Client
 
         private Timer sendDataTimer;
 
+        private Timer sendFileTimer;
+
         private Timer recvDataTimer;
 
         private DataAgent agent;
@@ -66,7 +68,9 @@ namespace Scada.Data.Client
 
         private RealTimeForm detailForm;
 
-        private const int TimerInterval = 3500;
+        private const int dataTimerInterval = 3500;
+
+        private const int fileTimerInterval = 15000;
 
         private ToolStripLabel statusLabel = new ToolStripLabel();
 
@@ -277,9 +281,15 @@ namespace Scada.Data.Client
         {
             // 定期往数据中心发数据
             this.sendDataTimer = new Timer();
-            this.sendDataTimer.Interval = TimerInterval;
+            this.sendDataTimer.Interval = dataTimerInterval;
             this.sendDataTimer.Tick += this.HttpSendDataTick;
             this.sendDataTimer.Start();
+
+            // 定期往数据中心发文件
+            this.sendFileTimer = new Timer();
+            this.sendFileTimer.Interval = fileTimerInterval;
+            this.sendFileTimer.Tick += this.HttpSendFileTick;
+            this.sendFileTimer.Start();
 
             // 每20s从数据中心取一次数据
             this.recvDataTimer = new Timer();
@@ -302,18 +312,27 @@ namespace Scada.Data.Client
             if (!this.isAutoData)
                 return;
             DateTime now = DateTime.Now;
-            // For Upload File Devices.
-            if (IsSendFileTimeOK(now))
-            {
-                Guid guid = Guid.NewGuid();
-                SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
-            }
-
+            
             // For Upload Data Devices.
             if (IsSendDataTimeOK(now))
             {
                 Guid guid = Guid.NewGuid();
                 SendDevicePackets(Settings.Instance.DataDeviceKeys, now, guid.ToString());
+            }
+        }
+
+        // 当归一化时间到来时上传文件
+        private void HttpSendFileTick(object sender, EventArgs e)
+        {
+            if (!this.isAutoData)
+                return;
+            DateTime now = DateTime.Now;
+
+            // For Upload File Devices.
+            if (IsSendFileTimeOK(now))
+            {
+                Guid guid = Guid.NewGuid();
+                SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
             }
         }
 
