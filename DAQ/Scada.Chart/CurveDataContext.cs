@@ -45,6 +45,8 @@ namespace Scada.Chart
 
         public DateTime EndTime { get; set; }
 
+        public DateTime CurrentBaseTime { get; set; }
+
         public double Graduation { get; set; }
 
         public int GraduationCount { get; set; }
@@ -59,17 +61,22 @@ namespace Scada.Chart
 
         private string currentValueKey;
 
-        public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
+        public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, DateTime beginTime, DateTime endTime, string timeKey = "time")
         {
+
             this.data = data;
             this.timeKey = timeKey;
+            this.BeginTime = beginTime;
+            this.EndTime = endTime;
 
+            DateTime dataBeginTime = default(DateTime);
+            DateTime dataEndTime = default(DateTime);
             try
             {
-                DateTime b = DateTime.Parse((string)data[0][timeKey]);
-                DateTime e = DateTime.Parse((string)data[data.Count - 1][timeKey]);
-                this.BeginTime = new DateTime(b.Year, b.Month, b.Day);
-                this.EndTime = new DateTime(e.Year, e.Month, e.Day).AddDays(1);
+                dataBeginTime = DateTime.Parse((string)data[0][timeKey]);
+                dataEndTime = DateTime.Parse((string)data[data.Count - 1][timeKey]);
+                // this.BeginTime = new DateTime(b.Year, b.Month, b.Day);
+                // this.EndTime = new DateTime(e.Year, e.Month, e.Day).AddDays(1);
             }
             catch (Exception)
             {
@@ -78,11 +85,38 @@ namespace Scada.Chart
 
             this.currentValueKey = valueKey;
             this.Interval = this.chartView.Interval;
+            this.CurrentBaseTime = this.BeginTime;
             this.UpdateTimeAxis(this.BeginTime, this.EndTime);
-            this.RenderCurve(this.BeginTime, this.EndTime, valueKey);
-            
+            this.ClearCurvePoints();
+            this.RenderCurve(data, dataBeginTime, dataEndTime, valueKey);
         }
 
+        public void AppendDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
+        {
+            this.data.AddRange(data);
+            this.timeKey = timeKey;
+
+            DateTime beginTime;
+            DateTime endTime;
+            try
+            {
+                beginTime = DateTime.Parse((string)data[0][timeKey]);
+                endTime = DateTime.Parse((string)data[data.Count - 1][timeKey]);
+                // this.BeginTime = new DateTime(b.Year, b.Month, b.Day);
+                // this.EndTime = new DateTime(e.Year, e.Month, e.Day).AddDays(1);
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            //this.UpdateTimeAxis(beginTime, endTime);
+            // this.UpdateTimeAxis(this.BeginTime, this.EndTime);
+            this.CurrentBaseTime = beginTime;
+            this.RenderCurve(data, beginTime, endTime, valueKey);
+        }
+
+        // This is for Realtime chart now.
         public void SetDataSource2(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
         {
             this.data = data;
@@ -103,18 +137,17 @@ namespace Scada.Chart
             this.currentValueKey = valueKey;
             this.Interval = this.chartView.Interval;
             this.UpdateTimeAxis(this.BeginTime, this.EndTime, false);
-            this.RenderCurve(this.BeginTime, this.EndTime, valueKey);
+            this.RenderCurve(data, this.BeginTime, this.EndTime, valueKey);
 
         }
 
-        private void RenderCurve(DateTime beginTime, DateTime endTime, string valueKey)
+        private void RenderCurve(List<Dictionary<string, object>> data, DateTime beginTime, DateTime endTime, string valueKey)
         {
-            if (this.data == null)
+            if (data == null)
                 return;
 
-            this.ClearCurvePoints();
             DateTime lastTime = default(DateTime);
-            foreach (var item in this.data)
+            foreach (var item in data)
             {
                 DateTime t = DateTime.Parse((string)item[this.timeKey]);
                 if (t >= beginTime && t <= endTime)
@@ -170,7 +203,8 @@ namespace Scada.Chart
             double y = 0.0;
             if (value is string)
             {
-                y = double.Parse((string)value);
+                string v = (string)value;
+                double.TryParse(v, out y);
             }
             else if (value is bool)
             {
@@ -187,7 +221,7 @@ namespace Scada.Chart
 
         private int GetIndexByTime(DateTime time)
         {
-            int index = (int)((time.Ticks - this.BeginTime.Ticks) / 10000000 / this.Interval);
+            int index = (int)((time.Ticks - this.CurrentBaseTime.Ticks) / 10000000 / this.Interval);
             return index;
         }
 
@@ -226,21 +260,25 @@ namespace Scada.Chart
             DateTime beginTime = this.GetTimeByX(beginPointX);
             DateTime endTime = this.GetTimeByX(endPointX);
 
-            this.BeginTime = this.GetRegularTime(beginTime);
-            this.EndTime = this.GetRegularTime(endTime, 1);
+            beginTime = this.GetRegularTime(beginTime);
+            endTime = this.GetRegularTime(endTime, 1);
             this.Clear();
-            this.UpdateTimeAxis(this.BeginTime, this.EndTime, false);
-            this.RenderCurve(this.BeginTime, this.EndTime, this.currentValueKey);
+
+            this.CurrentBaseTime = beginTime;
+            this.UpdateTimeAxis(beginTime, endTime, false);
+            this.RenderCurve(this.data, beginTime, endTime, this.currentValueKey);
 
             if (this.chartView.updateRangeAction != null)
             {
                 this.chartView.updateRangeAction(beginPointX, endPointX);
             }
+
+            this.chartView.UpdateCurve();
         }
 
         internal void Reset()
         {
-            this.SetDataSource(this.data, this.currentValueKey, this.timeKey);
+            this.SetDataSource(this.data, this.currentValueKey, this.BeginTime, this.EndTime, this.timeKey);
             if (this.chartView.resetAction != null)
             {
                 this.chartView.resetAction();

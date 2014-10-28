@@ -109,7 +109,8 @@ namespace Scada.MainVision
             // this.AddPageEntry("数据分析", this.CounterTree);
 
 
-            this.ShowDataViewPanel("scada.naidevice");
+            // this.ShowDataViewPanel("scada.naidevice");
+            this.ShowStatusPane();
             // this.OnDeviceItemClicked(null, null);
             this.loaded = true;
             // Max when startup;
@@ -266,6 +267,18 @@ namespace Scada.MainVision
 			this.panelManager.CloseListViewPanel(panel);
 		}
 
+        private void ShowStatusPane()
+        {
+            string name = "Devices-Run-Status";
+            System.Windows.Controls.UserControl page = this.panelManager.GetPage(name);
+            if (page == null)
+            {
+                page = this.panelManager.CreatePage(name, this.dataProvider);
+            }
+            this.panelManager.SetPage(name, page);
+        }
+
+        /*
         void OnNaviItemClicked(object sender, EventArgs e)
         {
             NaviLabel nv = (NaviLabel)sender;
@@ -276,7 +289,7 @@ namespace Scada.MainVision
                 page = this.panelManager.CreatePage(name, this.dataProvider);
             }
             this.panelManager.SetPage(name, page);
-        }
+        }*/
 
         void OnDeviceItemClicked(object sender, EventArgs e)
         {
@@ -450,5 +463,53 @@ namespace Scada.MainVision
 
             this.currentSelectedTreeViewItem = tvi;
         }
+
+        private void MenuMain_Click(object sender, RoutedEventArgs e)
+        {
+            Command.Send(Ports.Main, new Command("MainVision", "Main", "show", ""));
+        }
+
+        private void MenuDataAgent_Click(object sender, RoutedEventArgs e)
+        {
+            Command.Send(Ports.DataClient, new Command("MainVision", "DataAgent", "show", ""));
+        }
+
+        private void Quit_Click(object sender, RoutedEventArgs e)
+        {
+            this.dataProvider.Quit = true;
+            commandReceiver.Close();
+            this.Close();
+        }
+
+        private void aboutMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.OpenProcessByName("Scada.About.exe");
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            this.OpenProcessByName("Scada.MainSettings.exe");
+        }
+        
+
+        private void OpenProcessByName(string name, bool uac = false)
+        {
+            string fileName = LogPath.GetExeFilePath(name);
+            try
+            {
+                ProcessStartInfo processInfo = new ProcessStartInfo();
+                if (uac && Environment.OSVersion.Version.Major >= 6)
+                {
+                    processInfo.Verb = "runas";
+                }
+                processInfo.FileName = fileName;
+                Process.Start(processInfo);
+            }
+            catch (Exception)
+            {
+                // MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
+            }
+        }
+        
     }
 }

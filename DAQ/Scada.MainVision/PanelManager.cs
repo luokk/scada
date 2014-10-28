@@ -293,6 +293,11 @@ namespace Scada.MainVision
 
         public void SetPage(string name, UserControl mainPage)
         {
+            if (this.currentPanel != null)
+            {
+                this.currentPanel.Visibility = Visibility.Hidden;
+            }
+
             ContainerPage containerPage = (ContainerPage)this.GetPage(name);
             if (containerPage == null)
             {
@@ -341,10 +346,6 @@ namespace Scada.MainVision
                 containerPage.Visibility = Visibility.Visible;
             }
 
-            if (this.currentPanel != null)
-            {
-                this.currentPanel.Visibility = Visibility.Hidden;
-            }
             currentPanel = containerPage;
         }
 

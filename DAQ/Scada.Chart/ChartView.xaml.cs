@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Scada.Chart
 {
@@ -80,6 +81,11 @@ namespace Scada.Chart
             InitializeComponent();
             this.Graduations = new Dictionary<int, GraduationLine>();
             this.CurveView.ChartView = this;
+
+            this.trackingTimer = new DispatcherTimer();
+            this.trackingTimer.Interval = TimeSpan.FromMilliseconds(800);
+            this.trackingTimer.Start();
+            this.trackingTimer.Tick += trackingTimerTick;
         }
 
         public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
@@ -321,28 +327,40 @@ namespace Scada.Chart
 
                     this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
 
-                    bool isWholePoint = (i % 16 == 0);
+                    bool isWholePoint = false;
+                    if (days < 6)
+                    {
+                        isWholePoint = (i % 16 == 0);
+                    }
+                    else if (days >= 7 && days < 16)
+                    {
+                        isWholePoint = (i % 48 == 0);
+                    }
+                    else if (days >= 16)
+                    {
+                        isWholePoint = (i % 96 == 0);
+                    }
                     scaleLine.X1 = scaleLine.X2 = x;
                     scaleLine.Y1 = 0;
                     scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
                     scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
                     this.TimeAxis.Children.Add(scaleLine);
 
-                    TextBlock timeLabel = null;
-                    timeLabel = new TextBlock();
-                    timeLabel.Foreground = Brushes.Black;
-                    timeLabel.FontWeight = FontWeights.Light;
-                    timeLabel.FontSize = 9;
-
-                    double pos = i * graduation;
-
-                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
-
-                    this.TimeAxis.Children.Add(timeLabel);
-
                     if (isWholePoint)
                     {
+                        TextBlock timeLabel = null;
+                        timeLabel = new TextBlock();
+                        timeLabel.Foreground = Brushes.Black;
+                        timeLabel.FontWeight = FontWeights.Light;
+                        timeLabel.FontSize = 9;
+
+                        double pos = i * graduation;
+
+                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                        this.TimeAxis.Children.Add(timeLabel);
+
                         string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
                         if (timeLabel != null)
                         {
@@ -360,14 +378,20 @@ namespace Scada.Chart
 
         public static int GetDays(DateTime beginTime, DateTime endTime)
         {
-            long seconds = (endTime.Ticks - beginTime.Ticks) / 10000000;
-            return (int)(seconds / 3600 / 24);
+            if (endTime.Second == 59)
+            {
+                endTime = endTime.AddSeconds(1);
+            }
+            return (endTime - beginTime).Days;
         }
 
         public static int GetHours(DateTime beginTime, DateTime endTime)
         {
-            long seconds = (endTime.Ticks - beginTime.Ticks) / 10000000;
-            return (int)(seconds / 3600);
+            if (endTime.Second == 59)
+            {
+                endTime = endTime.AddSeconds(1);
+            }
+            return (endTime - beginTime).Hours;
         }
 
         public void UpdateTimeAxis(DateTime beginTime, DateTime endTime, bool completedDays, out double graduation, out int graduationCount)
@@ -388,34 +412,47 @@ namespace Scada.Chart
         {
             this.CurveView.DisplayName = displayName;
         }
-           
+
+        DispatcherTimer trackingTimer = new DispatcherTimer();
+
+        private MouseEventArgs currentMouseEvent;
+
 
         private void MainViewMouseMove(object sender, MouseEventArgs e)
         {
-            this.TrackTimeLine(e);   
+            this.currentMouseEvent = e;
+            this.TrackTimeLine(e, false); 
         }
 
-        private void TrackTimeLine(MouseEventArgs e)
+        void trackingTimerTick(object sender, EventArgs e)
+        {
+            if (this.currentMouseEvent != null)
+            {
+                this.TrackTimeLine(this.currentMouseEvent, true);
+                this.currentMouseEvent = null;
+            }
+        }
+
+        private void TrackTimeLine(MouseEventArgs e, bool calculation)
         {
             if (this.disableTracking)
             {
                 return;
             }
 
-            bool timed = false;
             string timeLabel = string.Empty;
             CurveView curveView = (CurveView)this.CurveView;
 
             Point point = e.GetPosition((UIElement)curveView.CanvasView);
             double x = point.X;
 
-            if (!timed && x >= 0)
+            if (calculation && x >= 0)
             {
                 double index = x * this.currentGraduationCount / this.currentGraduation;
                 timeLabel = this.GetFormatDateTime(this.currentBaseTime, (int)index, this.Interval);
             }
 
-            curveView.TrackTimeLine(point, timeLabel);
+            curveView.TrackTimeLine(point, timeLabel, calculation);
         }
 
         private string GetFormatTime(DateTime baseTime, int index, int interval)
@@ -449,14 +486,29 @@ namespace Scada.Chart
 
         private string GetFormatTime2(DateTime baseTime, int index, int interval)
         {
-            DateTime dt = baseTime.AddSeconds(index * interval);
             if (interval == 60 * 5)
             {
-                return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                DateTime dt = baseTime.AddSeconds(index * interval);
+                if (dt.Minute == 0 && dt.Hour == 0)
+                {
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
+                }
+                else
+                {
+                    return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                }
             }
             else if (interval == 30)
             {
-                return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                DateTime dt = baseTime.AddSeconds(index * interval);
+                if (dt.Minute == 0 && dt.Hour == 0)
+                {
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
+                }
+                else
+                {
+                    return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                }
             }
             return "";
         }
@@ -517,10 +569,16 @@ namespace Scada.Chart
             this.curveDataContext = this.CurveView.AddCurveDataContext(this);
         }
 
-        public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
+        public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, DateTime beginTime, DateTime endTime, string timeKey = "time")
         {
-            this.curveDataContext.SetDataSource(data, valueKey, timeKey);
+            this.curveDataContext.SetDataSource(data, valueKey, beginTime, endTime, timeKey);
             this.UpdateCurve();
+        }
+
+        public void AppendDataSource(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")
+        {
+            this.curveDataContext.AppendDataSource(data, valueKey, timeKey);
+            // this.UpdateCurve();
         }
 
         public void SetDataSource2(List<Dictionary<string, object>> data, string valueKey, string timeKey = "time")

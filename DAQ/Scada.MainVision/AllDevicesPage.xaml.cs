@@ -39,11 +39,11 @@ namespace Scada.MainVision
             this.hpicPane.Initialize(new string[] { "最近采集时间", "剂量率"});
             this.weatherPane.Initialize(new string[] { "最近采集时间", "温度", "湿度", "雨量", "风速", "风向", "气压" });
             this.naiPane.Initialize(new string[] { "最近采集时间", "总剂量率" });
-            this.mdsPane.Initialize(new string[] { "最近采样时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
-            this.aisPane.Initialize(new string[] { "最近采样时间", "瞬时采样流量", "累计采样流量", "累积采样时间" });
+            this.mdsPane.Initialize(new string[] { "最近采样时间", "瞬时采样流量", "累计采样流量", "累积采样时间", "滤纸报警", "流量报警", "主电源报警"});
+            this.aisPane.Initialize(new string[] { "最近采样时间", "瞬时采样流量", "累计采样流量", "累积采样时间", "滤纸报警", "流量报警", "主电源报警" });
             this.dwdPane.Initialize(new string[] { "最近采集时间", "采样状态" });
             this.rainPane.Initialize(new string[] { "最近采集时间", "降雨状态" });
-            this.shelterPane.Initialize(new string[] { "最近采集时间", "市电状态", "备电时间", "舱内温度" });
+            this.shelterPane.Initialize(new string[] { "最近采集时间", "市电状态", "备电时间", "舱内温度", "门禁报警", "烟感报警", "浸水报警" });
 
 
             this.dbConn = this.dataProvider.GetMySqlConnection();
@@ -264,7 +264,10 @@ namespace Scada.MainVision
                 Get(d, "time", ""), 
                 Get(d, "flow", "m³/h"),
                 Get(d, "volume", "m³"),
-                Get(d, "hours", "h"));
+                Get(d, "hours", "h"), 
+                GetAlarm(d, "alarm1", ""),
+                GetAlarm(d, "alarm2", ""),
+                GetAlarm(d, "alarm3", ""));
         }
         // 5 采样状态（可用颜色表示）、累计采样体积（重要）、累计采样时间、瞬时采样流量、三种故障报警
         private void UpdatePanel_AIS(SmartDataPane panel)
@@ -282,7 +285,10 @@ namespace Scada.MainVision
                 Get(d, "time", ""), 
                 Get(d, "flow", "L/h"),
                 Get(d, "volume", "L"),
-                Get(d, "hours", "h"));
+                Get(d, "hours", "h"),
+                GetAlarm(d, "alarm1", ""),
+                GetAlarm(d, "alarm2", ""),
+                GetAlarm(d, "alarm3", ""));
         }
         // 6 市电状态、备电时间、舱内温度、门禁报警、烟感报警、浸水报警
         private void UpdatePanel_Shelter(SmartDataPane panel)
@@ -333,7 +339,10 @@ namespace Scada.MainVision
             string batteryHoursMsg = string.Format("{0}h", batteryHours);
             string tempMsg = string.Format("{0}℃", temperature);
 
-            panel.SetData(Get(d, "time", ""), mainPowMsg, batteryHoursMsg, tempMsg);
+            panel.SetData(Get(d, "time", ""), mainPowMsg, batteryHoursMsg, tempMsg, 
+                GetAlarm(d, "ifdooropen", ""),
+                GetAlarm(d, "ifsmoke", ""),
+                GetAlarm(d, "ifwater", ""));
 
         }
         // 7 仅工作状态
@@ -412,6 +421,12 @@ namespace Scada.MainVision
         private string Get(Dictionary<string, object> d, string key, string s)
         {
             return this.GetDisplayString(d, key.ToLower()) + " " + s; 
+        }
+
+        private string GetAlarm(Dictionary<string, object> d, string key, string s)
+        {
+            string v = this.GetDisplayString(d, key.ToLower());
+            return (v == "1") ? "报警" : "正常";
         }
     }
 }

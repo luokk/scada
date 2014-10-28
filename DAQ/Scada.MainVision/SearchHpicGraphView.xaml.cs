@@ -76,23 +76,15 @@ namespace Scada.MainVision
             return ret;
         }
 
-        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval)
+        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int index, DateTime beginTime, DateTime endTime)
         {
             if (dataSource == null || dataSource.Count == 0)
             {
                 return;
             }
 
-            List<Dictionary<string, object>> data = null;
-            if (interval == 30)
-            {
-                data = dataSource;
-            }
-            else
-            {
-                data = this.GetDataByInterval(dataSource, interval);
-            }
-            this.SearchChartView.SetDataSource(data, valueKey);
+            this.SearchChartView.Interval = interval;
+            this.SearchChartView.SetDataSource(dataSource, valueKey, beginTime, endTime);
             this.SearchChartView.SetUpdateRangeHandler((begin, end) => 
             {
                 this.SearchChartView2.UpdateRange(begin, end);
@@ -101,7 +93,29 @@ namespace Scada.MainVision
             {
                 this.SearchChartView2.Reset();
             });
-            this.SearchChartView2.SetDataSource(dataSource, "ifrain");
+            this.SearchChartView2.SetDataSource(dataSource, "ifrain", beginTime, endTime);
+        }
+
+        public void AppendDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int index)
+        {
+            if (dataSource == null || dataSource.Count == 0)
+            {
+                return;
+            }
+
+            /*
+            List<Dictionary<string, object>> data = null;
+            if (interval == 30)
+            {
+                data = dataSource;
+            }
+            else
+            {
+                data = this.GetDataByInterval(dataSource, interval);
+            }*/
+
+            this.SearchChartView.AppendDataSource(dataSource, valueKey);
+            this.SearchChartView2.AppendDataSource(dataSource, "ifrain");
         }
 
         public int Interval
@@ -169,7 +183,7 @@ namespace Scada.MainVision
         internal void SaveChart()
         {
             string filePath = string.Empty;
-            System.Windows.Forms.OpenFileDialog fileDialog = new OpenFileDialog();
+            System.Windows.Forms.SaveFileDialog fileDialog = new SaveFileDialog();
             fileDialog.InitialDirectory = "C://";
             fileDialog.Filter = "曲线图片 (*.bmp)|*.bmp|All files (*.*)|*.*";
             fileDialog.FilterIndex = 1;
@@ -177,8 +191,8 @@ namespace Scada.MainVision
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
                 filePath = fileDialog.FileName;
-            }
-            this.SearchChartView.SaveChart(filePath);
+                this.SearchChartView.SaveChart(filePath);
+            } 
         }
     }
 

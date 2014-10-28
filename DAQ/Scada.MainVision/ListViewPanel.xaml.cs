@@ -338,11 +338,6 @@ namespace Scada.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-
-            DateTime now = DateTime.Now;
-            this.FromDate.SelectedDate = now.AddDays(-2);
-            this.ToDate.SelectedDate = now.AddDays(-1);
-            // Can NOT Find Element in Template;
         }
 
         private void ContentLoaded(object sender, RoutedEventArgs e)
@@ -508,44 +503,113 @@ namespace Scada.Controls
                 return;
             }
 
+            if (this.inSearch)
+                return;
+
             this.FromDateText.Background = Brushes.White;
             this.ToDateText.Background = Brushes.White;
             var dt1 = DateTime.Parse(this.FromDateText.Text);
             var dt2 = DateTime.Parse(this.ToDateText.Text);
+            int days = (dt2 - dt1).Days;
+            SynchronizationContext sc = SynchronizationContext.Current;
 
-            using (var conn = DBDataProvider.Instance.GetMySqlConnection())
+            Thread thread = new Thread(new ParameterizedThreadStart((o) => 
             {
-                using (var cmd = conn.CreateCommand())
+                
+                using (var conn = DBDataProvider.Instance.GetMySqlConnection())
                 {
-                    this.searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, cmd);
-
-                    if (this.searchDataSource.Count == 0)
+                    using (var cmd = conn.CreateCommand())
                     {
-                        MessageBox.Show("没有找到数据");
-                        return;
+                        DateTime t1 = dt1;
+                        DateTime t2 = dt1.AddDays(1).AddSeconds(-2);
+                        
+                        int index = 0;
+                        this.inSearch = true;
+                        if (true || t2 < dt2)
+                        {
+                            // Get Daily data;
+                            var searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, t1, t2, cmd);
+
+                            if (searchDataSource.Count > 0)
+                            {
+                                sc.Post(new SendOrPostCallback((data) =>
+                                {
+                                    this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
+                                    index++;
+                                }), searchDataSource);
+                                
+                            }
+                            /*
+                            t1 = t1.AddDays(1);
+                            if (days <= 2)
+                            {
+                                t2 = t1.AddDays(1).AddSeconds(-2);
+                            }
+                            else
+                            {
+                                t2 = dt2;
+                            }
+                            */
+                            // Thread.Sleep(20);
+                        }
+                        this.inSearch = false;
                     }
                 }
-            }
 
-            // int interval = this.currentInterval;
-            this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
 
+            }));
+            thread.Start(null);
+
+            //this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
+        }
+
+        private void UpdateSearchData(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime, int days)
+        {
             ListView searchListView = (ListView)this.SearchView;
             searchListView.ItemsSource = null;
 
-            if (this.searchData != null && this.searchData.Count > 0)
+            int interval = 30;
+            if (days <= 2)
             {
+                interval = 30;
+            }
+            else if (days > 2 && days <= 7)
+            {
+                interval = 300;
+            }
+            else
+            {
+                interval = 3600;
+            }
 
-                searchListView.ItemsSource = this.searchData;
-                if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+            if (data != null && data.Count > 0)
+            {
+                if (index == 0)
                 {
-                    ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30);
+                    if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+                    {
+                        ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
+                    }
+                    else
+                    {
+                        if (this.graphSearchView != null)
+                        {
+                            ((SearchGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
+                        }
+                    }
                 }
                 else
                 {
-                    if (this.graphSearchView != null)
+                    if (this.deviceKey == DataProvider.DeviceKey_Hpic)
                     {
-                        ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                        ((SearchHpicGraphView)this.graphSearchView).AppendDataSource(data, this.selectedField, 30, index);
+                    }
+                    else
+                    {
+                        if (this.graphSearchView != null)
+                        {
+                            ((SearchGraphView)this.graphSearchView).AppendDataSource(data, this.selectedField, index);
+                        }
                     }
                 }
             }
@@ -688,7 +752,15 @@ namespace Scada.Controls
 
         private void SaveChart(object sender, RoutedEventArgs e)
         {
-            ((SearchGraphView)this.GraphSearchView).SaveChart();
+            if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+            {
+                ((SearchHpicGraphView)this.GraphSearchView).SaveChart();
+            }
+            else
+            {
+                ((SearchGraphView)this.GraphSearchView).SaveChart();
+                
+            }
             MainWindow.Status = "成功保存曲线。";
             /////////////////////////////////////////////////////////
             // Window1 alert = new Window1("成功保存曲线。");
@@ -710,7 +782,7 @@ namespace Scada.Controls
         {
             if ((bool)e.NewValue)
             {
-                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30, 0, this.BeginTime, this.EndTime);
             }
 
         }
@@ -729,6 +801,7 @@ namespace Scada.Controls
         
         public string selectedField;
         private MySqlConnection realTimeDbConn;
+        private bool inSearch;
 
         public bool Shown
         {
@@ -837,7 +910,7 @@ namespace Scada.Controls
             }
 
             ((SearchHpicGraphView)this.graphSearchView).Interval = this.selectedInterval;
-            ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.selectedInterval);
+            ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.selectedInterval, 0, this.BeginTime, this.EndTime);
         }
 
         private void FieldSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -855,8 +928,12 @@ namespace Scada.Controls
             {
                 this.selectedField = "windspeed";
             }
-            ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField);
+            ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30,  0, this.BeginTime, this.EndTime);
 
         }
+
+        public DateTime BeginTime { get; set; }
+
+        public DateTime EndTime { get; set; }
     }
 }

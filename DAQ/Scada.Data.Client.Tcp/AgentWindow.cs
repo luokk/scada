@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json.Linq;
 using Scada.Common;
 using Scada.Config;
 using Scada.DataCenterAgent.Properties;
@@ -80,7 +81,7 @@ namespace Scada.Data.Client.Tcp
                 else
                 {
                     // Not connected
-                    return string.Format("<{0}> 正在连接...", this.ConnectingTime);
+                    return "";  // string.Format("<{0}> 正在连接...", this.ConnectingTime);
                 }
             }
 
@@ -129,6 +130,7 @@ namespace Scada.Data.Client.Tcp
         public AgentWindow()
         {
             this.StartState = false;
+            this.retryCount = 0;
             InitializeComponent();
         }
 
@@ -141,11 +143,14 @@ namespace Scada.Data.Client.Tcp
             this.MakeWindowShownFront();
             this.ShowInTaskbar = false;
             this.SetExceptionToolStripMenuItem.Checked = false;
+
+            /*
             this.statusStrip.Items.Add(this.GetConnetionString());
             this.statusStrip.Items.Add(new ToolStripSeparator());
             this.statusStrip.Items.Add("MS: " + Settings.Instance.Mn);
             this.statusStrip.Items.Add(new ToolStripSeparator());
             // this.statusStrip.Items.Add("数据中心IP:");
+             * */
 
             this.cmdReceiver = new CommandReceiver(Ports.DataClient);
             cmdReceiver.Start(this.OnLocalCommand);
@@ -187,6 +192,22 @@ namespace Scada.Data.Client.Tcp
                     {
                         this.WindowState = FormWindowState.Minimized;
                         this.ShowAtTaskBar(false);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        JObject json = JObject.Parse(msg);
+                        string type = json["type"].ToString().Trim('"');
+                        string commandLine = json["content"].ToString().Trim('"');
+                        if (type == "show")
+                        {
+                            this.MakeWindowShownFront();
+                        }
+                    }
+                    catch (Exception)
+                    {
                     }
                 }
             });
@@ -299,6 +320,7 @@ namespace Scada.Data.Client.Tcp
         {
             Agent agent = new Agent(serverAddress, serverPort);
             agent.Type = Type.Country;
+            // ?
             agent.Wireless = false;
             agent.NotifyEvent += this.OnNotifyEvent;
             return agent;
@@ -614,7 +636,7 @@ namespace Scada.Data.Client.Tcp
                 return;
             this.SafeInvoke(() =>
             {
-                this.statusStrip.Items[0].Text = this.GetConnetionString();
+                //this.statusStrip.Items[0].Text = this.GetConnetionString();
 
                 if (NotifyEvents.Connecting == notify)
                 {
@@ -628,14 +650,20 @@ namespace Scada.Data.Client.Tcp
                     cr.ConnectedTime = DateTime.Now;
 
                     this.agent.StopConnectCountryCenter(true);
+                    this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
                 }
-                else if (NotifyEvents.Disconnect == notify)
+                else if (NotifyEvents.Disconnect == notify || NotifyEvents.Disconnect2 == notify)
                 {
                     int count = this.connectionHistory.Count;
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.DisconnectedTime = DateTime.Now;
 
-                    this.agent.StartConnectCountryCenter(true);
+                    if (NotifyEvents.Disconnect == notify && this.retryCount % 4 == 0)
+                    {
+                        this.retryCount++;
+                        this.agent.StartConnectCountryCenter(true);
+                    }
+                    this.MainConnStatusLabel.Text = "省中心连接状态: 已断开";
                 }
                 else if (NotifyEvents.HandleEvent == notify)
                 {
@@ -654,22 +682,22 @@ namespace Scada.Data.Client.Tcp
                 {
                     /// 国家数据中心相关
                     this.StartConnectCountryCenter();
-                    this.AddListItem(msg1);
+                    this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
                 }
                 else if (NotifyEvents.DisconnectToCountryCenter == notify)
                 {
                     /// 国家数据中心相关
                     this.StopConnectCountryCenter();
-                    this.AddListItem(msg1);
+                    this.SubConnStatusLabel.Text = "国家中心连接状态: 已断开";
                 }
             });
         }
 
         private void AddListItem(string line)
         {
-            if (this.mainListBox.Items.Count > 200)
+            if (this.mainListBox.Items.Count > 10)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < this.mainListBox.Items.Count - 10; i++)
                 {
                     this.mainListBox.Items.RemoveAt(0);
                 }
@@ -806,7 +834,11 @@ namespace Scada.Data.Client.Tcp
             {
                 foreach (var cr in this.connectionHistory)
                 {
-                    this.connHistoryList.Items.Insert(0, cr.ToString());
+                    string historyItem = cr.ToString();
+                    if (!string.IsNullOrEmpty(historyItem))
+                    {
+                        this.connHistoryList.Items.Insert(0, cr.ToString());
+                    }
                 }
             }
             else if (this.mainTabCtrl.SelectedIndex == 2)
@@ -816,6 +848,7 @@ namespace Scada.Data.Client.Tcp
         }
 
         private Dictionary<string, DeviceDataDetails> detailsDict = new Dictionary<string, DeviceDataDetails>();
+        private int retryCount;
 
         private void InitDetailsListView()
         {
@@ -897,6 +930,11 @@ namespace Scada.Data.Client.Tcp
                     this.agent.SendExceptionNotify(packet);
                 }
             }
+        }
+
+        private void SubConnStatusLabel_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

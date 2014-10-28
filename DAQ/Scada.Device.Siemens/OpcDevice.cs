@@ -178,7 +178,7 @@ namespace Scada.Device.Siemens
             {
                 this.Disconnect();
             }
-            else if (cmd == "start")
+            else if (cmd.IndexOf("start") >= 0)
             {
                 int b = cmd.IndexOf("Sid=");
                 if (b > 0)

@@ -53,25 +53,26 @@
                 -->
                 <!--1-->
                 <MenuItem Header="系统管理" FontSize="14">
-                    <MenuItem Header="设备管理器" FontSize="14"></MenuItem>
-                    <MenuItem Header="数据上传管理器" FontSize="14"></MenuItem>
+                    <MenuItem Header="设备管理器" FontSize="14" Click="MenuMain_Click"></MenuItem>
+                    <MenuItem Header="数据上传管理器" FontSize="14" Click="MenuDataAgent_Click"></MenuItem>
                     <Separator/>
-                    <MenuItem Header="退出" FontSize="14" />
+                    <MenuItem Header="退出" FontSize="14" Click="Quit_Click"/>
                 </MenuItem>
-                <!--2-->
+                <!--2
                 <MenuItem Header="日志管理" FontSize="14">
                     <MenuItem Header="实时日志管理器" FontSize="14"></MenuItem>
                 </MenuItem>
-                <!--
-                <MenuItem Header="设置管理" FontSize="14">
-                    <MenuItem Header="基本设置" FontSize="14"></MenuItem>
-                </MenuItem>
                 -->
+                
+                <MenuItem Header="设置管理" FontSize="14">
+                    <MenuItem Header="基本设置" FontSize="14" Click="Settings_Click"></MenuItem>
+                </MenuItem>
+                
                 <!--4-->
                 <MenuItem Header="帮助" FontSize="14">
-                    <MenuItem Header="快速入门" FontSize="14"></MenuItem>
+                    <MenuItem Header="快速入门" FontSize="14" IsEnabled="False"></MenuItem>
                     <Separator/>
-                    <MenuItem Header="关于" FontSize="14"/>
+                    <MenuItem Header="关于" FontSize="14" Click="aboutMenuItem_Click"/>
                 </MenuItem>
             </Menu>
         </DockPanel>
