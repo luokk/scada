@@ -280,8 +280,8 @@ namespace Scada.Data.Client.Tcp
                 // 直接数据
                 case ReceivedCommand.StartSendDataDirectly:
                     {
-                        Debug.Assert(this.agent.Type != Type.Country);
-                        if (this.agent.Type != Type.Country)
+                        // Debug.Assert(this.agent.Type != Type.Country);
+                        // if (this.agent.Type != Type.Country)
                         {
                            this.OnStartSendDataDirectly(msg);
                         }
@@ -796,6 +796,7 @@ namespace Scada.Data.Client.Tcp
             string qn = Value.Parse(msg, "QN");
             this.SendReplyPacket(qn);
             this.SendResultPacket(qn);
+            Console.WriteLine("OnStartSendDataDirectly");
             this.agent.StartConnectCountryCenter();
         }
 
