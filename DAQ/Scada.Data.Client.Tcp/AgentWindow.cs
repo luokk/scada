@@ -651,9 +651,13 @@ namespace Scada.Data.Client.Tcp
                     int count = this.connectionHistory.Count;
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.ConnectedTime = DateTime.Now;
-
-                    // this.agent.StopConnectCountryCenter(true);
                     this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
+
+                    this.agent.StopConnectCountryCenter(true);
+                }
+                else if (NotifyEvents.ConnectedCountry == notify)
+                {
+                    this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
                 }
                 else if (NotifyEvents.Disconnect == notify || NotifyEvents.Disconnect2 == notify)
                 {
@@ -661,12 +665,16 @@ namespace Scada.Data.Client.Tcp
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.DisconnectedTime = DateTime.Now;
 
-                    if (NotifyEvents.Disconnect == notify && this.retryCount % 4 == 0)
+                    if (NotifyEvents.Disconnect == notify && this.retryCount % 3 == 0)
                     {
                         this.retryCount++;
-                        // this.agent.StartConnectCountryCenter(true);
+                        this.agent.StartConnectCountryCenter(true);
                     }
                     this.MainConnStatusLabel.Text = "省中心连接状态: 已断开";
+                }
+                else if (NotifyEvents.DisconnectCountry == notify)
+                {
+                    this.SubConnStatusLabel.Text = "国家中心连接状态: 已中断";
                 }
                 else if (NotifyEvents.HandleEvent == notify)
                 {
@@ -685,13 +693,11 @@ namespace Scada.Data.Client.Tcp
                 {
                     /// 国家数据中心相关
                     this.StartConnectCountryCenter();
-                    this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
                 }
                 else if (NotifyEvents.DisconnectToCountryCenter == notify)
                 {
                     /// 国家数据中心相关
                     this.StopConnectCountryCenter();
-                    this.SubConnStatusLabel.Text = "国家中心连接状态: 已断开";
                 }
             });
         }
@@ -708,7 +714,6 @@ namespace Scada.Data.Client.Tcp
 
             this.mainListBox.Items.Add(line);
         }
-
 
         private void StartConnectCountryCenter()
         {
