@@ -472,7 +472,15 @@ namespace Scada.Data.Client.Tcp
                     string address = this.isConnectingWired ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
                     string msg = string.Format("Connected to {0} Failed => {1}", address, e.Message);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
+
+                    if (this.Type == Type.Country)
+                    {
+                        this.NotifyEvent(this, NotifyEvents.DisconnectCountry, msg, null);
+                    }
+                    else
+                    {
+                        this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
+                    }
 
                     this.OnConnectionException(e);
                 }

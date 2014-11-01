@@ -145,14 +145,6 @@ namespace Scada.Data.Client.Tcp
             this.ShowInTaskbar = false;
             this.SetExceptionToolStripMenuItem.Checked = false;
 
-            /*
-            this.statusStrip.Items.Add(this.GetConnetionString());
-            this.statusStrip.Items.Add(new ToolStripSeparator());
-            this.statusStrip.Items.Add("MS: " + Settings.Instance.Mn);
-            this.statusStrip.Items.Add(new ToolStripSeparator());
-            // this.statusStrip.Items.Add("数据中心IP:");
-             * */
-
             this.cmdReceiver = new CommandReceiver(Ports.DataClient);
             cmdReceiver.Start(this.OnLocalCommand);
 
@@ -322,7 +314,7 @@ namespace Scada.Data.Client.Tcp
         {
             Agent agent = new Agent(serverAddress, serverPort);
             agent.Type = Type.Country;
-            // ?
+
             agent.Wireless = false;
             agent.NotifyEvent += this.OnNotifyEvent;
             return agent;
@@ -429,9 +421,12 @@ namespace Scada.Data.Client.Tcp
                 List<DataPacket> pks = builder.GetDataPackets(deviceKey, time, content);
                 foreach (var p in pks)
                 {
-                    this.agent.SendDataPacket(p);
+                    if (this.agent != null)
+                    {
+                        this.agent.SendDataPacket(p);
+                    }
 
-                    if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+                    if (this.countryCenterAgent != null)
                     {
                         this.countryCenterAgent.SendDataPacket(p);
                     }
@@ -462,11 +457,14 @@ namespace Scada.Data.Client.Tcp
         {
             MessageBox.Show("2");
             DataPacket p = builder.GetFlowDataPacket(deviceKey, data, true);
-            if (this.agent.SendDataPacket(p))
+            if (this.agent != null)
             {
-                string msg = string.Format("RD: {0}", p.ToString());
-                Log.GetLogFile(deviceKey).Log(msg);
-                this.UpdateSendDataRecord(deviceKey, false);
+                if (this.agent.SendDataPacket(p))
+                {
+                    string msg = string.Format("RD: {0}", p.ToString());
+                    Log.GetLogFile(deviceKey).Log(msg);
+                    this.UpdateSendDataRecord(deviceKey, false);
+                }
             }
 
             if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
@@ -479,11 +477,14 @@ namespace Scada.Data.Client.Tcp
         {
             // 门禁数据
             var p = builder.GetShelterPacket(deviceKey, data, true);
-            if (this.agent.SendDataPacket(p))
+            if (this.agent != null)
             {
-                string msg = string.Format("RD: {0}", p.ToString());
-                Log.GetLogFile(deviceKey).Log(msg);
-                this.UpdateSendDataRecord(deviceKey, false);
+                if (this.agent.SendDataPacket(p))
+                {
+                    string msg = string.Format("RD: {0}", p.ToString());
+                    Log.GetLogFile(deviceKey).Log(msg);
+                    this.UpdateSendDataRecord(deviceKey, false);
+                }
             }
 
             if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
@@ -572,11 +573,6 @@ namespace Scada.Data.Client.Tcp
 
         public void SendDataPackets(DateTime time, string deviceKey)
         {
-            if (this.agent == null || !this.agent.SendDataStarted)
-            {
-               // return;
-            }
-
             if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
             {
                 // For file data packets branch.
@@ -688,7 +684,6 @@ namespace Scada.Data.Client.Tcp
                     Log.GetLogFile(deviceKey).Log(line);
                     this.UpdateSendDataRecord(deviceKey, true);
                 }
-                /// 国家数据中心相关
                 else if (NotifyEvents.ConnectToCountryCenter == notify)
                 {
                     /// 国家数据中心相关

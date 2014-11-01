@@ -680,7 +680,6 @@ namespace Scada.Data.Client.Tcp
                         }
                     }
                     
-
                     dt = dt.AddSeconds(60 * 5);
                 }
             }
