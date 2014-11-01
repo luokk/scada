@@ -460,6 +460,7 @@ namespace Scada.Data.Client.Tcp
         // '大流量' 数据
         private void SendFlowDataPackets(string deviceKey, Dictionary<string, object> data)
         {
+            MessageBox.Show("2");
             DataPacket p = builder.GetFlowDataPacket(deviceKey, data, true);
             if (this.agent.SendDataPacket(p))
             {
@@ -573,7 +574,7 @@ namespace Scada.Data.Client.Tcp
         {
             if (this.agent == null || !this.agent.SendDataStarted)
             {
-                return;
+               // return;
             }
 
             if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
