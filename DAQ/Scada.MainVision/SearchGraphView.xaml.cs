@@ -26,7 +26,7 @@ namespace Scada.MainVision
 
         }
 
-        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int index, DateTime beginTime, DateTime endTime)
+        public void SetDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int index, DateTime beginTime, DateTime endTime)
         {
             if (dataSource == null || dataSource.Count == 0)
             {

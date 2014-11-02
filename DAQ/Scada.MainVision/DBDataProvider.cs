@@ -187,39 +187,13 @@ namespace Scada.MainVision
             set;
         }
 
-        // Get Recent data
-        // Notify the new 
-        public void RefreshTimeline(string deviceKey, MySqlCommand cmd)
-        {
-            DBDataCommonListerner listener = this.dataListeners[deviceKey];
-            if (listener == null)
-            {
-                return;
-            }
-
-            var result = this.Refresh(deviceKey, true, this.FetchCount, DateTime.MinValue, DateTime.MinValue, cmd);
-            if (result == null)
-            {
-                return;
-            }
-
-            result.Sort(DBDataProvider.DateTimeCompare);
-
-            listener.OnDataArrivalBegin(DataArrivalConfig.TimeRecent);
-            foreach (var data in result)
-            {
-                listener.OnDataArrival(DataArrivalConfig.TimeRecent, data);
-            }
-            listener.OnDataArrivalEnd(DataArrivalConfig.TimeRecent);
-        }
-
         // Get time-range data,
         // Notify with all the result.
-        public List<Dictionary<string, object>> RefreshTimeRange(string deviceKey, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
+        public List<Dictionary<string, object>> RefreshTimeRange(string deviceKey, DateTime beginTime, DateTime endTime, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
         {
             try
             {
-                var result = this.Refresh(deviceKey, false, -1, fromTime, toTime, cmd);
+                var result = this.Refresh(deviceKey, false, -1, beginTime, endTime, fromTime, toTime, cmd);
                 result.Reverse();
                 return result;
             }
@@ -235,7 +209,7 @@ namespace Scada.MainVision
         {
             try
             {
-                var result = this.Refresh(deviceKey, false, -1, fromTime, toTime, cmd);
+                var result = this.Refresh(deviceKey, false, -1, fromTime, toTime, fromTime, toTime, cmd);
                 result.Reverse();
                 return result;
             }
@@ -316,7 +290,7 @@ namespace Scada.MainVision
         /// <param name="count"></param>
         /// <param name="from"></param>
         /// <param name="to"></param>
-        private List<Dictionary<string, object>> Refresh(string deviceKey, bool current, int count, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
+        private List<Dictionary<string, object>> Refresh(string deviceKey, bool current, int count, DateTime beginTime, DateTime endTime, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
         {
             // Return values
             var ret = new List<Dictionary<string, object>>();
@@ -325,11 +299,12 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
             if (current)
             {
+                // Dead Branch
                 cmd.CommandText = this.GetSelectStatement(entry.TableName, count);
             }
             else
             {
-                cmd.CommandText = this.GetSelectStatement(entry.TableName, fromTime, toTime);
+                cmd.CommandText = this.GetSelectStatement(entry.TableName, beginTime, endTime, fromTime, toTime);
             }
 
             using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -344,8 +319,13 @@ namespace Scada.MainVision
                     {
                         continue;
                     }
-                    
+
                     keys.Add(key);
+                }
+
+                if (deviceKey == DataProvider.DeviceKey_Hpic || deviceKey == DataProvider.DeviceKey_Weather)
+                {
+                    keys.Add("ifrain");
                 }
 
                 string[] keyArray = keys.ToArray();
@@ -399,22 +379,6 @@ namespace Scada.MainVision
             return ret;
         }
 
-        private void ReviseIfRainForHpic(MySqlCommand cmd, List<Dictionary<string, object>> ret, DateTime fromTime, DateTime toTime)
-        {
-            cmd.CommandText = this.GetSelectStatement("RDSampler_rec", fromTime, toTime);
-
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    string time = reader.GetString("time");
-                    string ifRain = reader.GetString("IfRain");
-
-                    this.AddRainStatus(ret, time, ifRain);
-                }
-            }
-        }
-
         private void AddRainStatus(List<Dictionary<string, object>> ret, string time, string ifRain)
         {
             foreach (var i in ret)
@@ -459,26 +423,94 @@ namespace Scada.MainVision
             return string.Format(format, tableName, count);
         }
 
-        private string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
+        private string GetSelectStatement(string tableName, DateTime beginTime, DateTime endTime, DateTime fromTime, DateTime toTime)
         {
-            if (tableName.ToLower().IndexOf("hpic") >= 0)
+            fromTime = beginTime;
+            toTime = endTime;
+            int days = (endTime - beginTime).Days;
+            if (days <= 2)
             {
-                string format = "select a.time, a.doserate, a.Highvoltage, a.Temperature, a.Battery, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
-                string sql = string.Format(format, tableName, toTime, fromTime);
-                return sql;
-            }
-            if (tableName.ToLower().IndexOf("weather") >= 0)
-            {
-                string format = "select a.time, a.Windspeed, a.Direction, a.Temperature, a.Humidity, a.Pressure, a.Raingauge, a.Rainspeed, a.Dewpoint, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
-                string sql = string.Format(format, tableName, toTime, fromTime);
-                return sql;
+                if (tableName.ToLower().IndexOf("hpic") >= 0)
+                {
+                    string format = "select a.time, a.doserate, a.Highvoltage, a.Temperature, a.Battery, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                if (tableName.ToLower().IndexOf("weather") >= 0)
+                {
+                    string format = "select a.time, a.Windspeed, a.Direction, a.Temperature, a.Humidity, a.Pressure, a.Raingauge, a.Rainspeed, a.Dewpoint, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
             }
             else
             {
-                // Get the recent <count> entries.
-                string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
-                string sql = string.Format(format, tableName, toTime, fromTime);
-                return sql;
+                int interval = 300;
+                if (days > 7)
+                    interval = 3600;
+                string timeIndex = string.Format("FROM_UNIXTIME( CEILING(UNIX_TIMESTAMP(a.time) / {0}) * {1}) as time", interval, interval);
+                // Too many days!
+                if (tableName.ToLower().IndexOf("hpic") >= 0)
+                {
+                    string format = "select {0}, avg(a.doserate) as doserate, avg(a.Highvoltage) as Highvoltage, avg(a.Temperature) as Temperature, avg(a.Battery) as Battery, avg(b.ifRain) as ifRain from {1} a left join RDSampler_rec b on a.time=b.time where a.time<'{2}' and a.time>'{3}' group by time order by Time DESC";
+                    string sql = string.Format(format, timeIndex, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("weather") >= 0)
+                {
+                    //string format = "select a.time, a.Windspeed, a.Direction, a.Temperature, a.Humidity, a.Pressure, a.Raingauge, a.Rainspeed, a.Dewpoint, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
+                    string format = "select {0}, avg(a.Windspeed) as Windspeed, avg(a.Direction) as Direction, avg(a.Temperature) as Temperature, avg(a.Humidity) as Humidity, avg(a.Pressure) as Pressure, avg(a.Raingauge) as Raingauge, avg(a.Rainspeed) as Rainspeed, avg(a.Dewpoint) as Dewpoint, avg(b.ifRain) as ifRain from {1} a left join RDSampler_rec b on a.time=b.time where a.time<'{2}' and a.time>'{3}' group by time order by Time DESC";
+                    string sql = string.Format(format, timeIndex, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("nai") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("mds") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("ais") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("environment") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("rdsampler") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else
+                {
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
             }
         }
 

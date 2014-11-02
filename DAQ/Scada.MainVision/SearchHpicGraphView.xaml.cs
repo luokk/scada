@@ -83,16 +83,8 @@ namespace Scada.MainVision
                 return;
             }
 
-            List<Dictionary<string, object>> data = null;
-            if (interval == 30)
-            {
-                data = dataSource;
-            }
-            else
-            {
-                data = this.GetDataByInterval(dataSource, interval);
-            }
-            this.SearchChartView.SetDataSource(data, valueKey, beginTime, endTime);
+            this.SearchChartView.Interval = interval;
+            this.SearchChartView.SetDataSource(dataSource, valueKey, beginTime, endTime);
             this.SearchChartView.SetUpdateRangeHandler((begin, end) => 
             {
                 this.SearchChartView2.UpdateRange(begin, end);
@@ -111,6 +103,7 @@ namespace Scada.MainVision
                 return;
             }
 
+            /*
             List<Dictionary<string, object>> data = null;
             if (interval == 30)
             {
@@ -119,9 +112,9 @@ namespace Scada.MainVision
             else
             {
                 data = this.GetDataByInterval(dataSource, interval);
-            }
+            }*/
 
-            this.SearchChartView.AppendDataSource(data, valueKey);
+            this.SearchChartView.AppendDataSource(dataSource, valueKey);
             this.SearchChartView2.AppendDataSource(dataSource, "ifrain");
         }
 
