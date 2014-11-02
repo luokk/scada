@@ -593,7 +593,7 @@ namespace Scada.Declare
                     RecordManager.DoSystemEventRecord(this, "开始QA测量", RecordType.Event);
 
                     // to do QA Measurement
-                    ExecQAMeasure();
+                    // ExecQAMeasure();
                     return true;
                 }
 
