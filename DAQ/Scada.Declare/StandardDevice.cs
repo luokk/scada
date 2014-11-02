@@ -443,6 +443,8 @@ namespace Scada.Declare
 
 		protected bool GetDeviceData(byte[] line, DateTime time, out DeviceData dd)
 		{
+            dd = default(DeviceData);
+
             if (time == default(DateTime))
             {
                 time = DateTime.Now;
@@ -451,24 +453,26 @@ namespace Scada.Declare
             try
             {
                 data = this.dataParser.Search(line, this.lastLine);
-
                 this.lastLine = line;
+
+                if (data == null || data.Length == 0)
+                {
+                    return false;
+                }
+                dd.Time = time;
+                object[] fields = Device.GetFieldsData(data, time, this.fieldsConfig);
+                dd = new DeviceData(this, fields);
+                dd.InsertIntoCommand = this.insertIntoCommand;
+
             }
             catch (Exception e)
             {
-                string errorMsg = "Parse data failure:" + e.Message;
+                string strLine = Encoding.ASCII.GetString(line);
+                string errorMsg = string.Format("GetDeviceData() Fail, Data={0}", strLine) + e.Message;
                 RecordManager.DoSystemEventRecord(this, errorMsg);
+                
+                return false;
             }
-
-			dd = default(DeviceData);
-			if (data == null || data.Length == 0)
-			{
-				return false;
-			}
-            dd.Time = time;
-            object[] fields = Device.GetFieldsData(data, time, this.fieldsConfig);
-			dd = new DeviceData(this, fields);
-			dd.InsertIntoCommand = this.insertIntoCommand;
 
 			// deviceData.FieldsConfig = this.fieldsConfig;
 			return true;

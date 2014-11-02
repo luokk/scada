@@ -76,6 +76,9 @@ namespace Scada.Device.Siemens
 
         private string tableName;
 
+        // 循环时间5s
+        private int interval = 5000;
+
         // mv中启动、关闭
         private bool stopping = false;
         private bool starting = false;
@@ -155,7 +158,30 @@ namespace Scada.Device.Siemens
 
         public override void Stop()
         {
-            this.server = null;
+            try
+            {
+                this.timer.Stop();
+                this.timer = null;
+
+                // 确保所有的Read线程都已经结束
+                //System.Threading.Thread.Sleep(2 * this.interval);
+
+                if (this.group != null)
+                {
+                    this.group.Remove(false);
+                    this.group = null;
+                }
+                if (this.server != null)
+                {
+                    this.server.Disconnect();
+                    this.server = null;
+                }
+                RecordManager.DoSystemEventRecord(this, string.Format("Close Device"), RecordType.Event, true);
+            }
+            catch (Exception e)
+            {
+                RecordManager.DoSystemEventRecord(this, string.Format("Close Device:{0}", e.Message), RecordType.Error);
+            }
         }
 
         public override void Send(byte[] action, DateTime time)
@@ -221,7 +247,7 @@ namespace Scada.Device.Siemens
                 this.connected = true;
 
                 this.timer = new System.Windows.Forms.Timer();
-                this.timer.Interval = 5000;
+                this.timer.Interval = this.interval;
                 this.timer.Tick += this.OnDataTimer;
                 this.timer.Start();
             }
@@ -431,11 +457,22 @@ namespace Scada.Device.Siemens
             try
             {
                 this.connected = false;
-                this.server.Disconnect();
-                RecordManager.DoSystemEventRecord(this, string.Format("Disconnect"), RecordType.Event, true);
 
                 this.timer.Stop();
                 this.timer = null;
+
+                // 确保所有的Read线程都已经结束
+                // System.Threading.Thread.Sleep(this.interval + 1);
+
+                if (this.group != null)
+                {
+                    this.group.Remove(false);
+                }
+                if (this.server != null)
+                {
+                    this.server.Disconnect();
+                }
+                RecordManager.DoSystemEventRecord(this, string.Format("Disconnect"), RecordType.Event, true);
             }
             catch (Exception e)
             {
