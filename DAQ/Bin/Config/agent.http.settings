@@ -3,7 +3,7 @@
   <!-- Default Port is 6000 and 7000 -->
   <datacenters>
     
-    <datacenter2 BaseUrl="http://211.103.184.100:8080" />
+    <datacenter2 BaseUrl="http://127.0.0.1:8080" />
     
 
     <!--
