@@ -54,7 +54,9 @@ namespace Scada.Data.Client
         }
 
 
-        private Timer sendDataTimer;
+        private Timer sendFileDataTimer;
+
+        private Timer sendDBDataTimer;
 
         private Timer recvDataTimer;
 
@@ -66,7 +68,9 @@ namespace Scada.Data.Client
 
         private RealTimeForm detailForm;
 
-        private const int TimerInterval = 3500;
+        private const int FileTimerInterval = 30 * 1000;
+
+        private const int DBDataTimerInterval = 4000;
 
         private ToolStripLabel statusLabel = new ToolStripLabel();
 
@@ -275,11 +279,17 @@ namespace Scada.Data.Client
 
         private void InitializeTimer()
         {
-            // 定期往数据中心发数据
-            this.sendDataTimer = new Timer();
-            this.sendDataTimer.Interval = TimerInterval;
-            this.sendDataTimer.Tick += this.HttpSendDataTick;
-            this.sendDataTimer.Start();
+            // 定期往数据中心发文件数据
+            this.sendFileDataTimer = new Timer();
+            this.sendFileDataTimer.Interval = FileTimerInterval;
+            this.sendFileDataTimer.Tick += this.HttpSendFileTick;
+            this.sendFileDataTimer.Start();
+
+            // 定期往数据中心发数据库数据
+            this.sendDBDataTimer = new Timer();
+            this.sendDBDataTimer.Interval = DBDataTimerInterval;
+            this.sendDBDataTimer.Tick += this.HttpSendDBDataTick;
+            this.sendDBDataTimer.Start();
 
             // 每20s从数据中心取一次数据
             this.recvDataTimer = new Timer();
@@ -297,23 +307,32 @@ namespace Scada.Data.Client
         }
 
         // 当归一化时间到来时上传数据
-        private void HttpSendDataTick(object sender, EventArgs e)
+        private void HttpSendDBDataTick(object sender, EventArgs e)
         {
             if (!this.isAutoData)
                 return;
             DateTime now = DateTime.Now;
-            // For Upload File Devices.
-            if (IsSendFileTimeOK(now))
-            {
-                Guid guid = Guid.NewGuid();
-                SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
-            }
 
             // For Upload Data Devices.
             if (IsSendDataTimeOK(now))
             {
                 Guid guid = Guid.NewGuid();
                 SendDevicePackets(Settings.Instance.DataDeviceKeys, now, guid.ToString());
+            }
+        }
+
+        // 当归一化时间到来时上传数据
+        private void HttpSendFileTick(object sender, EventArgs e)
+        {
+            if (!this.isAutoData)
+                return;
+            DateTime now = DateTime.Now;
+
+            // For Upload File Devices.
+            if (IsSendFileTimeOK(now))
+            {
+                Guid guid = Guid.NewGuid();
+                SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
             }
         }
 
