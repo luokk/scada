@@ -63,7 +63,10 @@ namespace Scada.Data.Client
                 // package占用文件，同时改变其文件名
                 int index = fileName.LastIndexOf("\\");
                 string fileNameWithToken = fileName.Insert(index + 1, "!");
-                File.Move(fileName, fileNameWithToken);
+                if (!File.Exists(fileNameWithToken))
+                {
+                    File.Move(fileName, fileNameWithToken);
+                }
 
                 Packet packet = new Packet(this.Token);
                 packet.Path = fileNameWithToken;

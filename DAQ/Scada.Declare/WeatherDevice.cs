@@ -463,23 +463,26 @@ namespace Scada.Declare
             try
             {
                 data = this.Search(line, this.lastLine);
-
                 this.lastLine = line;
+
+                if (data == null || data.Length == 0)
+                {
+                    return false;
+                }
+                dd.Time = time;
+                object[] fields = Device.GetFieldsData(data, time, this.fieldsConfig);
+                dd = new DeviceData(this, fields);
+                dd.InsertIntoCommand = this.insertIntoCommand;
             }
+
             catch (Exception e)
             {
-                RecordManager.DoSystemEventRecord(this, "Parse data failure: " + e.Message);
+                string strLine = Encoding.ASCII.GetString(line);
+                string errorMsg = string.Format("GetDeviceData() Fail, Data={0}", strLine) + e.Message;
+                RecordManager.DoSystemEventRecord(this, errorMsg);
+
                 return false;
             }
-
-			if (data == null || data.Length == 0)
-			{
-				return false;
-			}
-            dd.Time = time;
-            object[] fields = Device.GetFieldsData(data, time, this.fieldsConfig);
-			dd = new DeviceData(this, fields);
-			dd.InsertIntoCommand = this.insertIntoCommand;
 
 			return true;
 		}
