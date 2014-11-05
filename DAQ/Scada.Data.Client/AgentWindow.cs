@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Scada.Data.Client
@@ -54,9 +55,9 @@ namespace Scada.Data.Client
         }
 
 
-        private Timer sendDataTimer;
+        private System.Windows.Forms.Timer sendDataTimer;
 
-        private Timer recvDataTimer;
+        private System.Windows.Forms.Timer recvDataTimer;
 
         private DataAgent agent;
 
@@ -276,13 +277,13 @@ namespace Scada.Data.Client
         private void InitializeTimer()
         {
             // 定期往数据中心发数据
-            this.sendDataTimer = new Timer();
+            this.sendDataTimer = new System.Windows.Forms.Timer();
             this.sendDataTimer.Interval = TimerInterval;
             this.sendDataTimer.Tick += this.HttpSendDataTick;
             this.sendDataTimer.Start();
 
             // 每20s从数据中心取一次数据
-            this.recvDataTimer = new Timer();
+            this.recvDataTimer = new System.Windows.Forms.Timer();
             this.recvDataTimer.Interval = 20 * 1000;
             this.recvDataTimer.Tick += this.HttpRecvDataTick;
             this.recvDataTimer.Start();
@@ -641,6 +642,11 @@ namespace Scada.Data.Client
             });
         }
 
+        private void OnNotify2(DataAgent agent, NotifyEvents notifyEvent, Notify p)
+        {
+            
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -685,75 +691,105 @@ namespace Scada.Data.Client
             string device = GetValue(payload, "device");
             string start = GetValue(payload, "start");
             string end = GetValue(payload, "end");
-            string timesStr = GetValue(payload, "times");
-            string[] timesArray = timesStr.Split(',');
-            Dictionary<long, bool> dict = new Dictionary<long, bool>();
-            foreach (var time in timesArray)
-            {
-                dict.Add(long.Parse(time), true);
-            }
 
-            if (timesArray != null && timesArray.Length > 0)
+            if (device == "hpge")
             {
-                string deviceKey = this.GetDeviceKey(device);
-                DateTime from = DateTime.Parse(start);
-                DateTime time = DateTime.Parse(end);
-                var data = new List<Dictionary<string, object>>();
-                string errorMsg;
-
-                if (this.MySqlCmd == null)
+                string sid = GetValue(payload, "sid");
+                Thread thread = new Thread(new ParameterizedThreadStart((o) => 
                 {
-                    this.ConnectToMySQL();
-                }
-
-                ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, RangeType.CloseOpen, data, out errorMsg);
-                if (d == ReadResult.ReadDataOK)
-                {   
-                    // If have data!
-                    int len = data.Count;
-                    if (timesArray.Length > 0)
+                    while (true)
                     {
-                        // 有请求的时间集合
-                        List<Dictionary<string, object>> group = new List<Dictionary<string, object>>();
-                        for (var i = 0; i < len; i++)
+                        string filePath = DataSource.Instance.GetNewHpGeFile(sid);
+                        if (string.IsNullOrEmpty(filePath))
+                            break;
+
+                        Packet p = builder.GetFilePacket(filePath, "hpge");
+                        if (p != null)
                         {
-                            // !
-                            var item = data[i];
-                            long unixtime = Packet.GetUnixTime2((string)item["time"]);
-                            if (dict.ContainsKey(unixtime))
-                            {
-                                group.Add(item);
-                            }
-
-                            if (group.Count >= 20 || i + 1 == len)
-                            {
-                                Packet p = builder.GetPacket(deviceKey, group, true);
-                                p.DeviceKey = deviceKey;
-                                p.Id = "";
-                                p.setHistory();
-
-                                this.agent.SendPacket(p);
-
-                                group.Clear();
-                            }
-                        } // End for
-                    }
-                    else
-                    {
-                        // 没有明确的时间集合
-                        for (var i = 0; i < len; i += 20)
-                        {
-                            var part = data.GetRange(i, Math.Min(20, len - i));
-                            Packet p = builder.GetPacket(deviceKey, part, true);
-                            p.DeviceKey = deviceKey;
+                            p.DeviceKey = Devices.HPGe;
                             p.Id = "";
                             p.setHistory();
 
                             this.agent.SendPacket(p);
                         }
                     }
+                }));
+                thread.Start();
+
+            }
+            else
+            {
+                string timesStr = GetValue(payload, "times");
+                string[] timesArray = timesStr.Split(',');
+                Dictionary<long, bool> dict = new Dictionary<long, bool>();
+                foreach (var time in timesArray)
+                {
+                    dict.Add(long.Parse(time), true);
+                }
+
+                if (timesArray != null && timesArray.Length > 0)
+                {
+                    string deviceKey = this.GetDeviceKey(device);
+                    DateTime from = DateTime.Parse(start);
+                    DateTime time = DateTime.Parse(end);
+                    var data = new List<Dictionary<string, object>>();
+                    string errorMsg;
+
+                    if (this.MySqlCmd == null)
+                    {
+                        this.ConnectToMySQL();
+                    }
+
+                    ReadResult d = DataSource.GetData(this.MySqlCmd, deviceKey, from, time, RangeType.CloseOpen, data, out errorMsg);
+                    if (d == ReadResult.ReadDataOK)
+                    {
+                        // If have data!
+                        int len = data.Count;
+                        if (timesArray.Length > 0)
+                        {
+                            // 有请求的时间集合
+                            List<Dictionary<string, object>> group = new List<Dictionary<string, object>>();
+                            for (var i = 0; i < len; i++)
+                            {
+                                // !
+                                var item = data[i];
+                                long unixtime = Packet.GetUnixTime2((string)item["time"]);
+                                if (dict.ContainsKey(unixtime))
+                                {
+                                    group.Add(item);
+                                }
+
+                                if (group.Count >= 20 || i + 1 == len)
+                                {
+                                    Packet p = builder.GetPacket(deviceKey, group, true);
+                                    p.DeviceKey = deviceKey;
+                                    p.Id = "";
+                                    p.setHistory();
+
+                                    this.agent.SendPacket(p);
+
+                                    group.Clear();
+                                }
+                            } // End for
+                        }
+                        else
+                        {
+                            // 没有明确的时间集合
+                            for (var i = 0; i < len; i += 20)
+                            {
+                                var part = data.GetRange(i, Math.Min(20, len - i));
+                                Packet p = builder.GetPacket(deviceKey, part, true);
+                                p.DeviceKey = deviceKey;
+                                p.Id = "";
+                                p.setHistory();
+
+                                this.agent.SendPacket(p);
+                            }
+                        }
+                    }
                 }
             }
+            
         }
 
         private string GetDeviceKey(string device)

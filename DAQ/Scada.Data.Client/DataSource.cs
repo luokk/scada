@@ -279,10 +279,13 @@ namespace Scada.Data.Client
             return sid;
         }
 
-        internal string GetNewHpGeFile()
+        internal string GetNewHpGeFile(string sid = null)
         {
             string path = LogPath.GetDeviceLogFilePath("scada.hpge");
-            string sid = GetCurrentSid();
+            if (string.IsNullOrEmpty(sid))
+            {
+                sid = GetCurrentSid();
+            }
 
             string currentFilePath = Path.Combine(path, sid);
 
