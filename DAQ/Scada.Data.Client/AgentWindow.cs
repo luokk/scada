@@ -111,9 +111,11 @@ namespace Scada.Data.Client
 
             this.CheckLastSendTime = true;
 
-            this.cmdReceiver = new CommandReceiver(Ports.DataClient);
-            cmdReceiver.Start(this.OnLocalCommand);
-
+            if (!this.IsSecond)
+            {
+                this.cmdReceiver = new CommandReceiver(Ports.DataClient);
+                cmdReceiver.Start(this.OnLocalCommand);
+            }
             this.InitDetailsListView();
             this.Start();
         }
@@ -226,16 +228,21 @@ namespace Scada.Data.Client
             this.InitializeTimer();
 
             string line = string.Format("{0} starts at {1}.", Program.DataClient, DateTime.Now);
-            Log.GetLogFile(Program.DataClient).Log(line);
+            if (!this.IsSecond)
+            {
+                Log.GetLogFile(Program.DataClient).Log(line);
+            }
         }
 
         private bool InitializeAgent()
         {
+            Settings.AgentXml = this.IsSecond ? Settings.AgentXml + ".2" : Settings.AgentXml;
             Settings.Instance.LoadSettings();
             Settings s = Settings.Instance;
 
             if (s.DataCenters.Count() == 0)
             {
+                MessageBox.Show("配置错误");
                 this.pingLabel.Text = "配置错误";
                 return false;
             }
@@ -877,5 +884,7 @@ namespace Scada.Data.Client
 
             }
         }
+
+        public bool IsSecond { get; set; }
     }
 }

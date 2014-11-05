@@ -208,7 +208,8 @@ namespace Scada.Data.Client
             }
             else
             {
-                Log.GetLogFile("scada.naidevice").Log(string.Format("{0} Not_Found", filePath));
+                // TODO: fix here, For second agent process, I disbale this log for temp.
+                // Log.GetLogFile("scada.naidevice").Log(string.Format("{0} Not_Found", filePath));
             }
 
             return content;
