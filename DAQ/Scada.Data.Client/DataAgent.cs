@@ -391,7 +391,7 @@ namespace Scada.Data.Client
                         string tmpDate = line.Substring(index1 + 12);
                         tmpDate = tmpDate.Replace('\0', ' ').Trim();
                         // 出错
-                        //startTime = DateTime.ParseExact(tmpDate, "yyyy/MM/dd HH:mm:ss", null);
+                        startTime = DateTime.ParseExact(tmpDate, "yyyy/MM/dd HH:mm:ss", null);
                         continue;
                     }
 

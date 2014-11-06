@@ -621,6 +621,28 @@ namespace Scada.Declare
 
         private void ExecSample24HourMeasure()
         {
+            // 首先清除原有进程
+            try
+            {
+                Process[] processes = Process.GetProcesses();
+
+                foreach (Process process in processes)
+                {
+                    if (process.ProcessName.ToLower() == "gv32")
+                    {
+                        process.Kill();
+                    }
+                }
+            }
+            catch (Exception e1)
+            {
+                string msg = string.Format("Kill GammaVision进程失败, 错误：{0}",e1.Message);
+                RecordManager.DoSystemEventRecord(this, msg, RecordType.Event);
+
+                return;
+            }
+
+            // 启动新的JOB文件
             var bat = ConfigPath.GetConfigFilePath("devices/Scada.HPGE/0.9/script/SampleMeasure24.bat");
             using (Process p = Process.Start(bat))
             {
