@@ -131,9 +131,23 @@ namespace Scada.Data.Client
                             timesStr = times.Value<string>();
                         }
 
-                        string start = content["start"].Value<string>();
-                        string end = content["end"].Value<string>();
-                        this.HandleHistoryData(device, start, end, timesStr);
+                        JToken sid = content["sid"];
+                        string sidStr = null;
+                        if (sid != null)
+                        {
+                            sidStr = sid.Value<string>();
+                        }
+
+                        if (device == "hpge")
+                        {
+                            this.HandleHistoryData(device, sidStr);
+                        }
+                        else
+                        {
+                            string start = content["start"].Value<string>();
+                            string end = content["end"].Value<string>();
+                            this.HandleHistoryData(device, start, end, timesStr);
+                        }
                     }
 
                     
@@ -153,6 +167,14 @@ namespace Scada.Data.Client
             n.SetValue("start", start);
             n.SetValue("end", end);
             n.SetValue("times", times);
+            this.NotifyEvent(this, NotifyEvents.HistoryData, n);
+        }
+
+        private void HandleHistoryData(string device, string sid)
+        {
+            Notify n = new Notify();
+            n.SetValue("device", device);
+            n.SetValue("sid", sid);
             this.NotifyEvent(this, NotifyEvents.HistoryData, n);
         }
 
