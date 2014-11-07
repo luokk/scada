@@ -246,24 +246,25 @@ namespace Scada.Chart
                     scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
                     this.TimeAxis.Children.Add(scaleLine);
 
-                    TextBlock timeLabel = null;
-                    timeLabel = new TextBlock();
-                    timeLabel.Foreground = Brushes.Black;
-                    timeLabel.FontWeight = FontWeights.Light;
-                    timeLabel.FontSize = 9;
 
-                    double pos = i * graduation;
 
-                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
-                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
-
-                    this.TimeAxis.Children.Add(timeLabel);
+                    
 
                     if (isWholePoint)
                     {
                         string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
-                        if (timeLabel != null)
+                        if (displayTime.Length > 0)
                         {
+                            TextBlock timeLabel = null;
+                            timeLabel = new TextBlock();
+                            timeLabel.Foreground = Brushes.Black;
+                            timeLabel.FontWeight = FontWeights.Light;
+                            timeLabel.FontSize = 9;
+                            this.TimeAxis.Children.Add(timeLabel);
+                            double pos = i * graduation;
+
+                            timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
+                            timeLabel.SetValue(Canvas.TopProperty, (double)10);
                             timeLabel.Text = displayTime;
                         }
                     }
@@ -290,24 +291,23 @@ namespace Scada.Chart
                     scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
                     this.TimeAxis.Children.Add(scaleLine);
 
-                    TextBlock timeLabel = null;
-                    timeLabel = new TextBlock();
-                    timeLabel.Foreground = Brushes.Black;
-                    timeLabel.FontWeight = FontWeights.Light;
-                    timeLabel.FontSize = 9;
-
-                    double pos = i * graduation;
-
-                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
-
-                    this.TimeAxis.Children.Add(timeLabel);
-
                     if (isWholePoint)
                     {
                         string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
-                        if (timeLabel != null)
+                        if (displayTime.Length > 0)
                         {
+                            TextBlock timeLabel = null;
+                            timeLabel = new TextBlock();
+                            timeLabel.Foreground = Brushes.Black;
+                            timeLabel.FontWeight = FontWeights.Light;
+                            timeLabel.FontSize = 9;
+
+                            double pos = i * graduation;
+
+                            timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                            timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                            this.TimeAxis.Children.Add(timeLabel);
                             timeLabel.Text = displayTime;
                         }
                     }
@@ -348,22 +348,22 @@ namespace Scada.Chart
 
                     if (isWholePoint)
                     {
-                        TextBlock timeLabel = null;
-                        timeLabel = new TextBlock();
-                        timeLabel.Foreground = Brushes.Black;
-                        timeLabel.FontWeight = FontWeights.Light;
-                        timeLabel.FontSize = 9;
-
-                        double pos = i * graduation;
-
-                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
-
-                        this.TimeAxis.Children.Add(timeLabel);
-
                         string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
-                        if (timeLabel != null)
+                        if (displayTime.Length > 0)
                         {
+                            TextBlock timeLabel = null;
+                            timeLabel = new TextBlock();
+                            timeLabel.Foreground = Brushes.Black;
+                            timeLabel.FontWeight = FontWeights.Light;
+                            timeLabel.FontSize = 9;
+
+                            double pos = i * graduation;
+
+                            timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                            timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                            this.TimeAxis.Children.Add(timeLabel);
+
                             timeLabel.Text = displayTime;
                         }
                     }
@@ -469,6 +469,18 @@ namespace Scada.Chart
                     return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
                 }
             }
+            if (interval == 3600)
+            {
+                DateTime dt = baseTime.AddSeconds(index * interval / 120);
+                if (dt.Minute == 0 && dt.Hour == 0)
+                {
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
+                }
+                else
+                {
+                    return "";
+                }
+            }
             else if (interval == 30)
             {
                 DateTime dt = baseTime.AddSeconds(index * interval);
@@ -496,6 +508,18 @@ namespace Scada.Chart
                 else
                 {
                     return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                }
+            }
+            if (interval == 3600)
+            {
+                DateTime dt = baseTime.AddSeconds(index * interval / 120);
+                if (dt.Minute == 0 && dt.Hour == 0)
+                {
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
+                }
+                else
+                {
+                    return "";
                 }
             }
             else if (interval == 30)

@@ -532,12 +532,20 @@ namespace Scada.Controls
 
                             if (searchDataSource.Count > 0)
                             {
-                                sc.Post(new SendOrPostCallback((data) =>
+                                int sleep = 0;
+                                sc.Send(new SendOrPostCallback((data) =>
                                 {
-                                    this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
+                                    sleep = this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
                                     index++;
                                 }), searchDataSource);
-                                
+
+                                Thread.Sleep(sleep);
+
+                                sc.Send(new SendOrPostCallback((data) =>
+                                {
+                                    this.UpdateSearchDataList((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
+                                    index++;
+                                }), searchDataSource);
                             }
                             /*
                             t1 = t1.AddDays(1);
@@ -563,11 +571,16 @@ namespace Scada.Controls
             //this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
         }
 
-        private void UpdateSearchData(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime, int days)
+        private void UpdateSearchDataList(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime, int days)
         {
             ListView searchListView = (ListView)this.SearchView;
             searchListView.ItemsSource = null;
 
+            searchListView.ItemsSource = data;
+        }
+
+        private int UpdateSearchData(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime, int days)
+        {
             int interval = 30;
             if (days <= 2)
             {
@@ -613,6 +626,12 @@ namespace Scada.Controls
                     }
                 }
             }
+
+            if (deviceKey == DataProvider.DeviceKey_Shelter || deviceKey == DataProvider.DeviceKey_Dwd)
+            {
+                return 0;
+            }
+            return 1000;
         }
 
         private List<Dictionary<string, object>> Filter(List<Dictionary<string, object>> data, int page)

@@ -84,6 +84,7 @@ namespace Scada.MainVision
             }
 
             this.SearchChartView.Interval = interval;
+            this.SearchChartView2.Interval = interval;
             this.SearchChartView.SetDataSource(dataSource, valueKey, beginTime, endTime);
             this.SearchChartView.SetUpdateRangeHandler((begin, end) => 
             {
