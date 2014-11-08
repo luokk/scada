@@ -530,6 +530,8 @@ namespace Scada.Controls
                             // Get Daily data;
                             var searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, t1, t2, cmd);
 
+                            this.BeginTime = dt1;
+                            this.EndTime = dt2;
                             if (searchDataSource.Count > 0)
                             {
                                 int sleep = 0;
@@ -595,6 +597,7 @@ namespace Scada.Controls
                 interval = 3600;
             }
 
+            this.searchData = data;
             if (data != null && data.Count > 0)
             {
                 if (index == 0)
@@ -923,7 +926,7 @@ namespace Scada.Controls
             {
                 this.selectedInterval = 3600;
             }
-            else if (s.SelectedIndex == 2)
+            else if (s.SelectedIndex == 3)
             {
                 this.selectedInterval = 3600 * 24;
             }

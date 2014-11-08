@@ -40,7 +40,10 @@ namespace Scada.MainVision
 
         private List<Dictionary<string, object>> GetDataByInterval(List<Dictionary<string, object>> data, int interval)
         {
-            int count = interval / 30;
+            if (interval == 30)
+            {
+                return data;
+            }
             List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
 
             var first = data[0];
@@ -83,9 +86,11 @@ namespace Scada.MainVision
                 return;
             }
 
+            var data = this.GetDataByInterval(dataSource, interval);
+
             this.SearchChartView.Interval = interval;
             this.SearchChartView2.Interval = interval;
-            this.SearchChartView.SetDataSource(dataSource, valueKey, beginTime, endTime);
+            this.SearchChartView.SetDataSource(data, valueKey, beginTime, endTime);
             this.SearchChartView.SetUpdateRangeHandler((begin, end) => 
             {
                 this.SearchChartView2.UpdateRange(begin, end);
@@ -94,7 +99,7 @@ namespace Scada.MainVision
             {
                 this.SearchChartView2.Reset();
             });
-            this.SearchChartView2.SetDataSource(dataSource, "ifrain", beginTime, endTime);
+            this.SearchChartView2.SetDataSource(data, "ifrain", beginTime, endTime);
         }
 
         public void AppendDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int index)
