@@ -539,7 +539,6 @@ namespace Scada.Controls
                                 sc.Send(new SendOrPostCallback((data) =>
                                 {
                                     sleep = this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
-                                    index++;
                                 }), searchDataSource);
 
                                 Thread.Sleep(sleep);
@@ -547,21 +546,9 @@ namespace Scada.Controls
                                 sc.Send(new SendOrPostCallback((data) =>
                                 {
                                     this.UpdateSearchDataList((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
-                                    index++;
                                 }), searchDataSource);
                             }
-                            /*
-                            t1 = t1.AddDays(1);
-                            if (days <= 2)
-                            {
-                                t2 = t1.AddDays(1).AddSeconds(-2);
-                            }
-                            else
-                            {
-                                t2 = dt2;
-                            }
-                            */
-                            // Thread.Sleep(20);
+
                         }
                         this.inSearch = false;
                     }
@@ -602,35 +589,20 @@ namespace Scada.Controls
                 interval = 3600;
             }
 
+            this.Interval = interval;
             this.searchData = data;
             if (data != null && data.Count > 0)
             {
-                if (index == 0)
+                // 
+                if (this.deviceKey == DataProvider.DeviceKey_Hpic)
                 {
-                    if (this.deviceKey == DataProvider.DeviceKey_Hpic)
-                    {
-                        ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
-                    }
-                    else
-                    {
-                        if (this.graphSearchView != null)
-                        {
-                            ((SearchGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
-                        }
-                    }
+                    ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
                 }
                 else
                 {
-                    if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+                    if (this.graphSearchView != null)
                     {
-                        ((SearchHpicGraphView)this.graphSearchView).AppendDataSource(data, this.selectedField, 30, index);
-                    }
-                    else
-                    {
-                        if (this.graphSearchView != null)
-                        {
-                            ((SearchGraphView)this.graphSearchView).AppendDataSource(data, this.selectedField, index);
-                        }
+                        ((SearchGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
                     }
                 }
             }
@@ -936,8 +908,7 @@ namespace Scada.Controls
                 this.selectedInterval = 3600 * 24;
             }
 
-            ((SearchHpicGraphView)this.graphSearchView).Interval = this.selectedInterval;
-            ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.selectedInterval, 0, this.BeginTime, this.EndTime);
+            ((SearchHpicGraphView)this.graphSearchView).SetDataSourceInterval(this.searchData, this.selectedField, this.Interval, this.selectedInterval, this.BeginTime, this.EndTime);
         }
 
         private void FieldSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)

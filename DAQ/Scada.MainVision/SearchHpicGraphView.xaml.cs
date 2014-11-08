@@ -102,26 +102,37 @@ namespace Scada.MainVision
             this.SearchChartView2.SetDataSource(data, "ifrain", beginTime, endTime);
         }
 
-        public void AppendDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int index)
+        public void SetDataSourceInterval(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int expectedInterval, DateTime beginTime, DateTime endTime)
         {
             if (dataSource == null || dataSource.Count == 0)
             {
                 return;
             }
 
-            /*
             List<Dictionary<string, object>> data = null;
-            if (interval == 30)
+            if (expectedInterval > interval)
+            {
+                data = this.GetDataByInterval(dataSource, expectedInterval);
+            }
+            else if (expectedInterval == interval)
             {
                 data = dataSource;
             }
-            else
-            {
-                data = this.GetDataByInterval(dataSource, interval);
-            }*/
+            else { return; }
 
-            this.SearchChartView.AppendDataSource(dataSource, valueKey);
-            this.SearchChartView2.AppendDataSource(dataSource, "ifrain");
+
+            this.SearchChartView.Interval = expectedInterval;
+            this.SearchChartView2.Interval = expectedInterval;
+            this.SearchChartView.SetDataSource(data, valueKey, beginTime, endTime);
+            this.SearchChartView.SetUpdateRangeHandler((begin, end) =>
+            {
+                this.SearchChartView2.UpdateRange(begin, end);
+            });
+            this.SearchChartView.SetResetHandler(() =>
+            {
+                this.SearchChartView2.Reset();
+            });
+            this.SearchChartView2.SetDataSource(data, "ifrain", beginTime, endTime);
         }
 
         public int Interval
