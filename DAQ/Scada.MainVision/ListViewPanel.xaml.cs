@@ -942,7 +942,8 @@ namespace Scada.Controls
             if (this.ShowListButton.IsChecked.Value)
             {
                 this.ListRow.Height = new GridLength(2, GridUnitType.Star);
-
+                ListView searchListView = (ListView)this.SearchView;
+                searchListView.Visibility = System.Windows.Visibility.Visible;
                 if (this.deviceKey == DataProvider.DeviceKey_NaI)
                 {
                     Config cfg = Config.Instance();
@@ -961,7 +962,8 @@ namespace Scada.Controls
             }
             else
             {
-                this.ListRow.Height = new GridLength(23);
+                ListView searchListView = (ListView)this.SearchView;
+                searchListView.Visibility = System.Windows.Visibility.Collapsed;
                 this.UpdateSearchDataList((List<Dictionary<string, object>>)null);
             }
         }
