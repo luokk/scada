@@ -540,13 +540,6 @@ namespace Scada.Controls
                                 {
                                     sleep = this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
                                 }), searchDataSource);
-
-                                Thread.Sleep(sleep);
-
-                                sc.Send(new SendOrPostCallback((data) =>
-                                {
-                                    this.UpdateSearchDataList((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
-                                }), searchDataSource);
                             }
 
                         }
@@ -561,11 +554,10 @@ namespace Scada.Controls
             //this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
         }
 
-        private void UpdateSearchDataList(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime, int days)
+        private void UpdateSearchDataList(List<Dictionary<string, object>> data)
         {
             ListView searchListView = (ListView)this.SearchView;
             searchListView.ItemsSource = null;
-
             searchListView.ItemsSource = data;
         }
 
@@ -937,5 +929,19 @@ namespace Scada.Controls
         public DateTime EndTime { get; set; }
 
         public int Interval { get; set; }
+
+        private void ShowListButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.ShowListButton.IsChecked.Value)
+            {
+                this.ListRow.Height = new GridLength(2, GridUnitType.Star);
+                this.UpdateSearchDataList((List<Dictionary<string, object>>)this.searchData);
+            }
+            else
+            {
+                this.ListRow.Height = new GridLength(23);
+                this.UpdateSearchDataList((List<Dictionary<string, object>>)null);
+            }
+        }
     }
 }

@@ -84,7 +84,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="35"></RowDefinition>
                                     <RowDefinition Height="300" x:Name="SearchChartRow"></RowDefinition>
-                                    <RowDefinition Height="*"></RowDefinition>
+                                    <RowDefinition Height="*" x:Name="ListRow"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
 
@@ -142,8 +142,12 @@
                                 <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainer" Margin="-5" Loaded="SearchGraphViewContainer_Loaded">
                                 </ContentControl>
                                 <!-- Contains ListView -->
-                                <ContentControl Grid.Row="2" x:Name="SearchViewContainer" Margin="-5">
-                                </ContentControl>
+                                <StackPanel Grid.Row="2" Orientation="Vertical">
+                                    <CheckBox x:Name="ShowListButton" Margin="2,2,2,10" Unchecked="ShowListButton_Checked" Checked="ShowListButton_Checked">在列表中显示数据</CheckBox>
+                                    <ContentControl  x:Name="SearchViewContainer" Margin="-5">
+                                    </ContentControl>
+                                </StackPanel>
+
 
                             </Grid>
                         </ContentControl>
