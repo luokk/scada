@@ -166,7 +166,7 @@ namespace Scada.MainVision
 
             this.SearchChartView2.Interval = 30;
             this.SearchChartView2.SetCurveDisplayName("感雨");
-            this.SearchChartView2.SetValueRange(0, 0.5);
+            this.SearchChartView2.SetValueRange(0, 1);
             this.SearchChartView2.HideResetButton();
             this.SearchChartView2.DisableTrackingLine();
             this.SearchChartView2.DisableGridLine();

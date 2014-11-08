@@ -338,8 +338,34 @@ namespace Scada.MainVision
                     {
                         try
                         {
-                            string v = reader.GetString(key);
-                            data.Add(key, v);
+                            // -----------------------------
+                            int i = reader.GetOrdinal(key);
+                            if (!reader.IsDBNull(i))
+                            {
+                                string v = reader.GetString(i);
+                                if (key == "ifrain")
+                                {
+                                    if (v == "1")
+                                    {
+                                        data.Add(key, true);
+                                    }
+                                    else
+                                    {
+                                        data.Add(key, false);
+                                    }
+                                }
+                                else
+                                {
+                                    data.Add(key, v);
+                                }
+                            }
+                            else
+                            {
+                                if (key == "ifrain")
+                                {
+                                    data.Add(key, false);
+                                }
+                            }
                         }
                         catch (SqlNullValueException)
                         {

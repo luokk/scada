@@ -92,7 +92,7 @@ namespace Scada.MainVision
             DateTime d;
             if (DateTime.TryParse(time, out d))
             {
-                if ((DateTime.Now - d).Ticks > 310 * 10000000L)
+                if ((DateTime.Now - d).Ticks > 610 * 10000000L)
                 {
                     this.DisplayName.Content = string.Format("{0}(未启动)", this.deviceName);
                 }
