@@ -101,6 +101,10 @@ namespace Scada.MainVision
                     this.DisplayName.Content = this.deviceName;
                 }
             }
+            else
+            {
+                this.DisplayName.Content = string.Format("{0}(未启动)", this.deviceName);
+            }
         }
     }
 }
