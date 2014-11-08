@@ -86,7 +86,7 @@ namespace Scada.MainVision
                 return;
             }
 
-            var data = this.GetDataByInterval(dataSource, interval);
+            var data = dataSource;// this.GetDataByInterval(dataSource, interval);
 
             this.SearchChartView.Interval = interval;
             this.SearchChartView2.Interval = interval;

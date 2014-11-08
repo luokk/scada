@@ -44,6 +44,9 @@ namespace Scada.MainVision
             {
                 this.SearchChartView.SetCurveDisplayName("风速");
             }
+
+            this.Interval = interval;
+            this.SearchChartView.Interval = this.Interval;
             this.SearchChartView.SetDataSource(dataSource, valueKey, beginTime, endTime);
         }
 
@@ -70,15 +73,8 @@ namespace Scada.MainVision
 
         public int Interval
         {
-            get
-            {
-                return this.SearchChartView.Interval;
-            }
-
-            set
-            {
-                this.SearchChartView.Interval = value;
-            }
+            get;
+            set;
         }
 
         public void AddLineName(string deviceKey, string lineName, string displayName)
@@ -105,31 +101,16 @@ namespace Scada.MainVision
             {
                 this.SearchChartView.SetCurveDisplayName("温度");
             }
-            this.SearchChartView.SetValueRange(item.Min, item.Max);
-
-        }
-
-        private void AddTimePoint(DateTime time, Dictionary<string, object> entry)
-        {
-            foreach (string key in dataSources.Keys)
+            if (this.Interval == 0)
             {
-                // 存在这条曲线
-                if (entry.ContainsKey(key))
+                this.Interval = 30;
+                if (deviceKey == DataProvider.DeviceKey_NaI)
                 {
-                    string v = (string)entry[key];
-                    double r = 0.0;
-                    if (v.Length > 0)
-                    {
-                        if (!double.TryParse(v, out r))
-                        {
-                            return;
-                        }
-                    }
-
-                    //this.CurveDataContext dataContext = dataSources[key];
-                    //dataContext.AddPoint(time, r);
+                    this.Interval = 300;
                 }
             }
+            this.SearchChartView.SetValueRange(item.Min, item.Max);
+
         }
 
         internal void SaveChart()
@@ -145,6 +126,16 @@ namespace Scada.MainVision
                 filePath = fileDialog.FileName;
                 this.SearchChartView.SaveChart(filePath);
             }            
+        }
+
+        internal void SelectChanged(string lineName)
+        {
+            Config cfg = Config.Instance();
+            ConfigEntry entry = cfg["scada.weather"];
+
+            ConfigItem item = entry.GetConfigItem(lineName);
+            this.SearchChartView.SetValueRange(item.Min, item.Max);
+
         }
     }
 

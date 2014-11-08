@@ -620,6 +620,7 @@ namespace Scada.Chart
 
         internal void UpdateCurve()
         {
+            this.CurveView.InitializeValueAxis();
             this.CurveView.UpdateCurve();
         }
 

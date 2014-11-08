@@ -532,6 +532,7 @@ namespace Scada.Controls
 
                             this.BeginTime = dt1;
                             this.EndTime = dt2;
+
                             if (searchDataSource.Count > 0)
                             {
                                 int sleep = 0;
@@ -587,6 +588,10 @@ namespace Scada.Controls
             if (days <= 2)
             {
                 interval = 30;
+                if (this.deviceKey == DataProvider.DeviceKey_NaI)
+                {
+                    interval = 300;
+                }
             }
             else if (days > 2 && days <= 7)
             {
@@ -950,6 +955,7 @@ namespace Scada.Controls
             {
                 this.selectedField = "windspeed";
             }
+            ((SearchGraphView)this.graphSearchView).SelectChanged(this.selectedField);
             ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30,  0, this.BeginTime, this.EndTime);
 
         }
@@ -957,5 +963,7 @@ namespace Scada.Controls
         public DateTime BeginTime { get; set; }
 
         public DateTime EndTime { get; set; }
+
+        public int Interval { get; set; }
     }
 }

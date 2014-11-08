@@ -142,6 +142,24 @@ namespace Scada.Chart
                 this.CanvasView.Children.Add(l);
             }
 
+            this.InitializeValueAxis();
+
+            this.AddCurveLine();
+
+            // DisplayName
+            this.SetDisplayName(this.DisplayName);
+
+            // TimeLine
+            timeLine.Y1 = 0;
+            timeLine.Y2 = GridViewHeight / 2;
+            timeLine.Stroke = new SolidColorBrush(Colors.Gray);
+            this.CanvasView.Children.Add(timeLine);
+            this.CanvasView.ClipToBounds = true;
+        }
+
+        public void InitializeValueAxis()
+        {
+            this.Graduation.Children.Clear();
             // Scale line
             double height = this.CanvasView.Height;
 
@@ -208,15 +226,7 @@ namespace Scada.Chart
                 }
             }
 
-            timeLine.Y1 = 0;
-            timeLine.Y2 = GridViewHeight / 2;
-            timeLine.Stroke = new SolidColorBrush(Colors.Gray);
-            this.CanvasView.Children.Add(timeLine);
-            this.CanvasView.ClipToBounds = true;
 
-            this.AddCurveLine();
-
-            this.SetDisplayName(this.DisplayName);
         }
 
         private void AddCurveLine()
