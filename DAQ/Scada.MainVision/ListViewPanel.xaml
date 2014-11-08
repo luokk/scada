@@ -117,6 +117,8 @@
                                             <Label>温度</Label>
                                             <Label>气压</Label>
                                             <Label>风速</Label>
+                                            <Label>湿度</Label>
+                                            <Label>雨量</Label>
                                         </ComboBox.Items>
                                     </ComboBox>
                                     

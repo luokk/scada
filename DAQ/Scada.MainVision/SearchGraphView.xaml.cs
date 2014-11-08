@@ -44,7 +44,14 @@ namespace Scada.MainVision
             {
                 this.SearchChartView.SetCurveDisplayName("风速");
             }
-
+            else if (valueKey == "humidity")
+            {
+                this.SearchChartView.SetCurveDisplayName("湿度");
+            }
+            else if (valueKey == "raingauge")
+            {
+                this.SearchChartView.SetCurveDisplayName("雨量");
+            }
             this.Interval = interval;
             this.SearchChartView.Interval = this.Interval;
             this.SearchChartView.SetDataSource(dataSource, valueKey, beginTime, endTime);

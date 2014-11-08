@@ -910,13 +910,21 @@ namespace Scada.Controls
             {
                 this.selectedField = "temperature";
             }
-            if (s.SelectedIndex == 1)
+            else if (s.SelectedIndex == 1)
             {
                 this.selectedField = "pressure";
             }
-            if (s.SelectedIndex == 2)
+            else if (s.SelectedIndex == 2)
             {
                 this.selectedField = "windspeed";
+            }
+            else if (s.SelectedIndex == 3)
+            {
+                this.selectedField = "humidity";
+            }
+            else if (s.SelectedIndex == 4)
+            {
+                this.selectedField = "raingauge";
             }
             ((SearchGraphView)this.graphSearchView).SelectChanged(this.selectedField);
             //((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.Interval,  0, this.BeginTime, this.EndTime);
