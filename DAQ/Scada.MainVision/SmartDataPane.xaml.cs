@@ -24,6 +24,8 @@ namespace Scada.MainVision
             InitializeComponent();
         }
 
+        private string deviceName;
+
         public string Title
         {
             get
@@ -32,6 +34,10 @@ namespace Scada.MainVision
             }
             set
             {
+                if (this.deviceName == null)
+                {
+                    this.deviceName = value;
+                }
                 this.DisplayName.Content = value;
             }
         }
@@ -81,6 +87,20 @@ namespace Scada.MainVision
           
         }
 
-
+        internal void Check(string time)
+        {
+            DateTime d;
+            if (DateTime.TryParse(time, out d))
+            {
+                if ((DateTime.Now - d).Ticks > 310 * 10000000L)
+                {
+                    this.DisplayName.Content = string.Format("{0}(未启动)", this.deviceName);
+                }
+                else
+                {
+                    this.DisplayName.Content = this.deviceName;
+                }
+            }
+        }
     }
 }

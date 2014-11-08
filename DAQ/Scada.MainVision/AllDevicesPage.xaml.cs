@@ -89,6 +89,7 @@ namespace Scada.MainVision
                 return;
             }
 
+            panel.Check(Get(d, "time", ""));
             const string Doserate = "doserate";
             panel.SetData(Get(d, "time", ""), Get(d, Doserate, "nGy/h"));
         }
@@ -151,6 +152,7 @@ namespace Scada.MainVision
             {
                 nuclideMsgs[k] = nuclideMsgs[k].TrimEnd(' ', ',');
             }
+            panel.Check(Get(d, "time", ""));
             panel.SetData(Get(d, "time", ""), Get(d, Doserate, "nSv/h"));
         }
 
@@ -236,7 +238,7 @@ namespace Scada.MainVision
             {
                 strDirection += " (NNW)";
             }
-
+            panel.Check(Get(d, "time", ""));
 
             panel.SetData(
                 Get(d, "time", ""), 
@@ -258,7 +260,7 @@ namespace Scada.MainVision
             {
                 return;
             }
-
+            panel.Check(Get(d, "time", ""));
             //"瞬时采样流量", "累计采样流量", "累积采样时间"
             panel.SetData(
                 Get(d, "time", ""), 
@@ -279,7 +281,7 @@ namespace Scada.MainVision
             {
                 return;
             }
-
+            panel.Check(Get(d, "time", ""));
             //"瞬时采样流量", "累计采样流量", "累积采样时间"
             panel.SetData(
                 Get(d, "time", ""), 
@@ -338,7 +340,7 @@ namespace Scada.MainVision
             string mainPowMsg = string.Format("{0}", mainPowerWay);
             string batteryHoursMsg = string.Format("{0}h", batteryHours);
             string tempMsg = string.Format("{0}℃", temperature);
-
+            panel.Check(Get(d, "time", ""));
             panel.SetData(
                 Get(d, "time", ""), 
                 mainPowMsg, 
@@ -363,6 +365,7 @@ namespace Scada.MainVision
             }
             string isLidOpen = (string)d["islidopen"];
             string LidOpenMsg = (isLidOpen == "1") ? "雨水采集" : "沉降灰采集";
+            panel.Check(Get(d, "time", ""));
             panel.SetData(Get(d, "time", ""), LidOpenMsg);
         }
 
@@ -382,6 +385,7 @@ namespace Scada.MainVision
             }
             string ifRain = (string)d["ifrain"];
             string ifRainStr = (ifRain == "1") ? "降雨" : "未降雨";
+            panel.Check(Get(d, "time", ""));
             panel.SetData(Get(d, "time", ""), ifRainStr);
         }
 
