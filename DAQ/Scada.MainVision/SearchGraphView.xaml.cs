@@ -34,23 +34,23 @@ namespace Scada.MainVision
             }
             if (valueKey == "temperature")
             {
-                this.SearchChartView.SetCurveDisplayName("温度");
+                this.SearchChartView.SetCurveDisplayName("温度(℃)");
             }
             else if (valueKey == "pressure")
             {
-                this.SearchChartView.SetCurveDisplayName("气压");
+                this.SearchChartView.SetCurveDisplayName("气压(mbar)");
             }
             else if (valueKey == "windspeed")
             {
-                this.SearchChartView.SetCurveDisplayName("风速");
+                this.SearchChartView.SetCurveDisplayName("风速(m/s)");
             }
             else if (valueKey == "humidity")
             {
-                this.SearchChartView.SetCurveDisplayName("湿度");
+                this.SearchChartView.SetCurveDisplayName("湿度(%)");
             }
             else if (valueKey == "raingauge")
             {
-                this.SearchChartView.SetCurveDisplayName("雨量");
+                this.SearchChartView.SetCurveDisplayName("雨量(mm)");
             }
             this.Interval = interval;
             this.SearchChartView.Interval = this.Interval;
@@ -102,11 +102,11 @@ namespace Scada.MainVision
             }
             else if (deviceKey == DataProvider.DeviceKey_NaI)
             {
-                this.SearchChartView.SetCurveDisplayName("剂量率");
+                this.SearchChartView.SetCurveDisplayName("总剂量率(nSv/h)");
             }
             else if (deviceKey == DataProvider.DeviceKey_Weather)
             {
-                this.SearchChartView.SetCurveDisplayName("温度");
+                this.SearchChartView.SetCurveDisplayName("温度(℃)");
             }
             if (this.Interval == 0)
             {

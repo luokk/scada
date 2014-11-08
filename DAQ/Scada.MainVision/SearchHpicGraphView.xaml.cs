@@ -160,7 +160,7 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
-            this.SearchChartView.SetCurveDisplayName("剂量率");
+            this.SearchChartView.SetCurveDisplayName("剂量率(nGy/h)");
             this.SearchChartView.SetValueRange(item.Min, item.Max);
             this.SearchChartView.HideTimeAxis();
 
