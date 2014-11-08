@@ -127,14 +127,14 @@ namespace Scada.Chart
 
 
             // Grid Line ---
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 4; i++)
             {
                 Line l = new Line();
-                l.Y1 = l.Y2 = canvasHeight - i * 40;
+                l.Y1 = l.Y2 = canvasHeight - i * 50;
                 l.X1 = 0;
                 l.X2 = 1900;
                 if (i == 0)
-                    l.StrokeThickness = 0.1;
+                    l.StrokeThickness = 2.0;
                 else
                     l.StrokeThickness = 0.5;
 
@@ -169,15 +169,19 @@ namespace Scada.Chart
 
             double d = height / (this.Max - this.Min);
             // How many graduation?
-            int dc = (int)height / 10;
+            double dc = height / 4.0;
             // What's the value each graduation 
             double ev = (this.Max - this.Min) / dc;
 
+            double ev2 = this.Ceil(ev);
+            this.e2 = ev2;
+            //this.Max = ev2 * dc + this.Min;
+            
             if (!this.ChartView.disableGridLine)
             {
-                for (int i = 0; i < 60; i++)
+                for (int i = 0; i < 40; i++)
                 {
-                    double y = height - i * 10;
+                    double y = height - i * 5;
 
                     if (y < 0)
                     {
@@ -193,14 +197,14 @@ namespace Scada.Chart
                     l.Stroke = new SolidColorBrush(Colors.Gray);
                     this.Graduation.Children.Add(l);
 
-                    double value = this.Min + i * ev;
+                    double value = this.Min + i * ev2;
 
                     if (i % 5 == 0)
                     {
                         TextBlock t = new TextBlock();
                         t.Foreground = Brushes.Black;
                         t.FontSize = 9;
-                        double pos = (double)y - 10;
+                        double pos = (double)y - 5;
 
                         if (this.Max > 10)
                         {
@@ -218,7 +222,7 @@ namespace Scada.Chart
                         }
 
                         t.SetValue(Canvas.RightProperty, (double)10.0);
-                        t.SetValue(Canvas.TopProperty, (double)pos - 10.0);
+                        t.SetValue(Canvas.TopProperty, (double)pos );
                         this.Graduation.Children.Add(t);
 
                         textCount++;
@@ -227,6 +231,43 @@ namespace Scada.Chart
             }
 
 
+        }
+
+        private double Ceil(double ev)
+        {
+            if (ev > 0 && ev <= 5)
+            {
+                return 5;
+            }
+            else if (ev > 5 && ev <= 10)
+            {
+                return 10;
+            }
+            else if (ev > 10 && ev <= 20)
+            {
+                return 20;
+            }
+            else if (ev > 20 && ev <= 50)
+            {
+                return 50;
+            }
+            else if (ev > 50 && ev <= 100)
+            {
+                return 100;
+            }
+            else if (ev > 100 && ev <= 200)
+            {
+                return 200;
+            }
+            else if (ev > 200 && ev <= 500)
+            {
+                return 500;
+            }
+            else if (ev > 500 && ev <= 1000)
+            {
+                return 1000;
+            }
+            return 2000;
         }
 
         private void AddCurveLine()
@@ -376,6 +417,12 @@ namespace Scada.Chart
             return Math.Round(d, n);
         }
 
+        private double Convert2(double v)
+        {
+            double y = this.CanvasView.Height - ((v - this.Min) / this.e2) * 5;
+            return y;
+        }
+
         private double Convert(double v)
         {
             double range = this.Max - this.Min;
@@ -472,7 +519,7 @@ namespace Scada.Chart
 
         private void Convert(Point p, out Point po)
         {
-            po = new Point(p.X, this.Convert(p.Y));
+            po = new Point(p.X, this.Convert2(p.Y));
         }
 
         private void SetDisplayName(string displayName)
@@ -517,6 +564,8 @@ namespace Scada.Chart
         private Point selBeginPoint;
 
         private Point selEndPoint;
+        
+        private double e2;
 
         private void CanvasView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

@@ -246,10 +246,6 @@ namespace Scada.Chart
                     scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
                     this.TimeAxis.Children.Add(scaleLine);
 
-
-
-                    
-
                     if (isWholePoint)
                     {
                         string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
@@ -595,6 +591,7 @@ namespace Scada.Chart
 
         public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, DateTime beginTime, DateTime endTime, string timeKey = "time")
         {
+            this.InitializeValueAxis();
             this.curveDataContext.SetDataSource(data, valueKey, beginTime, endTime, timeKey);
             this.UpdateCurve();
         }
@@ -618,9 +615,13 @@ namespace Scada.Chart
             this.curveDataContext.AddPoint(time, value);
         }
 
-        internal void UpdateCurve()
+        internal void InitializeValueAxis()
         {
             this.CurveView.InitializeValueAxis();
+        }
+
+        internal void UpdateCurve()
+        {
             this.CurveView.UpdateCurve();
         }
 
