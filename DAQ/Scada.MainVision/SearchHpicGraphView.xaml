@@ -24,6 +24,7 @@
                          VerticalAlignment="Bottom">
         </chart:ChartView>
         <chart:ChartView x:Name="SearchChartView2" 
+                         
                          Grid.Row="1" 
                          Grid.Column="0" 
                          VerticalAlignment="Top">

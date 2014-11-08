@@ -208,7 +208,7 @@ namespace Scada.Chart
             }
             else if (value is bool)
             {
-                y = (bool)value ? 1.8 : 0.8;
+                y = (bool)value ? 50 : 10;
             }
             else
             {

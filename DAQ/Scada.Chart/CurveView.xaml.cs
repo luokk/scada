@@ -425,6 +425,12 @@ namespace Scada.Chart
             return y;
         }
 
+        private double ConvertT(double y)
+        {
+            double v = (this.CanvasView.Height - y) / 5.0 * this.e2 + this.Min;
+            return v;
+        }
+
         private double Convert(double v)
         {
             double range = this.Max - this.Min;

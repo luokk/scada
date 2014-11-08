@@ -19,7 +19,7 @@
             </Grid.RowDefinitions>
 
             <local:CurveView x:Name="CurveView" Height="220" Grid.Row="0" Grid.ColumnSpan="2"
-                        MouseMove="MainViewMouseMove" Loaded="CurveViewLoaded">
+                        MouseMove="MainViewMouseMove" Loaded="CurveViewLoaded" VerticalAlignment="Bottom">
 
             </local:CurveView>
             <Canvas x:Name="TimeAxis" Grid.Column="1" Grid.Row="1" Background="#F8F8F8"></Canvas>
