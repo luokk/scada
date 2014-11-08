@@ -356,26 +356,18 @@ namespace Scada.MainVision
                         }
                     }
 
+                    /*
                     if (entry.DataFilter != null)
                     {
                         entry.DataFilter.Fill(data);
                     }
+                    */
                     ret.Add(data);
 
                     index++;
                 }
             }
 
-            // No Need!! Left join instead.
-            if (deviceKey == DataProvider.DeviceKey_Weather)
-            {
-                // ReviseIfRainForWeather(cmd, ret);
-            }
-            else if (deviceKey == DataProvider.DeviceKey_Hpic)
-            {
-                
-                // this.ReviseIfRainForHpic(cmd, ret, fromTime, toTime);
-            }
             return ret;
         }
 

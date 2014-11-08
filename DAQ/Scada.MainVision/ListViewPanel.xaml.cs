@@ -535,10 +535,9 @@ namespace Scada.Controls
 
                             if (searchDataSource.Count > 0)
                             {
-                                int sleep = 0;
                                 sc.Send(new SendOrPostCallback((data) =>
                                 {
-                                    sleep = this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
+                                    this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
                                 }), searchDataSource);
                             }
 
@@ -935,6 +934,21 @@ namespace Scada.Controls
             if (this.ShowListButton.IsChecked.Value)
             {
                 this.ListRow.Height = new GridLength(2, GridUnitType.Star);
+
+                if (this.deviceKey == DataProvider.DeviceKey_NaI)
+                {
+                    Config cfg = Config.Instance();
+                    ConfigEntry entry = cfg[DataProvider.DeviceKey_NaI];
+
+                    if (entry.DataFilter != null)
+                    {
+                        foreach (var data in this.searchData)
+                        {
+                            entry.DataFilter.Fill(data);
+                        }
+                    }
+                }
+
                 this.UpdateSearchDataList((List<Dictionary<string, object>>)this.searchData);
             }
             else
