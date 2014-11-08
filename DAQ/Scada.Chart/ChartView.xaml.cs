@@ -442,7 +442,8 @@ namespace Scada.Chart
             Point point = e.GetPosition((UIElement)curveView.CanvasView);
             double x = point.X;
 
-            if (calculation && x >= 0)
+            // 暂时屏蔽TrackingLine功能
+            if (false && calculation && x >= 0)
             {
                 double index = x * this.currentGraduationCount / this.currentGraduation;
                 timeLabel = this.GetFormatDateTime(this.currentBaseTime, (int)index, this.Interval);

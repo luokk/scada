@@ -365,7 +365,9 @@ namespace Scada.Chart
         public void TrackTimeLine(Point point, string timeLabel, bool calculation)
         {
             timeLine.X1 = timeLine.X2 = point.X;
-            // this.centerX = point.X;
+
+            // 暂时屏蔽Tracking功能
+            return;
             if (calculation)
             {
                 this.ShowValueTip(point, timeLabel);
