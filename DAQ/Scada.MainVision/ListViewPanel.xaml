@@ -112,7 +112,14 @@
 
                                     </Border>
 
-
+                                    <ComboBox x:Name="FieldSelect" Visibility="Collapsed" SelectionChanged="FieldSelect_SelectionChanged">
+                                        <ComboBox.Items>
+                                            <Label>温度</Label>
+                                            <Label>气压</Label>
+                                            <Label>风速</Label>
+                                        </ComboBox.Items>
+                                    </ComboBox>
+                                    
                                     <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
                                         Style="{StaticResource ButtonKey}" Click="SearchByDateRange">查询</Button>
 
@@ -121,13 +128,7 @@
                                 
                                     <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0"
                                             Style="{StaticResource ButtonKey}" Click="SaveChart">保存曲线</Button>
-                                    <ComboBox x:Name="FieldSelect" Visibility="Collapsed" SelectionChanged="FieldSelect_SelectionChanged">
-                                        <ComboBox.Items>
-                                            <Label>温度</Label>
-                                            <Label>气压</Label>
-                                            <Label>风速</Label>
-                                        </ComboBox.Items>
-                                    </ComboBox>
+
 
                                     <ComboBox x:Name="IntervalSelect" Margin="5,0,5,0" Visibility="Collapsed" SelectionChanged="IntervalSelect_SelectionChanged">
                                         <ComboBox.Items>

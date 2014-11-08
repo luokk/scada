@@ -113,7 +113,7 @@ namespace Scada.MainVision
                     }
                     else if (deviceKey == DataProvider.DeviceKey_Hpic)
                     {
-                        panel.IntervalSelect.Visibility = Visibility.Visible;
+                        // panel.IntervalSelect.Visibility = Visibility.Visible;
                         panel.IntervalSelect.SelectedIndex = 0;
                         panel.selectedField = "doserate";
                     }

@@ -919,8 +919,7 @@ namespace Scada.Controls
                 this.selectedField = "windspeed";
             }
             ((SearchGraphView)this.graphSearchView).SelectChanged(this.selectedField);
-            ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.Interval,  0, this.BeginTime, this.EndTime);
-
+            //((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.Interval,  0, this.BeginTime, this.EndTime);
         }
 
         public DateTime BeginTime { get; set; }
