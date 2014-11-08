@@ -225,6 +225,7 @@ namespace Scada.Controls
                 this.ListViewContainer.Content = this.listView;
 
                 ListView theListView = (ListView)this.listView;
+                
                 // theListView.ItemsSource = this.dataSource;
                 this.ApplyListStyle(theListView);
                 theListView.MouseRightButtonUp += OnListViewMouseRightButton;
@@ -330,7 +331,6 @@ namespace Scada.Controls
         {
             Color c = Color.FromRgb(83, 83, 83);
             listView.Background = new SolidColorBrush(c);
-
             // listView.ItemContainerStyle = (Style)this.Resources["ListViewItemKey"];
             listView.Style = (Style)this.Resources["ListViewKey"];
         }
@@ -556,6 +556,7 @@ namespace Scada.Controls
         private void UpdateSearchDataList(List<Dictionary<string, object>> data)
         {
             ListView searchListView = (ListView)this.SearchView;
+            searchListView.Height = this.ListRow.ActualHeight;
             searchListView.ItemsSource = null;
             searchListView.ItemsSource = data;
         }

@@ -147,9 +147,9 @@ namespace Scada.MainVision
             // ListView
             ListView listView = new ListView();
             GridView gridView = new GridView();
+            
             listView.View = gridView;
-
-            // 
+            
             var columnInfoList = dataListener.GetColumnsInfo(); // new List<ColumnInfo>();
 
             foreach (var columnInfo in columnInfoList)

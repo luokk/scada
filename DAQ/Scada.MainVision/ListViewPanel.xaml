@@ -145,9 +145,9 @@
                                 <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainer" Margin="-5" Loaded="SearchGraphViewContainer_Loaded">
                                 </ContentControl>
                                 <!-- Contains ListView -->
-                                <StackPanel Grid.Row="2" Orientation="Vertical">
+                                <StackPanel Grid.Row="2" Orientation="Vertical" x:Name="ListContainer">
                                     <CheckBox x:Name="ShowListButton" Margin="2,2,2,10" Unchecked="ShowListButton_Checked" Checked="ShowListButton_Checked">在列表中显示数据</CheckBox>
-                                    <ContentControl  x:Name="SearchViewContainer" Margin="-5">
+                                    <ContentControl  x:Name="SearchViewContainer" Margin="-5" >
                                     </ContentControl>
                                 </StackPanel>
 
