@@ -82,14 +82,13 @@ namespace Scada.MainVision
         private void UpdatePanel_HPIC(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Hpic);
-
+            panel.Check(Get(d, "time", ""));
             // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
             if (d == null || d.Count == 0)
             {
                 return;
             }
 
-            panel.Check(Get(d, "time", ""));
             const string Doserate = "doserate";
             panel.SetData(Get(d, "time", ""), Get(d, Doserate, "nGy/h"));
         }
@@ -114,6 +113,7 @@ namespace Scada.MainVision
         private void UpdatePanel_NaI(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_NaI);
+            panel.Check(Get(d, "time", ""));
 
             // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
             if (d == null || d.Count == 0)
@@ -152,14 +152,14 @@ namespace Scada.MainVision
             {
                 nuclideMsgs[k] = nuclideMsgs[k].TrimEnd(' ', ',');
             }
-            panel.Check(Get(d, "time", ""));
+            
             panel.SetData(Get(d, "time", ""), Get(d, Doserate, "nSv/h"));
         }
 
         private void UpdatePanel_Weather(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Weather);
-
+            panel.Check(Get(d, "time", ""));
             // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
             if (d == null || d.Count == 0)
             {
@@ -238,7 +238,6 @@ namespace Scada.MainVision
             {
                 strDirection += " (NNW)";
             }
-            panel.Check(Get(d, "time", ""));
 
             panel.SetData(
                 Get(d, "time", ""), 
@@ -254,13 +253,13 @@ namespace Scada.MainVision
         private void UpdatePanel_MDS(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_MDS);
-
+            panel.Check(Get(d, "time", ""));
             // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
             if (d == null || d.Count == 0)
             {
                 return;
             }
-            panel.Check(Get(d, "time", ""));
+
             //"瞬时采样流量", "累计采样流量", "累积采样时间"
             panel.SetData(
                 Get(d, "time", ""), 
@@ -275,13 +274,13 @@ namespace Scada.MainVision
         private void UpdatePanel_AIS(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_AIS);
-
+            panel.Check(Get(d, "time", ""));
             // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
             if (d == null || d.Count == 0)
             {
                 return;
             }
-            panel.Check(Get(d, "time", ""));
+
             //"瞬时采样流量", "累计采样流量", "累积采样时间"
             panel.SetData(
                 Get(d, "time", ""), 
@@ -296,7 +295,7 @@ namespace Scada.MainVision
         private void UpdatePanel_Shelter(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Shelter);
-
+            panel.Check(Get(d, "time", ""));
             // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
             if (d == null || d.Count == 0)
             {
@@ -340,7 +339,7 @@ namespace Scada.MainVision
             string mainPowMsg = string.Format("{0}", mainPowerWay);
             string batteryHoursMsg = string.Format("{0}h", batteryHours);
             string tempMsg = string.Format("{0}℃", temperature);
-            panel.Check(Get(d, "time", ""));
+
             panel.SetData(
                 Get(d, "time", ""), 
                 mainPowMsg, 
@@ -355,6 +354,7 @@ namespace Scada.MainVision
         private void UpdatePanel_DWD(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Dwd);
+            panel.Check(Get(d, "time", ""));
             if (d == null)
             {
                 return;
@@ -365,14 +365,14 @@ namespace Scada.MainVision
             }
             string isLidOpen = (string)d["islidopen"];
             string LidOpenMsg = (isLidOpen == "1") ? "雨水采集" : "沉降灰采集";
-            panel.Check(Get(d, "time", ""));
+
             panel.SetData(Get(d, "time", ""), LidOpenMsg);
         }
 
         private void UpdatePanel_Rain(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Dwd);
-
+            panel.Check(Get(d, "time", ""));
             // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
             if (d == null || d.Count == 0)
             {
@@ -385,7 +385,7 @@ namespace Scada.MainVision
             }
             string ifRain = (string)d["ifrain"];
             string ifRainStr = (ifRain == "1") ? "降雨" : "未降雨";
-            panel.Check(Get(d, "time", ""));
+
             panel.SetData(Get(d, "time", ""), ifRainStr);
         }
 
