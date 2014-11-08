@@ -433,11 +433,11 @@ namespace Scada.MainVision
             bool alarm = (v == "1");
             if (alarm)
             {
-                pane.SetDataColor(index, Brushes.Red);
+                pane.SetDataColor(index, Brushes.Red, true);
             }
             else
             {
-                pane.SetDataColor(index, Brushes.Green);
+                pane.SetDataColor(index, Brushes.Green, false);
             }
             return alarm ? "报警" : "正常";
         }

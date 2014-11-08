@@ -69,9 +69,11 @@ namespace Scada.MainVision
             }
         }
 
-        public void SetDataColor(int index, Brush brush)
+        public void SetDataColor(int index, Brush brush, bool bold)
         {
             this.labels[index].Foreground = brush;
+
+            this.labels[index].FontWeight = bold ? FontWeights.Bold : FontWeights.Normal;
         }
 
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
