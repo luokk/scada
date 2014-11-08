@@ -575,10 +575,6 @@ namespace Scada.Controls
             if (days <= 2)
             {
                 interval = 30;
-                if (this.deviceKey == DataProvider.DeviceKey_NaI)
-                {
-                    interval = 300;
-                }
             }
             else if (days > 2 && days <= 7)
             {
@@ -587,6 +583,11 @@ namespace Scada.Controls
             else
             {
                 interval = 3600;
+            }
+
+            if (this.deviceKey == DataProvider.DeviceKey_NaI)
+            {
+                interval = 300;
             }
 
             this.Interval = interval;

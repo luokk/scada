@@ -59,11 +59,11 @@ namespace Scada.MainVision
 
                 if (itemTime >= beginTime && itemTime < endTime)
                 {
-                    gv.AddValue(data[i], "doserate");
+                    gv.AddValue(data[i], "doserate", "ifrain");
                 }
                 else
                 {
-                    Dictionary<string, object> newItem = gv.GetValue("doserate");
+                    Dictionary<string, object> newItem = gv.GetValue("doserate", "ifrain");
                     if (newItem != null)
                     {
                         newItem.Add("time", beginTime.ToString());
