@@ -345,13 +345,13 @@ namespace Scada.MainVision
                                 string v = reader.GetString(i);
                                 if (key == "ifrain")
                                 {
-                                    if (v == "1")
+                                    if (v == "0")
                                     {
-                                        data.Add(key, true);
+                                        data.Add(key, false);
                                     }
                                     else
                                     {
-                                        data.Add(key, false);
+                                        data.Add(key, true);
                                     }
                                 }
                                 else
