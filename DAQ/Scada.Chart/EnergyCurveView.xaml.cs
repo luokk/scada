@@ -375,7 +375,7 @@ namespace Scada.Chart
 
                 this.valueBorder.Visibility = Visibility.Visible;
                 int i = (int)(xo / Grad);
-                this.valueLabel.Text = string.Format("[{0}, {1}]", i, v);
+                this.valueLabel.Text = string.Format("[{0}道: {1}]", i, v);
             }
             else
             {

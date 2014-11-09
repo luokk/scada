@@ -814,6 +814,11 @@ namespace Scada.Controls
             {
                 this.SearchChartRow.Height = new GridLength(0);
             }
+
+            if (this.deviceKey != DataProvider.DeviceKey_Hpic)
+            {
+                this.SearchChartRow.Height = new GridLength(250);
+            }
         }
 
         private void GraphViewContainer_Loaded(object sender, RoutedEventArgs e)

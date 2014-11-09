@@ -134,7 +134,7 @@ namespace Scada.Chart
                 l.X1 = 0;
                 l.X2 = 1900;
                 if (i == 0)
-                    l.StrokeThickness = 2.0;
+                    l.StrokeThickness = 0.1;
                 else
                     l.StrokeThickness = 0.5;
 
