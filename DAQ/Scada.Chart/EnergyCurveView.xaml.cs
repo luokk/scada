@@ -604,6 +604,11 @@ namespace Scada.Chart
             }
         }
 
+        protected void OnResetClick(object sender, RoutedEventArgs e)
+        {
+            this.SetPoints(this.data);
+        }
+
         private void UpdateRange(double beginPointX, double endPointX)
         {
             if (this.data == null)
