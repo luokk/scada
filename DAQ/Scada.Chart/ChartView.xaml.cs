@@ -86,6 +86,8 @@ namespace Scada.Chart
             this.trackingTimer.Interval = TimeSpan.FromMilliseconds(800);
             this.trackingTimer.Start();
             this.trackingTimer.Tick += trackingTimerTick;
+
+            this.DisableTrackingLine();
         }
 
         public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
