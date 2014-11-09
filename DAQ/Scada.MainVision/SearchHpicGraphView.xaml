@@ -22,13 +22,14 @@
                              Grid.Row="0" 
                              Grid.Column="0" Background="Black"
                              VerticalAlignment="Bottom">
+               
             </chart:ChartView>
             <chart:ChartView x:Name="SearchChartView2" 
-                         
+                             chart:DisplayNameTop="200"
                              Grid.Row="1" 
                              Grid.Column="0" 
                              VerticalAlignment="Top">
-
+                
             </chart:ChartView>
         </Grid>
     </Border>

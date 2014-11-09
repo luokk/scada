@@ -532,7 +532,7 @@ namespace Scada.Chart
 
         private void SetDisplayName(string displayName)
         {
-            const double Top = 12.0;
+            double Top = this.ChartView.DisplayNameTop;
             SolidColorBrush labelBrush = new SolidColorBrush(Color.FromRgb(219, 219, 219));
             
             TextBlock displayLabel = new TextBlock();

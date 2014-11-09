@@ -86,11 +86,20 @@ namespace Scada.Chart
             this.trackingTimer.Interval = TimeSpan.FromMilliseconds(800);
             this.trackingTimer.Start();
             this.trackingTimer.Tick += trackingTimerTick;
-
+            this.DisplayNameTop = 25;
             this.DisableTrackingLine();
         }
 
-        public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
+        //public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
+
+        //public static readonly DependencyProperty DisplayNameTopProperty = DependencyProperty.Register("DisplayNameTop", typeof(int), typeof(ChartView));
+
+        public int DisplayNameTop
+        {
+            get;
+            set;
+        }
+
         private CurveDataContext curveDataContext;
 
         private DateTime GetBaseTime(DateTime startTime)

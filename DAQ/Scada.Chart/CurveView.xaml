@@ -26,7 +26,7 @@
                     MouseMove="CanvasViewMouseMove" 
                     MouseLeftButtonDown="CanvasView_MouseLeftButtonDown"
                     MouseLeftButtonUp="CanvasView_MouseLeftButtonUp">
-                <Button x:Name="ResetButton" Canvas.Top="30" Canvas.Right="10" Cursor="Hand" Click="OnResetClick" Panel.ZIndex="100"> 重置
+                <Button x:Name="ResetButton" Canvas.Top="55" Canvas.Right="10" Cursor="Hand" Click="OnResetClick" Panel.ZIndex="100"> 重置
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <TextBlock TextDecorations="Underline">  

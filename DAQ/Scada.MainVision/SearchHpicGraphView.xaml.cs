@@ -170,6 +170,7 @@ namespace Scada.MainVision
             this.SearchChartView2.HideResetButton();
             this.SearchChartView2.DisableTrackingLine();
             this.SearchChartView2.DisableGridLine();
+            this.SearchChartView2.DisplayNameTop = 180;
             // 方波颜色
             this.SearchChartView2.SetCurveColor(Color.FromRgb(0x00, 0x00, 0xCC));
         }
