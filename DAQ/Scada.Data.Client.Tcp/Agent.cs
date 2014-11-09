@@ -611,7 +611,10 @@ namespace Scada.Data.Client.Tcp
             timer.Elapsed += (s, e) => 
             {
                 if (this.client != null)
+                {
+                    Console.WriteLine("ConnectRetryRoutine client != null");
                     return;
+                }
 
                 if (this.UIThreadMashaller != null)
                 {
@@ -620,6 +623,8 @@ namespace Scada.Data.Client.Tcp
                     {
                         this.UIThreadMashaller.Mashall((o) =>
                         {
+                            this.DoLog(ScadaDataClient, "ConnectRetryRoutine");
+                            Console.WriteLine("ConnectRetryRoutine");
                             this.Connect();
                         });   
                     }

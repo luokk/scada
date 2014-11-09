@@ -466,12 +466,18 @@ namespace Scada.MainVision
 
         private void MenuMain_Click(object sender, RoutedEventArgs e)
         {
-            Command.Send(Ports.Main, new Command("MainVision", "Main", "show", ""));
+            if (!this.OpenProcess("Scada.Main"))
+            {
+                Command.Send(Ports.Main, new Command("MainVision", "Main", "show", ""));
+            }
         }
 
         private void MenuDataAgent_Click(object sender, RoutedEventArgs e)
         {
-            Command.Send(Ports.DataClient, new Command("MainVision", "DataAgent", "show", ""));
+            if (!this.OpenProcess("Scada.DataCenterAgent"))
+            {
+                Command.Send(Ports.DataClient, new Command("MainVision", "DataAgent", "show", ""));
+            }
         }
 
         private void Quit_Click(object sender, RoutedEventArgs e)
@@ -490,7 +496,17 @@ namespace Scada.MainVision
         {
             this.OpenProcessByName("Scada.MainSettings.exe");
         }
-        
+
+        private bool OpenProcess(string procName)
+        {
+            Process[] ps = Process.GetProcessesByName(procName);
+            if (ps == null || ps.Length == 0)
+            {
+                this.OpenProcessByName(procName + ".exe", false);
+                return true;
+            }
+            return false;
+        }
 
         private void OpenProcessByName(string name, bool uac = false)
         {
