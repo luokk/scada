@@ -56,7 +56,7 @@ namespace Scada.MainVision
                 {
                     this.RefreshTick(cmd);
                 };
-                dispatcherTimer.Interval = new TimeSpan(0, 0, 15);
+                dispatcherTimer.Interval = new TimeSpan(0, 0, 10);
                 dispatcherTimer.Start();
                 this.RefreshTick(cmd);
             }
@@ -440,7 +440,13 @@ namespace Scada.MainVision
 
         private string Get(Dictionary<string, object> d, string key, string s)
         {
-            return this.GetDisplayString(d, key.ToLower()) + " " + s; 
+            string v = this.GetDisplayString(d, key.ToLower());
+            double dv;
+            if (double.TryParse(v, out dv))
+            {
+                return dv.ToString("0.0") + " " + s; 
+            }
+            return v + " " + s; 
         }
 
         private string GetAlarm(Dictionary<string, object> d, string key, string s)

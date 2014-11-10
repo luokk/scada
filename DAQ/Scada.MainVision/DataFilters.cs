@@ -56,7 +56,7 @@ namespace Scada.MainVision
                     {
                         // data.Add(nuclideKey, doserate);
                         // data.Add(indicationKey, indication);
-                        data.Add(nuclideKey, string.Format("{0}, {1}({2})", doserate, activity, indication));
+                        data.Add(nuclideKey, string.Format("{0}, {1}({2})", Convert.ToDouble(doserate).ToString("0.0"), activity, indication));
                     }
                     else
                     {

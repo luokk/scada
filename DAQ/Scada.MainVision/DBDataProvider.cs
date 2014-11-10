@@ -360,7 +360,7 @@ namespace Scada.MainVision
                                 }
                                 else if (key == "nuclidefound")
                                 {
-                                    data.Add(key, v);
+                                    data.Add(key, v == "1" ? "发现" : "未发现");
                                 }
                                 else
                                 {
