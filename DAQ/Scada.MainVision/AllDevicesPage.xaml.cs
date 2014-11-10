@@ -266,9 +266,14 @@ namespace Scada.MainVision
                 Get(d, "flow", "m³/h"),
                 Get(d, "volume", "m³"),
                 Get(d, "hours", "h"),
-                GetAlarm(d, "alarm1", "", panel, 4),
-                GetAlarm(d, "alarm2", "", panel, 5),
-                GetAlarm(d, "alarm3", "", panel, 6));
+                GetAlarm(d, "alarm1", ""),
+                GetAlarm(d, "alarm2", ""),
+                GetAlarm(d, "alarm3", ""));
+
+
+            MarkAlarm(d, "alarm1", panel, 4);
+            MarkAlarm(d, "alarm2", panel, 5);
+            MarkAlarm(d, "alarm3", panel, 6);
         }
         // 5 采样状态（可用颜色表示）、累计采样体积（重要）、累计采样时间、瞬时采样流量、三种故障报警
         private void UpdatePanel_AIS(SmartDataPane panel)
@@ -287,9 +292,14 @@ namespace Scada.MainVision
                 Get(d, "flow", "L/h"),
                 Get(d, "volume", "L"),
                 Get(d, "hours", "h"),
-                GetAlarm(d, "alarm1", "", panel, 4),
-                GetAlarm(d, "alarm2", "", panel, 5),
-                GetAlarm(d, "alarm3", "", panel, 6));
+                GetAlarm(d, "alarm1", ""),
+                GetAlarm(d, "alarm2", ""),
+                GetAlarm(d, "alarm3", ""));
+
+
+            MarkAlarm(d, "alarm1", panel, 4);
+            MarkAlarm(d, "alarm2", panel, 5);
+            MarkAlarm(d, "alarm3", panel, 6);
         }
         // 6 市电状态、备电时间、舱内温度、门禁报警、烟感报警、浸水报警
         private void UpdatePanel_Shelter(SmartDataPane panel)
@@ -345,9 +355,13 @@ namespace Scada.MainVision
                 mainPowMsg, 
                 batteryHoursMsg, 
                 tempMsg,
-                GetAlarm(d, "ifdooropen", "", panel, 4),
-                GetAlarm(d, "ifsmoke", "", panel, 5),
-                GetAlarm(d, "ifwater", "", panel, 6));
+                GetAlarm(d, "ifdooropen", ""),
+                GetAlarm(d, "ifsmoke", ""),
+                GetAlarm(d, "ifwater", ""));
+
+            MarkAlarm(d, "ifdooropen", panel, 4);
+            MarkAlarm(d, "ifsmoke", panel, 5);
+            MarkAlarm(d, "ifwater", panel, 6);
 
         }
         // 7 仅工作状态
@@ -431,7 +445,14 @@ namespace Scada.MainVision
             return this.GetDisplayString(d, key.ToLower()) + " " + s; 
         }
 
-        private string GetAlarm(Dictionary<string, object> d, string key, string s, SmartDataPane pane, int index)
+        private string GetAlarm(Dictionary<string, object> d, string key, string s)
+        {
+            string v = this.GetDisplayString(d, key.ToLower());
+            bool alarm = (v == "1");
+            return alarm ? "报警" : "正常";
+        }
+
+        private void MarkAlarm(Dictionary<string, object> d, string key, SmartDataPane pane, int index)
         {
             string v = this.GetDisplayString(d, key.ToLower());
             bool alarm = (v == "1");
@@ -443,7 +464,6 @@ namespace Scada.MainVision
             {
                 pane.SetDataColor(index, Brushes.Green, false);
             }
-            return alarm ? "报警" : "正常";
         }
     }
 }

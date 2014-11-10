@@ -26,6 +26,8 @@ namespace Scada.MainVision
 
         private string deviceName;
 
+        private bool isConnected;
+
         public string Title
         {
             get
@@ -71,6 +73,14 @@ namespace Scada.MainVision
         {
             for (int i = 0; i< values.Length; ++i)
             {
+                if (!this.isConnected)
+                {
+                    this.SetDataColor(i, Brushes.DarkGray, false);
+                }
+                else
+                {
+                    this.SetDataColor(i, Brushes.Black, false);
+                }
                 this.labels[i].Content = (string)values[i];
             }
         }
@@ -94,16 +104,19 @@ namespace Scada.MainVision
             {
                 if ((DateTime.Now - d).Ticks > 610 * 10000000L)
                 {
-                    this.DisplayName.Content = string.Format("{0}(未启动)", this.deviceName);
+                    this.DisplayName.Content = string.Format("{0}(未连接)", this.deviceName);
+                    this.isConnected = false;
                 }
                 else
                 {
                     this.DisplayName.Content = this.deviceName;
+                    this.isConnected = true;
                 }
             }
             else
             {
-                this.DisplayName.Content = string.Format("{0}(未启动)", this.deviceName);
+                this.DisplayName.Content = string.Format("{0}(未连接)", this.deviceName);
+                this.isConnected = false;
             }
         }
     }
