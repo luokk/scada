@@ -395,9 +395,17 @@ namespace Scada.MainVision
             {
                 return;
             }
-            string ifRain = (string)d["ifrain"];
-            string ifRainStr = (ifRain == "1") ? "降雨" : "未降雨";
 
+            object v = d["ifrain"];
+            string ifRainStr = "";   // = (ifRain == "1") ? "降雨" : "未降雨";
+            if (v is string)
+            {
+                ifRainStr = ((string)v == "1") ? "降雨" : "未降雨";
+            }
+            else if (v is bool)
+            {
+                ifRainStr = (bool)v ? "降雨" : "未降雨";
+            }
             panel.SetData(Get(d, "time", ""), ifRainStr);
         }
 

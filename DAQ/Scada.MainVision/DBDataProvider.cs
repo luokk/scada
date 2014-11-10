@@ -247,8 +247,53 @@ namespace Scada.MainVision
 
                         try
                         {
-                            string v = reader.GetString(key);
-                            ret.Add(key, v);
+                            int index = reader.GetOrdinal(key);
+                            if (!reader.IsDBNull(index))
+                            {
+                                string v = reader.GetString(index);
+                                if (key == "ifrain")
+                                {
+                                    if (v == "0")
+                                    {
+                                        ret.Add(key, false);
+                                    }
+                                    else
+                                    {
+                                        ret.Add(key, true);
+                                    }
+                                }
+                                else if (key == "doserate")
+                                {
+                                    ret.Add(key, Convert.ToDouble(v).ToString("0.0"));
+                                }
+                                else if (key == "nuclidefound")
+                                {
+                                    ret.Add(key, v == "1" ? "发现" : "未发现");
+                                }
+                                else if (key.IndexOf("alarm") >= 0)
+                                {
+                                    ret.Add(key, v);
+                                }
+                                else
+                                {
+                                    double d;
+                                    if (double.TryParse(v, out d))
+                                    {
+                                        ret.Add(key, d.ToString("0.0"));
+                                    }
+                                    else
+                                    {
+                                        ret.Add(key, d.ToString(v));
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (key == "ifrain")
+                                {
+                                    ret.Add(key, false);
+                                }
+                            }
                         }
                         catch (SqlNullValueException)
                         {
@@ -361,6 +406,10 @@ namespace Scada.MainVision
                                 else if (key == "nuclidefound")
                                 {
                                     data.Add(key, v == "1" ? "发现" : "未发现");
+                                }
+                                else if (key.IndexOf("alarm") >= 0)
+                                {
+                                    data.Add(key, v);
                                 }
                                 else
                                 {
