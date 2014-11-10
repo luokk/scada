@@ -354,9 +354,25 @@ namespace Scada.MainVision
                                         data.Add(key, true);
                                     }
                                 }
-                                else
+                                else if (key == "doserate")
+                                {
+                                    data.Add(key, Convert.ToDouble(v).ToString("0.0"));
+                                }
+                                else if (key == "nuclidefound")
                                 {
                                     data.Add(key, v);
+                                }
+                                else
+                                {
+                                    double d;
+                                    if (double.TryParse(v, out d))
+                                    {
+                                        data.Add(key, d.ToString("0.0"));
+                                    }
+                                    else
+                                    {
+                                        data.Add(key, d.ToString(v));
+                                    }
                                 }
                             }
                             else

@@ -270,7 +270,6 @@ namespace Scada.MainVision
                 GetAlarm(d, "alarm2", ""),
                 GetAlarm(d, "alarm3", ""));
 
-
             MarkAlarm(d, "alarm1", panel, 4);
             MarkAlarm(d, "alarm2", panel, 5);
             MarkAlarm(d, "alarm3", panel, 6);
@@ -295,7 +294,6 @@ namespace Scada.MainVision
                 GetAlarm(d, "alarm1", ""),
                 GetAlarm(d, "alarm2", ""),
                 GetAlarm(d, "alarm3", ""));
-
 
             MarkAlarm(d, "alarm1", panel, 4);
             MarkAlarm(d, "alarm2", panel, 5);
