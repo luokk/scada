@@ -484,14 +484,7 @@ namespace Scada.MainVision
         {
             string v = this.GetDisplayString(d, key.ToLower());
             bool alarm = (v == "1");
-            if (alarm)
-            {
-                pane.SetDataColor(index, Brushes.Red, true);
-            }
-            else
-            {
-                pane.SetDataColor(index, Brushes.Green, false);
-            }
+            pane.SetDataColor(index, alarm);
         }
 
         private void MarkHpicAlarm(string v, double alarm, SmartDataPane pane, int index)
@@ -499,14 +492,7 @@ namespace Scada.MainVision
             double dv;
             if (double.TryParse(v, out dv))
             {
-                if (dv > alarm)
-                {
-                    pane.SetDataColor(index, Brushes.Red, true);
-                }
-                else
-                {
-                    pane.SetDataColor(index, Brushes.Green, false);
-                }
+                pane.SetDataColor(index, dv > alarm);
             }
 
         }

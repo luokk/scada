@@ -92,6 +92,26 @@ namespace Scada.MainVision
             this.labels[index].FontWeight = bold ? FontWeights.Bold : FontWeights.Normal;
         }
 
+        public void SetDataColor(int index, bool alarm)
+        {
+            if (!this.isConnected)
+            {
+                this.SetDataColor(index, Brushes.DarkGray, false);
+                return;
+            }
+
+            if (alarm)
+            {
+                this.SetDataColor(index, Brushes.Red, true);
+            }
+            else
+            {
+                this.SetDataColor(index, Brushes.Green, true);
+            }
+
+
+        }
+
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
           
