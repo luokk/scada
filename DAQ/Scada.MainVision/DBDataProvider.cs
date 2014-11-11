@@ -274,15 +274,7 @@ namespace Scada.MainVision
                                 }
                                 else
                                 {
-                                    double d;
-                                    if (double.TryParse(v, out d))
-                                    {
-                                        ret.Add(key, d.ToString("0.0"));
-                                    }
-                                    else
-                                    {
-                                        ret.Add(key, v);
-                                    }
+                                    ret.Add(key, v);
                                 }
                             }
                         }
@@ -307,7 +299,6 @@ namespace Scada.MainVision
             {
             }
 
-            
             if (deviceKey == "scada.weather")
             {
                 var d = new List<Dictionary<string, object>>();
