@@ -484,8 +484,7 @@ namespace Scada.MainVision
                     }
                     catch (Exception e)
                     {
-                        MessageBox.Show(e.Message);
-
+                        //MessageBox.Show(e.Message);
                     }
                 }
             }

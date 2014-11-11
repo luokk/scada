@@ -227,13 +227,12 @@ namespace Scada.MainVision
 
         public SearchHpicGraphView ShowSearchHpicGraphView(ListViewPanel panel, DataListener dataListener)
         {
-            MessageBox.Show("52235");
             SearchHpicGraphView graphView = new SearchHpicGraphView();
             graphView.Interval = 30;
-            MessageBox.Show("535");
+
             var columnInfoList = dataListener.GetColumnsInfo();
             string deviceKey = dataListener.DeviceKey;
-            MessageBox.Show("5544");
+
             foreach (var columnInfo in columnInfoList)
             {
                 // Time would be deal as a Chart.
@@ -247,7 +246,7 @@ namespace Scada.MainVision
                     graphView.AddLineName(deviceKey, columnInfo.BindingName, columnInfo.Header);
                 }
             }
-            MessageBox.Show("55");
+
             return graphView;
         }
 
