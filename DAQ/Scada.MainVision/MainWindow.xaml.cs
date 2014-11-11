@@ -494,6 +494,11 @@ namespace Scada.MainVision
             this.OpenProcessByName("Scada.About.exe");
         }
 
+        private void helpMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.OpenProcessByName("help.rtf");
+        }
+
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
             this.OpenProcessByName("Scada.MainSettings.exe", false, () => 

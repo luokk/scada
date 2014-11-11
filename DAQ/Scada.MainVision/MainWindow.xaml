@@ -70,7 +70,7 @@
                 
                 <!--4-->
                 <MenuItem Header="帮助" FontSize="14">
-                    <MenuItem Header="快速入门" FontSize="14" IsEnabled="False"></MenuItem>
+                    <MenuItem Header="快速入门" FontSize="14" Click="helpMenuItem_Click" IsEnabled="True"></MenuItem>
                     <Separator/>
                     <MenuItem Header="关于" FontSize="14" Click="aboutMenuItem_Click"/>
                 </MenuItem>
