@@ -91,6 +91,16 @@ namespace Scada.MainVision
 
             const string Doserate = "doserate";
             panel.SetData(Get(d, "time", ""), Get(d, Doserate, "nGy/h"));
+
+            if (!string.IsNullOrEmpty(Settings.Instance.HpicAlarm))
+            {
+                double alarm;
+                if (double.TryParse(Settings.Instance.HpicAlarm, out alarm))
+                {
+                    string v = Get(d, Doserate, "");
+                    this.MarkHpicAlarm(v, alarm, panel, 1);
+                }
+            }
         }
         
         
@@ -482,6 +492,23 @@ namespace Scada.MainVision
             {
                 pane.SetDataColor(index, Brushes.Green, false);
             }
+        }
+
+        private void MarkHpicAlarm(string v, double alarm, SmartDataPane pane, int index)
+        {
+            double dv;
+            if (double.TryParse(v, out dv))
+            {
+                if (dv > alarm)
+                {
+                    pane.SetDataColor(index, Brushes.Red, true);
+                }
+                else
+                {
+                    pane.SetDataColor(index, Brushes.Green, false);
+                }
+            }
+
         }
     }
 }

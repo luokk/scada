@@ -77,6 +77,8 @@ namespace Scada.MainVision
 			this.LoadConfig();
 			this.LoadDataProvider();
 
+            this.UpdateHpicThreshold();
+
             // Device List
             this.DeviceList.ClickDeviceItem += this.OnDeviceItemClicked;
             this.DeviceList.MainWindow = this;
@@ -494,7 +496,23 @@ namespace Scada.MainVision
 
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            this.OpenProcessByName("Scada.MainSettings.exe");
+            this.OpenProcessByName("Scada.MainSettings.exe", false, () => 
+            {
+                this.UpdateHpicThreshold();
+            });
+        }
+
+        public static string GetDeviceConfigFile(string deviceKey)
+        {
+            return ConfigPath.GetDeviceConfigFilePath(deviceKey, "0.9");
+        }
+
+        private void UpdateHpicThreshold()
+        {
+            string filePath = GetDeviceConfigFile("scada.hpic");
+            DeviceEntry entry = DeviceEntry.GetDeviceEntry("scada.hpic", filePath);
+
+            Settings.Instance.HpicAlarm = (StringValue)entry["Alarm1"];
         }
 
         private bool OpenProcess(string procName)
@@ -508,7 +526,7 @@ namespace Scada.MainVision
             return false;
         }
 
-        private void OpenProcessByName(string name, bool uac = false)
+        private void OpenProcessByName(string name, bool uac = false, Action action = null)
         {
             string fileName = LogPath.GetExeFilePath(name);
             try
@@ -519,7 +537,16 @@ namespace Scada.MainVision
                     processInfo.Verb = "runas";
                 }
                 processInfo.FileName = fileName;
-                Process.Start(processInfo);
+                
+                var process = Process.Start(processInfo);
+                if (action != null)
+                {
+                    process.EnableRaisingEvents = true;
+                    process.Exited += (object sender, EventArgs e) =>
+                    {
+                        action();
+                    };
+                }
             }
             catch (Exception)
             {

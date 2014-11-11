@@ -174,7 +174,6 @@ namespace Scada.Data.Client.Tcp
                 }
                 else if (msg.IndexOf("ACTIVE=") == 0)
                 {
-                    MessageBox.Show("2");
                     string state = msg.Substring(6);
                     if (state == "1")
                     {
@@ -435,7 +434,7 @@ namespace Scada.Data.Client.Tcp
                     }
                 }
 
-                if (pks.Count > 0)
+                if (this.agent != null && pks.Count > 0)
                 {
                     Logger logger = Log.GetLogFile(deviceKey);
                     logger.Log("---- BEGIN ----");
@@ -458,7 +457,6 @@ namespace Scada.Data.Client.Tcp
         // '大流量' 数据
         private void SendFlowDataPackets(string deviceKey, Dictionary<string, object> data)
         {
-            MessageBox.Show("2");
             DataPacket p = builder.GetFlowDataPacket(deviceKey, data, true);
             if (this.agent != null)
             {

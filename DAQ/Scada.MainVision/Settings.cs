@@ -129,5 +129,7 @@ namespace Scada.MainVision
         public string AdminComp { get; set; }
 
         public string BuildComp { get; set; }
+
+        public string HpicAlarm { get; set; }
     }
 }
