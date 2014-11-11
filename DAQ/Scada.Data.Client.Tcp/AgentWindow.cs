@@ -650,12 +650,14 @@ namespace Scada.Data.Client.Tcp
                     int count = this.connectionHistory.Count;
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.ConnectedTime = DateTime.Now;
+                    this.MainConnStatusLabel.ForeColor = Color.Black;
                     this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
 
                     this.agent.StopConnectCountryCenter(true);
                 }
                 else if (NotifyEvents.ConnectedCountry == notify)
                 {
+                    this.SubConnStatusLabel.ForeColor = Color.Black;
                     this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
                 }
                 else if (NotifyEvents.Disconnect == notify || NotifyEvents.Disconnect2 == notify)
@@ -669,10 +671,12 @@ namespace Scada.Data.Client.Tcp
                         this.retryCount++;
                         this.agent.StartConnectCountryCenter(true);
                     }
+                    this.MainConnStatusLabel.ForeColor = Color.Red;
                     this.MainConnStatusLabel.Text = "省中心连接状态: 未连接";
                 }
                 else if (NotifyEvents.DisconnectCountry == notify)
                 {
+                    this.SubConnStatusLabel.ForeColor = Color.Red;
                     this.SubConnStatusLabel.Text = "国家中心连接状态: 未连接";
                 }
                 else if (NotifyEvents.HandleEvent == notify)

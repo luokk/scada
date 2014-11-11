@@ -118,15 +118,17 @@
             // 
             // MainConnStatusLabel
             // 
+            this.MainConnStatusLabel.ForeColor = System.Drawing.Color.DarkRed;
             this.MainConnStatusLabel.Name = "MainConnStatusLabel";
             this.MainConnStatusLabel.Size = new System.Drawing.Size(135, 17);
-            this.MainConnStatusLabel.Text = "省中心连接状态: 已断开";
+            this.MainConnStatusLabel.Text = "省中心连接状态: 未连接";
             // 
             // SubConnStatusLabel
             // 
+            this.SubConnStatusLabel.ForeColor = System.Drawing.Color.DarkRed;
             this.SubConnStatusLabel.Name = "SubConnStatusLabel";
             this.SubConnStatusLabel.Size = new System.Drawing.Size(147, 17);
-            this.SubConnStatusLabel.Text = "国家中心连接状态: 已断开";
+            this.SubConnStatusLabel.Text = "国家中心连接状态: 未连接";
             this.SubConnStatusLabel.Click += new System.EventHandler(this.SubConnStatusLabel_Click);
             // 
             // splitter1
