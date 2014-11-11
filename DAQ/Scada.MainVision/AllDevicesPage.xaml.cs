@@ -159,91 +159,97 @@ namespace Scada.MainVision
         private void UpdatePanel_Weather(SmartDataPane panel)
         {
             var d = this.dataProvider.GetLatestEntry(DataProvider.DeviceKey_Weather);
+            
             panel.Check(Get(d, "time", ""));
             // NOTICE：数据库中没有任何记录时，d的对象仍然可以创建成功，所以需要加入d.Count==0
             if (d == null || d.Count == 0)
             {
                 return;
             }
-            
+
+           
             // "温度", "湿度", "雨量", "风速", "风向" "气压"
             // 风向换算
             string strDirection = Get(d, "direction", "");
-            int direction = int.Parse(strDirection.Trim());
-            if ( 348 < direction && direction <= 360 )
+
+            double direction;
+            if (double.TryParse(strDirection.Trim(), out direction))
             {
-                strDirection += " (N)";
-            }
-            else if (direction <= 11)
-            {
-                strDirection += " (N)";
-            }
-            else if ( 11 < direction && direction <= 33 )
-            {
-                strDirection += " (NNE)";
-            }
-            else if (33 < direction && direction <= 56)
-            {
-                strDirection += " (NE)";
-            }
-            else if (56 < direction && direction <= 78)
-            {
-                strDirection += " (ENE)";
-            }
-            else if (78 < direction && direction <= 101)
-            {
-                strDirection += " (E)";
-            }
-            else if (101 < direction && direction <= 123)
-            {
-                strDirection += " (ESE)";
-            }
-            else if (123 < direction && direction <= 146)
-            {
-                strDirection += " (SE)";
-            }
-            else if (146 < direction && direction <= 168)
-            {
-                strDirection += " (SSE)";
-            }
-            else if (168 < direction && direction <= 191)
-            {
-                strDirection += " (S)";
-            }
-            else if (191 < direction && direction <= 213)
-            {
-                strDirection += " (SSW)";
-            }
-            else if (213 < direction && direction <= 236)
-            {
-                strDirection += " (SW)";
-            }
-            else if (236 < direction && direction <= 258)
-            {
-                strDirection += " (WSW)";
-            }
-            else if (258 < direction && direction <= 281)
-            {
-                strDirection += " (W)";
-            }
-            else if (281 < direction && direction <= 303)
-            {
-                strDirection += " (WNW)";
-            }
-            else if (303 < direction && direction <= 326)
-            {
-                strDirection += " (NW)";
-            }
-            else if (326 < direction && direction <= 348)
-            {
-                strDirection += " (NNW)";
+                if (348 < direction && direction <= 360)
+                {
+                    strDirection += " (N)";
+                }
+                else if (direction <= 11)
+                {
+                    strDirection += " (N)";
+                }
+                else if (11 < direction && direction <= 33)
+                {
+                    strDirection += " (NNE)";
+                }
+                else if (33 < direction && direction <= 56)
+                {
+                    strDirection += " (NE)";
+                }
+                else if (56 < direction && direction <= 78)
+                {
+                    strDirection += " (ENE)";
+                }
+                else if (78 < direction && direction <= 101)
+                {
+                    strDirection += " (E)";
+                }
+                else if (101 < direction && direction <= 123)
+                {
+                    strDirection += " (ESE)";
+                }
+                else if (123 < direction && direction <= 146)
+                {
+                    strDirection += " (SE)";
+                }
+                else if (146 < direction && direction <= 168)
+                {
+                    strDirection += " (SSE)";
+                }
+                else if (168 < direction && direction <= 191)
+                {
+                    strDirection += " (S)";
+                }
+                else if (191 < direction && direction <= 213)
+                {
+                    strDirection += " (SSW)";
+                }
+                else if (213 < direction && direction <= 236)
+                {
+                    strDirection += " (SW)";
+                }
+                else if (236 < direction && direction <= 258)
+                {
+                    strDirection += " (WSW)";
+                }
+                else if (258 < direction && direction <= 281)
+                {
+                    strDirection += " (W)";
+                }
+                else if (281 < direction && direction <= 303)
+                {
+                    strDirection += " (WNW)";
+                }
+                else if (303 < direction && direction <= 326)
+                {
+                    strDirection += " (NW)";
+                }
+                else if (326 < direction && direction <= 348)
+                {
+                    strDirection += " (NNW)";
+                }
             }
 
             panel.SetData(
                 Get(d, "time", ""), 
-                Get(d, "Temperature", "℃"),
-                Get(d, "Humidity", "%"),
-                Get(d, "Raingauge", "mm"),
+                Get(d, "temperature", "℃"),
+                Get(d, "humidity", "%"),
+                Get(d, "raingauge", "mm"),
                 Get(d, "windspeed", "m/s"),
                 strDirection,
                 Get(d, "pressure", "Pa"));
@@ -397,7 +403,7 @@ namespace Scada.MainVision
             }
 
             object v = d["ifrain"];
-            string ifRainStr = "";   // = (ifRain == "1") ? "降雨" : "未降雨";
+            string ifRainStr = "";
             if (v is string)
             {
                 ifRainStr = ((string)v == "1") ? "降雨" : "未降雨";
