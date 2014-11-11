@@ -375,7 +375,7 @@ namespace Scada.Chart
 
                 this.valueBorder.Visibility = Visibility.Visible;
                 int i = (int)(xo / Grad);
-                this.valueLabel.Text = string.Format("[通道:{0} 计数:{1}]", i, v);
+                this.valueLabel.Text = string.Format("[能量:{0} 计数:{1}]", i, v);
             }
             else
             {
@@ -512,7 +512,7 @@ namespace Scada.Chart
             valueBorder.CornerRadius = new CornerRadius(1.0);
             valueBorder.BorderBrush = labelBrush;
             valueBorder.Padding = new Thickness(4.0, 0.0, 4.0, 3.0);
-            valueBorder.SetValue(Canvas.RightProperty, 120.0);
+            valueBorder.SetValue(Canvas.RightProperty, 130.0);
             
             valueBorder.SetValue(Canvas.TopProperty, Top);
             this.valueLabel = new TextBlock();
