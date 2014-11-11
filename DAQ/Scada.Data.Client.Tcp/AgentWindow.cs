@@ -669,11 +669,11 @@ namespace Scada.Data.Client.Tcp
                         this.retryCount++;
                         this.agent.StartConnectCountryCenter(true);
                     }
-                    this.MainConnStatusLabel.Text = "省中心连接状态: 已断开";
+                    this.MainConnStatusLabel.Text = "省中心连接状态: 未连接";
                 }
                 else if (NotifyEvents.DisconnectCountry == notify)
                 {
-                    this.SubConnStatusLabel.Text = "国家中心连接状态: 已中断";
+                    this.SubConnStatusLabel.Text = "国家中心连接状态: 未连接";
                 }
                 else if (NotifyEvents.HandleEvent == notify)
                 {
