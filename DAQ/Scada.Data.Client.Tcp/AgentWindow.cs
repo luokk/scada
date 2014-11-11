@@ -174,12 +174,14 @@ namespace Scada.Data.Client.Tcp
                 }
                 else if (msg.IndexOf("ACTIVE=") == 0)
                 {
+                    MessageBox.Show("2");
                     string state = msg.Substring(6);
                     if (state == "1")
                     {
                         this.WindowState = FormWindowState.Normal;
                         this.MakeWindowShownFront();
                         this.ShowAtTaskBar(true);
+                        
                     }
                     else
                     {
@@ -245,6 +247,7 @@ namespace Scada.Data.Client.Tcp
         private void MakeWindowShownFront()
         {
             this.TopMost = true;
+            this.WindowState = FormWindowState.Normal;
             this.Activate();
             this.TopMost = false;
         }
