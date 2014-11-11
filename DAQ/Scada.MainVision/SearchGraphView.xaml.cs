@@ -96,9 +96,13 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
-            if (deviceKey == DataProvider.DeviceKey_AIS || deviceKey == DataProvider.DeviceKey_MDS)
+            if (deviceKey == DataProvider.DeviceKey_AIS)
             {
-                this.SearchChartView.SetCurveDisplayName("瞬时流量");
+                this.SearchChartView.SetCurveDisplayName("瞬时流量(L/h)");
+            }
+            else if (deviceKey == DataProvider.DeviceKey_MDS)
+            {
+                this.SearchChartView.SetCurveDisplayName("瞬时流量(m³/h)");
             }
             else if (deviceKey == DataProvider.DeviceKey_NaI)
             {
