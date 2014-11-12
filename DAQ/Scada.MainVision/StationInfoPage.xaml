@@ -8,24 +8,26 @@
     <Canvas>
         <Label Canvas.Left="24" Canvas.Top="25" FontSize="16" FontWeight="Bold" Width="452">欢迎使用 辐射环境自动监测站管理系统</Label>
 
-        <Label x:Name="StationName" Canvas.Left="24" Canvas.Top="65" FontSize="16" FontWeight="Bold"></Label>
+        <Label x:Name="StationName" Canvas.Left="24" Canvas.Top="65" FontSize="12"></Label>
 
-        <Label x:Name="StationId" Canvas.Left="24" Canvas.Top="105" FontSize="16" FontWeight="Bold"></Label>
-        
-        
-        <Rectangle Canvas.Left="0" Canvas.Top="150" Fill="#aaa" VerticalAlignment="Top" Width="2000" Height="1"/>
-        
-        <Canvas Canvas.Left="24" Canvas.Top="160">
-            <StackPanel Canvas.Left="10" Canvas.Top="0" Orientation="Horizontal">
-                <Label FontSize="16" >数据采集管理器:</Label>
-                <Label FontSize="16" FontWeight="Bold" Foreground="Green">运行中</Label>
-            </StackPanel>
+        <Label x:Name="StationId" Canvas.Left="24" Canvas.Top="105" FontSize="12"></Label>
 
-            <StackPanel Canvas.Left="10" Canvas.Top="30" Orientation="Horizontal">
-                <Label FontSize="16" >数据采集管理器:</Label>
-                <Label FontSize="16" FontWeight="Bold" Foreground="Green">运行中</Label>
-            </StackPanel>
+        <Label x:Name="PosLabel" Canvas.Left="24" Canvas.Top="145" FontSize="12"></Label>
 
+        <Label x:Name="UserComp" Canvas.Left="24" Canvas.Top="185" FontSize="12"></Label>
+
+        <Label x:Name="AdminComp" Canvas.Left="24" Canvas.Top="225" FontSize="12"></Label>
+
+        <Label x:Name="BuildComp" Canvas.Left="24" Canvas.Top="265" FontSize="12"></Label>
+
+        <Rectangle Canvas.Left="0" Canvas.Top="399" Fill="#aaa" VerticalAlignment="Top" Width="2000" Height="1"/>
+
+        <Canvas Canvas.Right="200" Canvas.Top="25" Width="400" Height="300">
+            <Canvas.Background>
+                <ImageBrush ImageSource="Images/background.png" Stretch="Uniform"></ImageBrush>
+            </Canvas.Background>
+
+            <!--
             <StackPanel Canvas.Left="10" Canvas.Top="60" Orientation="Horizontal" Visibility="Hidden">
                 <Label FontSize="16" >累计数据采集量:</Label>
                 <Label FontSize="16" >240601</Label>
@@ -41,7 +43,7 @@
                 <Label FontSize="16" FontWeight="Bold">120天</Label>
                 <Label FontSize="13" VerticalContentAlignment="Bottom">9小时30分</Label>
             </StackPanel>
-
+-->
         </Canvas>
 
 

@@ -64,17 +64,17 @@ namespace Scada.Declare
 
 		private string error = "No Error";
 
+        // 假的风速数据
+        private string falsevalue;
+
         // private static int MaxDelay = 10;
 
         private DateTime currentRecordTime = default(DateTime);
 
         private byte[] lastLine;
 
-        // Serial port sleep 200 ms as default before read
-        private int bufferSleep = 200;
-
-        // init status for first start (第一次重启时需要重置设备，以后每天重置一次)
-        private bool initStatus = false;
+        // Serial port sleep 400 ms as default before read
+        private int bufferSleep = 400;
 
 		public WeatherDevice(DeviceEntry entry)
 		{
@@ -108,6 +108,9 @@ namespace Scada.Declare
             // 
             this.actionSend1 = Encoding.ASCII.GetBytes((StringValue)entry["ActionSend1"]);
             this.actionSend2 = Encoding.ASCII.GetBytes((StringValue)entry["ActionSend2"]);
+
+            // 仅用于假的风速数据
+            this.falsevalue = (StringValue)entry["Falsevalue"];
 			
 			// Virtual On
 			string isVirtual = (StringValue)entry[DeviceEntry.Virtual];
@@ -234,7 +237,7 @@ namespace Scada.Declare
 
         private void StartSenderTimer(int interval)
         {
-            // timer 每2s一次
+            // timer 每4s一次
             int minInterval = 2;
             if (MainApplication.TimerCreator != null)
             {
@@ -294,6 +297,23 @@ namespace Scada.Declare
         private string[] Search(byte[] data, byte[] lastData)
 		{
             string[] ret = this.Search(data);
+
+            // 东北气象站坏了，给个假的值
+            if (this.falsevalue == "true")
+            {
+                double windspeed = 0;
+                if (double.TryParse(ret[7], out windspeed))
+                {
+                    if (windspeed <= 0)
+                    {
+                        Random ro = new Random();
+                        windspeed = 0.5 + ro.NextDouble();
+                        windspeed = Math.Round(windspeed, 1);
+                        ret[7] = windspeed.ToString();
+                    }
+                }
+            }
+            
             double rd = 0;
             double r = 0;
             if (double.TryParse(ret[8], out r))
@@ -443,23 +463,26 @@ namespace Scada.Declare
             try
             {
                 data = this.Search(line, this.lastLine);
-
                 this.lastLine = line;
+
+                if (data == null || data.Length == 0)
+                {
+                    return false;
+                }
+                dd.Time = time;
+                object[] fields = Device.GetFieldsData(data, time, this.fieldsConfig);
+                dd = new DeviceData(this, fields);
+                dd.InsertIntoCommand = this.insertIntoCommand;
             }
+
             catch (Exception e)
             {
-                RecordManager.DoSystemEventRecord(this, "Parse data failure: " + e.Message);
+                string strLine = Encoding.ASCII.GetString(line);
+                string errorMsg = string.Format("GetDeviceData() Fail, Data={0}", strLine) + e.Message;
+                RecordManager.DoSystemEventRecord(this, errorMsg);
+
                 return false;
             }
-
-			if (data == null || data.Length == 0)
-			{
-				return false;
-			}
-            dd.Time = time;
-            object[] fields = Device.GetFieldsData(data, time, this.fieldsConfig);
-			dd = new DeviceData(this, fields);
-			dd.InsertIntoCommand = this.insertIntoCommand;
 
 			return true;
 		}
@@ -481,19 +504,6 @@ namespace Scada.Declare
 
             try
             {
-                // 每次重启时，重置探测器
-                if (!this.initStatus)
-                {
-                    if (this.IsRealDevice)
-                    {
-                        this.serialPort.Write(this.actionSend2, 0, this.actionSend2.Length);
-                        this.initStatus = true;
-
-                        RecordManager.DoSystemEventRecord(this, "Reset weather station - Initial", RecordType.Event);
-                    }
-                    return;
-                }
-
                 // 归一化时间
                 DateTime rightTime = default(DateTime);
                 if (!this.recordTimePolicy.NowAtRightTime(out rightTime) ||

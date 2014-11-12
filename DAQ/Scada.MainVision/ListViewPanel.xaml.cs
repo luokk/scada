@@ -35,6 +35,10 @@ namespace Scada.Controls
 
         private Control ctrlView = null;
 
+        private Control doorView = null;
+
+        private Control sttView = null;
+
         private Control energyView = null;
 
         private DataListener dataListener;
@@ -42,8 +46,6 @@ namespace Scada.Controls
         private DBDataProvider dataProvider;
 
         private string deviceKey;
-
-        private static string currentDeviceKey;
 
         private List<Dictionary<string, object>> dataSource;
 
@@ -64,20 +66,15 @@ namespace Scada.Controls
 
         private object currentSelectedItem;
 
-        // private bool ShowChartViewBySearch = true;
-
-        // Must Use the <Full Name>
-        private System.Windows.Forms.Timer refreshDataTimer;
-
-        private Thread fetchDataThread;
-
-        private MySqlConnection dbConn;
-
         private SynchronizationContext SynchronizationContext
         {
             get;
             set;
         }
+
+        public bool HasSerachDataChart { get; set; }
+
+        public bool HasRealTimeChart { get; set; }
 
 
         /// <summary>
@@ -92,26 +89,8 @@ namespace Scada.Controls
             this.DisplayName = entry.DisplayName;
             this.dataProvider = dataProvider;
 
-            this.dbConn = this.dataProvider.GetMySqlConnection();
-
-            var dbCmd = this.dbConn.CreateCommand();
-            var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-            dispatcherTimer.Tick += (s, evt) =>
-            {
-                if (this.Shown && this.deviceKey != currentDeviceKey)
-                {
-                    currentDeviceKey = this.deviceKey;
-                    this.ListRecentData(dbCmd);
-                }
-            };
-            dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
-            dispatcherTimer.Start();
-
-        }
-
-        internal void ListRecentData(MySqlCommand dbCmd)
-        {
-            this.dataProvider.RefreshTimeline(this.deviceKey, dbCmd);
+            this.HasSerachDataChart = false;
+            this.HasRealTimeChart = false;
         }
 
         public Control ListView
@@ -185,6 +164,42 @@ namespace Scada.Controls
             }
         }
 
+        public Control DoorPanel
+        {
+            get
+            {
+                return this.doorView;
+            }
+
+            set
+            {
+                this.doorView = value;
+                if (this.doorView != null)
+                {
+                    this.DoorPanelTabItem.Visibility = Visibility.Visible;
+                    this.DoorPanelContainer.Content = this.doorView;
+                }
+            }
+        }
+
+        public Control SttPanel
+        {
+            get
+            {
+                return this.sttView;
+            }
+
+            set
+            {
+                this.sttView = value;
+                if (this.sttView != null)
+                {
+                    this.SttPanelTabItem.Visibility = Visibility.Visible;
+                    this.SttPanelContainer.Content = this.sttView;
+                }
+            }
+        }
+
         public Control EnergyPanel
         {
             get
@@ -210,6 +225,7 @@ namespace Scada.Controls
                 this.ListViewContainer.Content = this.listView;
 
                 ListView theListView = (ListView)this.listView;
+                
                 // theListView.ItemsSource = this.dataSource;
                 this.ApplyListStyle(theListView);
                 theListView.MouseRightButtonUp += OnListViewMouseRightButton;
@@ -220,10 +236,16 @@ namespace Scada.Controls
         public void SetupContextMenu(ListView listView)
         {
             ContextMenu cm = new ContextMenu();
-            MenuItem mi = new MenuItem();
-            mi.Header = "显示能谱图";
-            mi.Click += this.ShowMenuItemClick;
-            cm.Items.Add(mi);
+            MenuItem mi1 = new MenuItem();
+            mi1.Header = "显示能谱图";
+            mi1.Click += this.ShowMenuItemClick;
+            cm.Items.Add(mi1);
+            /*
+            MenuItem mi2 = new MenuItem();
+            mi2.Header = "比较能谱图";
+            mi2.Click += this.CompareMenuItemClick;
+            cm.Items.Add(mi2);
+            */
             listView.ContextMenu = cm;
         }
 
@@ -242,6 +264,11 @@ namespace Scada.Controls
                     }
                 }
             }
+        }
+
+        void CompareMenuItemClick(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         void OnListViewMouseRightButton(object sender, MouseButtonEventArgs e)
@@ -304,7 +331,6 @@ namespace Scada.Controls
         {
             Color c = Color.FromRgb(83, 83, 83);
             listView.Background = new SolidColorBrush(c);
-
             // listView.ItemContainerStyle = (Style)this.Resources["ListViewItemKey"];
             listView.Style = (Style)this.Resources["ListViewKey"];
         }
@@ -312,11 +338,6 @@ namespace Scada.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-
-            DateTime now = DateTime.Now;
-            this.FromDate.SelectedDate = now.AddDays(-2);
-            this.ToDate.SelectedDate = now.AddDays(-1);
-            // Can NOT Find Element in Template;
         }
 
         private void ContentLoaded(object sender, RoutedEventArgs e)
@@ -482,28 +503,108 @@ namespace Scada.Controls
                 return;
             }
 
+            if (this.inSearch)
+                return;
+
             this.FromDateText.Background = Brushes.White;
             this.ToDateText.Background = Brushes.White;
             var dt1 = DateTime.Parse(this.FromDateText.Text);
             var dt2 = DateTime.Parse(this.ToDateText.Text);
+            int days = (dt2 - dt1).Days;
+            SynchronizationContext sc = SynchronizationContext.Current;
 
-            using (var cmd = this.dbConn.CreateCommand())
+            Thread thread = new Thread(new ParameterizedThreadStart((o) => 
             {
-                this.searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, cmd);
-            }
-            // int interval = this.currentInterval;
-            this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
+                
+                using (var conn = DBDataProvider.Instance.GetMySqlConnection())
+                {
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        DateTime t1 = dt1;
+                        DateTime t2 = dt1.AddDays(1).AddSeconds(-2);
+                        
+                        int index = 0;
+                        this.inSearch = true;
+                        if (true || t2 < dt2)
+                        {
+                            // Get Daily data;
+                            var searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, t1, t2, cmd);
 
+                            this.BeginTime = dt1;
+                            this.EndTime = dt2;
+
+                            if (searchDataSource.Count > 0)
+                            {
+                                sc.Send(new SendOrPostCallback((data) =>
+                                {
+                                    this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
+                                }), searchDataSource);
+                            }
+
+                        }
+                        this.inSearch = false;
+                    }
+                }
+
+
+            }));
+            thread.Start(null);
+
+            //this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
+        }
+
+        private void UpdateSearchDataList(List<Dictionary<string, object>> data)
+        {
             ListView searchListView = (ListView)this.SearchView;
+            searchListView.Height = this.ListRow.ActualHeight;
             searchListView.ItemsSource = null;
+            searchListView.ItemsSource = data;
+        }
 
-            if (this.searchData != null && this.searchData.Count > 0)
+        private int UpdateSearchData(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime, int days)
+        {
+            int interval = 30;
+            if (days <= 2)
             {
-                // Show the searched data.
-                searchListView.ItemsSource = this.searchData;
-                // Enable the chart button.
-                this.ButtonShowChart.IsEnabled = true;
+                interval = 30;
             }
+            else if (days > 2 && days <= 7)
+            {
+                interval = 300;
+            }
+            else
+            {
+                interval = 3600;
+            }
+
+            if (this.deviceKey == DataProvider.DeviceKey_NaI)
+            {
+                interval = 300;
+            }
+
+            this.Interval = interval;
+            this.searchData = data;
+            if (data != null && data.Count > 0)
+            {
+                // 
+                if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+                {
+                    ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
+                }
+                else
+                {
+                    if (this.graphSearchView != null)
+                    {
+                        ((SearchGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
+                    }
+                }
+            }
+
+            if (deviceKey == DataProvider.DeviceKey_Shelter || deviceKey == DataProvider.DeviceKey_Dwd)
+            {
+                return 0;
+            }
+            return 1000;
         }
 
         private List<Dictionary<string, object>> Filter(List<Dictionary<string, object>> data, int page)
@@ -574,66 +675,6 @@ namespace Scada.Controls
 
         }
 
-        /* Pages about.
-        private void OnPrevButton(object sender, RoutedEventArgs e)
-        {
-            this.OnNavigateTo(-1);
-        }
-
-        private void OnNextButton(object sender, RoutedEventArgs e)
-        {
-            this.OnNavigateTo(1);
-        }
-
-        private int currentPage = 0;
-
-        private void OnNavigateTo(int nav)
-        {
-            int pageCount = this.searchDataSource.Count / MaxCountPage + 1;
-            this.currentPage += nav;
-            if (this.currentPage < 0)
-            {
-                this.currentPage = 0;
-            }
-            else if (this.currentPage >= pageCount) 
-            {
-                this.currentPage = pageCount - 1;
-            }
-
-            this.searchData = this.Filter(this.searchDataSource, this.currentPage);
-
-            ListView searchListView = (ListView)this.SearchView;
-            searchListView.ItemsSource = null;
-
-            if (this.searchData != null && this.searchData.Count > 0)
-            {
-                // Show the searched data.
-                searchListView.ItemsSource = this.searchData;
-                // Enable the chart button.
-                this.ButtonShowChart.IsEnabled = true;
-            }
- 
-
-        }
-        */
-
-        // Select the ChartView to show.
-        private void ShowChartView(object sender, RoutedEventArgs e)
-        {
-            this.ChartViewTabItem.Visibility = Visibility.Visible;
-            this.SearchChartViewTabItem.Visibility = Visibility.Collapsed;
-            this.TabCtrl.SelectedItem = this.ChartViewTabItem;
-            // this.ShowChartViewBySearch = false;
-        }
-
-        private void ShowSearchChartView(object sender, RoutedEventArgs e)
-        {
-            this.SearchChartViewTabItem.Visibility = Visibility.Visible;
-            this.ChartViewTabItem.Visibility = Visibility.Collapsed;
-            this.TabCtrl.SelectedItem = this.SearchChartViewTabItem;
-            // this.ShowChartViewBySearch = true;
-        }
-
         private void ExportDataList(object sender, RoutedEventArgs e)
         {
             this.ExportDataListToFile(this.dataSource);
@@ -646,13 +687,24 @@ namespace Scada.Controls
 
         private void ExportDataListToFile(List<Dictionary<string, object>> dataList)
         {
-            DateTime now = DateTime.Now;
-            string fileName = string.Format("{0}-{1}-{2}-{3}.csv", now.Year, now.Month, now.Day, now.Ticks);
-            string filePath = string.Format("./csv/{0}", fileName);
-
             if (!Directory.Exists("./csv"))
             {
                 Directory.CreateDirectory("./csv");
+            }
+
+            string filePath = string.Empty;
+            System.Windows.Forms.SaveFileDialog fileDialog = new System.Windows.Forms.SaveFileDialog();
+            fileDialog.InitialDirectory = "./csv";
+            fileDialog.Filter = "CSV (*.csv)|*.csv|All files (*.*)|*.*";
+            fileDialog.FilterIndex = 1;
+            fileDialog.RestoreDirectory = true;
+            if (fileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                filePath = fileDialog.FileName;
+            }
+            else
+            {
+                return;
             }
 
             using (StreamWriter sw = new StreamWriter(filePath))
@@ -669,7 +721,6 @@ namespace Scada.Controls
                     sw.WriteLine(line);
                 }
 
-
                 // Window1 alert = new Window1("成功导出CSV文件。");
                 // alert.ShowDialog();
                 MainWindow.Status = "成功导出CSV文件。";
@@ -682,17 +733,28 @@ namespace Scada.Controls
             this.TabCtrl.SelectedItem = this.EnergyPanelTabItem;
             EnergyPanel energyPanel = (EnergyPanel)this.EnergyPanel;
 
-            using (var cmd = this.dbConn.CreateCommand())
+            using (var conn = DBDataProvider.Instance.GetMySqlConnection())
             {
-                energyPanel.UpdateEnergyGraphByTime(time, cmd);
+                using (var cmd = conn.CreateCommand())
+                {
+                    energyPanel.UpdateEnergyGraphByTime(time, cmd);
+                }
             }
-
         }
 
         private void SaveChart(object sender, RoutedEventArgs e)
         {
-            ((GraphView)this.GraphView).SaveChart();
+            if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+            {
+                ((SearchHpicGraphView)this.GraphSearchView).SaveChart();
+            }
+            else
+            {
+                ((SearchGraphView)this.GraphSearchView).SaveChart();
+                
+            }
             MainWindow.Status = "成功保存曲线。";
+            /////////////////////////////////////////////////////////
             // Window1 alert = new Window1("成功保存曲线。");
             // alert.ShowDialog();
         }
@@ -708,32 +770,11 @@ namespace Scada.Controls
 
         public int currentInterval { get; set; }
 
-        private void IntervalSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            /*
-            switch (this.FrList.SelectedIndex)
-            {
-                case 0:
-                    this.currentInterval = 30;
-                    break;
-                case 1:
-                    this.currentInterval = 60 * 5;
-                    break;
-                case 2:
-                    this.currentInterval = 60 * 60;
-                    break;
-                default:
-                    this.currentInterval = 30;
-                    break;
-            }   
-            */
-        }
-
         private void SearchChartViewTabItemIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if ((bool)e.NewValue)
             {
-                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData);
+                ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30, 0, this.BeginTime, this.EndTime);
             }
 
         }
@@ -748,6 +789,12 @@ namespace Scada.Controls
 
         private bool shown = false;
 
+        public int selectedInterval = 30;
+        
+        public string selectedField;
+        private MySqlConnection realTimeDbConn;
+        private bool inSearch;
+
         public bool Shown
         {
             get
@@ -758,6 +805,171 @@ namespace Scada.Controls
             {
                 this.shown = value;
                 // currentDeviceKey = this.deviceKey;
+            }
+        }
+
+        private void SearchGraphViewContainer_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!this.HasSerachDataChart)
+            {
+                this.SearchChartRow.Height = new GridLength(0);
+            }
+
+            if (this.deviceKey != DataProvider.DeviceKey_Hpic)
+            {
+                this.SearchChartRow.Height = new GridLength(250);
+            }
+        }
+
+        private void GraphViewContainer_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!this.HasRealTimeChart)
+            {
+                this.ChartRow.Height = new GridLength(0);
+                return;
+            }
+
+            this.InitRealTimeDataTick();
+        }
+
+        private void InitRealTimeDataTick()
+        {
+            var dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            this.realTimeDbConn = DBDataProvider.Instance.GetMySqlConnection();
+            if (realTimeDbConn == null)
+            {
+                return;
+            }
+
+            dispatcherTimer.Tick += (s, evt) =>
+            {
+                DateTime fromTime = DateTime.Now.AddMinutes(-48);
+
+                using (var dbCmd = realTimeDbConn.CreateCommand())
+                {
+                    var data = DBDataProvider.Instance.RefreshTimeRange2(this.deviceKey, fromTime, DateTime.Now, dbCmd);
+                    if (data.Count == 0)
+                    {
+                        dispatcherTimer.Interval = new TimeSpan(0, 1, 30);
+                    }
+                    else
+                    {
+                        dispatcherTimer.Interval = new TimeSpan(0, 0, 30);
+                    }
+                    GraphView v = (GraphView)this.GraphView;
+                    v.SetDataSource2(data, "flow");
+
+                    ListView l = (ListView)this.ListView;
+                    l.ItemsSource = null;
+                    data.Reverse();
+                    l.ItemsSource = data;
+                }
+            };
+            dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
+            dispatcherTimer.Start();
+        }
+
+        public void SetField(string field)
+        {
+            this.selectedField = field;
+        }
+
+        public void AddField(string field)
+        {
+            this.FieldSelect.Items.Add(field);
+        }
+
+        // Only for HPIC
+        private void IntervalSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox s = (ComboBox)e.Source;
+            if (this.searchData == null)
+            {
+                s.SelectedIndex = 0;
+                return;
+            }
+
+            if (s.SelectedIndex == 0)
+            {
+                this.selectedInterval = 30;
+            }
+            else if (s.SelectedIndex == 1)
+            {
+                this.selectedInterval = 300;
+            }
+            else if (s.SelectedIndex == 2)
+            {
+                this.selectedInterval = 3600;
+            }
+            else if (s.SelectedIndex == 3)
+            {
+                this.selectedInterval = 3600 * 24;
+            }
+
+            ((SearchHpicGraphView)this.graphSearchView).SetDataSourceInterval(this.searchData, this.selectedField, this.Interval, this.selectedInterval, this.BeginTime, this.EndTime);
+        }
+
+        private void FieldSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox s = (ComboBox)e.Source;
+            if (s.SelectedIndex == 0)
+            {
+                this.selectedField = "temperature";
+            }
+            else if (s.SelectedIndex == 1)
+            {
+                this.selectedField = "pressure";
+            }
+            else if (s.SelectedIndex == 2)
+            {
+                this.selectedField = "windspeed";
+            }
+            else if (s.SelectedIndex == 3)
+            {
+                this.selectedField = "humidity";
+            }
+            else if (s.SelectedIndex == 4)
+            {
+                this.selectedField = "raingauge";
+            }
+            ((SearchGraphView)this.graphSearchView).SelectChanged(this.selectedField);
+            //((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.Interval,  0, this.BeginTime, this.EndTime);
+        }
+
+        public DateTime BeginTime { get; set; }
+
+        public DateTime EndTime { get; set; }
+
+        public int Interval { get; set; }
+
+        private void ShowListButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.ShowListButton.IsChecked.Value)
+            {
+                this.ListRow.Height = new GridLength(2, GridUnitType.Star);
+                ListView searchListView = (ListView)this.SearchView;
+                searchListView.Visibility = System.Windows.Visibility.Visible;
+                if (this.deviceKey == DataProvider.DeviceKey_NaI)
+                {
+                    Config cfg = Config.Instance();
+                    ConfigEntry entry = cfg[DataProvider.DeviceKey_NaI];
+
+                    if (entry.DataFilter != null)
+                    {
+                        foreach (var data in this.searchData)
+                        {
+                            entry.DataFilter.Fill(data);
+                        }
+                    }
+                }
+
+                this.UpdateSearchDataList((List<Dictionary<string, object>>)this.searchData);
+            }
+            else
+            {
+                ListView searchListView = (ListView)this.SearchView;
+                searchListView.Visibility = System.Windows.Visibility.Collapsed;
+                this.UpdateSearchDataList((List<Dictionary<string, object>>)null);
             }
         }
     }

@@ -71,10 +71,10 @@ namespace Scada.MainVision
             return string.Format("{0}-{1:D2}", date.Year, date.Month);
         }
         */
-        
-        public int[] GetNaICannelData(DateTime time, MySqlCommand cmd)
+
+        public int[] GetNaICannelData(DateTime time, MySqlCommand cmd, out double a, out double b, out double c)
         {
-            string cdLine = DBDataProvider.Instance.GetNaIDeviceChannelData(time, cmd);
+            string cdLine = DBDataProvider.Instance.GetNaIDeviceChannelData(time, cmd, out a, out b, out c);
             cdLine = cdLine.Trim();
             if (cdLine.Length > 0)
             {
@@ -102,11 +102,12 @@ namespace Scada.MainVision
         //private
         internal void UpdateEnergyGraphByTime(DateTime time, MySqlCommand cmd)
         {
-            int[] data = this.GetNaICannelData(time, cmd);
+            double a, b, c;
+            int[] data = this.GetNaICannelData(time, cmd, out a, out b, out c);
             if (data.Length > 0)
             {
                 this.EnergyView.ClearPoints();
-                this.EnergyView.SetDataPoints(data);
+                this.EnergyView.SetDataPoints(data, a, b, c);
                 // TODO: show the energy data in chart.
                 // TODO: Chart...
             }

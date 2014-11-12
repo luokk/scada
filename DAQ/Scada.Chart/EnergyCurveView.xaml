@@ -4,32 +4,56 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="200"
+             d:DesignHeight="400" d:DesignWidth="600"
              Loaded="CurveViewLoaded" MouseMove="CanvasViewMouseMove">
-    
-        <Grid x:Name="MainView" >
-            <Grid.RowDefinitions>
-                <RowDefinition Height="6"></RowDefinition>
-                <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="4"></RowDefinition>
-            </Grid.RowDefinitions>
-            
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="30"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <!-- Canvas -->
-            <Canvas x:Name="Graduation" Grid.Row="1" Grid.Column="0" Background="#F8F8F8">
-            </Canvas>
 
-            <Border BorderBrush="Blue" BorderThickness="0"
-                    Grid.Row="1" Grid.Column="1" 
-                    VerticalAlignment="Bottom">
-                <Canvas x:Name="CanvasView" Background="#F8F8F8"
-                    MouseMove="CanvasViewMouseMove" VerticalAlignment="Bottom">
-                </Canvas>
-            </Border>
+    <Grid x:Name="MainView" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="6"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
 
-        </Grid>
-    
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <!-- Canvas -->
+        <Canvas x:Name="Graduation" Grid.Row="1" Grid.Column="0" 
+                    Background="#F8F8F8">
+        </Canvas>
+
+        <Canvas x:Name="CanvasView" Grid.Row="1" Grid.Column="1"
+                    Background="#F8F8F8"
+                    MouseMove="CanvasViewMouseMove" 
+                    MouseLeftButtonDown="CanvasView_MouseLeftButtonDown"
+                    MouseLeftButtonUp="CanvasView_MouseLeftButtonUp">
+            <Button x:Name="ResetButton" Canvas.Top="30" Canvas.Right="10" Cursor="Hand" Click="OnResetClick" Panel.ZIndex="100">重置
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock TextDecorations="Underline">  
+                                <ContentPresenter />
+                        </TextBlock>
+                    </ControlTemplate>
+                </Button.Template>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Foreground" Value="Blue" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Foreground" Value="Red" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Canvas>
+
+        <Rectangle Grid.Row="2" Grid.Column="0" Fill="#F8F8EE"></Rectangle>
+
+        <Canvas x:Name="PointAxis" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" 
+                    Background="#F8F8EE">
+        </Canvas>
+    </Grid>
+
 </UserControl>

@@ -31,26 +31,29 @@
         <Label Canvas.Left="220" Canvas.Top="225" FontSize="16" Foreground="Green">&lt;运行中&gt;</Label>
         -->
 
-        <m:SmartDataPane x:Name="hpicPane" Title="高压电离室" Canvas.Left="44" Canvas.Top="35">
+        <m:SmartDataPane x:Name="hpicPane" Title="高压电离室" Canvas.Left="26" Canvas.Top="17">
         </m:SmartDataPane>
 
-        <m:SmartDataPane x:Name="weatherPane" Title="气象站" Canvas.Left="44" Canvas.Top="354">
+        <m:SmartDataPane x:Name="weatherPane" Title="气象站" Canvas.Left="345" Canvas.Top="255">
         </m:SmartDataPane>
 
-        <m:SmartDataPane x:Name="naiPane" Title="NaI谱仪" Canvas.Left="345" Canvas.Top="35">
+        <m:SmartDataPane x:Name="naiPane" Title="NaI谱仪" Canvas.Left="345" Canvas.Top="124">
         </m:SmartDataPane>
 
-        <m:SmartDataPane x:Name="mdsPane" Title="超大流量气溶胶采样器" Canvas.Left="680" Canvas.Top="35">
+        <m:SmartDataPane x:Name="rainPane" Title="感雨器" Canvas.Left="345" Canvas.Top="17">
         </m:SmartDataPane>
 
-        <m:SmartDataPane x:Name="aisPane" Title="碘采样器" Canvas.Left="680" Canvas.Top="192">
+        <m:SmartDataPane x:Name="mdsPane" Title="超大流量气溶胶采样器" Canvas.Left="696" Canvas.Top="17">
         </m:SmartDataPane>
 
-        <m:SmartDataPane x:Name="shelterPane" Title="环境与安防" Canvas.Left="44" Canvas.Top="164">
+        <m:SmartDataPane x:Name="aisPane" Title="碘采样器" Canvas.Left="696" Canvas.Top="324">
+        </m:SmartDataPane>
+
+        <m:SmartDataPane x:Name="shelterPane" Title="环境与安防" Canvas.Left="26" Canvas.Top="124">
         </m:SmartDataPane>
 
 
-        <m:SmartDataPane x:Name="dwdPane" Title="干湿沉降采样器" Canvas.Left="680" Canvas.Top="354">
+        <m:SmartDataPane x:Name="dwdPane" Title="干湿沉降采样器" Canvas.Left="26" Canvas.Top="405">
         </m:SmartDataPane>
     </m:CanvasEx>
 </UserControl>

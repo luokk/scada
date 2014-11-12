@@ -12,6 +12,7 @@ namespace Scada.MainVision
     using System.IO;
     using System.Reflection;
     using Scada.Config;
+    using System.Windows.Forms;
 
     /// <summary>
     /// Each Device has a Listener.
@@ -49,14 +50,12 @@ namespace Scada.MainVision
 
 
         // ?
-        private Dictionary<string, object> dataCache = new Dictionary<string, object>();
+        // private Dictionary<string, object> dataCache = new Dictionary<string, object>();
 
 
         // <DeviceKey, dict[data]>
         private Dictionary<string, object> latestData = new Dictionary<string, object>();
 
-
-        private List<Dictionary<string, object>> timelineSource;
         /// <summary>
         /// 
         /// </summary>
@@ -92,7 +91,7 @@ namespace Scada.MainVision
             this.dataListeners = new Dictionary<string, DBDataCommonListerner>(30);
 
             // 192.168.1.24
-            this.timelineSource = new List<Dictionary<string, object>>();
+            // this.timelineSource = new List<Dictionary<string, object>>();
         }
 
         public MySqlConnection GetMySqlConnection()
@@ -157,22 +156,8 @@ namespace Scada.MainVision
             }
         }
 
-        public void RemoveFilters()
-        {
-            this.filters.Clear();
-        }
-
-        public void SetFilter(string key, object value)
-        {
-            if (!this.filters.ContainsKey(key))
-            {
-                this.filters.Add(key, value);
-            }
-        }
-
-        // For Panels.
-        // Get Latest data,
-        // No Notify.
+        // For DevicePage.
+        // Get Latest data ( 1 Entry ),
         public void RefreshTimeNow(MySqlCommand cmd)
         {
             this.latestData.Clear();
@@ -203,39 +188,29 @@ namespace Scada.MainVision
             set;
         }
 
-        // Get Recent data
-        // Notify the new 
-        public void RefreshTimeline(string deviceKey, MySqlCommand cmd)
-        {
-            DBDataCommonListerner listener = this.dataListeners[deviceKey];
-            if (listener == null)
-            {
-                return;
-            }
-
-            var result = this.Refresh(deviceKey, true, this.FetchCount, DateTime.MinValue, DateTime.MinValue, cmd);
-            if (result == null)
-            {
-                return;
-            }
-
-            result.Sort(DBDataProvider.DateTimeCompare);
-
-            listener.OnDataArrivalBegin(DataArrivalConfig.TimeRecent);
-            foreach (var data in result)
-            {
-                listener.OnDataArrival(DataArrivalConfig.TimeRecent, data);
-            }
-            listener.OnDataArrivalEnd(DataArrivalConfig.TimeRecent);
-        }
-
         // Get time-range data,
         // Notify with all the result.
-        public List<Dictionary<string, object>> RefreshTimeRange(string deviceKey, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
+        public List<Dictionary<string, object>> RefreshTimeRange(string deviceKey, DateTime beginTime, DateTime endTime, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
         {
             try
             {
-                var result = this.Refresh(deviceKey, false, -1, fromTime, toTime, cmd);
+                var result = this.Refresh(deviceKey, false, -1, beginTime, endTime, fromTime, toTime, cmd);
+                result.Reverse();
+                return result;
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return new List<Dictionary<string, object>>();
+        }
+
+        public List<Dictionary<string, object>> RefreshTimeRange2(string deviceKey, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
+        {
+            try
+            {
+                var result = this.Refresh(deviceKey, false, -1, fromTime, toTime, fromTime, toTime, cmd);
                 result.Reverse();
                 return result;
             }
@@ -249,7 +224,6 @@ namespace Scada.MainVision
 
         public Dictionary<string, object> RefreshTimeNow(string deviceKey, MySqlCommand cmd)
         {
-
             // Return values
             const int MaxItemCount = 20;
             var ret = new Dictionary<string, object>(MaxItemCount);
@@ -267,10 +241,42 @@ namespace Scada.MainVision
                     foreach (var i in entry.ConfigItems)
                     {
                         string key = i.Key.ToLower();
+                        if (deviceKey == DataProvider.DeviceKey_NaI && key.IndexOf('-') > 0)
+                        {
+                            continue;
+                        }
+            
                         try
                         {
-                            string v = reader.GetString(key);
-                            ret.Add(key, v);
+                            int index = reader.GetOrdinal(key);
+                            if (!reader.IsDBNull(index))
+                            {
+                                string v = reader.GetString(index);
+                                if (key == "doserate")
+                                {
+                                    double dv;
+                                    if (double.TryParse(v, out dv))
+                                    {
+                                        ret.Add(key, dv.ToString("0.0"));
+                                    }
+                                    else
+                                    {
+                                        ret.Add(key, v);
+                                    }
+                                }
+                                else if (key == "nuclidefound")
+                                {
+                                    ret.Add(key, v == "1" ? "发现" : "未发现");
+                                }
+                                else if (key.IndexOf("alarm") >= 0 || key == "direction")
+                                {
+                                    ret.Add(key, v);
+                                }
+                                else
+                                {
+                                    ret.Add(key, v);
+                                }
+                            }
                         }
                         catch (SqlNullValueException)
                         {
@@ -312,7 +318,7 @@ namespace Scada.MainVision
         /// <param name="count"></param>
         /// <param name="from"></param>
         /// <param name="to"></param>
-        private List<Dictionary<string, object>> Refresh(string deviceKey, bool current, int count, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
+        private List<Dictionary<string, object>> Refresh(string deviceKey, bool current, int count, DateTime beginTime, DateTime endTime, DateTime fromTime, DateTime toTime, MySqlCommand cmd)
         {
             // Return values
             var ret = new List<Dictionary<string, object>>();
@@ -321,26 +327,101 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
             if (current)
             {
+                // Dead Branch
                 cmd.CommandText = this.GetSelectStatement(entry.TableName, count);
             }
             else
             {
-                cmd.CommandText = this.GetSelectStatement(entry.TableName, fromTime, toTime);
+                cmd.CommandText = this.GetSelectStatement(entry.TableName, beginTime, endTime, fromTime, toTime);
             }
 
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
                 int index = 0;
+
+                List<string> keys = new List<string>();
+                foreach (var i in entry.ConfigItems)
+                {
+                    string key = i.Key.ToLower();
+                    if (deviceKey == DataProvider.DeviceKey_NaI && key.IndexOf('-') > 0)
+                    {
+                        continue;
+                    }
+
+                    keys.Add(key);
+                }
+
+                if (deviceKey == DataProvider.DeviceKey_Hpic || deviceKey == DataProvider.DeviceKey_Weather)
+                {
+                    keys.Add("ifrain");
+                }
+
+                string[] keyArray = keys.ToArray();
+
+                Dictionary<string, object> data = null;// new Dictionary<string, object>(10);
                 while (reader.Read())
                 {
-                    Dictionary<string, object> data = new Dictionary<string, object>(10);
-                    foreach (var i in entry.ConfigItems)
+                    data = new Dictionary<string, object>(keyArray.Length);
+                    foreach (var key in keyArray)
                     {
-                        string key = i.Key.ToLower();
                         try
                         {
-                            string v = reader.GetString(key);
-                            data.Add(key, v);
+                            // -----------------------------
+                            int i = reader.GetOrdinal(key);
+                            if (!reader.IsDBNull(i))
+                            {
+                                string v = reader.GetString(i);
+                                if (key == "ifrain")
+                                {
+                                    if (v == "0")
+                                    {
+                                        data.Add(key, false);
+                                    }
+                                    else
+                                    {
+                                        data.Add(key, true);
+                                    }
+                                }
+                                else if (key == "doserate")
+                                {
+                                    double dv;
+                                    if (double.TryParse(v, out dv))
+                                    {
+                                        data.Add(key, dv.ToString("0.0"));
+                                    }
+                                    else
+                                    {
+                                        data.Add(key, v);
+                                    }
+                                }
+                                else if (key == "nuclidefound")
+                                {
+                                    data.Add(key, v == "1" ? "发现" : "未发现");
+                                }
+                                else if (key.IndexOf("alarm") >= 0)
+                                {
+                                    data.Add(key, v);
+                                }
+                                else
+                                {
+                                    double d;
+                                    if (double.TryParse(v, out d))
+                                    {
+                                        data.Add(key, d.ToString("0.0"));
+                                    }
+                                    else
+                                    {
+                                        data.Add(key, d.ToString(v));
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (key == "ifrain")
+                                {
+                                    data.Add(key, false);
+                                }
+                            }
                         }
                         catch (SqlNullValueException)
                         {
@@ -352,26 +433,37 @@ namespace Scada.MainVision
                         }
                         catch (Exception e)
                         {
-                            break;
+                            // break;
                             // No this field.
                         }
                     }
 
+                    /*
                     if (entry.DataFilter != null)
                     {
                         entry.DataFilter.Fill(data);
                     }
+                    */
                     ret.Add(data);
 
                     index++;
                 }
             }
 
-            if (deviceKey == "scada.weather")
-            {
-                ReviseIfRainForWeather(cmd, ret);
-            }
             return ret;
+        }
+
+        private void AddRainStatus(List<Dictionary<string, object>> ret, string time, string ifRain)
+        {
+            foreach (var i in ret)
+            {
+                if ((string)i["time"] == time)
+                {
+                    i.Add("ifrain", ifRain == "1");
+                    return;
+                }
+            }
+
         }
 
         private void ReviseIfRainForWeather(MySqlCommand cmd, List<Dictionary<string, object>> ret)
@@ -383,9 +475,16 @@ namespace Scada.MainVision
 
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    if (reader.Read())
+                    try
                     {
-                        item["ifrain"] = reader.GetString("IfRain");
+                        if (reader.Read())
+                        {
+                            item["ifrain"] = reader.GetString("IfRain");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        //MessageBox.Show(e.Message);
                     }
                 }
             }
@@ -405,12 +504,95 @@ namespace Scada.MainVision
             return string.Format(format, tableName, count);
         }
 
-        private string GetSelectStatement(string tableName, DateTime fromTime, DateTime toTime)
+        private string GetSelectStatement(string tableName, DateTime beginTime, DateTime endTime, DateTime fromTime, DateTime toTime)
         {
-            // Get the recent <count> entries.
-            string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
-            string sql = string.Format(format, tableName, toTime, fromTime);
-            return sql;
+            fromTime = beginTime;
+            toTime = endTime;
+            int days = (endTime - beginTime).Days;
+            if (days <= 2)
+            {
+                if (tableName.ToLower().IndexOf("hpic") >= 0)
+                {
+                    string format = "select a.time, a.doserate, a.Highvoltage, a.Temperature, a.Battery, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                if (tableName.ToLower().IndexOf("weather") >= 0)
+                {
+                    string format = "select a.time, a.Windspeed, a.Direction, a.Temperature, a.Humidity, a.Pressure, a.Raingauge, a.Rainspeed, a.Dewpoint, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+            }
+            else
+            {
+                int interval = 300;
+                if (days > 7)
+                    interval = 3600;
+                string timeIndex = string.Format("FROM_UNIXTIME( CEILING(UNIX_TIMESTAMP(a.time) / {0}) * {1}) as time", interval, interval);
+                // Too many days!
+                if (tableName.ToLower().IndexOf("hpic") >= 0)
+                {
+                    string format = "select {0}, avg(a.doserate) as doserate, avg(a.Highvoltage) as Highvoltage, avg(a.Temperature) as Temperature, avg(a.Battery) as Battery, avg(b.ifRain) as ifRain from {1} a left join RDSampler_rec b on a.time=b.time where a.time<'{2}' and a.time>'{3}' group by time order by Time DESC";
+                    string sql = string.Format(format, timeIndex, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("weather") >= 0)
+                {
+                    //string format = "select a.time, a.Windspeed, a.Direction, a.Temperature, a.Humidity, a.Pressure, a.Raingauge, a.Rainspeed, a.Dewpoint, b.ifRain from {0} a left join RDSampler_rec b on a.time=b.time where a.time<'{1}' and a.time>'{2}' order by Time DESC";
+                    string format = "select {0}, avg(a.Windspeed) as Windspeed, avg(a.Direction) as Direction, avg(a.Temperature) as Temperature, avg(a.Humidity) as Humidity, avg(a.Pressure) as Pressure, avg(a.Raingauge) as Raingauge, avg(a.Rainspeed) as Rainspeed, avg(a.Dewpoint) as Dewpoint, avg(b.ifRain) as ifRain from {1} a left join RDSampler_rec b on a.time=b.time where a.time<'{2}' and a.time>'{3}' group by time order by Time DESC";
+                    string sql = string.Format(format, timeIndex, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("nai") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("mds") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("ais") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("environment") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else if (tableName.ToLower().IndexOf("rdsampler") >= 0)
+                {
+                    // Get the recent <count> entries.
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+                else
+                {
+                    string format = "select * from {0}  where time<'{1}' and time>'{2}' order by Time DESC";
+                    string sql = string.Format(format, tableName, toTime, fromTime);
+                    return sql;
+                }
+            }
         }
 
         private DataListener GetDataListenerByTableName(string tableName)
@@ -455,9 +637,9 @@ namespace Scada.MainVision
             return 1;
         }
 
-        public string GetNaIDeviceChannelData(DateTime time, MySqlCommand cmd)
+        public string GetNaIDeviceChannelData(DateTime time, MySqlCommand cmd, out double a, out double b, out double c)
         {
-            string sql = string.Format("select ChannelData from nai_rec where time='{0}'", time);
+            string sql = string.Format("select ChannelData, Coefficients from nai_rec where time='{0}'", time);
             cmd.CommandText = sql;
 
             using (MySqlDataReader reader = cmd.ExecuteReader())
@@ -465,10 +647,102 @@ namespace Scada.MainVision
                 if (reader.Read())
                 {
                     string ret = reader.GetString(0);
+                    string co = reader.GetString(1);
+                    string[] d = co.Split(' ');
+                    c = double.Parse(d[0]);
+                    b = double.Parse(d[1]);
+                    a = double.Parse(d[2]);
                     return ret;
                 }
             }
+            a = 0.0;
+            b = 1.0;
+            c = 0.0;
             return string.Empty;
+        }
+
+        internal List<Dictionary<string, object>> GetSidData(string p, DateTime dt1, DateTime dt2)
+        {
+            List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
+            using (var conn = this.GetMySqlConnection())
+            {
+                using (var cmd = conn.CreateCommand())
+                {
+                    string tableName = (p == DataProvider.DeviceKey_MDS) ? "mds_rec" : "ais_rec";
+                    
+                    string sql = string.Format("select * from {0} where time>'{1}' and time<'{2}' and status=0", tableName, dt1, dt2);
+                    cmd.CommandText = sql;
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        
+                        while (reader.Read())
+                        {
+                            var data = new Dictionary<string, object>();
+                            data.Add("sid", reader.GetString("Sid"));
+                            data.Add("begintime", reader.GetString("begintime"));
+                            data.Add("endtime", reader.GetString("endtime"));
+                            data.Add("volume", reader.GetString("volume"));
+                            data.Add("hours", reader.GetString("hours"));
+                            ret.Add(data);
+                        }
+
+                        
+                    }
+                }
+            }
+            return ret;
+        }
+
+
+
+        internal List<Dictionary<string, object>> GetDoorStatus(DateTime dt1, DateTime dt2)
+        {
+            List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
+            using (var conn = this.GetMySqlConnection())
+            {
+                using (var cmd = conn.CreateCommand())
+                {
+                    int ifOpen = 1;
+
+                    string beginTime = dt1.ToString();
+                    string endTime = string.Empty;
+                    while (true)
+                    {
+                        string sql = string.Format("select * from environment_rec where time>'{0}' and time<'{1}' and ifDoorOpen={2} limit 1", beginTime, dt2, ifOpen);
+                        cmd.CommandText = sql;
+
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            var data = new Dictionary<string, object>();
+                            if (!reader.Read())
+                            {
+                                break;
+                            }
+
+
+                            if (ifOpen == 0)
+                            {
+                                ifOpen = 1;
+                                endTime = reader.GetString("Time");
+                                ret.Add(new Dictionary<string, object>() 
+                                {
+                                    {"begintime", beginTime}, {"endtime", endTime}
+                                }
+                                );
+                                beginTime = endTime;
+                            }
+                            else
+                            {
+                                ifOpen = 0;
+                                beginTime = reader.GetString("Time");
+                            }
+                        }
+                    }
+
+                }
+            }
+            return ret;
         }
     }
 }

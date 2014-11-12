@@ -80,6 +80,10 @@ namespace Scada.MainVision
             this.StationName = this.GetAttribute(appNode, "station", "????自动站");
             this.Status = this.GetAttribute(appNode, "status", "试运行");
             this.StationId = this.GetAttribute(appNode, "stationId", "00000000001");
+            this.Pos = this.GetAttribute(appNode, "pos", "未知GPS信息");
+            this.UserComp = this.GetAttribute(appNode, "usercomp", "未知用户单位");
+            this.AdminComp = this.GetAttribute(appNode, "admincomp", "未知运营单位");
+            this.BuildComp = this.GetAttribute(appNode, "buildcomp", "未知承建单位");
         }
 
         private string GetAttribute(XmlNode node, string attr, string defaultValue = "")
@@ -100,15 +104,32 @@ namespace Scada.MainVision
             get;
             set;
         }
+
         public string StationName
         {
             get;
             set;
         }
 
+        public string Pos
+        {
+            get;
+            set;
+        }
+
+
+
 
         public string Status { get; set; }
+
         public string StationId { get; set; }
-        
+
+        public string UserComp { get; set; }
+
+        public string AdminComp { get; set; }
+
+        public string BuildComp { get; set; }
+
+        public string HpicAlarm { get; set; }
     }
 }

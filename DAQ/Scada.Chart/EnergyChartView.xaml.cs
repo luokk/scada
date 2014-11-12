@@ -103,8 +103,7 @@ namespace Scada.Chart
                 return;
             }
             this.initialized = true;
-            this.InitPointAxis();
-            //this.AddCurveView("Energy", "能谱图");
+            this.AddCurveView("Energy", "能谱图");
         }
 
         private DateTime GetBaseTime(DateTime startTime)
@@ -126,28 +125,6 @@ namespace Scada.Chart
             return baseTime;
         }
 
-        private void InitPointAxis()
-        {
-            /*
-            for (int i = 0; i < 2048 / 2; i++)
-            {
-                // One interval per 5px
-                double x = i * Grad;
-                Line scaleLine = new Line();
-
-                this.Graduations.Add(i, new GraduationLine() { Line = scaleLine, Pos = x });
-
-                bool isWholePoint = (i % 10 == 0);
-                scaleLine.X1 = scaleLine.X2 = x;
-                scaleLine.Y1 = 0;
-                scaleLine.Y2 = isWholePoint ? Charts.MainScaleLength : Charts.ScaleLength;
-                scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
-                this.PointAxis.Children.Add(scaleLine);
-            }
-
-            this.UpdatePointAxis();
-            */ 
-        }
 
         public void UpdatePointAxis()
         {
@@ -191,14 +168,14 @@ namespace Scada.Chart
         // !
         public EnergyCurveView AddCurveView(string curveViewName, string displayName)
         {
-            EnergyCurveView curveView = new EnergyCurveView(this);
-            curveView.CurveViewName = curveViewName;
-            curveView.PointAxisScale = this.PointAxisScale;
-            curveView.Height = 400;
+            //EnergyCurveView curveView = new EnergyCurveView(this);
+            this.CurveView.CurveViewName = curveViewName;
+            this.CurveView.PointAxisScale = this.PointAxisScale;
+            this.CurveView.Height = 400;
             
-            this.ChartContainer.Children.Add(curveView);
+            //this.ChartContainer.Children.Add(curveView);
             //this.ChartContainer.Height= 500;
-            return curveView;
+            return this.CurveView;
         }
 
         public void ClearPoints()
@@ -208,40 +185,45 @@ namespace Scada.Chart
             //this.index = 0;
         }
 
-        public void SetDataPoints(int[] data)
+        public void SetDataPoints(int[] data, double a, double b, double c)
         {
+            int[] n = new int[3200];
+
+            int lastEx = 0;
+            for (int j = 1; j <= 2048; j++)
+            {
+                int ex = (int)(a * j * j + b * j + c);
+                if (ex < 0) 
+                    ex = 0;
+                if (ex >= 3200)
+                    break;
+                for (int p = lastEx; p <= ex; p++)
+                {
+                    n[p] = data[j - 1];
+                }
+                lastEx = ex;
+            }
+
             EnergyCurveView curveView = (EnergyCurveView)this.CurveView;
-
-
-            curveView.SetPoints(data);
+            curveView.SetPoints(n);
         }
 
         private void MainViewMouseMove(object sender, MouseEventArgs e)
         {
-            if (this.pressed)
-            {
-                // Mouse.SetCursor(Cursors.ScrollWE);
-                // this.MoveCurveLines(e, true);
-            }
-            else
-            {
-                Mouse.SetCursor(Cursors.Arrow);
-                this.TrackTimeLine(e);
-                this.MoveCurveLines(e, false);
-            }
+            Mouse.SetCursor(Cursors.Arrow);
+            this.TrackTimeLine(e);
+            this.MoveCurveLines(e, false);
         }
-
 
         private void TrackTimeLine(MouseEventArgs e)
         {
-            bool timed = false;
             string timeLabel = string.Empty;
             EnergyCurveView curveView = (EnergyCurveView)this.CurveView;
 
             Point point = e.GetPosition((UIElement)curveView.View);
             double x = point.X;
             double centerX = curveView.CenterX;
-            if (!timed && x >= 0)
+            if (x >= 0)
             {
                 double v = (x - centerX) / scale + centerX;
                 double index = v / Grad / IntervalCount;
@@ -250,58 +232,10 @@ namespace Scada.Chart
             }
 
             curveView.TrackTimeLine(point, timeLabel);
-
-            /*
-            foreach (var view in this.ChartContainer.Children)
-            {
-                EnergyCurveView curveView = (EnergyCurveView)view;
-
-                Point point = e.GetPosition((UIElement)curveView.View);
-                double x = point.X;
-                double centerX = curveView.CenterX;
-                if (!timed && x >= 0)
-                {
-                    double v = (x - centerX) / scale + centerX;
-                    double index = v / Grad / IntervalCount;
-
-                    timeLabel = this.GetFormatDateTime(this.currentBaseTime, index, IntervalCount * this.Interval);
-                }
-
-                curveView.TrackTimeLine(point, timeLabel);
-            }*/
         }
 
         private void MoveCurveLines(MouseEventArgs e, bool moving)
         {
-            /*
-            bool timed = false;
-            string timeLabel = string.Empty;
-            foreach (var view in this.ChartContainer.Children)
-            {
-                EnergyCurveView curveView = (EnergyCurveView)view;
-
-                if (moving)
-                {
-
-                    Point point = e.GetPosition((UIElement)curveView.View);
-                    double x = point.X;
-                    double centerX = curveView.CenterX;
-                    if (!timed && x >= 0)
-                    {
-                        double v = (x - centerX) / scale + centerX;
-
-                        double index = v / Grad / 5;
-                        timeLabel = this.GetFormatDateTime(this.currentBaseTime, (int)index, this.Interval);
-                    }
-
-                    curveView.MoveCurveLine(point, timeLabel);
-                }
-                else
-                {
-                    curveView.MoveCurveLine(false);
-                }
-            }
-            */
         }
 
 
@@ -316,65 +250,6 @@ namespace Scada.Chart
             set
             {
                 this.SetValue(PointAxisScaleProperty, (long)value);
-            }
-        }
-
-        private void ZoomHandler(object sender, MouseWheelEventArgs e)
-        {
-            e.Handled = true;
-
-            int a = e.Delta;
-            if (a > 0)
-            {
-                this.scale += 0.1;
-                if (this.scale > 3.0)
-                {
-                    this.scale = 3.0;
-                }
-            }
-            else if (a < 0)
-            {
-                this.scale -= 0.1;
-                if (this.scale < 1.0)
-                {
-                    this.scale = 1.0;
-                }
-            }
-
-            this.ZoomChartView(this.scale);
-        }
-
-        private void ZoomChartView(double scale)
-        {
-            double centerX = 0.0;
-            EnergyCurveView curveView = (EnergyCurveView)this.CurveView;
-            curveView.UpdateCurveScale(scale);
-            centerX = curveView.CenterX;
-
-            this.UpdateTimeAxisScale(scale, centerX);
-        }
-
-        private void UpdateTimeAxisScale(double scale, double centerX)
-        {
-            if (scale < 1.0 || scale > 3.0)
-            {
-                return;
-            }
-
-            // Update Time graduation lines.
-            foreach (var g in this.Graduations)
-            {
-                Line l = g.Value.Line;
-                l.X1 = l.X2 = (g.Value.Pos - centerX) * scale + centerX;
-            }
-
-            // Update Time Label
-            foreach (var t in this.GraduationTimes)
-            {
-                TextBlock b = t.Value.Text;
-                // double pos = (g.Value.Pos - centerY) * scale + centerY;
-                double pos = (t.Value.Pos - centerX) * scale + centerX;
-                b.SetValue(Canvas.LeftProperty, (double)pos - Offset);
             }
         }
 
@@ -422,8 +297,6 @@ namespace Scada.Chart
             set;
         }
 
-
-
         public void SaveChart()
         {
             DateTime now = DateTime.Now;
@@ -439,22 +312,6 @@ namespace Scada.Chart
             encoder.Save(ms);
             ms.Close();
         }
-
-
-        private bool pressed = false;
-
-        private void CanvasViewMouseLeftButtonEventHandler(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ButtonState == MouseButtonState.Pressed)
-            {
-                pressed = true;
-            }
-            else
-            {
-                pressed = false;
-            }
-        }
-
 
     }
 }

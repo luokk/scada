@@ -101,7 +101,7 @@ namespace Scada.Installer
             }
 
             // 以后MainVision是唯一的用户操作入口
-            if (CreateDesktopIcons("Scada.MainVision.exe", "Nuclover - SCADA"))
+            if (CreateDesktopIcons("Scada.MainVision.exe", "辐射环境自动监测站管理系统"))
             {
                 if (this.installMode)
                 {

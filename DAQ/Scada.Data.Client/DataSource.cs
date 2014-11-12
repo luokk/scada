@@ -67,8 +67,16 @@ namespace Scada.Data.Client
         {
             string connectionString = new DBConnectionString().ToString();
             var conn = new MySqlConnection(connectionString);
-            conn.Open();
-            return conn;
+
+            try
+            {
+                conn.Open();
+                return conn;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         Packet GetDataPacket(string deviceKey, DateTime time)
@@ -200,7 +208,8 @@ namespace Scada.Data.Client
             }
             else
             {
-                Log.GetLogFile("scada.naidevice").Log(string.Format("{0} Not_Found", filePath));
+                // TODO: fix here, For second agent process, I disbale this log for temp.
+                // Log.GetLogFile("scada.naidevice").Log(string.Format("{0} Not_Found", filePath));
             }
 
             return content;
@@ -271,21 +280,28 @@ namespace Scada.Data.Client
             return sid;
         }
 
-        internal string GetNewHpGeFile()
+        internal string GetNewHpGeFile(string sid = null)
         {
             string path = LogPath.GetDeviceLogFilePath("scada.hpge");
-            string sid = GetCurrentSid();
+            if (string.IsNullOrEmpty(sid))
+            {
+                sid = GetCurrentSid();
+            }
 
             string currentFilePath = Path.Combine(path, sid);
 
-            string[] files = Directory.GetFiles(currentFilePath);
-            foreach (var file in files)
+            if (Directory.Exists(currentFilePath))
             {
-                string fileName = Path.GetFileName(file);
-                if (fileName.StartsWith("!"))
-                    return file;
+                string[] files = Directory.GetFiles(currentFilePath);
+                foreach (var file in files)
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (!fileName.StartsWith("!"))
+                        return file;
+                }
+                return string.Empty;
             }
-            return string.Empty;
+            else { return string.Empty; }
         }
     }
 }

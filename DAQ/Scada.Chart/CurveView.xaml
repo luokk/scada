@@ -11,7 +11,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="6"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="4"></RowDefinition>
+                <RowDefinition Height="0"></RowDefinition>
             </Grid.RowDefinitions>
             
             <Grid.ColumnDefinitions>
@@ -24,8 +24,27 @@
 
             <Canvas x:Name="CanvasView" Background="#F8F8F8" Grid.Row="1" Grid.Column="1" 
                     MouseMove="CanvasViewMouseMove" 
-                    
-                    >
+                    MouseLeftButtonDown="CanvasView_MouseLeftButtonDown"
+                    MouseLeftButtonUp="CanvasView_MouseLeftButtonUp">
+                <Button x:Name="ResetButton" Canvas.Top="55" Canvas.Right="10" Cursor="Hand" Click="OnResetClick" Panel.ZIndex="100"> 重置
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <TextBlock TextDecorations="Underline">  
+                                <ContentPresenter />
+                            </TextBlock>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Foreground" Value="Blue" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                    <Setter Property="Foreground" Value="Red" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Canvas>
         </Grid>
     </Border>

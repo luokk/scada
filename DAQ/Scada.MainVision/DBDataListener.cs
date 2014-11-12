@@ -9,7 +9,7 @@ namespace Scada.Controls.Data
     {
         TimeNew,
         TimeRecent,
-        TimeRange,
+        TimeRange
     }
 
 	public delegate void OnDataArrivalBegin(DataArrivalConfig config);
@@ -20,6 +20,11 @@ namespace Scada.Controls.Data
 
     public class ColumnInfo
     {
+        public ColumnInfo()
+        {
+            this.Width = 160;
+        }
+
         public string Header
         {
             get;

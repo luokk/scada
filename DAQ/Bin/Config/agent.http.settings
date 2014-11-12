@@ -2,8 +2,8 @@
 <settings>
   <!-- Default Port is 6000 and 7000 -->
   <datacenters>
-    
     <datacenter2 BaseUrl="http://127.0.0.1:8080" />
+
     
 
     <!--
@@ -27,7 +27,7 @@
   <devices use-debug-data-time="true">
     <!-- NOTICE -->
     <!-- NOTICE -->
-    <device id="scada.hpic" table="HPIC_rec" eno="001001" debug-data-time="2014-07-02 20:26:30">
+    <device id="scada.hpic" table="HPIC_rec" eno="001001" debug-data-time="2014-09-29 12:00:30">
       <code field="doserate">0102060301</code>
       <code field="battery">0102069901</code>
       <code field="highvoltage">0102069902</code>
