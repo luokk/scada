@@ -434,7 +434,7 @@ namespace Scada.Data.Client.Tcp
                     }
                 }
 
-                if (this.agent != null && pks.Count > 0)
+                if (this.agent != null && this.agent.Stream != null && pks.Count > 0)
                 {
                     Logger logger = Log.GetLogFile(deviceKey);
                     logger.Log("---- BEGIN ----");
