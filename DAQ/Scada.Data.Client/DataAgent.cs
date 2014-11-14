@@ -279,6 +279,13 @@ namespace Scada.Data.Client
                 try {  param = this.GetHpGeParams(packet.Path); }
                 catch (Exception e1Q)
                 {
+                    Notify msg = new Notify();
+                    msg.Message = "GetHpGeParams Error";
+                    this.NotifyEvent(this, NotifyEvents.EventMessage, msg);
+
+                    // 上传失败，移除占用标志
+                    RemoveOccupiedToken(packet);
+
                     return false;
                 }
                 
