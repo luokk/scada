@@ -102,6 +102,7 @@ namespace Scada.Data.Client
             }
             catch (Exception)
             {
+                this.commandClient = null;
             }
         }
 
