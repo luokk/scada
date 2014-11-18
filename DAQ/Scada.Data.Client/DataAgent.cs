@@ -240,7 +240,11 @@ namespace Scada.Data.Client
 
             if (File.Exists(fileNameWithToken))
             {
-                File.Move(fileNameWithToken, fileNameWithToken.Replace("!", ""));
+                string fileName = Path.GetFileName(fileNameWithToken);
+                string path = Path.GetDirectoryName(fileNameWithToken);
+                fileName = fileName.Substring(1);
+                string newFileName = Path.Combine(path, fileName);
+                File.Move(fileNameWithToken, newFileName);
             }
         }
 
@@ -278,9 +282,13 @@ namespace Scada.Data.Client
                 var folder = GetPacketSID(packet);
 
                 var param = "";
-                try {  param = this.GetHpGeParams(packet.Path); }
-                catch (Exception e1Q)
+                try 
+                {  
+                    param = this.GetHpGeParams(packet.Path); 
+                }
+                catch (Exception)
                 {
+                    RemoveOccupiedToken(packet);
                     return false;
                 }
                 
