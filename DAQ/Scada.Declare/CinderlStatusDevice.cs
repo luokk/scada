@@ -94,6 +94,7 @@ namespace Scada.Declare
                     string c = WorkMode.ToString() + ";" + LoopMode.ToString() + ";" + Running_Process.ToString() + ";" + status.ToString();
                     this.UpdateStatusToDataCenter(c);
                     Command.Send(Ports.MainVision, new Command("m", "mv", "cinderella.status", c));
+                    RecordManager.DoSystemEventRecord(this, c);
                 }
                 counter++;
 
@@ -127,6 +128,13 @@ namespace Scada.Declare
             {
                 byte[] data = Encoding.UTF8.GetBytes(status);
                 string uri = this.GetUpdateStatusUri();
+                wc.UploadDataCompleted += (object o, UploadDataCompletedEventArgs e) => 
+                {
+                    if (e.Error == null)
+                    {
+                        string result = Encoding.UTF8.GetString(e.Result);
+                    }
+                };
                 wc.UploadDataAsync(new Uri(uri), "POST", data, null);
             }
         }
