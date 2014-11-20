@@ -58,7 +58,6 @@ namespace Scada.MainVision
 		{
             TreeViewItem tvi = (TreeViewItem)sender;
             this.ClickDeviceItem(tvi.DataContext, args);
-
             this.MainWindow.OnSelectionChanged(tvi);
 		}
 
@@ -66,8 +65,6 @@ namespace Scada.MainVision
 		{
 			
 		}
-
-
 
         public event EventHandler ClickDeviceItem;
 

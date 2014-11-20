@@ -92,16 +92,18 @@ namespace Scada.Declare
             }
 
 			string line = RecordManager.PackDeviceData(deviceData);
-			
-            // remove temp by Kaikai
-            //RecordManager.WriteDataToLog(deviceData.Device, line, RecordType.Data);
 
             // Record into MySQL:)
-			if (!RecordManager.mysql.DoRecord(deviceData))
-			{
-				// TODO: Do log this failure.
+            if (!RecordManager.mysql.DoRecord(deviceData))
+            {
+                // TODO: Do log this failure.
                 RecordManager.WriteDataToLog(deviceData.Device, "Insert to DB Error", RecordType.Data);
-			}
+            }
+            else 
+            {
+                // log
+                RecordManager.WriteDataToLog(deviceData.Device, line, RecordType.Data);
+            }
 		}
 
 		private static string PackDeviceData(DeviceData deviceData)

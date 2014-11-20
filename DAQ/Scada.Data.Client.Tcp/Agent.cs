@@ -53,7 +53,10 @@ namespace Scada.Data.Client.Tcp
     {
         Connecting,
         Connected,
+        ConnectedCountry,
         Disconnect,
+        DisconnectCountry,
+        Disconnect2,
         BeginRead,
         EndRead,
         Received,
@@ -153,6 +156,12 @@ namespace Scada.Data.Client.Tcp
             set;
         }
 
+        internal bool SendDataDirectlyStartedByError
+        {
+            get;
+            set;
+        }
+
         public Agent(string serverAddress, int serverPort)
         {
             this.ServerAddress = serverAddress;
@@ -192,7 +201,6 @@ namespace Scada.Data.Client.Tcp
             get;
         }
 
-        // No use.
         public Type Type
         {
             get;
@@ -285,7 +293,7 @@ namespace Scada.Data.Client.Tcp
         private void OnConnectionException(Exception e)
         {
             this.Disconnect();
-            this.TryToPing();
+            // this.TryToPing();
         }
 
         private IPStatus GetPingResult(string serverIpAddress)
@@ -358,20 +366,26 @@ namespace Scada.Data.Client.Tcp
                 {
                     this.client = new TcpClient();
                     this.client.ReceiveTimeout = Timeout;
-                    
+
                     this.client.BeginConnect(serverIpAddress, serverPort,
                         new AsyncCallback(ConnectCallback),
                         this.client);
 
                     string msg = string.Format("Connecting to {0}:{1} retry times = {2}.", serverIpAddress, serverPort, this.retryCount);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
+                    if (this.Type == Type.Province)
+                    {
+                        this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
+                    }
                 }
                 else
                 {
                     string msg = string.Format("Connecting to {0}:{1} Already!!", serverIpAddress, serverPort);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
+                    if (this.Type == Type.Province)
+                    {
+                        this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
+                    }
                 }
             }
             catch (Exception e)
@@ -399,13 +413,20 @@ namespace Scada.Data.Client.Tcp
                 }
                 string msg = string.Format("Disconnect from {0}", this.ToString());
                 this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
+                if (this.Type == Type.Country)
+                {
+                    this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
+                }
+                else
+                {
+                    this.NotifyEvent(this, NotifyEvents.DisconnectCountry, msg, null);
+                }
             }
             catch (Exception e)
             {
                 string msg = string.Format("Disconnect from {0} Failed => {1}", this.ToString(), e.Message);
                 this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
+                this.NotifyEvent(this, NotifyEvents.Disconnect2, msg, null);
             }
             this.Stream = null;
             this.client = null;
@@ -434,7 +455,15 @@ namespace Scada.Data.Client.Tcp
 
                         string msg = string.Format("Connected to {0}", this.ToString());
                         this.DoLog(ScadaDataClient, msg);
-                        this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
+                        if (this.Type == Type.Country)
+                        {
+                            this.NotifyEvent(this, NotifyEvents.ConnectedCountry, msg, null);
+                        }
+                        else
+                        {
+                            this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
+                        }
+
                         this.NotifyEvent(this, NotifyEvents.HandleEvent, msg, null);
                     }   
                 }
@@ -443,7 +472,15 @@ namespace Scada.Data.Client.Tcp
                     string address = this.isConnectingWired ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
                     string msg = string.Format("Connected to {0} Failed => {1}", address, e.Message);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
+
+                    if (this.Type == Type.Country)
+                    {
+                        this.NotifyEvent(this, NotifyEvents.DisconnectCountry, msg, null);
+                    }
+                    else
+                    {
+                        this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
+                    }
 
                     this.OnConnectionException(e);
                 }
@@ -574,7 +611,10 @@ namespace Scada.Data.Client.Tcp
             timer.Elapsed += (s, e) => 
             {
                 if (this.client != null)
+                {
+                    Console.WriteLine("ConnectRetryRoutine client != null");
                     return;
+                }
 
                 if (this.UIThreadMashaller != null)
                 {
@@ -583,6 +623,8 @@ namespace Scada.Data.Client.Tcp
                     {
                         this.UIThreadMashaller.Mashall((o) =>
                         {
+                            this.DoLog(ScadaDataClient, "ConnectRetryRoutine");
+                            Console.WriteLine("ConnectRetryRoutine");
                             this.Connect();
                         });   
                     }
@@ -655,18 +697,22 @@ namespace Scada.Data.Client.Tcp
             return this.Send(Encoding.ASCII.GetBytes(s));
         }
 
-        internal void StartConnectCountryCenter()
+        internal void StartConnectCountryCenter(bool sendDataDirectlyStartedByError = false)
         {
             this.SendDataDirectlyStarted = true;
+            this.SendDataDirectlyStartedByError = sendDataDirectlyStartedByError;
             string msg = string.Format("启动到国家数据中心的连接!");
             this.NotifyEvent(this, NotifyEvents.ConnectToCountryCenter, msg, null);
         }
 
-        internal void StopConnectCountryCenter()
+        internal void StopConnectCountryCenter(bool sendDataDirectlyStartedByError = false)
         {
-            this.SendDataDirectlyStarted = false;
-            string msg = string.Format("国家数据中心连接已断开");
-            this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg, null);
+            if (this.SendDataDirectlyStartedByError == sendDataDirectlyStartedByError)
+            {
+                this.SendDataDirectlyStarted = false;
+                string msg = string.Format("国家数据中心连接已断开");
+                this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg, null);
+            }
         }
 
         public ThreadMashaller UIThreadMashaller

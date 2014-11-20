@@ -60,13 +60,21 @@ namespace Scada.Data.Client
         {
             if (!string.IsNullOrEmpty(fileName) && File.Exists(fileName))
             {
+                // package占用文件，同时改变其文件名
+                int index = fileName.LastIndexOf("\\");
+                string fileNameWithToken = fileName.Insert(index + 1, "!");
+                if (!File.Exists(fileNameWithToken))
+                {
+                    File.Move(fileName, fileNameWithToken);
+                }
+
                 Packet packet = new Packet(this.Token);
-                packet.Path = fileName;
+                packet.Path = fileNameWithToken;
                 packet.FileType = fileType;
                 packet.IsFilePacket = true;
                 return packet;
             }
-            return null;
+            else { return null; }            
         }
 
         internal Packet CombinePacket(Packet packet1, Packet packet2)
