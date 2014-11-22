@@ -662,15 +662,10 @@ namespace Scada.Data.Client
 
         private void OnNotify(DataAgent agent, NotifyEvents notifyEvent, Notify p)
         {
-            this.SafeInvoke(() =>
+            this.SafePostInvoke(() =>
             {
                 this.OnNotifyAtUIThread(agent, notifyEvent, p);
             });
-        }
-
-        private void OnNotify2(DataAgent agent, NotifyEvents notifyEvent, Notify p)
-        {
-            
         }
 
         /// <summary>

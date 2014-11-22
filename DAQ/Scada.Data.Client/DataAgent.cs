@@ -186,6 +186,22 @@ namespace Scada.Data.Client
         /// <param name="p"></param>
         internal bool SendPacket(Packet p)
         {
+            if (SynchronizationContext.Current != null)
+            {
+                ThreadPool.QueueUserWorkItem(new WaitCallback((o) => 
+                {
+                    this.SendPacket(p, true);
+                }), null);
+                return true;
+            }
+            else
+            {
+                return this.SendPacket(p, false);
+            }
+        }
+
+        private bool SendPacket(Packet p, bool fromNewThread)
+        {
             if (!p.IsFilePacket)
             {
                 return this.SendDataPacket(p, default(DateTime));
