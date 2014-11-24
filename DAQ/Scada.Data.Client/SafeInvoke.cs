@@ -21,5 +21,17 @@ namespace Scada.Data.Client
                 handler();
             }
         }
+
+        public static void SafePostInvoke(this Control control, InvokeHandler handler)
+        {
+            if (control.InvokeRequired)
+            {
+                control.BeginInvoke(handler);
+            }
+            else
+            {
+                handler();
+            }
+        }
     }
 }
