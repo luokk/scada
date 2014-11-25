@@ -297,7 +297,7 @@ namespace Scada.Data.Client
             this.sendDBDataTimer = new System.Windows.Forms.Timer();
             this.sendDBDataTimer.Interval = DBDataTimerInterval;
             this.sendDBDataTimer.Tick += this.HttpSendDBDataTick;
-            this.sendDBDataTimer.Start();;
+            this.sendDBDataTimer.Start();
 
             // 每20s从数据中心取一次数据
             this.recvDataTimer = new System.Windows.Forms.Timer();
