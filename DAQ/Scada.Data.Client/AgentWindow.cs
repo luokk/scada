@@ -320,7 +320,7 @@ namespace Scada.Data.Client
             if (!this.isAutoData)
                 return;
             DateTime now = DateTime.Now;
-
+            
             // For Upload Data Devices.
             if (IsSendDataTimeOK(now))
             {
@@ -328,6 +328,7 @@ namespace Scada.Data.Client
                 SendDevicePackets(Settings.Instance.DataDeviceKeys, now, guid.ToString());
             }
         }
+
 
         // 当归一化时间到来时上传数据
         private void HttpSendFileTick(object sender, EventArgs e)
@@ -343,6 +344,7 @@ namespace Scada.Data.Client
                 SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
             }
         }
+
 
         // 上传所有设备的(实时)数据
         private void SendDevicePackets(string[] deviceKeys, DateTime now, string packetId)
