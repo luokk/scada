@@ -136,6 +136,7 @@ namespace Scada.Data.Client.Tcp
 
         private void AgentWindowLoad(object sender, EventArgs e)
         {
+            this.Visible = false;
             LoggerClient.Initialize();
             this.logger.Send("ScadaDataClient", "Data (upload) Program starts at " + DateTime.Now);
 
@@ -143,14 +144,6 @@ namespace Scada.Data.Client.Tcp
             this.MakeWindowShownFront();
             this.ShowInTaskbar = false;
             this.SetExceptionToolStripMenuItem.Checked = false;
-
-            /*
-            this.statusStrip.Items.Add(this.GetConnetionString());
-            this.statusStrip.Items.Add(new ToolStripSeparator());
-            this.statusStrip.Items.Add("MS: " + Settings.Instance.Mn);
-            this.statusStrip.Items.Add(new ToolStripSeparator());
-            // this.statusStrip.Items.Add("数据中心IP:");
-             * */
 
             this.cmdReceiver = new CommandReceiver(Ports.DataClient);
             cmdReceiver.Start(this.OnLocalCommand);
@@ -187,6 +180,7 @@ namespace Scada.Data.Client.Tcp
                         this.WindowState = FormWindowState.Normal;
                         this.MakeWindowShownFront();
                         this.ShowAtTaskBar(true);
+                        
                     }
                     else
                     {
@@ -252,6 +246,7 @@ namespace Scada.Data.Client.Tcp
         private void MakeWindowShownFront()
         {
             this.TopMost = true;
+            this.WindowState = FormWindowState.Normal;
             this.Activate();
             this.TopMost = false;
         }
@@ -287,6 +282,7 @@ namespace Scada.Data.Client.Tcp
                 if (dc.CountryCenter)
                 {
                     // 国家中心
+                    Console.WriteLine("Start DataCenter for Country");
                     this.countryCenterAgent = CreateCountryCenterAgent(dc.Ip, dc.Port);
                     this.countryCenterAgent.AddWirelessInfo(dc.WirelessIp, dc.WirelessPort);
                 }
@@ -320,7 +316,7 @@ namespace Scada.Data.Client.Tcp
         {
             Agent agent = new Agent(serverAddress, serverPort);
             agent.Type = Type.Country;
-            // ?
+
             agent.Wireless = false;
             agent.NotifyEvent += this.OnNotifyEvent;
             return agent;
@@ -427,15 +423,18 @@ namespace Scada.Data.Client.Tcp
                 List<DataPacket> pks = builder.GetDataPackets(deviceKey, time, content);
                 foreach (var p in pks)
                 {
-                    this.agent.SendDataPacket(p);
+                    if (this.agent != null)
+                    {
+                        this.agent.SendDataPacket(p);
+                    }
 
-                    if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+                    if (this.countryCenterAgent != null)
                     {
                         this.countryCenterAgent.SendDataPacket(p);
                     }
                 }
 
-                if (pks.Count > 0)
+                if (this.agent != null && this.agent.Stream != null && pks.Count > 0)
                 {
                     Logger logger = Log.GetLogFile(deviceKey);
                     logger.Log("---- BEGIN ----");
@@ -459,11 +458,14 @@ namespace Scada.Data.Client.Tcp
         private void SendFlowDataPackets(string deviceKey, Dictionary<string, object> data)
         {
             DataPacket p = builder.GetFlowDataPacket(deviceKey, data, true);
-            if (this.agent.SendDataPacket(p))
+            if (this.agent != null)
             {
-                string msg = string.Format("RD: {0}", p.ToString());
-                Log.GetLogFile(deviceKey).Log(msg);
-                this.UpdateSendDataRecord(deviceKey, false);
+                if (this.agent.SendDataPacket(p))
+                {
+                    string msg = string.Format("RD: {0}", p.ToString());
+                    Log.GetLogFile(deviceKey).Log(msg);
+                    this.UpdateSendDataRecord(deviceKey, false);
+                }
             }
 
             if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
@@ -476,11 +478,14 @@ namespace Scada.Data.Client.Tcp
         {
             // 门禁数据
             var p = builder.GetShelterPacket(deviceKey, data, true);
-            if (this.agent.SendDataPacket(p))
+            if (this.agent != null)
             {
-                string msg = string.Format("RD: {0}", p.ToString());
-                Log.GetLogFile(deviceKey).Log(msg);
-                this.UpdateSendDataRecord(deviceKey, false);
+                if (this.agent.SendDataPacket(p))
+                {
+                    string msg = string.Format("RD: {0}", p.ToString());
+                    Log.GetLogFile(deviceKey).Log(msg);
+                    this.UpdateSendDataRecord(deviceKey, false);
+                }
             }
 
             if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
@@ -569,11 +574,6 @@ namespace Scada.Data.Client.Tcp
 
         public void SendDataPackets(DateTime time, string deviceKey)
         {
-            if (this.agent == null || !this.agent.SendDataStarted)
-            {
-                return;
-            }
-
             if (deviceKey.Equals("Scada.NaIDevice", StringComparison.OrdinalIgnoreCase))
             {
                 // For file data packets branch.
@@ -648,9 +648,15 @@ namespace Scada.Data.Client.Tcp
                     int count = this.connectionHistory.Count;
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.ConnectedTime = DateTime.Now;
+                    this.MainConnStatusLabel.ForeColor = Color.Black;
+                    this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
 
                     this.agent.StopConnectCountryCenter(true);
-                    this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
+                }
+                else if (NotifyEvents.ConnectedCountry == notify)
+                {
+                    this.SubConnStatusLabel.ForeColor = Color.Black;
+                    this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
                 }
                 else if (NotifyEvents.Disconnect == notify || NotifyEvents.Disconnect2 == notify)
                 {
@@ -658,12 +664,18 @@ namespace Scada.Data.Client.Tcp
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.DisconnectedTime = DateTime.Now;
 
-                    if (NotifyEvents.Disconnect == notify && this.retryCount % 4 == 0)
+                    if (NotifyEvents.Disconnect == notify && this.retryCount % 3 == 0)
                     {
                         this.retryCount++;
                         this.agent.StartConnectCountryCenter(true);
                     }
-                    this.MainConnStatusLabel.Text = "省中心连接状态: 已断开";
+                    this.MainConnStatusLabel.ForeColor = Color.Red;
+                    this.MainConnStatusLabel.Text = "省中心连接状态: 未连接";
+                }
+                else if (NotifyEvents.DisconnectCountry == notify)
+                {
+                    this.SubConnStatusLabel.ForeColor = Color.Red;
+                    this.SubConnStatusLabel.Text = "国家中心连接状态: 未连接";
                 }
                 else if (NotifyEvents.HandleEvent == notify)
                 {
@@ -677,18 +689,15 @@ namespace Scada.Data.Client.Tcp
                     Log.GetLogFile(deviceKey).Log(line);
                     this.UpdateSendDataRecord(deviceKey, true);
                 }
-                /// 国家数据中心相关
                 else if (NotifyEvents.ConnectToCountryCenter == notify)
                 {
                     /// 国家数据中心相关
                     this.StartConnectCountryCenter();
-                    this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
                 }
                 else if (NotifyEvents.DisconnectToCountryCenter == notify)
                 {
                     /// 国家数据中心相关
                     this.StopConnectCountryCenter();
-                    this.SubConnStatusLabel.Text = "国家中心连接状态: 已断开";
                 }
             });
         }
@@ -706,11 +715,11 @@ namespace Scada.Data.Client.Tcp
             this.mainListBox.Items.Add(line);
         }
 
-
         private void StartConnectCountryCenter()
         {
             if (this.countryCenterAgent != null)
             {
+                Console.WriteLine("Country Center Connecting");
                 this.countryCenterAgent.Connect();
             }
             else

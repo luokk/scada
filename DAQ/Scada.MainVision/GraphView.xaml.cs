@@ -52,7 +52,15 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
-            this.ChartView.SetCurveDisplayName("瞬时流量");
+
+            if (deviceKey == DataProvider.DeviceKey_AIS)
+            {
+                this.ChartView.SetCurveDisplayName("瞬时流量(L/h)");
+            }
+            else if (deviceKey == DataProvider.DeviceKey_MDS)
+            {
+                this.ChartView.SetCurveDisplayName("瞬时流量(m³/h)");
+            }
             this.ChartView.SetValueRange(item.Min, item.Max);
             this.ChartView.HideResetButton();
             this.StartRealTimeChart();

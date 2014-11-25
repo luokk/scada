@@ -225,6 +225,7 @@ namespace Scada.Controls
                 this.ListViewContainer.Content = this.listView;
 
                 ListView theListView = (ListView)this.listView;
+                
                 // theListView.ItemsSource = this.dataSource;
                 this.ApplyListStyle(theListView);
                 theListView.MouseRightButtonUp += OnListViewMouseRightButton;
@@ -330,7 +331,6 @@ namespace Scada.Controls
         {
             Color c = Color.FromRgb(83, 83, 83);
             listView.Background = new SolidColorBrush(c);
-
             // listView.ItemContainerStyle = (Style)this.Resources["ListViewItemKey"];
             listView.Style = (Style)this.Resources["ListViewKey"];
         }
@@ -530,27 +530,17 @@ namespace Scada.Controls
                             // Get Daily data;
                             var searchDataSource = this.dataProvider.RefreshTimeRange(this.deviceKey, dt1, dt2, t1, t2, cmd);
 
+                            this.BeginTime = dt1;
+                            this.EndTime = dt2;
+
                             if (searchDataSource.Count > 0)
                             {
-                                sc.Post(new SendOrPostCallback((data) =>
+                                sc.Send(new SendOrPostCallback((data) =>
                                 {
                                     this.UpdateSearchData((List<Dictionary<string, object>>)data, index, dt1, dt2, days);
-                                    index++;
                                 }), searchDataSource);
-                                
                             }
-                            /*
-                            t1 = t1.AddDays(1);
-                            if (days <= 2)
-                            {
-                                t2 = t1.AddDays(1).AddSeconds(-2);
-                            }
-                            else
-                            {
-                                t2 = dt2;
-                            }
-                            */
-                            // Thread.Sleep(20);
+
                         }
                         this.inSearch = false;
                     }
@@ -563,11 +553,16 @@ namespace Scada.Controls
             //this.searchData = this.Filter(this.searchDataSource, this.currentInterval);
         }
 
-        private void UpdateSearchData(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime, int days)
+        private void UpdateSearchDataList(List<Dictionary<string, object>> data)
         {
             ListView searchListView = (ListView)this.SearchView;
+            searchListView.Height = this.ListRow.ActualHeight;
             searchListView.ItemsSource = null;
+            searchListView.ItemsSource = data;
+        }
 
+        private int UpdateSearchData(List<Dictionary<string, object>> data, int index, DateTime beginTime, DateTime endTime, int days)
+        {
             int interval = 30;
             if (days <= 2)
             {
@@ -582,37 +577,34 @@ namespace Scada.Controls
                 interval = 3600;
             }
 
+            if (this.deviceKey == DataProvider.DeviceKey_NaI)
+            {
+                interval = 300;
+            }
+
+            this.Interval = interval;
+            this.searchData = data;
             if (data != null && data.Count > 0)
             {
-                if (index == 0)
+                // 
+                if (this.deviceKey == DataProvider.DeviceKey_Hpic)
                 {
-                    if (this.deviceKey == DataProvider.DeviceKey_Hpic)
-                    {
-                        ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
-                    }
-                    else
-                    {
-                        if (this.graphSearchView != null)
-                        {
-                            ((SearchGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
-                        }
-                    }
+                    ((SearchHpicGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
                 }
                 else
                 {
-                    if (this.deviceKey == DataProvider.DeviceKey_Hpic)
+                    if (this.graphSearchView != null)
                     {
-                        ((SearchHpicGraphView)this.graphSearchView).AppendDataSource(data, this.selectedField, 30, index);
-                    }
-                    else
-                    {
-                        if (this.graphSearchView != null)
-                        {
-                            ((SearchGraphView)this.graphSearchView).AppendDataSource(data, this.selectedField, index);
-                        }
+                        ((SearchGraphView)this.graphSearchView).SetDataSource(data, this.selectedField, interval, index, beginTime, endTime);
                     }
                 }
             }
+
+            if (deviceKey == DataProvider.DeviceKey_Shelter || deviceKey == DataProvider.DeviceKey_Dwd)
+            {
+                return 0;
+            }
+            return 1000;
         }
 
         private List<Dictionary<string, object>> Filter(List<Dictionary<string, object>> data, int page)
@@ -822,6 +814,11 @@ namespace Scada.Controls
             {
                 this.SearchChartRow.Height = new GridLength(0);
             }
+
+            if (this.deviceKey != DataProvider.DeviceKey_Hpic)
+            {
+                this.SearchChartRow.Height = new GridLength(250);
+            }
         }
 
         private void GraphViewContainer_Loaded(object sender, RoutedEventArgs e)
@@ -904,13 +901,12 @@ namespace Scada.Controls
             {
                 this.selectedInterval = 3600;
             }
-            else if (s.SelectedIndex == 2)
+            else if (s.SelectedIndex == 3)
             {
                 this.selectedInterval = 3600 * 24;
             }
 
-            ((SearchHpicGraphView)this.graphSearchView).Interval = this.selectedInterval;
-            ((SearchHpicGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.selectedInterval, 0, this.BeginTime, this.EndTime);
+            ((SearchHpicGraphView)this.graphSearchView).SetDataSourceInterval(this.searchData, this.selectedField, this.Interval, this.selectedInterval, this.BeginTime, this.EndTime);
         }
 
         private void FieldSelect_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -920,20 +916,61 @@ namespace Scada.Controls
             {
                 this.selectedField = "temperature";
             }
-            if (s.SelectedIndex == 1)
+            else if (s.SelectedIndex == 1)
             {
                 this.selectedField = "pressure";
             }
-            if (s.SelectedIndex == 2)
+            else if (s.SelectedIndex == 2)
             {
                 this.selectedField = "windspeed";
             }
-            ((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, 30,  0, this.BeginTime, this.EndTime);
-
+            else if (s.SelectedIndex == 3)
+            {
+                this.selectedField = "humidity";
+            }
+            else if (s.SelectedIndex == 4)
+            {
+                this.selectedField = "raingauge";
+            }
+            ((SearchGraphView)this.graphSearchView).SelectChanged(this.selectedField);
+            //((SearchGraphView)this.graphSearchView).SetDataSource(this.searchData, this.selectedField, this.Interval,  0, this.BeginTime, this.EndTime);
         }
 
         public DateTime BeginTime { get; set; }
 
         public DateTime EndTime { get; set; }
+
+        public int Interval { get; set; }
+
+        private void ShowListButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.ShowListButton.IsChecked.Value)
+            {
+                this.ListRow.Height = new GridLength(2, GridUnitType.Star);
+                ListView searchListView = (ListView)this.SearchView;
+                searchListView.Visibility = System.Windows.Visibility.Visible;
+                if (this.deviceKey == DataProvider.DeviceKey_NaI)
+                {
+                    Config cfg = Config.Instance();
+                    ConfigEntry entry = cfg[DataProvider.DeviceKey_NaI];
+
+                    if (entry.DataFilter != null)
+                    {
+                        foreach (var data in this.searchData)
+                        {
+                            entry.DataFilter.Fill(data);
+                        }
+                    }
+                }
+
+                this.UpdateSearchDataList((List<Dictionary<string, object>>)this.searchData);
+            }
+            else
+            {
+                ListView searchListView = (ListView)this.SearchView;
+                searchListView.Visibility = System.Windows.Visibility.Collapsed;
+                this.UpdateSearchDataList((List<Dictionary<string, object>>)null);
+            }
+        }
     }
 }

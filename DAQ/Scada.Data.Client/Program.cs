@@ -17,27 +17,36 @@ namespace Scada.Data.Client
         [STAThread]
         static void Main(string[] args)
         {
+            bool second = false;
             bool createNew = false;
             using (Mutex mutex = new Mutex(true, Application.ProductName, out createNew))
             {
-                if (createNew)
+                if (!createNew)
                 {
-                    try
+                    var r = MessageBox.Show("数据上传程序（HTTP）已经在运行中...", "选择是否允许第二个数据上传代理", MessageBoxButtons.YesNo);
+                    if (r == DialogResult.Yes)
                     {
-                        Application.EnableVisualStyles();
-                        Application.SetCompatibleTextRenderingDefault(false);
-                        MainDataAgentWindow form = new MainDataAgentWindow();
-                        Application.Run(form);
+                        second = true;
                     }
-                    catch (Exception e)
+                    else
                     {
-                        MessageBox.Show(e.Message);
+                        return;
                     }
                 }
-                else
+
+                try
                 {
-                    MessageBox.Show("数据上传程序（HTTP）已经在运行中...");
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    MainDataAgentWindow form = new MainDataAgentWindow();
+                    form.IsSecond = second;
+                    Application.Run(form);
                 }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+                
             }
         }
 

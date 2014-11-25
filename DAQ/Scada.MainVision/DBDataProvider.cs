@@ -12,6 +12,7 @@ namespace Scada.MainVision
     using System.IO;
     using System.Reflection;
     using Scada.Config;
+    using System.Windows.Forms;
 
     /// <summary>
     /// Each Device has a Listener.
@@ -244,11 +245,38 @@ namespace Scada.MainVision
                         {
                             continue;
                         }
-
+            
                         try
                         {
-                            string v = reader.GetString(key);
-                            ret.Add(key, v);
+                            int index = reader.GetOrdinal(key);
+                            if (!reader.IsDBNull(index))
+                            {
+                                string v = reader.GetString(index);
+                                if (key == "doserate")
+                                {
+                                    double dv;
+                                    if (double.TryParse(v, out dv))
+                                    {
+                                        ret.Add(key, dv.ToString("0.0"));
+                                    }
+                                    else
+                                    {
+                                        ret.Add(key, v);
+                                    }
+                                }
+                                else if (key == "nuclidefound")
+                                {
+                                    ret.Add(key, v == "1" ? "发现" : "未发现");
+                                }
+                                else if (key.IndexOf("alarm") >= 0 || key == "direction")
+                                {
+                                    ret.Add(key, v);
+                                }
+                                else
+                                {
+                                    ret.Add(key, v);
+                                }
+                            }
                         }
                         catch (SqlNullValueException)
                         {
@@ -338,8 +366,62 @@ namespace Scada.MainVision
                     {
                         try
                         {
-                            string v = reader.GetString(key);
-                            data.Add(key, v);
+                            // -----------------------------
+                            int i = reader.GetOrdinal(key);
+                            if (!reader.IsDBNull(i))
+                            {
+                                string v = reader.GetString(i);
+                                if (key == "ifrain")
+                                {
+                                    if (v == "0")
+                                    {
+                                        data.Add(key, false);
+                                    }
+                                    else
+                                    {
+                                        data.Add(key, true);
+                                    }
+                                }
+                                else if (key == "doserate")
+                                {
+                                    double dv;
+                                    if (double.TryParse(v, out dv))
+                                    {
+                                        data.Add(key, dv.ToString("0.0"));
+                                    }
+                                    else
+                                    {
+                                        data.Add(key, v);
+                                    }
+                                }
+                                else if (key == "nuclidefound")
+                                {
+                                    data.Add(key, v == "1" ? "发现" : "未发现");
+                                }
+                                else if (key.IndexOf("alarm") >= 0)
+                                {
+                                    data.Add(key, v);
+                                }
+                                else
+                                {
+                                    double d;
+                                    if (double.TryParse(v, out d))
+                                    {
+                                        data.Add(key, d.ToString("0.0"));
+                                    }
+                                    else
+                                    {
+                                        data.Add(key, d.ToString(v));
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (key == "ifrain")
+                                {
+                                    data.Add(key, false);
+                                }
+                            }
                         }
                         catch (SqlNullValueException)
                         {
@@ -356,26 +438,18 @@ namespace Scada.MainVision
                         }
                     }
 
+                    /*
                     if (entry.DataFilter != null)
                     {
                         entry.DataFilter.Fill(data);
                     }
+                    */
                     ret.Add(data);
 
                     index++;
                 }
             }
 
-            // No Need!! Left join instead.
-            if (deviceKey == DataProvider.DeviceKey_Weather)
-            {
-                // ReviseIfRainForWeather(cmd, ret);
-            }
-            else if (deviceKey == DataProvider.DeviceKey_Hpic)
-            {
-                
-                // this.ReviseIfRainForHpic(cmd, ret, fromTime, toTime);
-            }
             return ret;
         }
 
@@ -401,9 +475,16 @@ namespace Scada.MainVision
 
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    if (reader.Read())
+                    try
                     {
-                        item["ifrain"] = reader.GetString("IfRain");
+                        if (reader.Read())
+                        {
+                            item["ifrain"] = reader.GetString("IfRain");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        //MessageBox.Show(e.Message);
                     }
                 }
             }

@@ -113,7 +113,7 @@ namespace Scada.MainVision
                     }
                     else if (deviceKey == DataProvider.DeviceKey_Hpic)
                     {
-                        panel.IntervalSelect.Visibility = Visibility.Visible;
+                        // panel.IntervalSelect.Visibility = Visibility.Visible;
                         panel.IntervalSelect.SelectedIndex = 0;
                         panel.selectedField = "doserate";
                     }
@@ -147,9 +147,9 @@ namespace Scada.MainVision
             // ListView
             ListView listView = new ListView();
             GridView gridView = new GridView();
+            
             listView.View = gridView;
-
-            // 
+            
             var columnInfoList = dataListener.GetColumnsInfo(); // new List<ColumnInfo>();
 
             foreach (var columnInfo in columnInfoList)

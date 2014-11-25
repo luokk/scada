@@ -84,7 +84,7 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="35"></RowDefinition>
                                     <RowDefinition Height="300" x:Name="SearchChartRow"></RowDefinition>
-                                    <RowDefinition Height="*"></RowDefinition>
+                                    <RowDefinition Height="*" x:Name="ListRow"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
 
@@ -112,7 +112,16 @@
 
                                     </Border>
 
-
+                                    <ComboBox x:Name="FieldSelect" Visibility="Collapsed" SelectionChanged="FieldSelect_SelectionChanged">
+                                        <ComboBox.Items>
+                                            <Label>温度</Label>
+                                            <Label>气压</Label>
+                                            <Label>风速</Label>
+                                            <Label>湿度</Label>
+                                            <Label>雨量</Label>
+                                        </ComboBox.Items>
+                                    </ComboBox>
+                                    
                                     <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0" 
                                         Style="{StaticResource ButtonKey}" Click="SearchByDateRange">查询</Button>
 
@@ -121,13 +130,7 @@
                                 
                                     <Button Padding="3,3,3,3" Height="25" Margin="5,0,5,0"
                                             Style="{StaticResource ButtonKey}" Click="SaveChart">保存曲线</Button>
-                                    <ComboBox x:Name="FieldSelect" Visibility="Collapsed" SelectionChanged="FieldSelect_SelectionChanged">
-                                        <ComboBox.Items>
-                                            <Label>温度</Label>
-                                            <Label>气压</Label>
-                                            <Label>风速</Label>
-                                        </ComboBox.Items>
-                                    </ComboBox>
+
 
                                     <ComboBox x:Name="IntervalSelect" Margin="5,0,5,0" Visibility="Collapsed" SelectionChanged="IntervalSelect_SelectionChanged">
                                         <ComboBox.Items>
@@ -142,8 +145,12 @@
                                 <ContentControl Grid.Row="1" x:Name="SearchGraphViewContainer" Margin="-5" Loaded="SearchGraphViewContainer_Loaded">
                                 </ContentControl>
                                 <!-- Contains ListView -->
-                                <ContentControl Grid.Row="2" x:Name="SearchViewContainer" Margin="-5">
-                                </ContentControl>
+                                <StackPanel Grid.Row="2" Orientation="Vertical" x:Name="ListContainer">
+                                    <CheckBox x:Name="ShowListButton" Margin="2,12,2,10" Unchecked="ShowListButton_Checked" Checked="ShowListButton_Checked">在列表中显示数据</CheckBox>
+                                    <ContentControl  x:Name="SearchViewContainer" Margin="-5" >
+                                    </ContentControl>
+                                </StackPanel>
+
 
                             </Grid>
                         </ContentControl>

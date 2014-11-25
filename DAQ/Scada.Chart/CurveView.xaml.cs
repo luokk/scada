@@ -127,10 +127,10 @@ namespace Scada.Chart
 
 
             // Grid Line ---
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 4; i++)
             {
                 Line l = new Line();
-                l.Y1 = l.Y2 = canvasHeight - i * 40;
+                l.Y1 = l.Y2 = canvasHeight - i * 50;
                 l.X1 = 0;
                 l.X2 = 1900;
                 if (i == 0)
@@ -142,6 +142,24 @@ namespace Scada.Chart
                 this.CanvasView.Children.Add(l);
             }
 
+            this.InitializeValueAxis();
+
+            this.AddCurveLine();
+
+            // DisplayName
+            this.SetDisplayName(this.DisplayName);
+
+            // TimeLine
+            timeLine.Y1 = 0;
+            timeLine.Y2 = GridViewHeight / 2;
+            timeLine.Stroke = new SolidColorBrush(Colors.Gray);
+            this.CanvasView.Children.Add(timeLine);
+            this.CanvasView.ClipToBounds = true;
+        }
+
+        public void InitializeValueAxis()
+        {
+            this.Graduation.Children.Clear();
             // Scale line
             double height = this.CanvasView.Height;
 
@@ -151,15 +169,19 @@ namespace Scada.Chart
 
             double d = height / (this.Max - this.Min);
             // How many graduation?
-            int dc = (int)height / 10;
+            double dc = height / 4.0;
             // What's the value each graduation 
             double ev = (this.Max - this.Min) / dc;
 
+            double ev2 = this.Ceil(ev);
+            this.e2 = ev2;
+            //this.Max = ev2 * dc + this.Min;
+            
             if (!this.ChartView.disableGridLine)
             {
-                for (int i = 0; i < 60; i++)
+                for (int i = 0; i < 40; i++)
                 {
-                    double y = height - i * 10;
+                    double y = height - i * 5;
 
                     if (y < 0)
                     {
@@ -175,14 +197,14 @@ namespace Scada.Chart
                     l.Stroke = new SolidColorBrush(Colors.Gray);
                     this.Graduation.Children.Add(l);
 
-                    double value = this.Min + i * ev;
+                    double value = this.Min + i * ev2;
 
                     if (i % 5 == 0)
                     {
                         TextBlock t = new TextBlock();
                         t.Foreground = Brushes.Black;
                         t.FontSize = 9;
-                        double pos = (double)y - 10;
+                        double pos = (double)y - 5;
 
                         if (this.Max > 10)
                         {
@@ -200,7 +222,7 @@ namespace Scada.Chart
                         }
 
                         t.SetValue(Canvas.RightProperty, (double)10.0);
-                        t.SetValue(Canvas.TopProperty, (double)pos - 10.0);
+                        t.SetValue(Canvas.TopProperty, (double)pos );
                         this.Graduation.Children.Add(t);
 
                         textCount++;
@@ -208,15 +230,44 @@ namespace Scada.Chart
                 }
             }
 
-            timeLine.Y1 = 0;
-            timeLine.Y2 = GridViewHeight / 2;
-            timeLine.Stroke = new SolidColorBrush(Colors.Gray);
-            this.CanvasView.Children.Add(timeLine);
-            this.CanvasView.ClipToBounds = true;
 
-            this.AddCurveLine();
+        }
 
-            this.SetDisplayName(this.DisplayName);
+        private double Ceil(double ev)
+        {
+            if (ev > 0 && ev <= 5)
+            {
+                return 5;
+            }
+            else if (ev > 5 && ev <= 10)
+            {
+                return 10;
+            }
+            else if (ev > 10 && ev <= 20)
+            {
+                return 20;
+            }
+            else if (ev > 20 && ev <= 50)
+            {
+                return 50;
+            }
+            else if (ev > 50 && ev <= 100)
+            {
+                return 100;
+            }
+            else if (ev > 100 && ev <= 200)
+            {
+                return 200;
+            }
+            else if (ev > 200 && ev <= 500)
+            {
+                return 500;
+            }
+            else if (ev > 500 && ev <= 1000)
+            {
+                return 1000;
+            }
+            return 2000;
         }
 
         private void AddCurveLine()
@@ -314,7 +365,9 @@ namespace Scada.Chart
         public void TrackTimeLine(Point point, string timeLabel, bool calculation)
         {
             timeLine.X1 = timeLine.X2 = point.X;
-            // this.centerX = point.X;
+
+            // 暂时屏蔽Tracking功能
+            return;
             if (calculation)
             {
                 this.ShowValueTip(point, timeLabel);
@@ -364,6 +417,18 @@ namespace Scada.Chart
                 n = 0;
             }
             return Math.Round(d, n);
+        }
+
+        private double Convert2(double v)
+        {
+            double y = this.CanvasView.Height - ((v - this.Min) / this.e2) * 5;
+            return y;
+        }
+
+        private double ConvertT(double y)
+        {
+            double v = (this.CanvasView.Height - y) / 5.0 * this.e2 + this.Min;
+            return v;
         }
 
         private double Convert(double v)
@@ -462,12 +527,12 @@ namespace Scada.Chart
 
         private void Convert(Point p, out Point po)
         {
-            po = new Point(p.X, this.Convert(p.Y));
+            po = new Point(p.X, this.Convert2(p.Y));
         }
 
         private void SetDisplayName(string displayName)
         {
-            const double Top = 12.0;
+            double Top = this.ChartView.DisplayNameTop;
             SolidColorBrush labelBrush = new SolidColorBrush(Color.FromRgb(219, 219, 219));
             
             TextBlock displayLabel = new TextBlock();
@@ -507,6 +572,8 @@ namespace Scada.Chart
         private Point selBeginPoint;
 
         private Point selEndPoint;
+        
+        private double e2;
 
         private void CanvasView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

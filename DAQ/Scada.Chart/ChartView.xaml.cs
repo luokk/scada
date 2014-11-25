@@ -86,9 +86,16 @@ namespace Scada.Chart
             this.trackingTimer.Interval = TimeSpan.FromMilliseconds(800);
             this.trackingTimer.Start();
             this.trackingTimer.Tick += trackingTimerTick;
+            this.DisplayNameTop = 25;
+            this.DisableTrackingLine();
         }
 
-        public static readonly DependencyProperty TimeScaleProperty = DependencyProperty.Register("TimeScale", typeof(long), typeof(ChartView));
+        public int DisplayNameTop
+        {
+            get;
+            set;
+        }
+
         private CurveDataContext curveDataContext;
 
         private DateTime GetBaseTime(DateTime startTime)
@@ -246,24 +253,21 @@ namespace Scada.Chart
                     scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
                     this.TimeAxis.Children.Add(scaleLine);
 
-                    TextBlock timeLabel = null;
-                    timeLabel = new TextBlock();
-                    timeLabel.Foreground = Brushes.Black;
-                    timeLabel.FontWeight = FontWeights.Light;
-                    timeLabel.FontSize = 9;
-
-                    double pos = i * graduation;
-
-                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
-                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
-
-                    this.TimeAxis.Children.Add(timeLabel);
-
                     if (isWholePoint)
                     {
                         string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
-                        if (timeLabel != null)
+                        if (displayTime.Length > 0)
                         {
+                            TextBlock timeLabel = null;
+                            timeLabel = new TextBlock();
+                            timeLabel.Foreground = Brushes.Black;
+                            timeLabel.FontWeight = FontWeights.Light;
+                            timeLabel.FontSize = 9;
+                            this.TimeAxis.Children.Add(timeLabel);
+                            double pos = i * graduation;
+
+                            timeLabel.SetValue(Canvas.LeftProperty, (double)pos - TimeLabelOffset);
+                            timeLabel.SetValue(Canvas.TopProperty, (double)10);
                             timeLabel.Text = displayTime;
                         }
                     }
@@ -290,24 +294,23 @@ namespace Scada.Chart
                     scaleLine.Stroke = isWholePoint ? Brushes.Gray : Brushes.LightGray;
                     this.TimeAxis.Children.Add(scaleLine);
 
-                    TextBlock timeLabel = null;
-                    timeLabel = new TextBlock();
-                    timeLabel.Foreground = Brushes.Black;
-                    timeLabel.FontWeight = FontWeights.Light;
-                    timeLabel.FontSize = 9;
-
-                    double pos = i * graduation;
-
-                    timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-                    timeLabel.SetValue(Canvas.TopProperty, (double)10);
-
-                    this.TimeAxis.Children.Add(timeLabel);
-
                     if (isWholePoint)
                     {
                         string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
-                        if (timeLabel != null)
+                        if (displayTime.Length > 0)
                         {
+                            TextBlock timeLabel = null;
+                            timeLabel = new TextBlock();
+                            timeLabel.Foreground = Brushes.Black;
+                            timeLabel.FontWeight = FontWeights.Light;
+                            timeLabel.FontSize = 9;
+
+                            double pos = i * graduation;
+
+                            timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                            timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                            this.TimeAxis.Children.Add(timeLabel);
                             timeLabel.Text = displayTime;
                         }
                     }
@@ -348,22 +351,22 @@ namespace Scada.Chart
 
                     if (isWholePoint)
                     {
-                        TextBlock timeLabel = null;
-                        timeLabel = new TextBlock();
-                        timeLabel.Foreground = Brushes.Black;
-                        timeLabel.FontWeight = FontWeights.Light;
-                        timeLabel.FontSize = 9;
-
-                        double pos = i * graduation;
-
-                        timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
-                        timeLabel.SetValue(Canvas.TopProperty, (double)10);
-
-                        this.TimeAxis.Children.Add(timeLabel);
-
                         string displayTime = this.GetFormatTime(this.currentBaseTime, i * graduationCount, this.Interval);
-                        if (timeLabel != null)
+                        if (displayTime.Length > 0)
                         {
+                            TextBlock timeLabel = null;
+                            timeLabel = new TextBlock();
+                            timeLabel.Foreground = Brushes.Black;
+                            timeLabel.FontWeight = FontWeights.Light;
+                            timeLabel.FontSize = 9;
+
+                            double pos = i * graduation;
+
+                            timeLabel.SetValue(Canvas.LeftProperty, (double)pos - Offset);
+                            timeLabel.SetValue(Canvas.TopProperty, (double)10);
+
+                            this.TimeAxis.Children.Add(timeLabel);
+
                             timeLabel.Text = displayTime;
                         }
                     }
@@ -446,7 +449,8 @@ namespace Scada.Chart
             Point point = e.GetPosition((UIElement)curveView.CanvasView);
             double x = point.X;
 
-            if (calculation && x >= 0)
+            // 暂时屏蔽TrackingLine功能
+            if (false && calculation && x >= 0)
             {
                 double index = x * this.currentGraduationCount / this.currentGraduation;
                 timeLabel = this.GetFormatDateTime(this.currentBaseTime, (int)index, this.Interval);
@@ -467,6 +471,18 @@ namespace Scada.Chart
                 else
                 {
                     return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                }
+            }
+            if (interval == 3600)
+            {
+                DateTime dt = baseTime.AddSeconds(index * interval / 120);
+                if (dt.Minute == 0 && dt.Hour == 0)
+                {
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
+                }
+                else
+                {
+                    return "";
                 }
             }
             else if (interval == 30)
@@ -496,6 +512,18 @@ namespace Scada.Chart
                 else
                 {
                     return string.Format("{0:d2}:{1:d2}", dt.Hour, dt.Minute);
+                }
+            }
+            if (interval == 3600)
+            {
+                DateTime dt = baseTime.AddSeconds(index * interval / 120);
+                if (dt.Minute == 0 && dt.Hour == 0)
+                {
+                    return string.Format("{0:d2}-{1:d2}\n{2:d2}:{3:d2}", dt.Month, dt.Day, dt.Hour, dt.Minute);
+                }
+                else
+                {
+                    return "";
                 }
             }
             else if (interval == 30)
@@ -571,6 +599,7 @@ namespace Scada.Chart
 
         public void SetDataSource(List<Dictionary<string, object>> data, string valueKey, DateTime beginTime, DateTime endTime, string timeKey = "time")
         {
+            this.InitializeValueAxis();
             this.curveDataContext.SetDataSource(data, valueKey, beginTime, endTime, timeKey);
             this.UpdateCurve();
         }
@@ -592,6 +621,11 @@ namespace Scada.Chart
         public void AddPoint(DateTime time, object value)
         {
             this.curveDataContext.AddPoint(time, value);
+        }
+
+        internal void InitializeValueAxis()
+        {
+            this.CurveView.InitializeValueAxis();
         }
 
         internal void UpdateCurve()

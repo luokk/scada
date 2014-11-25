@@ -66,29 +66,21 @@ namespace Scada.Chart
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            this.ChartView.SetValueRange(-110, 110);
+            this.ChartView.SetValueRange(0, 200);
 
             DateTime t = DateTime.Parse("2014-10-02 13:34:00");
             List<Dictionary<string, object>> data = new List<Dictionary<string, object>>();
             for (long i = 0; i < 3600 * 0.8; i += 30)
             {
-                if (i > 3600 * 4.2 && i < 3600 * 6.3)
-                {
-                    var item1 = new Dictionary<string, object>(3);
-                    item1.Add("time", t.AddSeconds(i).ToString());
-                    //item.Add("doserate", (double) (3600 * 24 - i) / 3600.0);
-                    item1.Add("doserate", null);
-                    data.Add(item1);
-                    continue;
-                }
+
                 var item = new Dictionary<string, object>(3);
                 item.Add("time", t.AddSeconds(i).ToString());
                 //item.Add("doserate", (double) (3600 * 24 - i) / 3600.0);
-                item.Add("doserate", (double)Math.Sin(3.14 / 288 * i / 30) * 100);
+                item.Add("doserate", true);
                 data.Add(item);
             }
             this.ChartView.Interval = 30;
-            this.ChartView.SetDataSource2(data, "doserate");
+            this.ChartView.SetDataSource(data, "doserate", t, t.AddDays(1));
         }
     }
 }

@@ -22,7 +22,11 @@ namespace Scada.MainVision
                     if (value.ContainsKey(key))
                     {
                         s = (double)value[key];
-                        s += double.Parse((string)v);
+                        string sv = (string)v;
+                        if (sv.Length > 0)
+                        {
+                            s += double.Parse(sv);
+                        }
                     }
                     value[key] = s;
                 }

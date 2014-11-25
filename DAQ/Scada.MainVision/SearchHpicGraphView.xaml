@@ -8,26 +8,29 @@
              xmlns:chart="clr-namespace:Scada.Chart;assembly=Scada.Chart"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="500">
+    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="10,0,10,0">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="110"/>
+            </Grid.RowDefinitions>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="110"/>
-        </Grid.RowDefinitions>
-
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <chart:ChartView x:Name="SearchChartView" 
-                         Grid.Row="0" 
-                         Grid.Column="0" Background="Black"
-                         VerticalAlignment="Bottom">
-        </chart:ChartView>
-        <chart:ChartView x:Name="SearchChartView2" 
-                         Grid.Row="1" 
-                         Grid.Column="0" 
-                         VerticalAlignment="Top">
-
-        </chart:ChartView>
-    </Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <chart:ChartView x:Name="SearchChartView" 
+                             Grid.Row="0" 
+                             Grid.Column="0" Background="Black"
+                             VerticalAlignment="Bottom">
+               
+            </chart:ChartView>
+            <chart:ChartView x:Name="SearchChartView2" 
+                             chart:DisplayNameTop="200"
+                             Grid.Row="1" 
+                             Grid.Column="0" 
+                             VerticalAlignment="Top">
+                
+            </chart:ChartView>
+        </Grid>
+    </Border>
 </UserControl>

@@ -208,7 +208,7 @@ namespace Scada.Chart
             }
             else if (value is bool)
             {
-                y = (bool)value ? 0.8 : 0.4;
+                y = (bool)value ? 50 : 10;
             }
             else
             {
@@ -252,7 +252,15 @@ namespace Scada.Chart
 
         private DateTime GetRegularTime(DateTime t, int hours = 0)
         {
-            return new DateTime(t.Year, t.Month, t.Day, t.Hour, 0, 0).AddHours(hours);
+            if (this.Interval == 3600)
+            {
+                return new DateTime(t.Year, t.Month, t.Day, 0, 0, 0).AddHours(24);
+            }
+            else
+            {
+                int h = t.Hour / 2 * 2;
+                return new DateTime(t.Year, t.Month, t.Day, h, 0, 0).AddHours(hours);
+            }
         }
 
         internal void UpdateRange(double beginPointX, double endPointX)

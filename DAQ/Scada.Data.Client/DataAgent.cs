@@ -102,6 +102,8 @@ namespace Scada.Data.Client
             }
             catch (Exception)
             {
+                this.commandClient.Dispose();
+                this.commandClient = null;
             }
         }
 
@@ -131,9 +133,23 @@ namespace Scada.Data.Client
                             timesStr = times.Value<string>();
                         }
 
-                        string start = content["start"].Value<string>();
-                        string end = content["end"].Value<string>();
-                        this.HandleHistoryData(device, start, end, timesStr);
+                        JToken sid = content["sid"];
+                        string sidStr = null;
+                        if (sid != null)
+                        {
+                            sidStr = sid.Value<string>();
+                        }
+
+                        if (device == "hpge")
+                        {
+                            this.HandleHistoryData(device, sidStr);
+                        }
+                        else
+                        {
+                            string start = content["start"].Value<string>();
+                            string end = content["end"].Value<string>();
+                            this.HandleHistoryData(device, start, end, timesStr);
+                        }
                     }
 
                     
@@ -153,6 +169,14 @@ namespace Scada.Data.Client
             n.SetValue("start", start);
             n.SetValue("end", end);
             n.SetValue("times", times);
+            this.NotifyEvent(this, NotifyEvents.HistoryData, n);
+        }
+
+        private void HandleHistoryData(string device, string sid)
+        {
+            Notify n = new Notify();
+            n.SetValue("device", device);
+            n.SetValue("sid", sid);
             this.NotifyEvent(this, NotifyEvents.HistoryData, n);
         }
 
@@ -391,7 +415,7 @@ namespace Scada.Data.Client
                         string tmpDate = line.Substring(index1 + 12);
                         tmpDate = tmpDate.Replace('\0', ' ').Trim();
                         // 出错
-                        //startTime = DateTime.ParseExact(tmpDate, "yyyy/MM/dd HH:mm:ss", null);
+                        startTime = DateTime.ParseExact(tmpDate, "yyyy/MM/d HH:mm:ss", null);
                         continue;
                     }
 

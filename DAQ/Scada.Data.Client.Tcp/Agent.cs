@@ -53,7 +53,9 @@ namespace Scada.Data.Client.Tcp
     {
         Connecting,
         Connected,
+        ConnectedCountry,
         Disconnect,
+        DisconnectCountry,
         Disconnect2,
         BeginRead,
         EndRead,
@@ -199,7 +201,6 @@ namespace Scada.Data.Client.Tcp
             get;
         }
 
-        // No use.
         public Type Type
         {
             get;
@@ -365,20 +366,26 @@ namespace Scada.Data.Client.Tcp
                 {
                     this.client = new TcpClient();
                     this.client.ReceiveTimeout = Timeout;
-                    
+
                     this.client.BeginConnect(serverIpAddress, serverPort,
                         new AsyncCallback(ConnectCallback),
                         this.client);
 
                     string msg = string.Format("Connecting to {0}:{1} retry times = {2}.", serverIpAddress, serverPort, this.retryCount);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
+                    if (this.Type == Type.Province)
+                    {
+                        this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
+                    }
                 }
                 else
                 {
                     string msg = string.Format("Connecting to {0}:{1} Already!!", serverIpAddress, serverPort);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
+                    if (this.Type == Type.Province)
+                    {
+                        this.NotifyEvent(this, NotifyEvents.Connecting, msg, null);
+                    }
                 }
             }
             catch (Exception e)
@@ -406,7 +413,14 @@ namespace Scada.Data.Client.Tcp
                 }
                 string msg = string.Format("Disconnect from {0}", this.ToString());
                 this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
+                if (this.Type == Type.Country)
+                {
+                    this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
+                }
+                else
+                {
+                    this.NotifyEvent(this, NotifyEvents.DisconnectCountry, msg, null);
+                }
             }
             catch (Exception e)
             {
@@ -441,7 +455,15 @@ namespace Scada.Data.Client.Tcp
 
                         string msg = string.Format("Connected to {0}", this.ToString());
                         this.DoLog(ScadaDataClient, msg);
-                        this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
+                        if (this.Type == Type.Country)
+                        {
+                            this.NotifyEvent(this, NotifyEvents.ConnectedCountry, msg, null);
+                        }
+                        else
+                        {
+                            this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
+                        }
+
                         this.NotifyEvent(this, NotifyEvents.HandleEvent, msg, null);
                     }   
                 }
@@ -450,7 +472,15 @@ namespace Scada.Data.Client.Tcp
                     string address = this.isConnectingWired ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
                     string msg = string.Format("Connected to {0} Failed => {1}", address, e.Message);
                     this.DoLog(ScadaDataClient, msg);
-                    this.NotifyEvent(this, NotifyEvents.Connected, msg, null);
+
+                    if (this.Type == Type.Country)
+                    {
+                        this.NotifyEvent(this, NotifyEvents.DisconnectCountry, msg, null);
+                    }
+                    else
+                    {
+                        this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
+                    }
 
                     this.OnConnectionException(e);
                 }
@@ -581,7 +611,10 @@ namespace Scada.Data.Client.Tcp
             timer.Elapsed += (s, e) => 
             {
                 if (this.client != null)
+                {
+                    Console.WriteLine("ConnectRetryRoutine client != null");
                     return;
+                }
 
                 if (this.UIThreadMashaller != null)
                 {
@@ -590,6 +623,8 @@ namespace Scada.Data.Client.Tcp
                     {
                         this.UIThreadMashaller.Mashall((o) =>
                         {
+                            this.DoLog(ScadaDataClient, "ConnectRetryRoutine");
+                            Console.WriteLine("ConnectRetryRoutine");
                             this.Connect();
                         });   
                     }

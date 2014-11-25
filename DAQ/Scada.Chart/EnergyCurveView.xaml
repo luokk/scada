@@ -28,6 +28,25 @@
                     MouseMove="CanvasViewMouseMove" 
                     MouseLeftButtonDown="CanvasView_MouseLeftButtonDown"
                     MouseLeftButtonUp="CanvasView_MouseLeftButtonUp">
+            <Button x:Name="ResetButton" Canvas.Top="30" Canvas.Right="10" Cursor="Hand" Click="OnResetClick" Panel.ZIndex="100">重置
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <TextBlock TextDecorations="Underline">  
+                                <ContentPresenter />
+                        </TextBlock>
+                    </ControlTemplate>
+                </Button.Template>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Foreground" Value="Blue" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Foreground" Value="Red" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </Canvas>
 
         <Rectangle Grid.Row="2" Grid.Column="0" Fill="#F8F8EE"></Rectangle>

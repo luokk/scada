@@ -77,6 +77,8 @@ namespace Scada.MainVision
 			this.LoadConfig();
 			this.LoadDataProvider();
 
+            this.UpdateHpicThreshold();
+
             // Device List
             this.DeviceList.ClickDeviceItem += this.OnDeviceItemClicked;
             this.DeviceList.MainWindow = this;
@@ -466,12 +468,18 @@ namespace Scada.MainVision
 
         private void MenuMain_Click(object sender, RoutedEventArgs e)
         {
-            Command.Send(Ports.Main, new Command("MainVision", "Main", "show", ""));
+            if (!this.OpenProcess("Scada.Main"))
+            {
+                Command.Send(Ports.Main, new Command("MainVision", "Main", "show", ""));
+            }
         }
 
         private void MenuDataAgent_Click(object sender, RoutedEventArgs e)
         {
-            Command.Send(Ports.DataClient, new Command("MainVision", "DataAgent", "show", ""));
+            if (!this.OpenProcess("Scada.DataCenterAgent"))
+            {
+                Command.Send(Ports.DataClient, new Command("MainVision", "DataAgent", "show", ""));
+            }
         }
 
         private void Quit_Click(object sender, RoutedEventArgs e)
@@ -486,13 +494,44 @@ namespace Scada.MainVision
             this.OpenProcessByName("Scada.About.exe");
         }
 
+        private void helpMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.OpenProcessByName("help.rtf");
+        }
+
         private void Settings_Click(object sender, RoutedEventArgs e)
         {
-            this.OpenProcessByName("Scada.MainSettings.exe");
+            this.OpenProcessByName("Scada.MainSettings.exe", false, () => 
+            {
+                this.UpdateHpicThreshold();
+            });
         }
-        
 
-        private void OpenProcessByName(string name, bool uac = false)
+        public static string GetDeviceConfigFile(string deviceKey)
+        {
+            return ConfigPath.GetDeviceConfigFilePath(deviceKey, "0.9");
+        }
+
+        private void UpdateHpicThreshold()
+        {
+            string filePath = GetDeviceConfigFile("scada.hpic");
+            DeviceEntry entry = DeviceEntry.GetDeviceEntry("scada.hpic", filePath);
+
+            Settings.Instance.HpicAlarm = (StringValue)entry["Alarm1"];
+        }
+
+        private bool OpenProcess(string procName)
+        {
+            Process[] ps = Process.GetProcessesByName(procName);
+            if (ps == null || ps.Length == 0)
+            {
+                this.OpenProcessByName(procName + ".exe", false);
+                return true;
+            }
+            return false;
+        }
+
+        private void OpenProcessByName(string name, bool uac = false, Action action = null)
         {
             string fileName = LogPath.GetExeFilePath(name);
             try
@@ -503,7 +542,16 @@ namespace Scada.MainVision
                     processInfo.Verb = "runas";
                 }
                 processInfo.FileName = fileName;
-                Process.Start(processInfo);
+                
+                var process = Process.Start(processInfo);
+                if (action != null)
+                {
+                    process.EnableRaisingEvents = true;
+                    process.Exited += (object sender, EventArgs e) =>
+                    {
+                        action();
+                    };
+                }
             }
             catch (Exception)
             {

@@ -208,7 +208,8 @@ namespace Scada.Data.Client
             }
             else
             {
-                Log.GetLogFile("scada.naidevice").Log(string.Format("{0} Not_Found", filePath));
+                // TODO: fix here, For second agent process, I disbale this log for temp.
+                // Log.GetLogFile("scada.naidevice").Log(string.Format("{0} Not_Found", filePath));
             }
 
             return content;
@@ -279,10 +280,13 @@ namespace Scada.Data.Client
             return sid;
         }
 
-        internal string GetNewHpGeFile()
+        internal string GetNewHpGeFile(string sid = null)
         {
             string path = LogPath.GetDeviceLogFilePath("scada.hpge");
-            string sid = GetCurrentSid();
+            if (string.IsNullOrEmpty(sid))
+            {
+                sid = GetCurrentSid();
+            }
 
             string currentFilePath = Path.Combine(path, sid);
 

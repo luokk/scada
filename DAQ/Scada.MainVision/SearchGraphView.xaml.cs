@@ -34,16 +34,26 @@ namespace Scada.MainVision
             }
             if (valueKey == "temperature")
             {
-                this.SearchChartView.SetCurveDisplayName("温度");
+                this.SearchChartView.SetCurveDisplayName("温度(℃)");
             }
             else if (valueKey == "pressure")
             {
-                this.SearchChartView.SetCurveDisplayName("气压");
+                this.SearchChartView.SetCurveDisplayName("气压(mbar)");
             }
             else if (valueKey == "windspeed")
             {
-                this.SearchChartView.SetCurveDisplayName("风速");
+                this.SearchChartView.SetCurveDisplayName("风速(m/s)");
             }
+            else if (valueKey == "humidity")
+            {
+                this.SearchChartView.SetCurveDisplayName("湿度(%)");
+            }
+            else if (valueKey == "raingauge")
+            {
+                this.SearchChartView.SetCurveDisplayName("雨量(mm)");
+            }
+            this.Interval = interval;
+            this.SearchChartView.Interval = this.Interval;
             this.SearchChartView.SetDataSource(dataSource, valueKey, beginTime, endTime);
         }
 
@@ -70,15 +80,8 @@ namespace Scada.MainVision
 
         public int Interval
         {
-            get
-            {
-                return this.SearchChartView.Interval;
-            }
-
-            set
-            {
-                this.SearchChartView.Interval = value;
-            }
+            get;
+            set;
         }
 
         public void AddLineName(string deviceKey, string lineName, string displayName)
@@ -93,43 +96,32 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
-            if (deviceKey == DataProvider.DeviceKey_AIS || deviceKey == DataProvider.DeviceKey_MDS)
+            if (deviceKey == DataProvider.DeviceKey_AIS)
             {
-                this.SearchChartView.SetCurveDisplayName("瞬时流量");
+                this.SearchChartView.SetCurveDisplayName("瞬时流量(L/h)");
+            }
+            else if (deviceKey == DataProvider.DeviceKey_MDS)
+            {
+                this.SearchChartView.SetCurveDisplayName("瞬时流量(m³/h)");
             }
             else if (deviceKey == DataProvider.DeviceKey_NaI)
             {
-                this.SearchChartView.SetCurveDisplayName("剂量率");
+                this.SearchChartView.SetCurveDisplayName("总剂量率(nSv/h)");
             }
             else if (deviceKey == DataProvider.DeviceKey_Weather)
             {
-                this.SearchChartView.SetCurveDisplayName("温度");
+                this.SearchChartView.SetCurveDisplayName("温度(℃)");
+            }
+            if (this.Interval == 0)
+            {
+                this.Interval = 30;
+                if (deviceKey == DataProvider.DeviceKey_NaI)
+                {
+                    this.Interval = 300;
+                }
             }
             this.SearchChartView.SetValueRange(item.Min, item.Max);
 
-        }
-
-        private void AddTimePoint(DateTime time, Dictionary<string, object> entry)
-        {
-            foreach (string key in dataSources.Keys)
-            {
-                // 存在这条曲线
-                if (entry.ContainsKey(key))
-                {
-                    string v = (string)entry[key];
-                    double r = 0.0;
-                    if (v.Length > 0)
-                    {
-                        if (!double.TryParse(v, out r))
-                        {
-                            return;
-                        }
-                    }
-
-                    //this.CurveDataContext dataContext = dataSources[key];
-                    //dataContext.AddPoint(time, r);
-                }
-            }
         }
 
         internal void SaveChart()
@@ -145,6 +137,16 @@ namespace Scada.MainVision
                 filePath = fileDialog.FileName;
                 this.SearchChartView.SaveChart(filePath);
             }            
+        }
+
+        internal void SelectChanged(string lineName)
+        {
+            Config cfg = Config.Instance();
+            ConfigEntry entry = cfg["scada.weather"];
+
+            ConfigItem item = entry.GetConfigItem(lineName);
+            this.SearchChartView.SetValueRange(item.Min, item.Max);
+
         }
     }
 

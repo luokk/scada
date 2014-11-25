@@ -40,7 +40,10 @@ namespace Scada.MainVision
 
         private List<Dictionary<string, object>> GetDataByInterval(List<Dictionary<string, object>> data, int interval)
         {
-            int count = interval / 30;
+            if (interval == 30)
+            {
+                return data;
+            }
             List<Dictionary<string, object>> ret = new List<Dictionary<string, object>>();
 
             var first = data[0];
@@ -56,11 +59,11 @@ namespace Scada.MainVision
 
                 if (itemTime >= beginTime && itemTime < endTime)
                 {
-                    gv.AddValue(data[i], "doserate");
+                    gv.AddValue(data[i], "doserate", "ifrain");
                 }
                 else
                 {
-                    Dictionary<string, object> newItem = gv.GetValue("doserate");
+                    Dictionary<string, object> newItem = gv.GetValue("doserate", "ifrain");
                     if (newItem != null)
                     {
                         newItem.Add("time", beginTime.ToString());
@@ -83,8 +86,11 @@ namespace Scada.MainVision
                 return;
             }
 
+            var data = dataSource;// this.GetDataByInterval(dataSource, interval);
+
             this.SearchChartView.Interval = interval;
-            this.SearchChartView.SetDataSource(dataSource, valueKey, beginTime, endTime);
+            this.SearchChartView2.Interval = interval;
+            this.SearchChartView.SetDataSource(data, valueKey, beginTime, endTime);
             this.SearchChartView.SetUpdateRangeHandler((begin, end) => 
             {
                 this.SearchChartView2.UpdateRange(begin, end);
@@ -93,29 +99,40 @@ namespace Scada.MainVision
             {
                 this.SearchChartView2.Reset();
             });
-            this.SearchChartView2.SetDataSource(dataSource, "ifrain", beginTime, endTime);
+            this.SearchChartView2.SetDataSource(data, "ifrain", beginTime, endTime);
         }
 
-        public void AppendDataSource(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int index)
+        public void SetDataSourceInterval(List<Dictionary<string, object>> dataSource, string valueKey, int interval, int expectedInterval, DateTime beginTime, DateTime endTime)
         {
             if (dataSource == null || dataSource.Count == 0)
             {
                 return;
             }
 
-            /*
             List<Dictionary<string, object>> data = null;
-            if (interval == 30)
+            if (expectedInterval > interval)
+            {
+                data = this.GetDataByInterval(dataSource, expectedInterval);
+            }
+            else if (expectedInterval == interval)
             {
                 data = dataSource;
             }
-            else
-            {
-                data = this.GetDataByInterval(dataSource, interval);
-            }*/
+            else { return; }
 
-            this.SearchChartView.AppendDataSource(dataSource, valueKey);
-            this.SearchChartView2.AppendDataSource(dataSource, "ifrain");
+
+            this.SearchChartView.Interval = expectedInterval;
+            this.SearchChartView2.Interval = expectedInterval;
+            this.SearchChartView.SetDataSource(data, valueKey, beginTime, endTime);
+            this.SearchChartView.SetUpdateRangeHandler((begin, end) =>
+            {
+                this.SearchChartView2.UpdateRange(begin, end);
+            });
+            this.SearchChartView.SetResetHandler(() =>
+            {
+                this.SearchChartView2.Reset();
+            });
+            this.SearchChartView2.SetDataSource(data, "ifrain", beginTime, endTime);
         }
 
         public int Interval
@@ -143,16 +160,17 @@ namespace Scada.MainVision
             ConfigEntry entry = cfg[deviceKey];
 
             ConfigItem item = entry.GetConfigItem(lineName);
-            this.SearchChartView.SetCurveDisplayName("剂量率");
+            this.SearchChartView.SetCurveDisplayName("剂量率(nGy/h)");
             this.SearchChartView.SetValueRange(item.Min, item.Max);
             this.SearchChartView.HideTimeAxis();
 
             this.SearchChartView2.Interval = 30;
             this.SearchChartView2.SetCurveDisplayName("感雨");
-            this.SearchChartView2.SetValueRange(0, 0.5);
+            this.SearchChartView2.SetValueRange(0, 100);
             this.SearchChartView2.HideResetButton();
             this.SearchChartView2.DisableTrackingLine();
             this.SearchChartView2.DisableGridLine();
+            this.SearchChartView2.DisplayNameTop = 180;
             // 方波颜色
             this.SearchChartView2.SetCurveColor(Color.FromRgb(0x00, 0x00, 0xCC));
         }
