@@ -335,7 +335,12 @@ namespace Scada.Declare
             // Basicly, we use the EndTime.
             string et = doc.Value("//s:EndTime", nsmgr);
 
-            string co = doc.Value("//a:Coefficients", nsmgr);
+
+            string co = doc.Value("//a:Calibration[@Type='Energy']//a:Coefficients", nsmgr);
+            if (string.IsNullOrEmpty(co))
+            {
+                co = doc.Value("//a:Coefficients", nsmgr);
+            }
 
             string cd = doc.Value("//a:ChannelData", nsmgr);
 
