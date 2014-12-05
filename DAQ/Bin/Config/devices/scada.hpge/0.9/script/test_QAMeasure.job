@@ -1,0 +1,20 @@
+set_detector 1
+
+stop
+
+set_preset_clear
+
+clear
+
+wait 10
+
+qasample
+
+wait
+
+save "D:\date\QAmeasure\QASpectra.spe"
+
+quit
+
+
+
