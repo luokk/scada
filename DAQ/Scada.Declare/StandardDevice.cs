@@ -317,18 +317,30 @@ namespace Scada.Declare
 
 		private byte[] ReadData()
 		{
-
+            // 真实设备
 			if (this.IsRealDevice)
 			{
                 // important, sleep 400ms to wait all the data come to system buffer, Kaikai
                 Thread.Sleep(this.bufferSleep);
 
 				int n = this.serialPort.BytesToRead;
-				byte[] buffer = new byte[n];
+                if (n == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    byte[] buffer = new byte[n];
+                    int r = this.serialPort.Read(buffer, 0, n);
+                    if (r != n)
+                    {
+                        RecordManager.DoSystemEventRecord(this, "SerialPort Read Error");
 
-				int r = this.serialPort.Read(buffer, 0, n);
+                        return null;
+                    }
 
-				return buffer;
+                    return buffer;
+                }
 			}
 			else // Virtual Device~!
 			{
@@ -373,27 +385,22 @@ namespace Scada.Declare
 			{
 				handled = false;
 				byte[] buffer = this.ReadData();
+                if (buffer == null)
+                {
+                    return;
+                }
 
+                /*
 				byte[] line = this.dataParser.GetLineBytes(buffer);
 				if (line == null || line.Length == 0)
 				{
                     return;
 				}
-
-                /*
-                if (this.sensitive)                
-                {
-                    DeviceData sdd;
-                    if (this.GetSensitiveData(line, out sdd))
-                    {
-                        this.SynchronizationContext.Post(this.DataReceived, sdd);
-                    }
-                }
                  * */
 
-                if (this.OnReceiveData(line))
+                if (this.OnReceiveData(buffer))
                 {
-                    this.RecordData(line);
+                    this.RecordData(buffer);
                 }
 
 			}
@@ -418,20 +425,25 @@ namespace Scada.Declare
                 return;
             }
 
-            this.currentRecordTime = rightTime;
-
             DeviceData dd;
-            if (!this.GetDeviceData(line, this.currentRecordTime, out dd))
+            if (!this.GetDeviceData(line, rightTime, out dd))
             {
+                /*
                 dd = new DeviceData(this, null);
                 dd.OriginData = DeviceData.ErrorFlag;
                 this.SynchronizationContext.Post(this.DataReceived, dd);
+                 * */
                 return;
             }
 
             // Post to Main thread to record.
             dd.OriginData = Encoding.ASCII.GetString(line);
+            RecordManager.DoSystemEventRecord(this, dd.OriginData);
+
             this.SynchronizationContext.Post(this.DataReceived, dd);
+
+            // 只有在存储完成之后，才能记录
+            this.currentRecordTime = rightTime;
         }
 
         private void PostStartStatus()
@@ -457,18 +469,19 @@ namespace Scada.Declare
 
                 if (data == null || data.Length == 0)
                 {
+                    RecordManager.DoSystemEventRecord(this, string.Format("GetDeviceData() Error, Data={0}", Encoding.ASCII.GetString(line)));
                     return false;
                 }
+
                 dd.Time = time;
                 object[] fields = Device.GetFieldsData(data, time, this.fieldsConfig);
                 dd = new DeviceData(this, fields);
                 dd.InsertIntoCommand = this.insertIntoCommand;
-
             }
             catch (Exception e)
             {
                 string strLine = Encoding.ASCII.GetString(line);
-                string errorMsg = string.Format("GetDeviceData() Fail, Data={0}", strLine) + e.Message;
+                string errorMsg = string.Format("GetDeviceData() Exception, Data={0}", strLine) + e.Message;
                 RecordManager.DoSystemEventRecord(this, errorMsg);
                 
                 return false;
