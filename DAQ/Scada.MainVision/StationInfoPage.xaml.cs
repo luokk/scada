@@ -32,6 +32,12 @@ namespace Scada.MainVision
 
             var stationId = string.Format("站点 ID: {0}", Settings.Instance.StationId);
             this.StationId.Content = stationId;
+
+            this.PosLabel.Content = Settings.Instance.Pos;
+
+            this.UserComp.Content = Settings.Instance.UserComp;
+            this.AdminComp.Content = Settings.Instance.AdminComp;
+            this.BuildComp.Content = Settings.Instance.BuildComp;
         }
     }
 }

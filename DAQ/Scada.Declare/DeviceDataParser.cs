@@ -131,22 +131,55 @@ namespace Scada.Declare
 		{
 			// .0000   .0000   .0000   .0000   .5564   383.0   6.136   28.40   .0000 
 			string line = Encoding.ASCII.GetString(data);
-			int p = line.IndexOf('>');
-			line = line.Substring(p + 1);
+            
+            // 去除错误的数据
+            if (line.Length < 27)
+            {
+                return null;
+            }
+
 			string[] items = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-            double d = 0.0;
-            if (double.TryParse(items[4], out d))
+            // 去除错误的值
+            if (items.Length != 10)
             {
-                double f = 1.0;
-                if (this.Factors.Count > 0)
-                {
-                    f = this.Factors[0];
-                }
-
-                // uGy/h (*1000)==> nGy/h
-                items[4] = (f * d * 1000).ToString();
+                return null;
             }
+
+            double d = 0.0;
+            try
+            {
+                if (double.TryParse(items[4], out d))
+                {
+                    double f = 1.0;
+                    if (this.Factors.Count > 0)
+                    {
+                        f = this.Factors[0];
+                    }
+
+                    // uGy/h (*1000)==> nGy/h
+                    items[4] = (f * d * 1000).ToString("0.0");
+                }
+                else { return null; }
+
+                // 判断item[5] ~ item[7]是否为float数值
+                if (double.TryParse(items[5], out d))
+                { }
+                else { return null; }
+
+                if (double.TryParse(items[6], out d))
+                { }
+                else { return null; }
+
+                if (double.TryParse(items[7], out d))
+                { }
+                else { return null; }
+            }
+            catch (Exception e1)
+            {
+                return null;
+            }
+            
 			return items;
 		}
 

@@ -94,6 +94,7 @@ namespace Scada.Declare
                     string c = WorkMode.ToString() + ";" + LoopMode.ToString() + ";" + Running_Process.ToString() + ";" + status.ToString();
                     this.UpdateStatusToDataCenter(c);
                     Command.Send(Ports.MainVision, new Command("m", "mv", "cinderella.status", c));
+                    RecordManager.DoSystemEventRecord(this, c);
                 }
                 counter++;
 
@@ -127,6 +128,13 @@ namespace Scada.Declare
             {
                 byte[] data = Encoding.UTF8.GetBytes(status);
                 string uri = this.GetUpdateStatusUri();
+                wc.UploadDataCompleted += (object o, UploadDataCompletedEventArgs e) => 
+                {
+                    if (e.Error == null)
+                    {
+                        string result = Encoding.UTF8.GetString(e.Result);
+                    }
+                };
                 wc.UploadDataAsync(new Uri(uri), "POST", data, null);
             }
         }
@@ -593,7 +601,7 @@ namespace Scada.Declare
                     RecordManager.DoSystemEventRecord(this, "开始QA测量", RecordType.Event);
 
                     // to do QA Measurement
-                    ExecQAMeasure();
+                    // ExecQAMeasure();
                     return true;
                 }
 
@@ -621,6 +629,28 @@ namespace Scada.Declare
 
         private void ExecSample24HourMeasure()
         {
+            // 首先清除原有进程
+            try
+            {
+                Process[] processes = Process.GetProcesses();
+
+                foreach (Process process in processes)
+                {
+                    if (process.ProcessName.ToLower() == "gv32")
+                    {
+                        process.Kill();
+                    }
+                }
+            }
+            catch (Exception e1)
+            {
+                string msg = string.Format("Kill GammaVision进程失败, 错误：{0}",e1.Message);
+                RecordManager.DoSystemEventRecord(this, msg, RecordType.Event);
+
+                return;
+            }
+
+            // 启动新的JOB文件
             var bat = ConfigPath.GetConfigFilePath("devices/Scada.HPGE/0.9/script/SampleMeasure24.bat");
             using (Process p = Process.Start(bat))
             {

@@ -77,6 +77,8 @@ namespace Scada.MainVision
 			this.LoadConfig();
 			this.LoadDataProvider();
 
+            this.UpdateHpicThreshold();
+
             // Device List
             this.DeviceList.ClickDeviceItem += this.OnDeviceItemClicked;
             this.DeviceList.MainWindow = this;
@@ -109,7 +111,8 @@ namespace Scada.MainVision
             // this.AddPageEntry("数据分析", this.CounterTree);
 
 
-            this.ShowDataViewPanel("scada.hpic");
+            // this.ShowDataViewPanel("scada.naidevice");
+            this.ShowStatusPane();
             // this.OnDeviceItemClicked(null, null);
             this.loaded = true;
             // Max when startup;
@@ -266,6 +269,18 @@ namespace Scada.MainVision
 			this.panelManager.CloseListViewPanel(panel);
 		}
 
+        private void ShowStatusPane()
+        {
+            string name = "Devices-Run-Status";
+            System.Windows.Controls.UserControl page = this.panelManager.GetPage(name);
+            if (page == null)
+            {
+                page = this.panelManager.CreatePage(name, this.dataProvider);
+            }
+            this.panelManager.SetPage(name, page);
+        }
+
+        /*
         void OnNaviItemClicked(object sender, EventArgs e)
         {
             NaviLabel nv = (NaviLabel)sender;
@@ -276,7 +291,7 @@ namespace Scada.MainVision
                 page = this.panelManager.CreatePage(name, this.dataProvider);
             }
             this.panelManager.SetPage(name, page);
-        }
+        }*/
 
         void OnDeviceItemClicked(object sender, EventArgs e)
         {
@@ -450,5 +465,99 @@ namespace Scada.MainVision
 
             this.currentSelectedTreeViewItem = tvi;
         }
+
+        private void MenuMain_Click(object sender, RoutedEventArgs e)
+        {
+            if (!this.OpenProcess("Scada.Main"))
+            {
+                Command.Send(Ports.Main, new Command("MainVision", "Main", "show", ""));
+            }
+        }
+
+        private void MenuDataAgent_Click(object sender, RoutedEventArgs e)
+        {
+            if (!this.OpenProcess("Scada.DataCenterAgent"))
+            {
+                Command.Send(Ports.DataClient, new Command("MainVision", "DataAgent", "show", ""));
+            }
+        }
+
+        private void Quit_Click(object sender, RoutedEventArgs e)
+        {
+            this.dataProvider.Quit = true;
+            commandReceiver.Close();
+            this.Close();
+        }
+
+        private void aboutMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.OpenProcessByName("Scada.About.exe");
+        }
+
+        private void helpMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.OpenProcessByName("help.rtf");
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            this.OpenProcessByName("Scada.MainSettings.exe", false, () => 
+            {
+                this.UpdateHpicThreshold();
+            });
+        }
+
+        public static string GetDeviceConfigFile(string deviceKey)
+        {
+            return ConfigPath.GetDeviceConfigFilePath(deviceKey, "0.9");
+        }
+
+        private void UpdateHpicThreshold()
+        {
+            string filePath = GetDeviceConfigFile("scada.hpic");
+            DeviceEntry entry = DeviceEntry.GetDeviceEntry("scada.hpic", filePath);
+
+            Settings.Instance.HpicAlarm = (StringValue)entry["Alarm1"];
+        }
+
+        private bool OpenProcess(string procName)
+        {
+            Process[] ps = Process.GetProcessesByName(procName);
+            if (ps == null || ps.Length == 0)
+            {
+                this.OpenProcessByName(procName + ".exe", false);
+                return true;
+            }
+            return false;
+        }
+
+        private void OpenProcessByName(string name, bool uac = false, Action action = null)
+        {
+            string fileName = LogPath.GetExeFilePath(name);
+            try
+            {
+                ProcessStartInfo processInfo = new ProcessStartInfo();
+                if (uac && Environment.OSVersion.Version.Major >= 6)
+                {
+                    processInfo.Verb = "runas";
+                }
+                processInfo.FileName = fileName;
+                
+                var process = Process.Start(processInfo);
+                if (action != null)
+                {
+                    process.EnableRaisingEvents = true;
+                    process.Exited += (object sender, EventArgs e) =>
+                    {
+                        action();
+                    };
+                }
+            }
+            catch (Exception)
+            {
+                // MessageBox.Show(string.Format("文件'{0}'不存在，或者需要管理员权限才能运行。", name));
+            }
+        }
+        
     }
 }

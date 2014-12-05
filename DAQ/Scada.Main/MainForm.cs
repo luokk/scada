@@ -170,6 +170,10 @@ namespace Scada.Main
                         {
                             Program.DeviceManager.SendDeviceCode("Scada.Cinderella.Status", commandLine);
                         }
+                        else if (type == "show")
+                        {
+                            this.ShowMainUI();
+                        }
                     }
                     catch (Exception)
                     {

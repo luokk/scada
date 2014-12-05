@@ -38,7 +38,6 @@ namespace Scada.Data.Client
 
         public Packet()
         {
-
         }
 
         public Packet(string token)
@@ -175,7 +174,7 @@ namespace Scada.Data.Client
                 return "cinderelladata";
             else if (deviceKey == Devices.CinderellaStatus)
                 return "cinderellastatus";
-            else;
+            else
                 return string.Empty;
         }
 

@@ -48,6 +48,7 @@ namespace Scada.Common
                         EndPoint Remote = (EndPoint)(sender);
 
                         byte[] buffer = new byte[1024];
+                        
                         int size = this.WinSocket.ReceiveFrom(buffer, ref Remote);
                         if (size > 0)
                         {
@@ -58,7 +59,7 @@ namespace Scada.Common
                             }
                             callbackAction(msg);
                         }
-
+                        
                     }
                 }
                 catch (Exception)

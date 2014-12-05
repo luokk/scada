@@ -45,14 +45,18 @@ namespace Scada.MainVision
                     string nuclname = reader.GetString("name");
                     string doserate = reader.GetString("Doserate");
                     string indication = reader.GetString("Indication");
-
+                    string activities = reader.GetString("Activity");
                     string nuclideKey = nuclname.ToLower();
                     string indicationKey = string.Format("Ind({0})", nuclideKey);
-
+                    
+                    string ac = activities.Split(' ')[0];
+                    double activity = 0.0;
+                    double.TryParse(ac, out activity);
                     if (!data.ContainsKey(nuclideKey))
                     {
-                        data.Add(nuclideKey, doserate);
-                        data.Add(indicationKey, indication);
+                        // data.Add(nuclideKey, doserate);
+                        // data.Add(indicationKey, indication);
+                        data.Add(nuclideKey, string.Format("{0}, {1}({2})", Convert.ToDouble(doserate).ToString("0.0"), activity, indication));
                     }
                     else
                     {

@@ -28,7 +28,7 @@ namespace Scada.MainSettings
                 {DeviceEntry.IPAddress, this.settings.IPAddress},
                 {DeviceEntry.RecordInterval, this.settings.Frequence.ToString()},
                 {DeviceEntry.DeviceSn, this.settings.DeviceSn},
-                {"MinuteAdjust", this.settings.MinuteAdjust.ToString()}
+                
             });
         }
 

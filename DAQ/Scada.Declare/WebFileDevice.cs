@@ -29,6 +29,8 @@ namespace Scada.Declare
 
 		private string deviceSn = string.Empty;
 
+        private string LastDownLoadFileName;
+
 		private int minuteAdjust = 0;
 
         private const int TimeZone = 8;
@@ -145,6 +147,12 @@ namespace Scada.Declare
             {
                 // Start download ...
                 string fileName1 = GetFileNameOnDevice(now);
+                // 判断NaI谱文件是否已经成功下载
+                if (fileName1 == LastDownLoadFileName)
+                {
+                    return;
+                }
+
                 string fileName2 = GetFileName(now);
                 string datePath = LogPath.GetDeviceLogFilePath(this.Id, now) + "\\" + now.Day.ToString() ;
                 this.DoFolderPolicy(datePath);
@@ -179,9 +187,15 @@ namespace Scada.Declare
                     {
                         RecordManager.DoSystemEventRecord(this, string.Format("{0} Try to download {1}: Failed.", now, address));
                         RecordManager.DoSystemEventRecord(this, e.Message);
+
+                        return;
                     }
                 }
+
+                // 下载成功之后记录，防止多次下载
+                LastDownLoadFileName = fileName1;
             }
+
 			Thread.Sleep(1000);
             if (File.Exists(tempFile))
             {
@@ -245,7 +259,9 @@ namespace Scada.Declare
             this.SynchronizationContext.Post(this.DataReceived, dd);
             foreach (var nd in set.sets)
             {
-                if (nd.Indication == "100")
+                int ind = 0;
+                int.TryParse(nd.Indication, out ind);
+                if (ind > 0 && ind <= 100)
                 {
                     var dd2 = this.ParseNuclideData(nd, time);
                     this.SynchronizationContext.Post(this.DataReceived, dd2);
@@ -319,7 +335,12 @@ namespace Scada.Declare
             // Basicly, we use the EndTime.
             string et = doc.Value("//s:EndTime", nsmgr);
 
-            string co = doc.Value("//a:Coefficients", nsmgr);
+
+            string co = doc.Value("//a:Calibration[@Type='Energy']//a:Coefficients", nsmgr);
+            if (string.IsNullOrEmpty(co))
+            {
+                co = doc.Value("//a:Coefficients", nsmgr);
+            }
 
             string cd = doc.Value("//a:ChannelData", nsmgr);
 

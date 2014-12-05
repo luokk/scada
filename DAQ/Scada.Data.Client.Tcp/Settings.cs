@@ -178,15 +178,17 @@ namespace Scada.Data.Client.Tcp
             // Load NaI device config.
             // TODO:
 
-            this.NaIFilePath = string.Format("{0}\\..\\devices\\Scada.NaIDevice\\0.9", Application.ExecutablePath);
+            // this.NaIFilePath = string.Format("{0}\\..\\devices\\Scada.NaIDevice\\0.9", Application.ExecutablePath);
 
             
 
             const string NaIDeviceKey = "scada.naidevice";
             DeviceEntry entry = LoadFromConfig(NaIDeviceKey, ConfigPath.GetDeviceConfigFilePath(NaIDeviceKey, "0.9"));
-
-            this.NaIDeviceSn = (StringValue)entry["DeviceSn"];
-            this.MinuteAdjust = (StringValue)entry["MinuteAdjust"];
+            if (entry != null)
+            {
+                this.NaIDeviceSn = (StringValue)entry["DeviceSn"];
+                this.MinuteAdjust = (StringValue)entry["MinuteAdjust"];
+            }
         }
 
         private Device ParseDeviceNode(XmlNode deviceNode)

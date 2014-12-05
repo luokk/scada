@@ -6,35 +6,24 @@
              xmlns:local="clr-namespace:Scada.Chart"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300"  MouseMove="MainViewMouseMove">
-    <Border BorderBrush="LightGray"  BorderThickness="1, 1, 1, 1">
-    <Grid x:Name="MainView" Background="#F8F8F8">
-        
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="30"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="30"></RowDefinition>
-        </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical" VerticalAlignment="Center">
-                <StackPanel x:Name="SelectedItems1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10, 0, 0, 0"/>
-                <StackPanel x:Name="SelectedItems2" Orientation="Horizontal" VerticalAlignment="Center" Margin="10, 0, 0, 0" Visibility="Collapsed"/>
+    <Border BorderBrush="LightGray">
+        <Grid x:Name="MainView" Background="#F8F8F8">
 
-            </StackPanel>
-            <ScrollViewer x:Name="panelScrollViewer" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden" >
-            <StackPanel x:Name="ChartContainer" 
-                        Orientation="Vertical" VerticalAlignment="Bottom"
-                        MouseMove="MainViewMouseMove"
-                        MouseLeftButtonDown="CanvasViewMouseLeftButtonEventHandler"
-                        MouseLeftButtonUp="CanvasViewMouseLeftButtonEventHandler" 
-                        MouseWheel="ZoomHandler" >
-            
-            </StackPanel>
-        </ScrollViewer>
-        <Canvas x:Name="TimeAxis" Grid.Column="1" Grid.Row="2" Background="#F8F8F8" Loaded="TimeAxisLoaded"></Canvas>
-        
-    </Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="50" x:Name="TimeAxisRow"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <local:CurveView x:Name="CurveView" Height="220" Grid.Row="0" Grid.ColumnSpan="2"
+                        MouseMove="MainViewMouseMove" Loaded="CurveViewLoaded" VerticalAlignment="Bottom">
+
+            </local:CurveView>
+            <Canvas x:Name="TimeAxis" Grid.Column="1" Grid.Row="1" Background="#F8F8F8"></Canvas>
+
+        </Grid>
     </Border>
 </UserControl>

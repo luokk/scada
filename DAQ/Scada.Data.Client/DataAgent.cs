@@ -65,9 +65,9 @@ namespace Scada.Data.Client
         /// </summary>
         /// <param name="packet"></param>
         /// <param name="time"></param>
-        internal void SendDataPacket(Packet packet, DateTime time)
+        internal bool SendDataPacket(Packet packet, DateTime time)
         {
-            this.Send(this.DataCenter.GetUrl("data/commit"), packet, time);
+            return this.Send(this.DataCenter.GetUrl("data/commit"), packet, time);
         }
 
         /// <summary>
@@ -102,6 +102,8 @@ namespace Scada.Data.Client
             }
             catch (Exception)
             {
+                this.commandClient.Dispose();
+                this.commandClient = null;
             }
         }
 
@@ -131,9 +133,23 @@ namespace Scada.Data.Client
                             timesStr = times.Value<string>();
                         }
 
-                        string start = content["start"].Value<string>();
-                        string end = content["end"].Value<string>();
-                        this.HandleHistoryData(device, start, end, timesStr);
+                        JToken sid = content["sid"];
+                        string sidStr = null;
+                        if (sid != null)
+                        {
+                            sidStr = sid.Value<string>();
+                        }
+
+                        if (device == "hpge")
+                        {
+                            this.HandleHistoryData(device, sidStr);
+                        }
+                        else
+                        {
+                            string start = content["start"].Value<string>();
+                            string end = content["end"].Value<string>();
+                            this.HandleHistoryData(device, start, end, timesStr);
+                        }
                     }
 
                     
@@ -156,19 +172,43 @@ namespace Scada.Data.Client
             this.NotifyEvent(this, NotifyEvents.HistoryData, n);
         }
 
+        private void HandleHistoryData(string device, string sid)
+        {
+            Notify n = new Notify();
+            n.SetValue("device", device);
+            n.SetValue("sid", sid);
+            this.NotifyEvent(this, NotifyEvents.HistoryData, n);
+        }
+
         /// <summary>
         /// Send Dispatcher
         /// </summary>
         /// <param name="p"></param>
-        internal void SendPacket(Packet p)
+        internal bool SendPacket(Packet p)
         {
-            if (!p.IsFilePacket)
+            if (SynchronizationContext.Current != null)
             {
-                this.SendDataPacket(p, default(DateTime));
+                ThreadPool.QueueUserWorkItem(new WaitCallback((o) => 
+                {
+                    this.SendPacket(p, true);
+                }), null);
+                return true;
             }
             else
             {
-                this.SendFilePacket(p);
+                return this.SendPacket(p, false);
+            }
+        }
+
+        private bool SendPacket(Packet p, bool fromNewThread)
+        {
+            if (!p.IsFilePacket)
+            {
+                return this.SendDataPacket(p, default(DateTime));
+            }
+            else
+            {
+                return this.SendFilePacket(p);
             }
         }
 
@@ -178,7 +218,7 @@ namespace Scada.Data.Client
         /// <param name="api"></param>
         /// <param name="packet"></param>
         /// <param name="time"></param>
-        private void Send(string api, Packet packet, DateTime time)
+        private bool Send(string api, Packet packet, DateTime time)
         {
             try
             {
@@ -186,33 +226,41 @@ namespace Scada.Data.Client
                 byte[] data = Encoding.ASCII.GetBytes(packet.ToString());
                 using (WebClient wc = new WebClient())
                 {
-                    wc.UploadDataCompleted += (object sender, UploadDataCompletedEventArgs e) =>
-                    {
-                        if (e.Error != null)
-                        {
-                            this.NotifyEvent(this, NotifyEvents.SendDataOK, new Notify() { DeviceKey = packet.DeviceKey, Message = e.Error.Message });
-                            this.HandleWebException(e.Error);
-                            return;
-                        }
+                    Byte[] result = wc.UploadData(uri, "POST", data);
+                    string strResult = Encoding.ASCII.GetString(result);
+                    this.NotifyEvent(this, NotifyEvents.SendDataOK, new Notify() { DeviceKey = packet.DeviceKey, Message = strResult });
 
-                        Packet p = (Packet)e.UserState;
-                        if (p != null)
-                        {
-                            string result = Encoding.ASCII.GetString(e.Result);
-                            result = result.Trim();
-                            if (!string.IsNullOrEmpty(result))
-                            {
-                                this.NotifyEvent(this, NotifyEvents.SendDataOK, new Notify() { DeviceKey = packet.DeviceKey, Message = result });
-                            }
-                        }
-                    };
-
-                    wc.UploadDataAsync(uri, "POST", data, packet);
+                    return true;
                 }
             }
             catch (Exception e)
             {
+                this.NotifyEvent(this, NotifyEvents.SendDataFailed, new Notify() { DeviceKey = packet.DeviceKey, Message = e.Message });
+                this.HandleWebException(e);
+                return false;
+            }
+        }
 
+        string GetPacketSID(Packet p)
+        {
+            string tmp = p.Path;
+            int endIndex = tmp.LastIndexOf("\\");
+            tmp = tmp.Substring(0, endIndex);
+            int startIndex = tmp.LastIndexOf("\\");
+            return tmp.Substring(startIndex + 1, tmp.Length - startIndex - 1);
+        }
+
+        void RemoveOccupiedToken(Packet p)
+        {
+            string fileNameWithToken = p.Path;
+
+            if (File.Exists(fileNameWithToken))
+            {
+                string fileName = Path.GetFileName(fileNameWithToken);
+                string path = Path.GetDirectoryName(fileNameWithToken);
+                fileName = fileName.Substring(1);
+                string newFileName = Path.Combine(path, fileName);
+                File.Move(fileNameWithToken, newFileName);
             }
         }
 
@@ -220,17 +268,23 @@ namespace Scada.Data.Client
         /// Upload File
         /// </summary>
         /// <param name="packet"></param>
-        internal void SendFilePacket(Packet packet)
+        internal bool SendFilePacket(Packet packet)
         {
             if (string.IsNullOrEmpty(packet.Path) || !File.Exists(packet.Path))
             {
                 Notify msg = new Notify();
                 msg.Message = "No File Found";
                 this.NotifyEvent(this, NotifyEvents.EventMessage, msg);
-                return;
+
+                // 上传失败，移除占用标志
+                RemoveOccupiedToken(packet);
+
+                return false;
             }
 
             string uploadUrl = string.Empty;
+
+            // 判断是哪种设备的文件上传
             if (packet.FileType.Equals("labr", StringComparison.OrdinalIgnoreCase))
             {
                 string path = Path.GetDirectoryName(packet.Path);
@@ -240,8 +294,20 @@ namespace Scada.Data.Client
             }
             else if (packet.FileType.Equals("hpge", StringComparison.OrdinalIgnoreCase))
             {
-                var folder = DataSource.GetCurrentSid();
-                var param = this.GetHpGeParams(packet.Path);    // "2014-07-04 00:00:00,2014-07-04 00:00:00,2014-07-04 00:00:00,PRT";
+                //var folder = DataSource.GetCurrentSid();
+                var folder = GetPacketSID(packet);
+
+                var param = "";
+                try 
+                {  
+                    param = this.GetHpGeParams(packet.Path); 
+                }
+                catch (Exception)
+                {
+                    RemoveOccupiedToken(packet);
+                    return false;
+                }
+                
                 param = param.Replace('/', '-');
                 uploadUrl = this.GetUploadApi(packet.FileType, folder, param);
             }
@@ -251,35 +317,24 @@ namespace Scada.Data.Client
             {
                 using (WebClient wc = new WebClient())
                 {
-                    wc.UploadFileCompleted += (object sender, UploadFileCompletedEventArgs e) =>
-                        {
+                    // 同步上传
+                    Byte[] result = wc.UploadFile(uri, Post, packet.Path);
+                    string strResult = Encoding.UTF8.GetString(result);
+                    string msg = string.Format("成功上传 {0}，信息 {1}", this.GetRelFilePath(packet), strResult);
+                    this.NotifyEvent(this, NotifyEvents.UploadFileOK, new Notify() { Message = msg });
 
-                            Packet p = (Packet)e.UserState;
-                            if (p != null)
-                            {
-                                if (e.Error == null)
-                                {
-                                    string result = Encoding.UTF8.GetString(e.Result);
-                                    this.RemovePrefix(p.Path);
-                                    // LogPath.GetDeviceLogFilePath("");
-                                    string msg = string.Format("成功上传 {0}", this.GetRelFilePath(packet));
-
-                                    this.NotifyEvent(this, NotifyEvents.UploadFileOK, new Notify() { Message = msg });
-
-                                    //this.NotifyEvent(this, NotifyEvents.UploadFileOK, new PacketBase() { Message = msg });
-                                }
-                                else
-                                {
-                                    this.NotifyEvent(this, NotifyEvents.UploadFileFailed, new Notify() { Message = e.Error.Message });
-                                }
-                            }
-                        };
-                    wc.UploadFileAsync(uri, Post, packet.Path, packet);
+                    return true;
                 }
             }
-            catch (WebException)
+            catch (WebException e)
             {
-             
+                // 上传失败，移除占用标志
+                RemoveOccupiedToken(packet);
+
+                string msg = string.Format("错误上传 {0}，错误信息 {1}", this.GetRelFilePath(packet), e.Message);
+                this.NotifyEvent(this, NotifyEvents.UploadFileFailed, new Notify() { Message = msg });
+
+                return false;
             }
         }
 
@@ -305,6 +360,7 @@ namespace Scada.Data.Client
             return string.Empty;
         }
 
+        // 处理HPGe文件参数
         private string GetHpGeParams(string fileName)
         {
             string filename = Path.GetFileName(fileName).ToLower();
@@ -335,39 +391,69 @@ namespace Scada.Data.Client
 
             DateTime dt = DateTime.ParseExact(time, "yyyy_MM_dd HH_mm_ss", null);
 
-            string[] lines = File.ReadAllLines(fileName);
-
-            bool b1 = false;
-            bool b2 = false;
+            // 计算开始、结束时间
             DateTime startTime = default(DateTime);
             DateTime endTime = default(DateTime);
-            foreach (var line in lines)
+            string[] lines = File.ReadAllLines(fileName);
+            if (mode.Contains("SPE"))
             {
-                if (b1)
-                {
-                    startTime = DateTime.ParseExact(line, "MM/dd/yyyy HH:mm:ss", null);
-                    
-                    b1 = false;
-                    continue;
-                }
-                if (b2)
-                {
-                    string[] parts = line.Split(' ');
-                    int max = Math.Max(int.Parse(parts[0]), int.Parse(parts[1]));
-                    endTime = startTime.AddSeconds(max);
-                    break;
-                }
-                if (line.IndexOf("$DATE_MEA:") >= 0)
-                {
-                    b1 = true;
-                    continue;
-                }
+                bool b1 = false;
+                bool b2 = false;
 
-                if (line.IndexOf("$MEAS_TIM:") >= 0)
+                foreach (var line in lines)
                 {
-                    b2 = true;
+                    if (b1)
+                    {
+                        startTime = DateTime.ParseExact(line, "MM/dd/yyyy HH:mm:ss", null);
+
+                        b1 = false;
+                        continue;
+                    }
+                    if (b2)
+                    {
+                        string[] parts = line.Split(' ');
+                        int max = Math.Max(int.Parse(parts[0]), int.Parse(parts[1]));
+                        endTime = startTime.AddSeconds(max);
+                        break;
+                    }
+                    if (line.IndexOf("$DATE_MEA:") >= 0)
+                    {
+                        b1 = true;
+                        continue;
+                    }
+
+                    if (line.IndexOf("$MEAS_TIM:") >= 0)
+                    {
+                        b2 = true;
+                    }
                 }
             }
+            else if (mode.Contains("RPT"))
+            {
+                foreach (var line in lines)
+                {
+                    int index1 = line.IndexOf("Start time:");
+                    int index2 = line.IndexOf("Real time:");
+                    if (index1 >= 0)
+                    {
+                        string tmpDate = line.Substring(index1 + 12);
+                        tmpDate = tmpDate.Replace('\0', ' ').Trim();
+
+                        startTime = DateTime.Parse(tmpDate);
+                        continue;
+                    }
+
+                    if (index2 >= 0)
+                    {
+                        string tmpSecond = line.Substring(index2 + 11);
+                        tmpSecond = tmpSecond.Replace('\0', ' ').Trim();
+                        int second = int.Parse(tmpSecond);
+                        endTime = startTime.AddSeconds(second);
+                        break;
+                    }
+                }
+            }
+            else { }
 
             return string.Format("{0},{1},{2},{3}", dt, startTime, endTime, mode);
         }
