@@ -1,0 +1,51 @@
+SET_DETECTOR 1
+
+
+wait 10
+
+clear
+
+
+START
+
+
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-001.spe"
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-002.spe"
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-003.spe"
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-004.spe"
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-005.spe"
+
+
+
+wait 4000
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra24.spe"
+stop
+wait 10
+
+recall_calib "C:\User\Calibrations\beijing_station_eff.Clb"
+recall_options "C:\User\Sample Types\sample.Sdf"
+analyze
+stop
+wait 20
+quit
