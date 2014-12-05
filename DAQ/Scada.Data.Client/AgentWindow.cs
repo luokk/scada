@@ -824,7 +824,7 @@ namespace Scada.Data.Client
             {
                 return Devices.Weather;
             }
-            else if (device == "cinderella")
+            else if (device == "cinderelladata")
             {
                 return Devices.CinderellaData;
             }
