@@ -2,8 +2,6 @@ set_detector 1
 
 stop
 
-set_preset_clear
-
 clear
 
 wait 10
@@ -14,7 +12,11 @@ wait
 
 save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\QASpectra.spe"
 
+stop
+
 wait 10
+
+set_preset_clear
 
 quit
 

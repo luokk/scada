@@ -1,9 +1,12 @@
 SET_DETECTOR 1
-
+stop
+set_preset_clear
 
 wait 10
 
 clear
+
+wait 2200
 
 
 START
@@ -36,6 +39,35 @@ WAIT 7200
 save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-005.spe"
 
 
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-006.spe"
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-007.spe"
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-008.spe"
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-009.spe"
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-0010.spe"
+
+WAIT 7200
+
+
+save "D:\gitnew\DAQ\Bin\Config\devices\scada.hpge\0.9\temp\SampleSpectra2-0011.spe"
 
 wait 4000
 
