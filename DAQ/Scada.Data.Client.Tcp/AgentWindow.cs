@@ -468,9 +468,12 @@ namespace Scada.Data.Client.Tcp
                 }
             }
 
-            if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+            if (this.countryCenterAgent != null && this.countryCenterAgent.Stream != null)
             {
-                this.countryCenterAgent.SendDataPacket(p);
+                if (this.countryCenterAgent.SendDataPacket(p))
+                {
+                    this.UpdateSendDataRecord(deviceKey, false);
+                }
             }
         }
 
@@ -488,9 +491,12 @@ namespace Scada.Data.Client.Tcp
                 }
             }
 
-            if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+            if (this.countryCenterAgent != null && this.countryCenterAgent.Stream != null)
             {
-                this.countryCenterAgent.SendDataPacket(p);
+                if (this.countryCenterAgent.SendDataPacket(p))
+                {
+                    this.UpdateSendDataRecord(deviceKey, false);
+                }
             }
         }
 
@@ -542,9 +548,12 @@ namespace Scada.Data.Client.Tcp
                             this.UpdateSendDataRecord(deviceKey, false);
                         }
 
-                        if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+                        if (this.countryCenterAgent != null && this.countryCenterAgent.Stream != null)
                         {
-                            this.countryCenterAgent.SendDataPacket(p);
+                            if (this.countryCenterAgent.SendDataPacket(p))
+                            {
+                                this.UpdateSendDataRecord(deviceKey, false);
+                            }
                         }
                     }
                 }

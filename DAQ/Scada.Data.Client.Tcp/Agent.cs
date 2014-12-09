@@ -147,18 +147,6 @@ namespace Scada.Data.Client.Tcp
             set;
         }
 
-        internal bool SendDataDirectlyStarted
-        {
-            get;
-            set;
-        }
-
-        internal bool SendDataDirectlyStartedByError
-        {
-            get;
-            set;
-        }
-
         public Agent(string serverAddress, int serverPort)
         {
             this.ServerAddress = serverAddress;
@@ -652,7 +640,7 @@ namespace Scada.Data.Client.Tcp
             if (p == null)
                 return false;
 
-            if (this.SendDataStarted)
+            if (this.SendDataStarted || this.Type == Type.Country)
             {
                 string s = p.ToString();
                 return this.Send(Encoding.ASCII.GetBytes(s));
