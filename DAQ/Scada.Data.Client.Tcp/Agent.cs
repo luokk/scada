@@ -56,14 +56,11 @@ namespace Scada.Data.Client.Tcp
         ConnectedCountry,
         Disconnect,
         DisconnectCountry,
-        Disconnect2,
         BeginRead,
         EndRead,
         Received,
         HistoryDataSent,
         HandleEvent,
-        ConnectToCountryCenter,
-        DisconnectToCountryCenter,
     }
 
     public enum Type
@@ -400,6 +397,7 @@ namespace Scada.Data.Client.Tcp
         internal void Disconnect()
         {
             this.IsWired = null;
+            string msg = string.Empty;
             try
             {
                 if (this.Stream != null)
@@ -411,25 +409,28 @@ namespace Scada.Data.Client.Tcp
                 {
                     this.client.Close();
                 }
-                string msg = string.Format("Disconnect from {0}", this.ToString());
+                msg = string.Format("Disconnect from {0}", this.ToString());
                 this.DoLog(ScadaDataClient, msg);
-                if (this.Type == Type.Country)
+            }
+            catch (Exception e)
+            {
+                msg = string.Format("Disconnect from {0} Failed => {1}", this.ToString(), e.Message);
+                this.DoLog(ScadaDataClient, msg);
+            }
+            finally
+            {
+                this.Stream = null;
+                this.client = null;
+
+                if (this.Type == Type.Province)
                 {
                     this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
                 }
-                else
+                else if (this.Type == Type.Country)
                 {
                     this.NotifyEvent(this, NotifyEvents.DisconnectCountry, msg, null);
                 }
             }
-            catch (Exception e)
-            {
-                string msg = string.Format("Disconnect from {0} Failed => {1}", this.ToString(), e.Message);
-                this.DoLog(ScadaDataClient, msg);
-                this.NotifyEvent(this, NotifyEvents.Disconnect2, msg, null);
-            }
-            this.Stream = null;
-            this.client = null;
         }
 
         private void ConnectCallback(IAsyncResult result)
@@ -455,6 +456,7 @@ namespace Scada.Data.Client.Tcp
 
                         string msg = string.Format("Connected to {0}", this.ToString());
                         this.DoLog(ScadaDataClient, msg);
+
                         if (this.Type == Type.Country)
                         {
                             this.NotifyEvent(this, NotifyEvents.ConnectedCountry, msg, null);
@@ -472,16 +474,6 @@ namespace Scada.Data.Client.Tcp
                     string address = this.isConnectingWired ? string.Format("{0}:{1}", this.ServerAddress, this.ServerPort) : string.Format("{0}:{1}", this.WirelessServerAddress, this.WirelessServerPort);
                     string msg = string.Format("Connected to {0} Failed => {1}", address, e.Message);
                     this.DoLog(ScadaDataClient, msg);
-
-                    if (this.Type == Type.Country)
-                    {
-                        this.NotifyEvent(this, NotifyEvents.DisconnectCountry, msg, null);
-                    }
-                    else
-                    {
-                        this.NotifyEvent(this, NotifyEvents.Disconnect, msg, null);
-                    }
-
                     this.OnConnectionException(e);
                 }
 
@@ -695,24 +687,6 @@ namespace Scada.Data.Client.Tcp
         {
             string s = p.ToString();
             return this.Send(Encoding.ASCII.GetBytes(s));
-        }
-
-        internal void StartConnectCountryCenter(bool sendDataDirectlyStartedByError = false)
-        {
-            this.SendDataDirectlyStarted = true;
-            this.SendDataDirectlyStartedByError = sendDataDirectlyStartedByError;
-            string msg = string.Format("启动到国家数据中心的连接!");
-            this.NotifyEvent(this, NotifyEvents.ConnectToCountryCenter, msg, null);
-        }
-
-        internal void StopConnectCountryCenter(bool sendDataDirectlyStartedByError = false)
-        {
-            if (this.SendDataDirectlyStartedByError == sendDataDirectlyStartedByError)
-            {
-                this.SendDataDirectlyStarted = false;
-                string msg = string.Format("国家数据中心连接已断开");
-                this.NotifyEvent(this, NotifyEvents.DisconnectToCountryCenter, msg, null);
-            }
         }
 
         public ThreadMashaller UIThreadMashaller

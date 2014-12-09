@@ -651,24 +651,27 @@ namespace Scada.Data.Client.Tcp
                     this.MainConnStatusLabel.ForeColor = Color.Black;
                     this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
 
-                    this.agent.StopConnectCountryCenter(true);
+                    this.StopConnectCountryCenter();
+                    
                 }
                 else if (NotifyEvents.ConnectedCountry == notify)
                 {
                     this.SubConnStatusLabel.ForeColor = Color.Black;
                     this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
                 }
-                else if (NotifyEvents.Disconnect == notify || NotifyEvents.Disconnect2 == notify)
+                else if (NotifyEvents.Disconnect == notify)
                 {
                     int count = this.connectionHistory.Count;
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.DisconnectedTime = DateTime.Now;
 
-                    if (NotifyEvents.Disconnect == notify && this.retryCount % 3 == 0)
+                    this.retryCount++;
+                    if (this.retryCount % 3 == 0)
                     {
-                        this.retryCount++;
-                        this.agent.StartConnectCountryCenter(true);
+                        this.StartConnectCountryCenter();
+                        
                     }
+                    
                     this.MainConnStatusLabel.ForeColor = Color.Red;
                     this.MainConnStatusLabel.Text = "省中心连接状态: 未连接";
                 }
@@ -689,16 +692,7 @@ namespace Scada.Data.Client.Tcp
                     Log.GetLogFile(deviceKey).Log(line);
                     this.UpdateSendDataRecord(deviceKey, true);
                 }
-                else if (NotifyEvents.ConnectToCountryCenter == notify)
-                {
-                    /// 国家数据中心相关
-                    this.StartConnectCountryCenter();
-                }
-                else if (NotifyEvents.DisconnectToCountryCenter == notify)
-                {
-                    /// 国家数据中心相关
-                    this.StopConnectCountryCenter();
-                }
+  
             });
         }
 
