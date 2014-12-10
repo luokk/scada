@@ -434,7 +434,8 @@ namespace Scada.Data.Client.Tcp
                     }
                 }
 
-                if (this.agent != null && this.agent.Stream != null && pks.Count > 0)
+                if ((this.agent != null && this.agent.Stream != null && pks.Count > 0) ||
+                    (this.countryCenterAgent != null && this.countryCenterAgent.Stream != null && pks.Count > 0))
                 {
                     Logger logger = Log.GetLogFile(deviceKey);
                     logger.Log("---- BEGIN ----");
@@ -661,12 +662,14 @@ namespace Scada.Data.Client.Tcp
                     this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
 
                     this.StopConnectCountryCenter();
-                    
+                    this.countryCenterAgent.DoLog(ScadaDataClient, "正在断开国家数据中心连接...");
                 }
                 else if (NotifyEvents.ConnectedCountry == notify)
                 {
                     this.SubConnStatusLabel.ForeColor = Color.Black;
                     this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
+
+                    this.countryCenterAgent.DoLog(ScadaDataClient, "已经连接到国家数据中心!");
                 }
                 else if (NotifyEvents.Disconnect == notify)
                 {
@@ -678,7 +681,6 @@ namespace Scada.Data.Client.Tcp
                     if (this.retryCount % 3 == 0)
                     {
                         this.StartConnectCountryCenter();
-                        
                     }
                     
                     this.MainConnStatusLabel.ForeColor = Color.Red;

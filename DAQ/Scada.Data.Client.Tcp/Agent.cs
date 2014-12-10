@@ -580,14 +580,12 @@ namespace Scada.Data.Client.Tcp
             return false;
         }
 
-        // A. 每30秒试图重连一次
-        // B. 6次连接失败, 则选择无线方式
-        // C. 无线连接也失败, 则重新测试连接无线4次
-        // D. 无线也连接不上, 则回到A步骤
+        int retryTimes = 0;
+
         private void ConnectRetryRoutine()
         {
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 6000; // 6 seconds
+            timer.Interval = 60000; // 1min
             timer.Elapsed += (s, e) => 
             {
                 if (this.client != null)
@@ -595,6 +593,14 @@ namespace Scada.Data.Client.Tcp
                     Console.WriteLine("ConnectRetryRoutine client != null");
                     return;
                 }
+
+                this.retryTimes++;
+                if (this.retryTimes > 13)
+                {
+                    this.retryTimes = 0;
+                }
+                if (this.retryTimes < 10) 
+                    return;
 
                 if (this.UIThreadMashaller != null)
                 {
