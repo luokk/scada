@@ -285,6 +285,8 @@ namespace Scada.Data.Client.Tcp
                     Console.WriteLine("Start DataCenter for Country");
                     this.countryCenterAgent = CreateCountryCenterAgent(dc.Ip, dc.Port);
                     this.countryCenterAgent.AddWirelessInfo(dc.WirelessIp, dc.WirelessPort);
+                    SynchronizationContext synchronizationContext = SynchronizationContext.Current;
+                    this.countryCenterAgent.UIThreadMashaller = new ThreadMashaller(synchronizationContext);
                 }
                 else
                 {
@@ -473,6 +475,8 @@ namespace Scada.Data.Client.Tcp
             {
                 if (this.countryCenterAgent.SendDataPacket(p))
                 {
+                    string msg = string.Format("RD: {0}", p.ToString());
+                    Log.GetLogFile(deviceKey).Log(msg);
                     this.UpdateSendDataRecord(deviceKey, false);
                 }
             }
@@ -496,6 +500,8 @@ namespace Scada.Data.Client.Tcp
             {
                 if (this.countryCenterAgent.SendDataPacket(p))
                 {
+                    string msg = string.Format("RD: {0}", p.ToString());
+                    Log.GetLogFile(deviceKey).Log(msg);
                     this.UpdateSendDataRecord(deviceKey, false);
                 }
             }
@@ -553,6 +559,8 @@ namespace Scada.Data.Client.Tcp
                         {
                             if (this.countryCenterAgent.SendDataPacket(p))
                             {
+                                string msg = string.Format("RD: {0}", p.ToString());
+                                Log.GetLogFile(deviceKey).Log(msg);
                                 this.UpdateSendDataRecord(deviceKey, false);
                             }
                         }

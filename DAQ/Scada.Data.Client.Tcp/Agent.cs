@@ -585,7 +585,7 @@ namespace Scada.Data.Client.Tcp
         private void ConnectRetryRoutine()
         {
             System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 60000; // 1min
+            timer.Interval = 30000; // 1min
             timer.Elapsed += (s, e) => 
             {
                 if (this.client != null)
@@ -595,11 +595,11 @@ namespace Scada.Data.Client.Tcp
                 }
 
                 this.retryTimes++;
-                if (this.retryTimes > 13)
+                if (this.retryTimes > 20)
                 {
                     this.retryTimes = 0;
                 }
-                if (this.retryTimes < 10) 
+                if (this.retryTimes > 2) 
                     return;
 
                 if (this.UIThreadMashaller != null)
@@ -631,8 +631,8 @@ namespace Scada.Data.Client.Tcp
         internal bool SendPacket(DataPacket p, DateTime time)
         {
             string s = p.ToString();
-            // TODO:!
-            this.DoLog(Agent.ScadaDataClient, string.Format("-->: {0}", s));
+           
+            this.DoLog(Agent.ScadaDataClient, string.Format("[{0}]-->: {1}", DateTime.Now, s));
             return this.Send(Encoding.ASCII.GetBytes(s));
         }
 
