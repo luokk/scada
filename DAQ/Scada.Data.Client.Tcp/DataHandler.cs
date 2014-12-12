@@ -283,7 +283,7 @@ namespace Scada.Data.Client.Tcp
                         // Debug.Assert(this.agent.Type != Type.Country);
                         // if (this.agent.Type != Type.Country)
                         {
-                           this.OnStartSendDataDirectly(msg);
+                           // this.OnStartSendDataDirectly(msg);
                         }
                     }
                     break;
@@ -796,7 +796,7 @@ namespace Scada.Data.Client.Tcp
             this.SendReplyPacket(qn);
             this.SendResultPacket(qn);
             Console.WriteLine("OnStartSendDataDirectly");
-            this.agent.StartConnectCountryCenter();
+            // this.agent.StartConnectCountryCenter();
         }
 
         private void OnStopSendDataDirectly(string msg)
@@ -804,7 +804,7 @@ namespace Scada.Data.Client.Tcp
             string qn = Value.Parse(msg, "QN");
             this.SendReplyPacket(qn);
             this.SendResultPacket(qn);
-            this.agent.StopConnectCountryCenter();
+            // this.agent.StopConnectCountryCenter();
         }
 
         private static int ParseCommandCode(string msg)
