@@ -93,6 +93,26 @@
       <code field="file-content">02</code>
     </device>
 
+    <!-- NOTICE -->
+    <!-- NOTICE -->
+    <device id="Scada.labrfilter" table="labrfilter_rec" eno="002002" debug-data-time="2014-09-29 12:00:30">
+      <code field="starttime" type="str">00200201</code>
+      <code field="endtime" type="str">00200202</code>
+      <code field="channeldata" type="str">00200203</code>
+      <code field="doserate">00200204</code>
+      <code field="temperature">00200205</code>
+      <code field="highvoltage">00200206</code>      
+    </device>
+
+    <!-- NOTICE -->
+    <!-- NOTICE -->
+    <device id="Scada.labrnuclidefilter" table="labrnuclidefilter_rec" eno="002003" debug-data-time="2014-09-29 12:00:30">
+      <code field="time" type="str">00200301</code>
+      <code field="name" type="str">00200302</code>
+      <code field="activity">00200303</code>
+      <code field="channel">00200304</code>
+      <code field="energy">00200305</code>
+    </device>
 
   </devices>
 </settings>
