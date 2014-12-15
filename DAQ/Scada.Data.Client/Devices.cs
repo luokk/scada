@@ -22,5 +22,9 @@ namespace Scada.Data.Client
         public const string CinderellaStatus = Prefix + "cinderella.status";
 
         public const string Shelter = Prefix + "shelter";
+
+        public const string LabrFilter = Prefix + "labrfilter";
+
+        public const string LabrNuclideFilter = Prefix + "labrnuclidefilter";
     }
 }
