@@ -594,6 +594,9 @@ namespace Scada.Data.Client.Tcp
                     return;
                 }
 
+                if (this.Type == Type.Country)
+                    return;
+
                 this.retryTimes++;
                 if (this.retryTimes > 20)
                 {

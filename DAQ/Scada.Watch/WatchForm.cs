@@ -165,6 +165,47 @@ namespace Scada.Watch
                 return;
             }
             this.delayCounter++;
+
+            if (this.CheckRebootDate(DateTime.Now))
+            {
+                this.Reboot(DateTime.Now);
+            }
+        }
+
+        private void Reboot(DateTime dateTime)
+        {
+            string scadaDataClient = this.versionCheck.Checked ? "Scada.Data.Client" : "Scada.DataCenterAgent";
+
+            this.KillScadaProcess(new string[]
+                {
+                    "Scada.Main.exe", scadaDataClient + ".exe"
+                });
+
+            this.WatchProcess("Scada.Main", "/R");
+            this.WatchProcess(scadaDataClient, "--start");
+            this.lastCheckRebootTime = dateTime;
+        }
+
+        private bool CheckRebootDate(DateTime dateTime)
+        {
+            if (this.lastCheckRebootTime.Day == dateTime.Day &&
+                this.lastCheckRebootTime.Hour == dateTime.Hour)
+            {
+                return false;
+            }
+
+            if (dateTime.Day == 1)
+            {
+                if (dateTime.Hour == 23)
+                {
+                    if (dateTime.Minute == 59)
+                    {
+                        
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private void WatchProcess(string procName, string startArgs)
@@ -259,6 +300,6 @@ namespace Scada.Watch
 
         }
 
-
-	}
+        public DateTime lastCheckRebootTime { get; set; }
+    }
 }
