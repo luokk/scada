@@ -285,6 +285,8 @@ namespace Scada.Data.Client.Tcp
                     Console.WriteLine("Start DataCenter for Country");
                     this.countryCenterAgent = CreateCountryCenterAgent(dc.Ip, dc.Port);
                     this.countryCenterAgent.AddWirelessInfo(dc.WirelessIp, dc.WirelessPort);
+                    SynchronizationContext synchronizationContext = SynchronizationContext.Current;
+                    this.countryCenterAgent.UIThreadMashaller = new ThreadMashaller(synchronizationContext);
                 }
                 else
                 {
@@ -434,7 +436,8 @@ namespace Scada.Data.Client.Tcp
                     }
                 }
 
-                if (this.agent != null && this.agent.Stream != null && pks.Count > 0)
+                if ((this.agent != null && this.agent.Stream != null && pks.Count > 0) ||
+                    (this.countryCenterAgent != null && this.countryCenterAgent.Stream != null && pks.Count > 0))
                 {
                     Logger logger = Log.GetLogFile(deviceKey);
                     logger.Log("---- BEGIN ----");
@@ -468,9 +471,14 @@ namespace Scada.Data.Client.Tcp
                 }
             }
 
-            if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+            if (this.countryCenterAgent != null && this.countryCenterAgent.Stream != null)
             {
-                this.countryCenterAgent.SendDataPacket(p);
+                if (this.countryCenterAgent.SendDataPacket(p))
+                {
+                    string msg = string.Format("RD: {0}", p.ToString());
+                    Log.GetLogFile(deviceKey).Log(msg);
+                    this.UpdateSendDataRecord(deviceKey, false);
+                }
             }
         }
 
@@ -488,9 +496,14 @@ namespace Scada.Data.Client.Tcp
                 }
             }
 
-            if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+            if (this.countryCenterAgent != null && this.countryCenterAgent.Stream != null)
             {
-                this.countryCenterAgent.SendDataPacket(p);
+                if (this.countryCenterAgent.SendDataPacket(p))
+                {
+                    string msg = string.Format("RD: {0}", p.ToString());
+                    Log.GetLogFile(deviceKey).Log(msg);
+                    this.UpdateSendDataRecord(deviceKey, false);
+                }
             }
         }
 
@@ -542,9 +555,14 @@ namespace Scada.Data.Client.Tcp
                             this.UpdateSendDataRecord(deviceKey, false);
                         }
 
-                        if (this.countryCenterAgent != null && this.agent.SendDataDirectlyStarted)
+                        if (this.countryCenterAgent != null && this.countryCenterAgent.Stream != null)
                         {
-                            this.countryCenterAgent.SendDataPacket(p);
+                            if (this.countryCenterAgent.SendDataPacket(p))
+                            {
+                                string msg = string.Format("RD: {0}", p.ToString());
+                                Log.GetLogFile(deviceKey).Log(msg);
+                                this.UpdateSendDataRecord(deviceKey, false);
+                            }
                         }
                     }
                 }
@@ -651,24 +669,28 @@ namespace Scada.Data.Client.Tcp
                     this.MainConnStatusLabel.ForeColor = Color.Black;
                     this.MainConnStatusLabel.Text = "省中心连接状态: 上传中";
 
-                    this.agent.StopConnectCountryCenter(true);
+                    this.StopConnectCountryCenter();
+                    this.countryCenterAgent.DoLog(ScadaDataClient, "正在断开国家数据中心连接...");
                 }
                 else if (NotifyEvents.ConnectedCountry == notify)
                 {
                     this.SubConnStatusLabel.ForeColor = Color.Black;
                     this.SubConnStatusLabel.Text = "国家中心连接状态: 上传中";
+
+                    this.countryCenterAgent.DoLog(ScadaDataClient, "已经连接到国家数据中心!");
                 }
-                else if (NotifyEvents.Disconnect == notify || NotifyEvents.Disconnect2 == notify)
+                else if (NotifyEvents.Disconnect == notify)
                 {
                     int count = this.connectionHistory.Count;
                     ConnetionRecord cr = this.connectionHistory[count - 1];
                     cr.DisconnectedTime = DateTime.Now;
 
-                    if (NotifyEvents.Disconnect == notify && this.retryCount % 3 == 0)
+                    this.retryCount++;
+                    if (this.retryCount % 3 == 0)
                     {
-                        this.retryCount++;
-                        this.agent.StartConnectCountryCenter(true);
+                        this.StartConnectCountryCenter();
                     }
+                    
                     this.MainConnStatusLabel.ForeColor = Color.Red;
                     this.MainConnStatusLabel.Text = "省中心连接状态: 未连接";
                 }
@@ -689,16 +711,7 @@ namespace Scada.Data.Client.Tcp
                     Log.GetLogFile(deviceKey).Log(line);
                     this.UpdateSendDataRecord(deviceKey, true);
                 }
-                else if (NotifyEvents.ConnectToCountryCenter == notify)
-                {
-                    /// 国家数据中心相关
-                    this.StartConnectCountryCenter();
-                }
-                else if (NotifyEvents.DisconnectToCountryCenter == notify)
-                {
-                    /// 国家数据中心相关
-                    this.StopConnectCountryCenter();
-                }
+  
             });
         }
 

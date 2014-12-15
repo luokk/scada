@@ -320,7 +320,7 @@ namespace Scada.Data.Client
             if (!this.isAutoData)
                 return;
             DateTime now = DateTime.Now;
-
+            
             // For Upload Data Devices.
             if (IsSendDataTimeOK(now))
             {
@@ -328,6 +328,7 @@ namespace Scada.Data.Client
                 SendDevicePackets(Settings.Instance.DataDeviceKeys, now, guid.ToString());
             }
         }
+
 
         // 当归一化时间到来时上传数据
         private void HttpSendFileTick(object sender, EventArgs e)
@@ -343,6 +344,7 @@ namespace Scada.Data.Client
                 SendDevicePackets(Settings.Instance.FileDeviceKeys, now, guid.ToString());
             }
         }
+
 
         // 上传所有设备的(实时)数据
         private void SendDevicePackets(string[] deviceKeys, DateTime now, string packetId)
@@ -455,13 +457,21 @@ namespace Scada.Data.Client
 
         private static DateTime GetDeviceSendTime(DateTime dt, string deviceKey)
         {
-            // Labr设备，每5分钟发送一次
+            // Labr或者LabrFilter、labrnuclidefilter设备，每5分钟发送一次
             if (deviceKey.Equals(Devices.Labr, StringComparison.OrdinalIgnoreCase))
             {
                 int min = dt.Minute / 5 * 5;
                 DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
                 return ret;
             }
+            // LabrFilter、labrnuclidefilter设备，每一小时发送一次
+            //if ((deviceKey.Equals(Devices.LabrFilter, StringComparison.OrdinalIgnoreCase)) || (deviceKey.Equals(Devices.LabrNuclideFilter, StringComparison.OrdinalIgnoreCase)))
+            //{
+            //    int min = 0;
+            //    DateTime ret = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, min, 0);
+            //    return ret;
+            //}
+
 
             /*
             // Cinderella.Status设备无固定发送频率，只要有数据立即发送
@@ -841,6 +851,14 @@ namespace Scada.Data.Client
             else if (device == "environment")
             {
                 return Devices.Shelter;
+            }
+            else if (device == "labrfilter")
+            {
+                return Devices.LabrFilter;
+            }
+            else if (device == "labrnuclidefilter")
+            {
+                return Devices.LabrNuclideFilter;
             }
             return string.Empty;
         }
