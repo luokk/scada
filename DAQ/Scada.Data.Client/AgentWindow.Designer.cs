@@ -61,6 +61,7 @@
             this.SendCinderellaDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SendCinderellaStatusModuleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SendShelterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SendSycnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sysNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,7 +69,7 @@
             this.操作ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autoDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FetchCmdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.SendSycnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkTodayDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -386,6 +387,13 @@
             this.SendShelterToolStripMenuItem.Text = "环境与安防监控";
             this.SendShelterToolStripMenuItem.Click += new System.EventHandler(this.SendDataToolStripMenuItem_Click);
             // 
+            // SendSycnToolStripMenuItem
+            // 
+            this.SendSycnToolStripMenuItem.Name = "SendSycnToolStripMenuItem";
+            this.SendSycnToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.SendSycnToolStripMenuItem.Text = "进程同步测试";
+            this.SendSycnToolStripMenuItem.Click += new System.EventHandler(this.SendSycnToolStripMenuItem_Click);
+            // 
             // sysNotifyIcon
             // 
             this.sysNotifyIcon.Text = "数据上传";
@@ -421,7 +429,8 @@
             // 
             this.操作ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.autoDataToolStripMenuItem,
-            this.FetchCmdToolStripMenuItem});
+            this.FetchCmdToolStripMenuItem,
+            this.checkTodayDataToolStripMenuItem});
             this.操作ToolStripMenuItem.Name = "操作ToolStripMenuItem";
             this.操作ToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
             this.操作ToolStripMenuItem.Text = "操作";
@@ -431,23 +440,23 @@
             this.autoDataToolStripMenuItem.Checked = true;
             this.autoDataToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.autoDataToolStripMenuItem.Name = "autoDataToolStripMenuItem";
-            this.autoDataToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.autoDataToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.autoDataToolStripMenuItem.Text = "自动通信";
             this.autoDataToolStripMenuItem.Click += new System.EventHandler(this.AutoDataToolStripMenuItemClick);
             // 
             // FetchCmdToolStripMenuItem
             // 
             this.FetchCmdToolStripMenuItem.Name = "FetchCmdToolStripMenuItem";
-            this.FetchCmdToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.FetchCmdToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.FetchCmdToolStripMenuItem.Text = "获取最新命令";
             this.FetchCmdToolStripMenuItem.Click += new System.EventHandler(this.FetchCmdToolStripMenuItem_Click);
             // 
-            // SendSycnToolStripMenuItem
+            // checkTodayDataToolStripMenuItem
             // 
-            this.SendSycnToolStripMenuItem.Name = "SendSycnToolStripMenuItem";
-            this.SendSycnToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.SendSycnToolStripMenuItem.Text = "进程同步测试";
-            this.SendSycnToolStripMenuItem.Click += new System.EventHandler(this.SendSycnToolStripMenuItem_Click);
+            this.checkTodayDataToolStripMenuItem.Name = "checkTodayDataToolStripMenuItem";
+            this.checkTodayDataToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.checkTodayDataToolStripMenuItem.Text = "申请当日数据复查";
+            this.checkTodayDataToolStripMenuItem.Click += new System.EventHandler(this.checkTodayDataToolStripMenuItem_Click);
             // 
             // MainDataAgentWindow
             // 
@@ -527,6 +536,7 @@
         private System.Windows.Forms.ToolStripButton DBTestStripButton;
         private System.Windows.Forms.ToolStripButton StartUpdateStripButton;
         private System.Windows.Forms.ToolStripMenuItem SendSycnToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem checkTodayDataToolStripMenuItem;
 
     }
 }

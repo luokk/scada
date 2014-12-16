@@ -498,6 +498,43 @@ namespace Scada.Data.Client
             return string.Format("data/upload/{0}/{1}/{2}/{3}", stationId, fileType, folder1, folder2);
         }
 
+        internal void CheckTodayData(DateTime n)
+        {
+            Thread thread = new Thread(new ParameterizedThreadStart((o) => 
+            {
+                foreach (var deviceKey in Settings.Instance.DeviceKeys)
+                {
+                    string deviceType = Packet.GetDataCenterDeviceId(deviceKey);
+                    this.DoCheckTodayData(n, deviceType, 2880);
+                }
+                
+            }));
+            thread.Start();
+        }
+
+        internal void DoCheckTodayData(DateTime n, string deviceType, int expect)
+        {
+            string stationId = Settings.Instance.Station;
+
+            string api = string.Format("data/check/{0}/{1}", stationId, deviceType);
+            this.DataCenter.GetUrl(api);
+            Uri uri = new Uri(this.DataCenter.GetUrl(api));
+
+            DateTime t = new DateTime(n.Year, n.Month, n.Day);
+            DateTime e = t.AddDays(1);
+            using (WebClient wc = new WebClient())
+            {
+                wc.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                string postData = string.Format("start={0}&end={1}&expect={2}&set=1", t.ToString(), e.ToString(), expect);
+                Byte[] r = wc.UploadData(uri, "POST", Encoding.UTF8.GetBytes(postData));
+
+                string result = Encoding.UTF8.GetString(r);
+
+                
+            }
+
+        }
+
         private void HandleWebException(Exception e)
         {
             WebException we = e as WebException;
@@ -530,6 +567,5 @@ namespace Scada.Data.Client
             
 
         }
-
     }
 }
