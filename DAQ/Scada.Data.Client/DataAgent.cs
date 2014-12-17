@@ -186,6 +186,9 @@ namespace Scada.Data.Client
         /// <param name="p"></param>
         internal bool SendPacket(Packet p)
         {
+            return this.SendPacket(p, false);
+
+            /* 应用线程池
             if (SynchronizationContext.Current != null)
             {
                 ThreadPool.QueueUserWorkItem(new WaitCallback((o) => 
@@ -196,8 +199,9 @@ namespace Scada.Data.Client
             }
             else
             {
-                return this.SendPacket(p, false);
-            }
+             * */
+                
+            //}
         }
 
         private bool SendPacket(Packet p, bool fromNewThread)
