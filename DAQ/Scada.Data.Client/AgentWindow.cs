@@ -313,10 +313,12 @@ namespace Scada.Data.Client
                 this.agent.FetchCommands();
             }
 
+
+            // 定期请求历史数据
             DateTime n = DateTime.Now;
             if (n.Hour == 23 && n.Minute == 59)
             {
-                if (n != this.lastHistoryTime)
+                if (n.Day != this.lastHistoryTime.Day)
                 {
                     this.agent.CheckTodayData(n);
                     this.lastHistoryTime = n;

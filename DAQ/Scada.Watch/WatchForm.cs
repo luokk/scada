@@ -166,6 +166,7 @@ namespace Scada.Watch
             }
             this.delayCounter++;
 
+            // 自动重启数采和数据上传
             if (this.CheckRebootDate(DateTime.Now))
             {
                 this.Reboot(DateTime.Now);
@@ -188,23 +189,19 @@ namespace Scada.Watch
 
         private bool CheckRebootDate(DateTime dateTime)
         {
-            if (this.lastCheckRebootTime.Day == dateTime.Day &&
-                this.lastCheckRebootTime.Hour == dateTime.Hour)
+            if (this.lastCheckRebootTime.Month != dateTime.Month)
             {
-                return false;
-            }
-
-            if (dateTime.Day == 1)
-            {
-                if (dateTime.Hour == 23)
+                if (dateTime.Day == 1)
                 {
-                    if (dateTime.Minute == 59)
+                    if (dateTime.Hour == 23)
                     {
-                        
-                        return true;
+                        if (dateTime.Minute == 59)
+                        {
+                            return true;
+                        }
                     }
                 }
-            }
+            }            
             return false;
         }
 
