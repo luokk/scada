@@ -2,7 +2,10 @@
 <settings>
   <!-- Default Port is 6000 and 7000 -->
   <datacenters>
+    <!--
     <datacenter2 BaseUrl="http://211.103.184.100:8080/" />
+    -->
+    <datacenter2 BaseUrl="http://127.0.0.1:8080/" />
   </datacenters>
   <!-- NOTICE SNO debug-data-time="2013-11-30 20:33:00"-->
   <site sysname="" sysst="213213123213123213" adapter="" name="" station="128" sno="0313A08" mn="0313A080000000">

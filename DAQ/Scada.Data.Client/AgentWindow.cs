@@ -312,6 +312,16 @@ namespace Scada.Data.Client
             {
                 this.agent.FetchCommands();
             }
+
+            DateTime n = DateTime.Now;
+            if (n.Hour == 23 && n.Minute == 59)
+            {
+                if (n != this.lastHistoryTime)
+                {
+                    this.agent.CheckTodayData(n);
+                    this.lastHistoryTime = n;
+                }
+            }
         }
 
         // 当归一化时间到来时上传数据
@@ -920,5 +930,12 @@ namespace Scada.Data.Client
         }
 
         public bool IsSecond { get; set; }
+
+        public DateTime lastHistoryTime { get; set; }
+
+        private void checkTodayDataToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.agent.CheckTodayData(DateTime.Now);
+        }
     }
 }
