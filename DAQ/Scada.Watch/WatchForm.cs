@@ -25,7 +25,7 @@ namespace Scada.Watch
 
         private long timesCounter = 0;
 
-        private const int WatchInterval = 20000;
+        private const int WatchInterval = 60000;
 
         private FileSystemWatcher fsw = null;
 
@@ -51,8 +51,11 @@ namespace Scada.Watch
 
         private void OnSysNotifyIconContextMenu(object sender, EventArgs e)
         {
-            this.ShowInTaskbar = true;
             this.Visible = true;
+            this.ShowInTaskbar = true;
+
+            this.WindowState = FormWindowState.Normal;
+            this.BringToFront();
         }
 
 		private void WatchForm_Load(object sender, EventArgs e)
@@ -65,7 +68,7 @@ namespace Scada.Watch
             // Watch timer
             this.checkTimer = new System.Windows.Forms.Timer();
             this.checkTimer.Interval = WatchInterval;    // Defines.KeepAliveInterval;
-            this.checkTimer.Tick += Per30secTimerTick;
+            this.checkTimer.Tick += Per60secTimerTick;
             this.checkTimer.Start();
 
             // Initial Path
@@ -147,30 +150,28 @@ namespace Scada.Watch
             }
         }
 
-        private void Per30secTimerTick(object sender, EventArgs e)
+        private void Per60secTimerTick(object sender, EventArgs e)
 		{
             if (this.delayCounter > 2)
             {
-                // per 20 sec
                 this.WatchProcess("Scada.Main", "/R");
 
-                // per 1 min
-                if (this.timesCounter % 3 == 0)
+                string scadaDataClient = this.versionCheck.Checked ? "Scada.Data.Client" : "Scada.DataCenterAgent";
+                this.WatchProcess(scadaDataClient, "--start");
+
+                // 自动重启数采和数据上传
+                if (this.CheckRebootDate(DateTime.Now))
                 {
-                    string scadaDataClient = this.versionCheck.Checked ? "Scada.Data.Client" : "Scada.DataCenterAgent";
-                    this.WatchProcess(scadaDataClient, "--start");
+                    this.Reboot(DateTime.Now);
                 }
-
-                this.timesCounter++;
-                return;
             }
-            this.delayCounter++;
 
-            // 自动重启数采和数据上传
-            if (this.CheckRebootDate(DateTime.Now))
+            if (delayCounter > 1000000)
             {
-                this.Reboot(DateTime.Now);
+                delayCounter = 0;
             }
+
+            this.delayCounter++;
         }
 
         private void Reboot(DateTime dateTime)

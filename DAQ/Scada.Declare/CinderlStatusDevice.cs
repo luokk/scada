@@ -83,22 +83,10 @@ namespace Scada.Declare
                 RecordManager.DoSystemEventRecord(this, record + "," + line.Length.ToString());
                 return false;
             }
-
             
             int status = 0;
             if (int.TryParse(record, out status))
             {
-                if (counter % 5 == 0)
-                {
-                    counter = 0;
-                    string c = WorkMode.ToString() + ";" + LoopMode.ToString() + ";" + Running_Process.ToString() + ";" + status.ToString();
-                    this.UpdateStatusToDataCenter(c);
-                    Command.Send(Ports.MainVision, new Command("m", "mv", "cinderella.status", c));
-                    RecordManager.DoSystemEventRecord(this, c);
-                }
-                counter++;
-
-
                 bool stateChanged = (this.lastStatus != status);
                 //important 状态判断！ by Kaikai
                 if (!stateChanged)
@@ -110,8 +98,16 @@ namespace Scada.Declare
 
                 this.CheckStatus(status);
 
+                // 上传状态到数据中心
+                string c = WorkMode.ToString() + ";" + LoopMode.ToString() + ";" + Running_Process.ToString() + ";" + status.ToString();
+                this.UpdateStatusToDataCenter(c);
+
+                // 上传状态到mv客户端
+                Command.Send(Ports.MainVision, new Command("m", "mv", "cinderella.status", c));
+                RecordManager.DoSystemEventRecord(this, c);
+
+                // Log
                 string statusLine = string.Format("STATUS:{0}", status);
-                
                 RecordManager.DoSystemEventRecord(this, statusLine);
                 return true;
             }
